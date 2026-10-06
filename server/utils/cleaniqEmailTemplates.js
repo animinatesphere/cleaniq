@@ -1154,13 +1154,44 @@ redesigned.regularCleanSummary = ({ firstName, service, every, time, firstDate, 
       ${sectionTitle("How it works")}
       ${steps([
         paid ? "Your card is saved securely with Stripe." : "Your first payment confirms your first clean and saves your card securely with Stripe.",
-        `Each following clean is ${gbp(pricePerVisit)}, charged <strong>48 hours before</strong> the clean — it's confirmed once paid, and we send you a receipt.`,
-        "If a payment doesn't go through, we'll email you a link to pay and try again 24 hours before.",
+        `Each following clean is ${gbp(pricePerVisit)}, charged <strong>24 hours before</strong> the clean — it's confirmed once paid, and we send you a receipt.`,
+        "If a payment doesn't go through, we'll email you a link to pay and try again 12 hours before.",
         "Pause or cancel any time from your account: free with 24 hours' notice (any clean already paid is refunded in full).",
       ])}
       ${small("Questions? Call or WhatsApp +44 7846 726428.")}
     `,
   });
 };
+
+// A regular-clean visit has just been paid (24 hours before): "your clean is tomorrow",
+// payment received and the booking confirmed — one email.
+redesigned.regularVisitConfirmed = ({ firstName, service, dayLabel, dateText, time, address, amount, ref, cleaner }) =>
+  layout({
+    title: `Your clean is ${dayLabel} — confirmed`,
+    preheader: `${service} ${dayLabel}${time ? ` at ${time}` : ""}. Payment received — your clean is confirmed.`,
+    eyebrow: "Regular cleaning",
+    heading: `Your clean is ${dayLabel}!`,
+    sub: "Payment received — your booking is confirmed",
+    badge: "Confirmed",
+    body: `
+      ${hello(firstName || "there")}
+      ${p(`Just a reminder that your regular <strong>${esc(service)}</strong> is <strong>${esc(dayLabel)}</strong>. We've taken the payment from your saved card, so your clean is confirmed.`)}
+      ${refBadge("Booking reference", esc(ref))}
+      ${sectionTitle("Your clean")}
+      ${kv([
+        ["Date", dateText],
+        ...(time ? [["Arrival time", time]] : []),
+        ...(address ? [["Address", address]] : []),
+        ...(cleaner ? [["Your cleaner", cleaner]] : []),
+      ])}
+      ${amountBox("Paid", `&pound;${Number(amount || 0).toFixed(2)}`, { note: "Charged to your saved card" })}
+      ${sectionTitle("Before we arrive")}
+      ${checkList([
+        "Please make sure we can get in (keys, codes or someone at home).",
+        "Let us know about parking or anything special — just reply to this email.",
+      ])}
+      ${small("Need to cancel? Less than 24 hours' notice keeps a late-notice charge (see our Terms). Call or WhatsApp +44 7846 726428.")}
+    `,
+  });
 
 module.exports = redesigned;

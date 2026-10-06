@@ -431,12 +431,15 @@ const BookingScreen = ({ navigation, route }) => {
   }, [frequencyOffered, regularRates]);
   const visitPrice = addTax(Math.round(rawTotal * 100) / 100);
   // One-off set-up fee on the first payment of a new regular clean (admin → Regular Cleans).
-  const [setupFee, setSetupFee] = useState({ enabled: false, amount: 0, label: "Set-up fee" });
+  const [setupFee, setSetupFee] = useState({ enabled: false, amount: 0, per: "hour", label: "Sign-up fee" });
   useEffect(() => {
     fetch(`${API_URL}/subscriptions/setup-fee`).then((r) => r.json())
       .then((f) => { if (f && typeof f.amount === "number") setSetupFee(f); }).catch(() => {});
   }, []);
-  const feeToday = isRegular && setupFee.enabled ? setupFee.amount : 0;
+  // £ per hour of the first clean (or a flat amount), same as the server.
+  const feeToday = isRegular && setupFee.enabled
+    ? Math.round((setupFee.per === "clean" ? setupFee.amount : setupFee.amount * (Number(form.duration) || 1)) * 100) / 100
+    : 0;
   const amountToday = Math.round((total + feeToday) * 100) / 100;
   const [regularConsent, setRegularConsent] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
@@ -628,7 +631,7 @@ const BookingScreen = ({ navigation, route }) => {
           <Text style={styles.successRef}>Reference: {bookingRef}</Text>
           <Text style={styles.successNote}>
             {isRegular
-              ? "Pay for your first clean on the secure page that opened. Your card is saved and each following clean is charged 48 hours before it.\n"
+              ? "Pay for your first clean on the secure page that opened. Your card is saved and each following clean is charged 24 hours before it.\n"
               : "A payment link has been sent to\n"}
             {!isRegular && <Text style={{ fontWeight: "800" }}>{email}</Text>}
             {!isRegular && "\nYour booking will be confirmed once payment is complete."}
@@ -836,7 +839,7 @@ const BookingScreen = ({ navigation, route }) => {
                 {[
                   `${["Weekly", "Fortnightly"].includes(form.frequency) ? "Same day and time" : "Same date and time"} ${REGULAR_EVERY[form.frequency]}`,
                   feeToday > 0 ? `Pay for your first clean today, plus a one-off ${setupFee.label.toLowerCase()} of £${feeToday.toFixed(2)}` : "Pay for your first clean today",
-                  "Each following clean is charged 48 hours before the clean",
+                  "Each following clean is charged 24 hours before the clean",
                   "Pause or cancel free with 24 hours' notice",
                 ].map((t) => (
                   <Text key={t} style={styles.regularInfoItem}>•  {t}</Text>
@@ -1235,7 +1238,7 @@ const BookingScreen = ({ navigation, route }) => {
                   </View>
                   {feeToday > 0 && (
                     <View style={styles.regularRow}>
-                      <Text style={styles.regularLbl}>{setupFee.label} (first clean only)</Text>
+                      <Text style={styles.regularLbl}>{setupFee.label} ({setupFee.per === "clean" ? "first clean only" : `£${setupFee.amount.toFixed(2)}/hr × ${form.duration}h`})</Text>
                       <Text style={styles.regularAmt}>£{feeToday.toFixed(2)}</Text>
                     </View>
                   )}
@@ -1250,7 +1253,7 @@ const BookingScreen = ({ navigation, route }) => {
                     <Text style={styles.regularAmt}>£{visitPrice.toFixed(2)}</Text>
                   </View>
                   <Text style={styles.regularNote}>
-                    Following cleans are charged to your card 48 hours before each clean. Pause or cancel
+                    Following cleans are charged to your card 24 hours before each clean. Pause or cancel
                     any time in Bookings → Regular cleans: free with 24 hours' notice, otherwise a late-notice charge applies.
                   </Text>
                   <TouchableOpacity style={styles.consentRow} onPress={() => setRegularConsent((v) => !v)} activeOpacity={0.8}>
@@ -1259,7 +1262,7 @@ const BookingScreen = ({ navigation, route }) => {
                     </View>
                     <Text style={styles.consentTxt}>
                       I agree that Cleaniq Services can save my card and charge £{visitPrice.toFixed(2)} for each following clean
-                      48 hours before the clean, until I pause or cancel.
+                      24 hours before the clean, until I pause or cancel.
                     </Text>
                   </TouchableOpacity>
                   {!regularConsent && (

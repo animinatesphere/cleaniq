@@ -450,7 +450,7 @@ async function createBooking(body) {
 
   // ── Regular clean with a payment link (weekly / fortnightly / monthly / every 3 months) ──
   // Becomes a regular clean like the website's: the first payment saves the card, each later
-  // visit is charged 48 hours before and only then confirmed and shown to cleaners.
+  // visit is charged 24 hours before and only then confirmed and shown to cleaners.
   const recurFreq = newBooking.details?.frequency;
   const subscriptions = require("../utils/subscriptions");
   let regularClean = null;
@@ -466,9 +466,10 @@ async function createBooking(body) {
       const visitPrice = Number(newBooking.payment.amount);
       // The one-off set-up fee (admin → Regular Cleans) is added to the first payment only.
       const fee = await subscriptions.getSetupFee();
-      if (fee.enabled) {
-        newBooking.payment.amount = Math.round((visitPrice + fee.amount) * 100) / 100;
-        newBooking.meta = { ...(newBooking.meta || {}), setupFee: fee.amount, setupFeeLabel: fee.label };
+      const feeAmount = subscriptions.setupFeeFor(fee, newBooking.details?.duration);
+      if (feeAmount > 0) {
+        newBooking.payment.amount = Math.round((visitPrice + feeAmount) * 100) / 100;
+        newBooking.meta = { ...(newBooking.meta || {}), setupFee: feeAmount, setupFeeLabel: fee.label };
         newBooking.markModified("meta");
         await newBooking.save();
       }

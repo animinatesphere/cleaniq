@@ -75,7 +75,7 @@ function buildTimeline(b) {
   ];
   const steps = [
     { label: "Booking received", time: b.createdAt, sub: "We've got your booking." },
-    // Regular-clean visits are paid 48 hours before the clean, so only show a payment time that fits the order.
+    // Regular-clean visits are paid 24 hours before the clean, so only show a payment time that fits the order.
     { label: "Booking confirmed", time: confirmedAt, sub: "Your clean is confirmed. We're finding you a cleaner." },
     { label: first ? `${first} is your cleaner` : "Cleaner assigned", time: b.jobAcceptedTime, sub: first ? `${first} has accepted your job.` : "A cleaner has accepted your job." },
     { label: "Cleaner arrived", time: b.jobArrivedTime, sub: `${first || "Your cleaner"} is at your property.` },
@@ -198,7 +198,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
   }, [bookingId, booking?.status, booking?.assignedWorker]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancel = async () => {
-    // Regular-clean visits are paid 48h ahead: say what will be refunded before confirming.
+    // Regular-clean visits are paid 24h ahead: say what will be refunded before confirming.
     let message = "Are you sure you want to cancel this booking? If you've paid, a refund will be processed.";
     try {
       const token = await AsyncStorage.getItem("customerToken");
@@ -486,7 +486,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
             <View style={styles.payNotice}>
               <CreditCard size={14} color={tc(C.info)} />
               <Text style={styles.payNoticeTxt}>
-                £{Number(booking.payment?.amount || 0).toFixed(2)} will be charged to your saved card 48 hours before this clean.
+                £{Number(booking.payment?.amount || 0).toFixed(2)} will be charged to your saved card 24 hours before this clean.
               </Text>
             </View>
           )}

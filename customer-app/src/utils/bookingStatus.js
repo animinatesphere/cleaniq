@@ -1,5 +1,5 @@
 // What a booking's status means for the customer (stored values stay the same). Regular-clean
-// visits are Pending until they're charged, 48 hours before — that's normal, so say so.
+// visits are Pending until they're charged, 24 hours before — that's normal, so say so.
 import { C } from "../theme/flat";
 
 const LABEL = {
@@ -26,7 +26,7 @@ export const isRegularVisit = (b) => Boolean(b?.meta?.subscriptionId);
 
 export function statusView(b) {
   if (isWaitingForPayment(b) && b.payment?.status === "Failed") return { label: "Payment needed", color: C.error, bg: C.errorBg };
-  if (isRegularVisit(b) && isWaitingForPayment(b) && b.payment?.chargeOnArrival) return { label: "Booked · paid 48h before", color: C.info, bg: C.infoBg };
+  if (isRegularVisit(b) && isWaitingForPayment(b) && b.payment?.chargeOnArrival) return { label: "Booked · paid 24h before", color: C.info, bg: C.infoBg };
   if (isWaitingForPayment(b)) return { label: "Awaiting payment", color: "#F59E0B", bg: C.warningBg };
   return { label: LABEL[b?.status] || b?.status || "", ...(COLORS[b?.status] || { color: C.textMuted, bg: C.surfaceAlt }) };
 }

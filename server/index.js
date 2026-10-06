@@ -462,6 +462,12 @@ app.post(
             ) {
               // Paid straight away (no hold) while still waiting for payment: confirm it now.
               await confirmPaidBooking(booking._id, { paymentIntentId: pi.id, captured: true, amount: pi.amount_received / 100, currency: pi.currency });
+            } else if (pi.metadata?.subscriptionRef) {
+              // A regular-clean visit charged 24h before: utils/subscriptions already confirmed it
+              // and sent the "your clean is tomorrow" email — just keep the payment record.
+              if (booking.payment?.status !== "Completed") {
+                await Booking.updateOne({ _id: booking._id }, { $set: { "payment.status": "Completed", "payment.capturedAt": new Date(), "payment.stripePaymentIntentId": pi.id } });
+              }
             } else {
               // Regular payment completed
               booking.payment = booking.payment || {};

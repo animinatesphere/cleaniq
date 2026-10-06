@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
     if (booking.workerRate == null) booking.workerRate = await workerRateFor(booking.service);
 
     // Regular clean (Wecasa-style subscription): first visit paid now, card saved, later visits
-    // charged 48 hours before each clean. The client can't mark it paid; Stripe is checked below.
+    // charged 24 hours before each clean. The client can't mark it paid; Stripe is checked below.
     const wantsSubscription =
       req.body.subscribe === true && subscriptions.isSubscriptionFrequency(req.body.details?.frequency);
     const paidOnWebsite = wantsSubscription && Boolean(req.body.payment?.stripePaymentIntentId);
@@ -37,13 +37,14 @@ router.post('/', async (req, res) => {
     // server adds it here, so older app versions are charged it too.
     if (wantsSubscription) {
       const fee = await subscriptions.getSetupFee();
-      if (fee.enabled) {
-        const included = Number(req.body.subscription?.setupFee) === fee.amount;
+      const feeAmount = subscriptions.setupFeeFor(fee, booking.details?.duration);
+      if (feeAmount > 0) {
+        const included = Math.abs(Number(req.body.subscription?.setupFee) - feeAmount) < 0.01;
         if (!paidOnWebsite && !included) {
-          booking.payment.amount = Math.round((Number(booking.payment.amount || 0) + fee.amount) * 100) / 100;
+          booking.payment.amount = Math.round((Number(booking.payment.amount || 0) + feeAmount) * 100) / 100;
         }
         if (!paidOnWebsite || included) {
-          booking.meta = { ...(booking.meta || {}), setupFee: fee.amount, setupFeeLabel: fee.label };
+          booking.meta = { ...(booking.meta || {}), setupFee: feeAmount, setupFeeLabel: fee.label };
           booking.markModified('meta');
         }
       }
@@ -326,7 +327,7 @@ router.get('/', verifyCustomer, async (req, res) => {
 });
 
 // GET /api/customer-bookings/:id/cancel-preview — what cancelling would refund (regular-clean visits
-// are charged 48h ahead, so a late cancellation keeps a fee from the refund).
+// are charged 24h ahead, so a late cancellation keeps a fee from the refund).
 router.get('/:id/cancel-preview', verifyCustomer, async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id).lean();
