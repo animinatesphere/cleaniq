@@ -180,12 +180,12 @@ test("a call books a one-off clean without an email: scheduled, caller asked to 
 
   assert.match(regular.error, /Regular cleans can't be booked on a call/);
   assert.ok(result.bookingRef, JSON.stringify(result));
-  assert.match(result.nextStep, /Your clean is scheduled for .*Could you WhatsApp your email address and booking reference to us on oh seven eight four six, seven two six, four two eight, or email them to info at cleaniq services dot com\?/);
+  assert.match(result.nextStep, /Your clean is scheduled for .*Could you WhatsApp your email address and booking reference to us on oh seven seven five two, four seven six, three six eight, or email them to info at cleaniq services dot com\?/);
   const b = await Booking.findOne({ bookingId: result.bookingRef }).lean();
   assert.equal(b.customer.email, ""); // never a misheard email
   assert.equal(b.status, "Pending");
   assert.equal(b.leadSource, "Phone AI");
-  assert.equal(b.meta.emailToCome, "Caller will WhatsApp their email to +44 7846 726428");
+  assert.equal(b.meta.emailToCome, "Caller will WhatsApp their email to +44 7752 476368");
   s.ws.close();
 });
 

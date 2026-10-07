@@ -242,8 +242,8 @@ const findPostcode = (text) => {
 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Callers WhatsApp what can't be taken on a call (e.g. their email) to this number.
-const TEXT_NUMBER = "+44 7846 726428"; // our WhatsApp line (texts/SMS aren't received)
-const TEXT_NUMBER_SPOKEN = "oh seven eight four six, seven two six, four two eight";
+const TEXT_NUMBER = "+44 7752 476368"; // only ever said on calls — not shown on the website or emails
+const TEXT_NUMBER_SPOKEN = "oh seven seven five two, four seven six, three six eight";
 const TEXT_EMAIL = "info@cleaniqservices.com";
 const TEXT_EMAIL_SPOKEN = "info at cleaniq services dot com";
 const ROOMS = { bedrooms: "Bedroom", bathrooms: "Bathroom", kitchens: "Kitchen", livingRooms: "Living Room" };
