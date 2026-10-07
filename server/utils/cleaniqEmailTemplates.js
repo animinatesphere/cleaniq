@@ -1005,7 +1005,7 @@ const redesigned = {
 
         ${twoCol(
           party("Billed to", esc(customerName || "—"), [esc(customerEmail), esc(customerPhone), esc(customerAddress)]),
-          party("From", "Cleaniq Services Ltd", ["info@cleaniqservices.com", "+44 7752 476368", "cleaniqservices.com"]),
+          party("From", "Cleaniq Services Ltd", ["info@cleaniqservices.com", "+44 7846 726428", "cleaniqservices.com"]),
         )}
 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e2e8f0;border-collapse:separate;border-radius:10px;margin-bottom:16px;">

@@ -139,20 +139,23 @@ test("price list says which services can be regular and at what price", () => {
 });
 
 
-test("phone calls never ask for an email: the caller WhatsApps or texts it, the enquiry is saved", () => {
+test("phone calls never ask for an email: the caller WhatsApps or emails it, the enquiry is saved", () => {
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now, canBook: true });
   assert.match(p, /NEVER ask for an email address on a call/);
-  assert.match(p, /WhatsApp or text your email address to us on oh seven seven five two, four seven six, three six eight/);
-  assert.match(p, /will WhatsApp\/text their email to \+44 7752 476368 or email info@cleaniqservices\.com/);
+  assert.match(p, /WhatsApp your email address to us on oh seven seven five two, four seven six, three six eight/);
+  assert.match(p, /will WhatsApp their email to \+44 7752 476368 or email info@cleaniqservices\.com/);
   assert.match(p, /never their email on a call/);
   assert.doesNotMatch(p, /spell the email address back/);
   assert.doesNotMatch(p, /Full name and email address/);
   // One-off: booked without an email and told it's scheduled. Quotes / regular: saved for the team.
   assert.match(p, /Call create_booking with customerConfirmed true and every detail, with the area as the address\. Don't pass an email\./);
-  assert.match(p, /Your clean is scheduled for Friday 9 October at 10am, reference B K 1 2 3 4 5 6 7\. Could you WhatsApp or text your email address and booking reference to us on oh seven seven five two, four seven six, three six eight, or email them to info at cleaniq services dot com\? We'll email your confirmation and payment link\. Your booking is confirmed once you've paid\./);
+  assert.match(p, /Your clean is scheduled for Friday 9 October at 10am, reference B K 1 2 3 4 5 6 7\. Could you WhatsApp your email address and booking reference to us on oh seven seven five two, four seven six, three six eight, or email them to info at cleaniq services dot com\? We'll email your confirmation and payment link\. Your booking is confirmed once you've paid\./);
   assert.match(p, /Quote, or a regular clean \(weekly, fortnightly, monthly…\) — after they say yes:\n- Call save_enquiry/);
   assert.doesNotMatch(p, /send_quote/);
-  // Anything else misheard twice: text it to us too.
+  // WhatsApp side: the email sent after a call reaches the team.
+  const wa = buildInstructions({ channel: "whatsapp", settings, knowledge, services, now, canBook: true });
+  assert.match(wa, /Email for phone booking <reference> — add it to the booking and press Resend/);
+  // Anything else misheard twice: WhatsApp it to us too.
   assert.match(p, /after asking twice, don't keep asking/);
   // On calls: just the area, never a postcode or full address (easily misheard).
   assert.match(p, /NEVER ask for a postcode or the full address/);

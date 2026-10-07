@@ -522,7 +522,7 @@ const templates = {
         <p style="margin:0 0 8px;font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;border-bottom:2px solid #d1fae5;padding-bottom:5px;">From</p>
         <p style="margin:0;font-size:15px;font-weight:800;color:#0f172a;">Cleaniq Services Ltd</p>
         <p style="margin:3px 0 0;font-size:12px;color:#64748b;">info@cleaniqservices.com</p>
-        <p style="margin:2px 0 0;font-size:12px;color:#64748b;">+44 7752 476368</p>
+        <p style="margin:2px 0 0;font-size:12px;color:#64748b;">+44 7846 726428</p>
         <p style="margin:2px 0 0;font-size:12px;color:#64748b;">cleaniqservices.com</p>
       </td>
     </tr></table>
@@ -590,7 +590,7 @@ const templates = {
   </td></tr>
   <tr><td style="background:#0f172a;padding:16px 44px;text-align:center;">
     <p style="margin:0;font-size:11px;color:#64748b;font-weight:600;">Cleaniq Services Limited</p>
-    <p style="margin:4px 0 0;font-size:10px;color:#475569;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+    <p style="margin:4px 0 0;font-size:10px;color:#475569;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7846 726428</p>
     <p style="margin:6px 0 0;font-size:9px;color:#334155;">&copy; ${new Date().getFullYear()} Cleaniq Services. All rights reserved.</p>
   </td></tr>
 
@@ -1202,7 +1202,7 @@ const templates = {
             </td>
           </tr>
         </table>
-        <p style="margin:0 0 32px;font-size:12px;color:#94a3b8;text-align:center;">Secure card payment powered by Stripe. Your card details are never stored.</p>` : `<p style="margin:0 0 32px;font-size:13px;color:#475569;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;">Please call or WhatsApp us on <strong>+44 7752 476368</strong> and we will send you a secure payment link.</p>`}
+        <p style="margin:0 0 32px;font-size:12px;color:#94a3b8;text-align:center;">Secure card payment powered by Stripe. Your card details are never stored.</p>` : `<p style="margin:0 0 32px;font-size:13px;color:#475569;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;">Please call or WhatsApp us on <strong>+44 7846 726428</strong> and we will send you a secure payment link.</p>`}
 
         <!-- Divider -->
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
@@ -2390,7 +2390,7 @@ const templates = {
               <p style="margin:0 0 10px;font-size:9px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.5px;border-bottom:2px solid #d1fae5;padding-bottom:6px">From</p>
               <p style="margin:0 0 4px;font-size:16px;font-weight:800;color:#0f172a">Cleaniq Services Ltd</p>
               <p style="margin:0 0 2px;font-size:13px;color:#64748b">info@cleaniqservices.com</p>
-              <p style="margin:0 0 2px;font-size:13px;color:#64748b">+44 7752 476368</p>
+              <p style="margin:0 0 2px;font-size:13px;color:#64748b">+44 7846 726428</p>
               <p style="margin:0;font-size:13px;color:#64748b">cleaniqservices.com</p>
             </td>
           </tr>
@@ -2514,7 +2514,7 @@ const templates = {
     <tr>
       <td style="background:#0f172a;padding:22px 40px;text-align:center">
         <p style="margin:0 0 5px;font-size:12px;color:#64748b;font-weight:600">Cleaniq Services Limited</p>
-        <p style="margin:0 0 8px;font-size:11px;color:#475569">info@cleaniqservices.com &nbsp;·&nbsp; cleaniqservices.com &nbsp;·&nbsp; +44 7752 476368</p>
+        <p style="margin:0 0 8px;font-size:11px;color:#475569">info@cleaniqservices.com &nbsp;·&nbsp; cleaniqservices.com &nbsp;·&nbsp; +44 7846 726428</p>
         <p style="margin:0;font-size:10px;color:#334155">&copy; 2026 Cleaniq Services. All rights reserved.</p>
       </td>
     </tr>
@@ -3126,7 +3126,7 @@ const workerEventEmails = {
             </td></tr>
           </table>
           <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#0f172a;font-family:Arial,sans-serif;">Cleaniq Services Limited</p>
-          <p style="margin:0 0 4px;font-size:12px;color:#64748b;font-family:Arial,sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+          <p style="margin:0 0 4px;font-size:12px;color:#64748b;font-family:Arial,sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7846 726428</p>
           <p style="margin:0 0 4px;font-size:12px;color:#64748b;font-family:Arial,sans-serif;">Greater Manchester, UK</p>
           <p style="margin:12px 0 0;font-size:11px;color:#94a3b8;font-family:Arial,sans-serif;">&#169; 2026 Cleaniq Services &nbsp;&middot;&nbsp; Professional Cleaning You Can Trust</p>
         </td>
@@ -3325,7 +3325,7 @@ const workerEventEmails = {
             </td></tr>
           </table>
           <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#0f172a;font-family:Arial,sans-serif;">Cleaniq Services Limited</p>
-          <p style="margin:0 0 4px;font-size:12px;color:#64748b;font-family:Arial,sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+          <p style="margin:0 0 4px;font-size:12px;color:#64748b;font-family:Arial,sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7846 726428</p>
           <p style="margin:0 0 4px;font-size:12px;color:#64748b;font-family:Arial,sans-serif;">Greater Manchester, UK</p>
           <p style="margin:12px 0 0;font-size:11px;color:#94a3b8;font-family:Arial,sans-serif;">&#169; 2026 Cleaniq Services &nbsp;&middot;&nbsp; Professional Cleaning You Can Trust</p>
         </td>

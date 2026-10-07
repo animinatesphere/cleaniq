@@ -166,7 +166,7 @@ If the time is taken, e.g.: "Sorry, 8am–11am on Monday 28 September is booked.
 
 // Phone calls: emails are too easily misheard, so callers are never asked for one. One-off cleans
 // are booked without it (the slot is held); quotes and regular cleans are saved for the team.
-// The caller WhatsApps or texts their email, and the team sends the payment link or the quote.
+// The caller WhatsApps or emails their email, and the team sends the payment link or the quote.
 function voiceBookingRules(settings) {
   const fee = Number(settings.suppliesFee ?? 10);
   const feeText = fee > 0 ? `£${fee.toFixed(2)} per visit` : "at no extra cost";
@@ -188,11 +188,11 @@ Then:
 
 One-off booking — after they say yes:
 - Call create_booking with customerConfirmed true and every detail, with the area as the address. Don't pass an email.
-- When it returns a bookingRef, say exactly this (with their day, time and reference; say the reference and number slowly): "Your clean is scheduled for Friday 9 October at 10am, reference B K 1 2 3 4 5 6 7. Could you WhatsApp or text your email address and booking reference to us on ${TEXT_NUMBER_SPOKEN}, or email them to ${TEXT_EMAIL_SPOKEN}? We'll email your confirmation and payment link. Your booking is confirmed once you've paid."
+- When it returns a bookingRef, say exactly this (with their day, time and reference; say the reference and number slowly): "Your clean is scheduled for Friday 9 October at 10am, reference B K 1 2 3 4 5 6 7. Could you WhatsApp your email address and booking reference to us on ${TEXT_NUMBER_SPOKEN}, or email them to ${TEXT_EMAIL_SPOKEN}? We'll email your confirmation and payment link. Your booking is confirmed once you've paid."
 
 Quote, or a regular clean (weekly, fortnightly, monthly…) — after they say yes:
-- Call save_enquiry with their name, the area as postcode, the service, preferredDate (day and arrival time), and in details: whether it's a quote or a regular clean, hours, frequency, supplies, any property details and extras, the total from get_quote, and "will WhatsApp/text their email to ${TEXT_NUMBER} or email ${TEXT_EMAIL}".
-- Then ask them to WhatsApp or text their email address to us on ${TEXT_NUMBER_SPOKEN}, or email ${TEXT_EMAIL_SPOKEN}, and explain that once we have it, the team will email their quote (or set up their regular clean and send the payment link).
+- Call save_enquiry with their name, the area as postcode, the service, preferredDate (day and arrival time), and in details: whether it's a quote or a regular clean, hours, frequency, supplies, any property details and extras, the total from get_quote, and "will WhatsApp their email to ${TEXT_NUMBER} or email ${TEXT_EMAIL}".
+- Then ask them to WhatsApp their email address to us on ${TEXT_NUMBER_SPOKEN}, or email ${TEXT_EMAIL_SPOKEN}, and explain that once we have it, the team will email their quote (or set up their regular clean and send the payment link).
 
 ## Existing bookings and rescheduling
 - If a caller asks about their booking (when is it, what did I book), call find_my_bookings and answer from it.
@@ -221,7 +221,7 @@ How to handle an enquiry:
 4. To save an enquiry, collect${voice ? ", one or two questions at a time" : " in ONE short numbered list, asking only for what's missing"}:
    - their name
    - best phone number (${voice ? "you already have the number they're calling from: confirm it's the best one" : "you already have this chat's number: only ask if they want a different one"})
-${voice ? `   - never their email on a call: ask them to WhatsApp or text it to ${TEXT_NUMBER_SPOKEN}, or email ${TEXT_EMAIL_SPOKEN}` : "   - email address, if they're happy to give it (optional)"}
+${voice ? `   - never their email on a call: ask them to WhatsApp it to ${TEXT_NUMBER_SPOKEN}, or email ${TEXT_EMAIL_SPOKEN}` : "   - email address, if they're happy to give it (optional)"}
    - postcode or area
    - what they need: service, property size (bedrooms/bathrooms), anything special
    - when they'd like it, and the best time for the team to call them back
@@ -244,8 +244,8 @@ function buildInstructions({ channel, settings, knowledge, services, now = new D
 - The caller has already heard a greeting from you (${name} at ${business}) saying calls are monitored to help the team. Don't repeat it; just help them.
 - Keep every reply to 1–3 short spoken sentences. Plain spoken words only: no lists, no bold or asterisks, no symbols, no URLs, no emojis — everything you write is read out loud.${canBook ? "\n- Only say a clean is scheduled, and only give a reference, when create_booking just returned it. Never say a quote is sent on a call: the team emails it once the caller has sent their email." : ""}
 - Say prices and times naturally, e.g. "thirty pounds sixty an hour", "ten in the morning". Offer at most three time options at once.
-- EMAIL ON CALLS: NEVER ask for an email address on a call, and never try to spell one — it's too easily misheard. Instead, near the end, ask the caller to WhatsApp or text their email to us: "To save you spelling it out, could you WhatsApp or text your email address to us on ${TEXT_NUMBER_SPOKEN}, or email us at ${TEXT_EMAIL_SPOKEN}?" Say the number slowly, and repeat it if they ask. If the caller starts saying their email anyway, politely stop them and ask them to text it instead.
-- If you still can't catch something else clearly (a name, area or anything) after asking twice, don't keep asking: ask them to WhatsApp or text it to us on ${TEXT_NUMBER_SPOKEN} too, then carry on with the rest of the call.
+- EMAIL ON CALLS: NEVER ask for an email address on a call, and never try to spell one — it's too easily misheard. Instead, near the end, ask the caller to WhatsApp their email to us: "To save you spelling it out, could you WhatsApp your email address to us on ${TEXT_NUMBER_SPOKEN}, or email us at ${TEXT_EMAIL_SPOKEN}?" Say the number slowly, and repeat it if they ask. If the caller starts saying their email anyway, politely stop them and ask them to WhatsApp or email it instead.
+- If you still can't catch something else clearly (a name, area or anything) after asking twice, don't keep asking: ask them to WhatsApp it to us on ${TEXT_NUMBER_SPOKEN} too, then carry on with the rest of the call.
 ${canBook ? `- You can check prices (get_quote) and availability (check_availability), look up the caller's bookings (find_my_bookings), book one-off cleans (create_booking, without an email) and take quote requests and regular cleans (save_enquiry), following the phone steps below. Use the tools instead of guessing.
 - On the phone, ask one or two questions at a time, never a long list. Keep a mental checklist and only ask for what's still missing.
 - Address on the phone: NEVER ask for a postcode or the full address — they're easily misheard on a call. Just ask which area they're in (e.g. Salford, Stockport, Didsbury, Bury). If they've already said the area, don't ask again; carry on. Pass the area as the address. Tell them our team will call or text them to take the full address.
@@ -257,7 +257,8 @@ ${canBook ? `- You can check prices (get_quote) and availability (check_availabi
       : `## WhatsApp rules
 - Keep replies short and friendly: usually 1–3 sentences. Plain text only; no headings or tables. Exception: when collecting booking details or sending a booking summary, use a short numbered list.
 - If the customer asks for a person or you cannot help, say a team member will reply in this chat as soon as possible.
-- Only text messages are supported; if the customer mentions a photo, voice note or file, ask them to describe it in text.`;
+- Only text messages are supported; if the customer mentions a photo, voice note or file, ask them to describe it in text.
+- After a phone call, customers send their email address and booking reference here (calls never take emails). When someone sends an email address with a booking reference, or says it's for their phone booking: thank them, call save_enquiry with their name, email and in details "Email for phone booking <reference> — add it to the booking and press Resend", and say the team will email their confirmation and payment link shortly. Don't book again.`;
 
   // Everything that changes per message (time, customer) goes last, under RIGHT_NOW_HEADING, so
   // the long part before it can be cached by the AI provider and reused between messages.

@@ -344,7 +344,7 @@ const InvoiceBuilder = () => {
       <p style="font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid #d1fae5">From</p>
       <p style="font-size:15px;font-weight:800;color:#0f172a;margin-bottom:3px">Cleaniq Services Ltd</p>
       <p style="font-size:11px;color:#64748b;margin-top:2px">info@cleaniqservices.com</p>
-      <p style="font-size:11px;color:#64748b;margin-top:2px">+44 7752 476368</p>
+      <p style="font-size:11px;color:#64748b;margin-top:2px">+44 7846 726428</p>
       <p style="font-size:11px;color:#64748b;margin-top:2px">cleaniqservices.com</p>
     </td>
   </tr>
@@ -401,7 +401,7 @@ const InvoiceBuilder = () => {
 </div>
 <div style="background:#0f172a;padding:18px 44px;text-align:center">
   <p style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px">Cleaniq Services Limited</p>
-  <p style="font-size:10px;color:#475569">info@cleaniqservices.com &nbsp;·&nbsp; cleaniqservices.com &nbsp;·&nbsp; +44 7752 476368</p>
+  <p style="font-size:10px;color:#475569">info@cleaniqservices.com &nbsp;·&nbsp; cleaniqservices.com &nbsp;·&nbsp; +44 7846 726428</p>
   <p style="font-size:9px;color:#334155;margin-top:6px">&copy; ${new Date().getFullYear()} Cleaniq Services. All rights reserved.</p>
 </div>
 </div></body></html>`;
@@ -504,7 +504,7 @@ const InvoiceBuilder = () => {
               <p className="text-[7px] font-black text-[#0A5C43] uppercase tracking-wide mb-1.5 pb-1 border-b-2 border-emerald-100">From</p>
               <p className="font-bold text-slate-800 text-[11px]">Cleaniq Services Ltd</p>
               <p className="text-slate-500 mt-0.5">info@cleaniqservices.com</p>
-              <p className="text-slate-500 mt-0.5">+44 7752 476368</p>
+              <p className="text-slate-500 mt-0.5">+44 7846 726428</p>
             </div>
           </div>
         );
@@ -780,7 +780,7 @@ const InvoiceBuilder = () => {
             </div>
             <div className="bg-slate-900 px-5 py-2.5 text-center">
               <p className="text-[8px] text-slate-500 font-semibold">Cleaniq Services Limited</p>
-              <p className="text-[7px] text-slate-600 mt-0.5">info@cleaniqservices.com · cleaniqservices.com · +44 7752 476368</p>
+              <p className="text-[7px] text-slate-600 mt-0.5">info@cleaniqservices.com · cleaniqservices.com · +44 7846 726428</p>
             </div>
           </div>
         </div>

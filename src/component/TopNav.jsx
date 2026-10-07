@@ -35,7 +35,7 @@ const TopNav = () => {
                 <Phone size={12} className="text-secondary md:w-3.5 md:h-3.5" />
               </div>
               <div className="flex flex-col leading-tight">
-                {["+44 7846 726428", "+44 7752 476368"].map((n) => (
+                {["+44 7846 726428"].map((n) => (
                   <a
                     key={n}
                     href={`tel:${n.replace(/\s+/g, "")}`}

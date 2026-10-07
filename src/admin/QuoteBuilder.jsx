@@ -418,7 +418,7 @@ thead th:last-child,thead th:nth-child(2),thead th:nth-child(3){text-align:right
     ${data.depositRequired&&depositAmount>0?`<div class="trow" style="color:#0369a1;margin-top:8px;"><span>Deposit Required (${data.depositPercent}%)</span><span>£${depositAmount.toFixed(2)}</span></div>`:""}
   </div>
   ${data.notes?`<div class="notes"><strong>Notes:</strong> ${data.notes}</div>`:""}
-  <div class="footer">Cleaniq Services Limited · info@cleaniqservices.com · cleaniqservices.com · +44 7752 476368</div>
+  <div class="footer">Cleaniq Services Limited · info@cleaniqservices.com · cleaniqservices.com · +44 7846 726428</div>
 </div>
 <script>window.onload=function(){window.print();}</script>
 </body></html>`;
@@ -1201,7 +1201,7 @@ tbody tr:nth-child(even){background:#f8fafc;}
     ${form.depositRequired && depositAmount > 0 ? `<div class="trow deposit"><span>Deposit Required (${form.depositPercent}%)</span><span>£${depositAmount.toFixed(2)}</span></div><div class="trow" style="color:#475569;"><span>Balance Due</span><span>£${balanceDue.toFixed(2)}</span></div>` : ""}
   </div>
   ${form.notes ? `<div class="notes"><div class="notes-label">Notes &amp; Terms</div><div class="notes-body">${form.notes}</div></div>` : ""}
-  <div class="footer"><span>© ${new Date().getFullYear()} Cleaniq Services Limited</span><span>info@cleaniqservices.com · cleaniqservices.com · +44 7752 476368</span></div>
+  <div class="footer"><span>© ${new Date().getFullYear()} Cleaniq Services Limited</span><span>info@cleaniqservices.com · cleaniqservices.com · +44 7846 726428</span></div>
 </div>
 <script>window.onload=function(){window.print();}</script>
 </body></html>`;

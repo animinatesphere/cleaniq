@@ -124,7 +124,7 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
     systemPrompt = system;
     assert.ok(tools.some((t) => t.name === "get_quote"));
     assert.ok(tools.some((t) => t.name === "transfer_to_human"));
-    // Calls book without an email (callers WhatsApp/text it); no emailed quotes on calls.
+    // Calls book without an email (callers WhatsApp it); no emailed quotes on calls.
     const book = tools.find((t) => t.name === "create_booking");
     assert.ok(book && !book.parametersJsonSchema.properties.email && !book.parametersJsonSchema.required.includes("email"));
     assert.ok(!tools.some((t) => t.name === "send_quote"));
@@ -157,7 +157,7 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
   await waitFor(async () => (await AiCall.findOne({ twilioCallSid: "CA6" })).endReason === "caller hung up");
 });
 
-test("a call books a one-off clean without an email: scheduled, caller asked to WhatsApp/text it", async () => {
+test("a call books a one-off clean without an email: scheduled, caller asked to WhatsApp it", async () => {
   const Booking = require("../../models/Booking");
   let result = null;
   let regular = null;
@@ -180,12 +180,12 @@ test("a call books a one-off clean without an email: scheduled, caller asked to 
 
   assert.match(regular.error, /Regular cleans can't be booked on a call/);
   assert.ok(result.bookingRef, JSON.stringify(result));
-  assert.match(result.nextStep, /Your clean is scheduled for .*Could you WhatsApp or text your email address and booking reference to us on oh seven seven five two, four seven six, three six eight, or email them to info at cleaniq services dot com\?/);
+  assert.match(result.nextStep, /Your clean is scheduled for .*Could you WhatsApp your email address and booking reference to us on oh seven seven five two, four seven six, three six eight, or email them to info at cleaniq services dot com\?/);
   const b = await Booking.findOne({ bookingId: result.bookingRef }).lean();
   assert.equal(b.customer.email, ""); // never a misheard email
   assert.equal(b.status, "Pending");
   assert.equal(b.leadSource, "Phone AI");
-  assert.equal(b.meta.emailToCome, "Caller will WhatsApp/text their email to +44 7752 476368");
+  assert.equal(b.meta.emailToCome, "Caller will WhatsApp their email to +44 7752 476368");
   s.ws.close();
 });
 

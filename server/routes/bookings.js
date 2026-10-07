@@ -1489,7 +1489,7 @@ async function rescheduleBooking(booking, { date, timeSlot, preferredTime }) {
     ${booking.details?.address ? `<tr><td style="font-size:12px;font-weight:700;color:#64748b;padding:10px 0;">Address</td><td align="right" style="font-size:12px;font-weight:700;color:#0F172A;padding:10px 0;">${booking.details.address}</td></tr>` : ""}
   </table>
 </div>
-<p style="font-size:13px;color:#64748b;text-align:center;">Questions? Reply to this email or call us at <strong>+44 7752 476368</strong>.</p>
+<p style="font-size:13px;color:#64748b;text-align:center;">Questions? Reply to this email or call us at <strong>+44 7846 726428</strong>.</p>
 <p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:24px;">Cleaniq Services · cleaniqservices.com</p>
 </div>`,
         });

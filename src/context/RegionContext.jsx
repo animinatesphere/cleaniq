@@ -13,7 +13,6 @@ export const regions = {
     basePrice: 20,
     contact: {
       phone: "+44 7846 726428",
-      phone2: "+44 7752 476368",
       email: "info@cleaniqservices.com",
       address: "20 Swan St, Manchester, M4 5JW",
     },

@@ -271,7 +271,7 @@ export default function PriceList() {
       <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:6px">From</div>
       <div style="font-size:13px;font-weight:700;color:#1e293b">Cleaniq Services Ltd</div>
       <div style="font-size:12px;color:#475569">info@cleaniqservices.com</div>
-      <div style="font-size:12px;color:#475569">+44 7752 476368</div>
+      <div style="font-size:12px;color:#475569">+44 7846 726428</div>
       <div style="font-size:12px;color:#475569">Manchester, United Kingdom</div>
     </div>
   </div>
