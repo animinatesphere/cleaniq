@@ -15,7 +15,19 @@ const TOKEN_TTL_MS = 2 * 60 * 1000;
 const SETUP_TIMEOUT_MS = 15 * 1000;
 const MAX_TURNS_PER_CALL = 40; // protects AI credit from very long or looping calls
 // Callers can book and get a written quote on the phone too (after the details are read back).
-const VOICE_TOOL_NAMES = ["check_postcode", "get_quote", "check_availability", "find_my_bookings", "save_enquiry", "create_booking", "send_quote"];
+// Calls never take an email (too easily misheard): create_booking works without one there, and
+// there's no send_quote. Callers WhatsApp or text their email; the team sends the link or quote.
+const VOICE_TOOL_NAMES = ["check_postcode", "get_quote", "check_availability", "find_my_bookings", "save_enquiry", "create_booking"];
+const forCall = (d) => {
+  if (d.name !== "create_booking") return d;
+  const schema = d.parametersJsonSchema;
+  const { email, ...properties } = schema.properties;
+  return {
+    ...d,
+    description: `${d.description} On a call: one-off cleans only, and no email (the caller WhatsApps or texts it afterwards).`,
+    parametersJsonSchema: { ...schema, properties, required: schema.required.filter((r) => r !== "email") },
+  };
+};
 
 const TRANSFER_TOOL = {
   name: "transfer_to_human",
@@ -177,7 +189,7 @@ function handleRelaySession(ws, deps = {}) {
       if (!VOICE_TOOL_NAMES.includes(name)) return { error: `${name} isn't available on phone calls.` };
       return baseRunner(name, args);
     }, state.knownRefs);
-    const tools = [...declarations.filter((d) => VOICE_TOOL_NAMES.includes(d.name)), ...(canTransfer ? [TRANSFER_TOOL] : [])];
+    const tools = [...declarations.filter((d) => VOICE_TOOL_NAMES.includes(d.name)).map(forCall), ...(canTransfer ? [TRANSFER_TOOL] : [])];
 
     // Speak each sentence as soon as the AI has written it, instead of waiting for the whole
     // reply: the caller hears the start of the answer within a second or so. A sentence that
@@ -214,7 +226,8 @@ function handleRelaySession(ws, deps = {}) {
       const system = await getInstructions("voice", { customerName: state.call?.customerName || "", agentName: state.call?.agentName || "", canBook: true });
       const history = state.history.slice(-30);
       // A "yes" to a booking or quote summary makes the AI actually do it (same as WhatsApp).
-      const forceTool = confirmationTool(history);
+      const wanted = confirmationTool(history);
+      const forceTool = VOICE_TOOL_NAMES.includes(wanted) ? wanted : null;
       reply = await ai({ system, history, tools, runTool, onText, forceTool });
       if (reply) {
         // Retries aren't streamed: the checked reply is spoken in one go below.

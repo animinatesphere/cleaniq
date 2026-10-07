@@ -241,6 +241,9 @@ const findPostcode = (text) => {
   return m ? `${m[1]} ${m[2]}`.toUpperCase() : "";
 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Callers WhatsApp or text what can't be taken on a call (e.g. their email) to this number.
+const TEXT_NUMBER = "+44 7752 476368";
+const TEXT_NUMBER_SPOKEN = "oh seven seven five two, four seven six, three six eight";
 const ROOMS = { bedrooms: "Bedroom", bathrooms: "Bathroom", kitchens: "Kitchen", livingRooms: "Living Room" };
 
 async function uniqueBookingId() {
@@ -263,7 +266,12 @@ async function createAiBooking(args, ctx) {
   if (!args.customerConfirmed) problems.push("the customer has not explicitly confirmed the summary and price yet");
   if (!NAME_RE.test(args.firstName || "") || args.firstName.trim().length < 2) problems.push("first name (letters only)");
   if (!NAME_RE.test(args.lastName || "") || args.lastName.trim().length < 2) problems.push("last name (letters only)");
-  if (!EMAIL_RE.test(args.email || "")) problems.push("a valid email address");
+  // Phone calls never take an email (too easily misheard): the caller WhatsApps/texts it after.
+  const phoneCall = ctx.channel === "voice";
+  if (!phoneCall && !EMAIL_RE.test(args.email || "")) problems.push("a valid email address");
+  if (phoneCall && args.frequency && args.frequency !== "Once") {
+    return { error: "Regular cleans can't be booked on a call. Save it with save_enquiry (say it's a regular clean in details) and the team will set it up once the caller has sent their email." };
+  }
   if (areaOnly(ctx)) {
     if (!args.address || args.address.trim().length < 2) problems.push("the area of Manchester they're in (e.g. Salford)");
   } else {
@@ -319,7 +327,7 @@ async function createAiBooking(args, ctx) {
     customer: {
       firstName: args.firstName.trim(),
       lastName: args.lastName.trim(),
-      email: args.email.trim().toLowerCase(),
+      email: phoneCall ? "" : args.email.trim().toLowerCase(),
       phone: ctx.phone,
     },
     service: quote.service,
@@ -336,7 +344,11 @@ async function createAiBooking(args, ctx) {
     noPaymentRequired: false,
     skipConfirmationEmail: false,
     createdByAdmin: null,
-    meta: { coupon: null, source: "ai-receptionist", conversationId: ctx.conversationId || null },
+    meta: {
+      coupon: null, source: "ai-receptionist", conversationId: ctx.conversationId || null,
+      // Phone booking: the caller WhatsApps/texts their email; admin adds it, then presses Resend.
+      ...(phoneCall ? { emailToCome: `Caller will WhatsApp/text their email to ${TEXT_NUMBER}` } : {}),
+    },
   };
 
   const visits = SERIES_SIZE[frequency] || 1;
@@ -353,7 +365,9 @@ async function createAiBooking(args, ctx) {
     total: quote.total,
     when: `${args.date} ${when.label}`,
     visits,
-    nextStep: `A confirmation email with a secure payment link has been sent to ${payload.customer.email}. The booking is confirmed once payment is completed.${areaOnly(ctx) ? " Our team will call or text them shortly to take the full address." : ""}`,
+    nextStep: phoneCall
+      ? `The booking is scheduled. Ask the caller to WhatsApp or text their email address and booking reference to us on ${TEXT_NUMBER_SPOKEN}; the team will then email the confirmation and a secure payment link. The booking is confirmed once payment is completed. Our team will call or text them shortly to take the full address.`
+      : `A confirmation email with a secure payment link has been sent to ${payload.customer.email}. The booking is confirmed once payment is completed.${areaOnly(ctx) ? " Our team will call or text them shortly to take the full address." : ""}`,
   };
 }
 
@@ -987,6 +1001,7 @@ async function guardInventedRefs(reply, known, retry) {
 }
 
 module.exports = {
+  TEXT_NUMBER, TEXT_NUMBER_SPOKEN,
   refsIn,
   trackRefs,
   guardInventedRefs,
