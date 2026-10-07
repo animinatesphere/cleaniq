@@ -92,6 +92,16 @@ router.use("/jobs", (req, res, next) =>
 router.use("/:id/schedule", hideCustomerContact);
 
 // Mobile App Login Endpoint
+// Marks the worker as using the app now (shown in admin → Staff). At most one write per 5 minutes.
+function markActive(workerId) {
+  if (!workerId || !mongoose.isValidObjectId(String(workerId))) return;
+  const now = new Date();
+  Worker.updateOne(
+    { _id: workerId, $or: [{ lastActiveAt: null }, { lastActiveAt: { $lt: new Date(now - 5 * 60 * 1000) } }] },
+    { $set: { lastActiveAt: now } },
+  ).catch(() => {});
+}
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -114,6 +124,13 @@ router.post("/login", async (req, res) => {
     if (worker.tempPassword !== password) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
+
+    // Admin → Staff shows when they last signed in.
+    const now = new Date();
+    worker.lastLoginAt = now;
+    worker.lastActiveAt = now;
+    worker.loginCount = (worker.loginCount || 0) + 1;
+    await worker.save();
 
     // Automatically activate the worker if they were Pending and successfully logged in
     if (worker.status === "Pending") {
@@ -195,6 +212,7 @@ const verifyWorkerToken = (req, res, next) => {
     const decoded = jwt.verify(auth.slice(7), process.env.JWT_SECRET || "cleaniq_super_secret_mobile_key");
     if (!decoded?.workerId || !mongoose.isValidObjectId(decoded.workerId)) throw new Error("bad token");
     req.workerId = String(decoded.workerId);
+    markActive(req.workerId);
     next();
   } catch {
     return res.status(401).json({ error: "Please log in again" });
@@ -239,6 +257,7 @@ const generateTempPassword = () => {
 // "Accepted"         = legacy flow
 // "Awaiting Payment" = customer submitted but hasn't paid yet — NOT shown to workers
 router.get("/jobs", async (req, res) => {
+  markActive(req.query.workerId);
   try {
     const { region, workerId, all } = req.query;
 
@@ -333,6 +352,7 @@ router.put("/jobs/:id/hidden", require("../middleware/adminAuth"), async (req, r
 
 // GET jobs accepted by a specific worker
 router.get("/jobs/my-jobs/:workerId", async (req, res) => {
+  markActive(req.params.workerId);
   try {
     const wId = req.params.workerId;
     // Match by string OR ObjectId (so it works regardless of how the ID was stored)
@@ -1715,6 +1735,7 @@ router.get("/active-locations", async (req, res) => {
 // always an explicit, worker-initiated toggle (foreground only) - never
 // silent background tracking.
 router.put("/:id/location", async (req, res) => {
+  markActive(req.params.id);
   try {
     const { id } = req.params;
     const { lat, lng, sharing, bookingId } = req.body;

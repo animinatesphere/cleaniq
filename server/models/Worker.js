@@ -67,6 +67,9 @@ const workerSchema = new mongoose.Schema({
   // Offer settings chosen in the app (services, working hours, travel area, pets, intro message).
   // See utils/offerMatching.js for the shape and defaults.
   preferences: { type: mongoose.Schema.Types.Mixed, default: undefined },
+  lastLoginAt: { type: Date, default: null },   // last time they signed in to the worker app
+  lastActiveAt: { type: Date, default: null },  // last time the app was used (logins last 30 days)
+  loginCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   meta: mongoose.Schema.Types.Mixed,
 });

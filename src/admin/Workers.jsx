@@ -21,6 +21,16 @@ import {
 import { useRegion } from "../context/RegionContext";
 import StatDetailDrawer from "./StatDetailDrawer";
 
+// "Tue 6 Oct 2026, 14:05 · 2 days ago" — or "Never".
+const whenText = (d) => {
+  if (!d) return "Never";
+  const t = new Date(d);
+  const mins = Math.round((Date.now() - t) / 60000);
+  const ago = mins < 2 ? "just now" : mins < 60 ? `${mins} min ago` : mins < 1440 ? `${Math.round(mins / 60)}h ago` : `${Math.round(mins / 1440)} day${Math.round(mins / 1440) === 1 ? "" : "s"} ago`;
+  return `${t.toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" })} · ${ago}`;
+};
+const money = (n) => `£${Number(n || 0).toFixed(2)}`;
+
 const Workers = () => {
   const { region } = useRegion();
   const [workers, setWorkers] = useState([]);
@@ -386,6 +396,16 @@ const Workers = () => {
                     </div>
                     <span className="font-semibold">{w.phone || "—"}</span>
                   </div>
+                  <div className={`flex items-center gap-2 text-xs ${w.lastLoginAt || w.lastActiveAt ? "text-white/60" : "text-amber-400/80"}`}>
+                    <div className="w-6 h-6 rounded-lg bg-white/[0.03] flex items-center justify-center shrink-0">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <span className="font-semibold truncate">
+                      {w.lastActiveAt || w.lastLoginAt
+                        ? `Last active ${whenText(w.lastActiveAt || w.lastLoginAt).split(" · ")[1]}`
+                        : "No login recorded yet"}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Stats */}
@@ -628,6 +648,31 @@ const Workers = () => {
               </div>
             </div>
 
+            {/* App activity: has this worker logged in, and when */}
+            <div className={`rounded-2xl p-5 space-y-3 mb-6 border ${workerDetailModal.lastLoginAt ? "bg-emerald-500/5 border-emerald-500/20" : "bg-amber-500/5 border-amber-500/25"}`}>
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${workerDetailModal.lastLoginAt ? "text-emerald-400" : "text-amber-400"}`}>App Activity</p>
+              {!workerDetailModal.lastLoginAt && (
+                <p className="text-xs font-bold text-amber-400">
+                  {workerDetailModal.lastActiveAt || workerDetailModal.pushTokens?.length || workerDetailModal.expoPushToken
+                    ? "Has used the app before — login times are recorded from now on."
+                    : "No login recorded yet. (Login times are recorded from Oct 2026.)"}
+                </p>
+              )}
+              {[
+                { label: "Last login", value: whenText(workerDetailModal.lastLoginAt) },
+                { label: "Last active in app", value: whenText(workerDetailModal.lastActiveAt) },
+                { label: "Times logged in", value: workerDetailModal.loginCount ? String(workerDetailModal.loginCount) : "0" },
+                { label: "App access", value: workerDetailModal.appAccessGranted ? "Granted" : "Not granted" },
+                { label: "Notifications", value: (workerDetailModal.pushTokens?.length || workerDetailModal.expoPushToken) ? `On (${workerDetailModal.pushTokens?.length || 1} phone${(workerDetailModal.pushTokens?.length || 1) > 1 ? "s" : ""})` : "Off" },
+                { label: "Last location", value: workerDetailModal.location?.lastUpdated ? whenText(workerDetailModal.location.lastUpdated) : "—" },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between items-center gap-4 text-sm">
+                  <span className="text-white/40 font-semibold">{label}</span>
+                  <span className="font-bold text-white/80 text-right">{value || "—"}</span>
+                </div>
+              ))}
+            </div>
+
             {/* Profile Details */}
             <div className="bg-white/[0.03] rounded-2xl p-5 space-y-3 mb-6">
               <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Profile Details</p>
@@ -635,13 +680,56 @@ const Workers = () => {
                 { label: "Worker ID", value: workerDetailModal.workerId },
                 { label: "Email", value: workerDetailModal.email },
                 { label: "Phone", value: workerDetailModal.phone },
+                { label: "Address", value: workerDetailModal.address },
+                { label: "Postcode", value: workerDetailModal.postcode },
                 { label: "Region", value: workerDetailModal.region },
-                { label: "Jobs Completed", value: workerDetailModal.jobsCompleted ?? 0 },
+                { label: "Position", value: workerDetailModal.role || "Cleaner" },
+                { label: "Profile completed", value: workerDetailModal.profileCompleted ? "Yes" : "No" },
+                { label: "Jobs Completed", value: String(workerDetailModal.jobsCompleted ?? 0) },
                 { label: "Rating", value: workerDetailModal.rating ? `⭐ ${workerDetailModal.rating}` : "—" },
+                { label: "Joined", value: workerDetailModal.createdAt ? new Date(workerDetailModal.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—" },
               ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between items-center text-sm">
+                <div key={label} className="flex justify-between items-center gap-4 text-sm">
                   <span className="text-white/40 font-semibold">{label}</span>
-                  <span className="font-bold text-white/80">{value || "—"}</span>
+                  <span className="font-bold text-white/80 text-right break-words min-w-0">{value || "—"}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Availability */}
+            {workerDetailModal.availability && (
+              <div className="bg-white/[0.03] rounded-2xl p-5 space-y-2 mb-6">
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Availability</p>
+                {["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].map((d) => {
+                  const day = workerDetailModal.availability?.[d];
+                  return (
+                    <div key={d} className="flex justify-between items-center gap-4 text-sm">
+                      <span className="text-white/40 font-semibold capitalize">{d}</span>
+                      <span className={`font-bold text-right ${day?.available ? "text-white/80" : "text-white/30"}`}>
+                        {day?.available ? (day.slots?.length ? day.slots.join(", ") : "Available") : "Off"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Bank & wallet */}
+            <div className="bg-white/[0.03] rounded-2xl p-5 space-y-3 mb-6">
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Bank & Earnings</p>
+              {[
+                { label: "Bank", value: workerDetailModal.bankDetails?.bankName },
+                { label: "Account name", value: workerDetailModal.bankDetails?.accountName },
+                { label: "Sort code", value: workerDetailModal.bankDetails?.sortCode },
+                { label: "Account number", value: workerDetailModal.bankDetails?.accountNumber },
+                { label: "Total earned", value: money(workerDetailModal.wallet?.totalEarned) },
+                { label: "Balance", value: money(workerDetailModal.wallet?.balance) },
+                { label: "On hold", value: money(workerDetailModal.wallet?.onHold) },
+                { label: "Paid out", value: money(workerDetailModal.wallet?.withdrawn) },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between items-center gap-4 text-sm">
+                  <span className="text-white/40 font-semibold">{label}</span>
+                  <span className="font-bold text-white/80 text-right">{value || "—"}</span>
                 </div>
               ))}
             </div>
