@@ -143,14 +143,13 @@ test("phone calls never ask for an email: the caller WhatsApps or texts it, the 
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now, canBook: true });
   assert.match(p, /NEVER ask for an email address on a call/);
   assert.match(p, /WhatsApp or text your email address to us on oh seven seven five two, four seven six, three six eight/);
-  assert.match(p, /will WhatsApp\/text their email to \+44 7752 476368/);
+  assert.match(p, /will WhatsApp\/text their email to \+44 7752 476368 or email info@cleaniqservices\.com/);
   assert.match(p, /never their email on a call/);
   assert.doesNotMatch(p, /spell the email address back/);
   assert.doesNotMatch(p, /Full name and email address/);
   // One-off: booked without an email and told it's scheduled. Quotes / regular: saved for the team.
   assert.match(p, /Call create_booking with customerConfirmed true and every detail, with the area as the address\. Don't pass an email\./);
-  assert.match(p, /tell them their clean is scheduled/);
-  assert.match(p, /WhatsApp or text their email address and booking reference to us on oh seven seven five two/);
+  assert.match(p, /Your clean is scheduled for Friday 9 October at 10am, reference B K 1 2 3 4 5 6 7\. Could you WhatsApp or text your email address and booking reference to us on oh seven seven five two, four seven six, three six eight, or email them to info at cleaniq services dot com\? We'll email your confirmation and payment link\. Your booking is confirmed once you've paid\./);
   assert.match(p, /Quote, or a regular clean \(weekly, fortnightly, monthly…\) — after they say yes:\n- Call save_enquiry/);
   assert.doesNotMatch(p, /send_quote/);
   // Anything else misheard twice: text it to us too.
