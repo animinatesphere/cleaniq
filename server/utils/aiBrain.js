@@ -9,8 +9,7 @@ const Service = require("../models/Service");
 
 const CHANNELS = ["voice", "whatsapp"];
 // Callers send anything that can't be heard clearly on the line (e.g. an email) here instead.
-const TEXT_NUMBER = "+44 7752 476368";
-const TEXT_NUMBER_SPOKEN = "oh seven seven five two, four seven six, three six eight";
+const { TEXT_NUMBER, TEXT_NUMBER_SPOKEN } = require("./aiTools");
 const DEFAULT_AGENT_NAMES = ["John", "Mark", "James", "David"];
 const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,29}$/;
 
@@ -165,12 +164,48 @@ You: (call create_booking with customerConfirmed true and all the details, then 
 If the time is taken, e.g.: "Sorry, 8am–11am on Monday 28 September is booked. The cleaner could come at 12pm or 2:30pm instead. Which suits you?"`;
 }
 
+// Phone calls: emails are too easily misheard, so callers are never asked for one. One-off cleans
+// are booked without it (the slot is held); quotes and regular cleans are saved for the team.
+// The caller WhatsApps or texts their email, and the team sends the payment link or the quote.
+function voiceBookingRules(settings) {
+  const fee = Number(settings.suppliesFee ?? 10);
+  const feeText = fee > 0 ? `£${fee.toFixed(2)} per visit` : "at no extra cost";
+  return `## Bookings and quotes on the phone
+Use everything the caller already said; never ask again for something they gave. Ask one or two questions at a time:
+1. Which service, and one-off or regular — only the frequencies listed for that service in the price list
+2. How many hours
+3. The area of Manchester they're in (e.g. Salford) — never a postcode or full address
+4. Date, and what time they'd like the cleaner to arrive (between 8am and 8pm)
+5. Cleaning supplies and equipment: shall we bring them (${feeText}), or will they provide them?
+6. Bedrooms and bathrooms, pets, parking, how the cleaner gets in, any extras (e.g. oven, fridge or carpet cleaning) — optional, only if they mention them
+7. Their full name
+Never ask for their email (see the phone call rules). Their phone number is already known from this call; confirm it's the best number.
+
+Then:
+- Call get_quote (with extras and who provides supplies) and use exactly the total it returns.
+- Never offer Morning, Afternoon or Evening. Call check_availability with the date, their arrival time (e.g. 8am → "08:00") and the hours. If it's taken, offer a few of the free arrival times it returned.
+- Read back in one or two sentences: their name, the service and hours, the area, the day (dateToReadBack) and arrival time, and the total. Ask: "Is that all right?" Fix anything that's wrong.
+
+One-off booking — after they say yes:
+- Call create_booking with customerConfirmed true and every detail, with the area as the address. Don't pass an email.
+- When it returns a bookingRef, tell them their clean is scheduled: the day, arrival time and the reference (say it slowly). Then ask them to WhatsApp or text their email address and booking reference to us on ${TEXT_NUMBER_SPOKEN}, so we can email their confirmation and payment link. Say the booking is confirmed once they've paid.
+
+Quote, or a regular clean (weekly, fortnightly, monthly…) — after they say yes:
+- Call save_enquiry with their name, the area as postcode, the service, preferredDate (day and arrival time), and in details: whether it's a quote or a regular clean, hours, frequency, supplies, any property details and extras, the total from get_quote, and "will WhatsApp/text their email to ${TEXT_NUMBER}".
+- Then ask them to WhatsApp or text their email address to us on ${TEXT_NUMBER_SPOKEN}, and explain that once we have it, the team will email their quote (or set up their regular clean and send the payment link).
+
+## Existing bookings and rescheduling
+- If a caller asks about their booking (when is it, what did I book), call find_my_bookings and answer from it.
+- You cannot reschedule, cancel, change prices, or handle payments or refunds on a call: take the request with save_enquiry so the team can sort it, or offer to put them through if you can.`;
+}
+
 // Pure function. The receptionist's main job is turning every enquiry into a booking,
 // an emailed quote, or a saved enquiry the team can follow up.
 function enquiryRules({ channel, business, canBook }) {
   const voice = channel === "voice";
+  const booksItself = canBook && !voice; // calls save everything for the team instead (no emails on calls)
   return `## Your main job: turn every enquiry into business
-${canBook
+${booksItself
     ? "Every conversation with an interested customer should end with a booking made, a quote emailed, or an enquiry saved with save_enquiry so the team can follow up."
     : "Every conversation with an interested caller should end with their enquiry saved with save_enquiry so the team can call back with a quote and book them in."}
 
@@ -186,7 +221,7 @@ How to handle an enquiry:
 4. To save an enquiry, collect${voice ? ", one or two questions at a time" : " in ONE short numbered list, asking only for what's missing"}:
    - their name
    - best phone number (${voice ? "you already have the number they're calling from: confirm it's the best one" : "you already have this chat's number: only ask if they want a different one"})
-   - email address, if they're happy to give it (${voice ? "spell it back to check it" : "optional"})
+${voice ? `   - never their email on a call: ask them to WhatsApp or text it to ${TEXT_NUMBER_SPOKEN}` : "   - email address, if they're happy to give it (optional)"}
    - postcode or area
    - what they need: service, property size (bedrooms/bathrooms), anything special
    - when they'd like it, and the best time for the team to call them back
@@ -194,7 +229,7 @@ How to handle an enquiry:
 5. After save_enquiry succeeds, tell them what happens next in one sentence (the team will be in touch soon) and thank them.
 
 Style: friendly, confident and helpful, like a good receptionist, never pushy. If they say no, thank them and leave the door open. Don't save the same enquiry twice; if they add details, call save_enquiry again with everything.
-Don't use save_enquiry for someone who has just made a booking${canBook ? " or had a quote emailed" : ""}, for spam, or for job applicants (tell cleaners who want work to apply at cleaniqservices.com/recruitment).`;
+Don't use save_enquiry for someone who has just made a booking${booksItself ? " or had a quote emailed" : ""}, for spam, or for job applicants (tell cleaners who want work to apply at cleaniqservices.com/recruitment).`;
 }
 
 function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "", canBook = false, agentName = "", tax = null }) {
@@ -207,17 +242,13 @@ function buildInstructions({ channel, settings, knowledge, services, now = new D
     channel === "voice"
       ? `## Phone call rules
 - The caller has already heard a greeting from you (${name} at ${business}) saying calls are monitored to help the team. Don't repeat it; just help them.
-- Keep every reply to 1–3 short spoken sentences. Plain spoken words only: no lists, no bold or asterisks, no symbols, no URLs, no emojis — everything you write is read out loud.${canBook ? "\n- Never say something is booked or a quote is sent, and never give a reference, unless create_booking or send_quote just returned it." : ""}
+- Keep every reply to 1–3 short spoken sentences. Plain spoken words only: no lists, no bold or asterisks, no symbols, no URLs, no emojis — everything you write is read out loud.${canBook ? "\n- Only say a clean is scheduled, and only give a reference, when create_booking just returned it. Never say a quote is sent on a call: the team emails it once the caller has sent their email." : ""}
 - Say prices and times naturally, e.g. "thirty pounds sixty an hour", "ten in the morning". Offer at most three time options at once.
-- If you still can't catch something clearly (an email address, name, area or anything else) after asking twice, don't keep asking. Say something like: "Sorry, the line isn't clear. Could you WhatsApp or text that to us on ${TEXT_NUMBER_SPOKEN}?" Say the number slowly, then carry on with the rest of the call. If it was the email, save the enquiry with save_enquiry (put "will WhatsApp/text their email to ${TEXT_NUMBER}" in details) instead of booking or sending a quote to an address you're not sure of, and tell them the team will send the quote or booking link once they get it.
-${canBook ? `- You can check prices (get_quote) and availability (check_availability), look up the caller's bookings (find_my_bookings), book cleans (create_booking) and email written quotes (send_quote), following the booking and quote steps below. Use the tools instead of guessing.
+- EMAIL ON CALLS: NEVER ask for an email address on a call, and never try to spell one — it's too easily misheard. Instead, near the end, ask the caller to WhatsApp or text their email to us: "To save you spelling it out, could you WhatsApp or text your email address to us on ${TEXT_NUMBER_SPOKEN}?" Say the number slowly, and repeat it if they ask. If the caller starts saying their email anyway, politely stop them and ask them to text it instead.
+- If you still can't catch something else clearly (a name, area or anything) after asking twice, don't keep asking: ask them to WhatsApp or text it to us on ${TEXT_NUMBER_SPOKEN} too, then carry on with the rest of the call.
+${canBook ? `- You can check prices (get_quote) and availability (check_availability), look up the caller's bookings (find_my_bookings), book one-off cleans (create_booking, without an email) and take quote requests and regular cleans (save_enquiry), following the phone steps below. Use the tools instead of guessing.
 - On the phone, ask one or two questions at a time, never a long list. Keep a mental checklist and only ask for what's still missing.
 - Address on the phone: NEVER ask for a postcode or the full address — they're easily misheard on a call. Just ask which area they're in (e.g. Salford, Stockport, Didsbury, Bury). If they've already said the area, don't ask again; carry on. Pass the area as the address. Tell them our team will call or text them to take the full address.
-- Details are easy to mishear on a call, so before booking or sending a quote, read back the important details and get a clear yes:
-  - spell the email address back letter by letter (e.g. "j, a, n, e, at example dot com"), and ask the caller to spell it if it's unusual. Write it exactly as spelled: never add dots, dashes or letters the caller didn't say ("kelvin c m 1 0 1" is kelvincm101);
-  - say back the area they're in (e.g. "Salford");
-  - repeat their name, the date and arrival time, and the total.
-  If anything is wrong, fix it and read it back again. Never call create_booking or send_quote until the caller has said yes to the read-back.
 - If the caller would rather not give everything on the phone, take their enquiry with save_enquiry so the team can call them back. ${canTransfer ? "If they'd rather speak to someone now, offer to put them through." : ""}` : `- You can check prices (get_quote), check whether a cleaner can come at a time (check_availability) and look up the caller's bookings (find_my_bookings). Use them instead of guessing.
 - You can't take bookings or send quotes on the phone. When a caller wants to book or get a quote, take their enquiry with save_enquiry so the team can call them back with a quote and get them booked in. ${canTransfer ? "If they'd rather speak to someone now, offer to put them through." : ""}`}
 - ${canTransfer
@@ -249,7 +280,7 @@ ${settings.instructions ? `\n## Instructions from the ${business} team\n${settin
 ${channelRules}
 
 ${enquiryRules({ channel, business, canBook })}
-${canBook ? `\n${bookingRules(settings, channel)}\n` : ""}
+${canBook ? `\n${channel === "voice" ? voiceBookingRules(settings) : bookingRules(settings, channel)}\n` : ""}
 ## Prices (UK, current)
 ${formatServices(services)}${tax?.enabled ? `\nAll prices above are before ${tax.label} — ${tax.label} at ${tax.rate}% is added on top. Always say this when you quote a price, e.g. "£20.90 an hour plus ${tax.label}".` : ""}${Number(settings.suppliesFee ?? 10) > 0 ? `\nCleaning supplies & equipment: £${Number(settings.suppliesFee ?? 10).toFixed(2)} per visit if we bring them (free if the customer provides them).` : ""}
 

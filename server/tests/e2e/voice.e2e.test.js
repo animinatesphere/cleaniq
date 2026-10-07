@@ -124,7 +124,10 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
     systemPrompt = system;
     assert.ok(tools.some((t) => t.name === "get_quote"));
     assert.ok(tools.some((t) => t.name === "transfer_to_human"));
-    assert.ok(tools.some((t) => t.name === "create_booking") && tools.some((t) => t.name === "send_quote")); // book and quote by phone too
+    // Calls book without an email (callers WhatsApp/text it); no emailed quotes on calls.
+    const book = tools.find((t) => t.name === "create_booking");
+    assert.ok(book && !book.parametersJsonSchema.properties.email && !book.parametersJsonSchema.required.includes("email"));
+    assert.ok(!tools.some((t) => t.name === "send_quote"));
     assert.equal(history.at(-1).text, "How much is a deep clean for three hours?");
     const q = await runTool("get_quote", { service: "Deep Clean", hours: 3 });
     return `That would be ${q.total} pounds.`;
@@ -152,6 +155,38 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
 
   s.ws.close();
   await waitFor(async () => (await AiCall.findOne({ twilioCallSid: "CA6" })).endReason === "caller hung up");
+});
+
+test("a call books a one-off clean without an email: scheduled, caller asked to WhatsApp/text it", async () => {
+  const Booking = require("../../models/Booking");
+  let result = null;
+  let regular = null;
+  fakeAi = async ({ runTool }) => {
+    regular = await runTool("create_booking", {
+      firstName: "Jane", lastName: "Smith", address: "Salford", suppliesProvidedBy: "Customer",
+      service: "Deep Clean", hours: 3, date: "tomorrow", time: "10:00", frequency: "Weekly", customerConfirmed: true,
+    });
+    result = await runTool("create_booking", {
+      firstName: "Jane", lastName: "Smith", email: "misheard@example", address: "Salford", suppliesProvidedBy: "Customer",
+      service: "Deep Clean", hours: 3, date: "tomorrow", time: "10:00", customerConfirmed: true,
+    });
+    return "Your clean is scheduled.";
+  };
+  const { token } = await incomingToken("CA9");
+  const s = await openSession(token, "CA9");
+  await waitFor(() => AiCall.exists({ twilioCallSid: "CA9" }));
+  s.ws.send(JSON.stringify({ type: "prompt", voicePrompt: "Yes that's right", last: true }));
+  await waitFor(() => result);
+
+  assert.match(regular.error, /Regular cleans can't be booked on a call/);
+  assert.ok(result.bookingRef, JSON.stringify(result));
+  assert.match(result.nextStep, /The booking is scheduled\. Ask the caller to WhatsApp or text their email address and booking reference to us on oh seven seven five two/);
+  const b = await Booking.findOne({ bookingId: result.bookingRef }).lean();
+  assert.equal(b.customer.email, ""); // never a misheard email
+  assert.equal(b.status, "Pending");
+  assert.equal(b.leadSource, "Phone AI");
+  assert.equal(b.meta.emailToCome, "Caller will WhatsApp/text their email to +44 7752 476368");
+  s.ws.close();
 });
 
 test("transfer: AI hands over → session ends with transfer → /after dials the team", async () => {

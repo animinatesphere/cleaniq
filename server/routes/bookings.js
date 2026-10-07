@@ -577,6 +577,10 @@ async function createBooking(body) {
       console.log(
         `🔇 Flat-rate booking ${newBooking.bookingId} created — no automatic customer email sent. Send the invoice manually via CRM actions.`,
       );
+    } else if (!String(newBooking.customer?.email || "").trim()) {
+      // Phone bookings: the caller WhatsApps/texts their email afterwards. Admin adds it to the
+      // booking and presses Resend to send the payment link.
+      console.log(`🔇 Booking ${newBooking.bookingId} has no email yet — send the payment link once it's added.`);
     } else if (
       !newBooking.noPaymentRequired &&
       newBooking.payment &&

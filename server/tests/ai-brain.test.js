@@ -139,20 +139,26 @@ test("price list says which services can be regular and at what price", () => {
 });
 
 
-test("phone calls can book and quote, with the address and email read back first", () => {
+test("phone calls never ask for an email: the caller WhatsApps or texts it, the enquiry is saved", () => {
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now, canBook: true });
-  assert.match(p, /book cleans \(create_booking\) and email written quotes \(send_quote\)/);
-  assert.match(p, /spell the email address back letter by letter/);
-  // Can't hear it after two tries: WhatsApp or text it to us.
-  assert.match(p, /after asking twice, don't keep asking/);
-  assert.match(p, /WhatsApp or text that to us on oh seven seven five two, four seven six, three six eight/);
+  assert.match(p, /NEVER ask for an email address on a call/);
+  assert.match(p, /WhatsApp or text your email address to us on oh seven seven five two, four seven six, three six eight/);
   assert.match(p, /will WhatsApp\/text their email to \+44 7752 476368/);
+  assert.match(p, /never their email on a call/);
+  assert.doesNotMatch(p, /spell the email address back/);
+  assert.doesNotMatch(p, /Full name and email address/);
+  // One-off: booked without an email and told it's scheduled. Quotes / regular: saved for the team.
+  assert.match(p, /Call create_booking with customerConfirmed true and every detail, with the area as the address\. Don't pass an email\./);
+  assert.match(p, /tell them their clean is scheduled/);
+  assert.match(p, /WhatsApp or text their email address and booking reference to us on oh seven seven five two/);
+  assert.match(p, /Quote, or a regular clean \(weekly, fortnightly, monthly…\) — after they say yes:\n- Call save_enquiry/);
+  assert.doesNotMatch(p, /send_quote/);
+  // Anything else misheard twice: text it to us too.
+  assert.match(p, /after asking twice, don't keep asking/);
   // On calls: just the area, never a postcode or full address (easily misheard).
   assert.match(p, /NEVER ask for a postcode or the full address/);
   assert.match(p, /which area they're in \(e\.g\. Salford/);
-  assert.match(p, /our team will call or text them to take the full address/);
   assert.doesNotMatch(p, /call check_postcode on it straight away/);
-  assert.match(p, /Never call create_booking or send_quote until the caller has said yes to the read-back/);
 });
 
 
