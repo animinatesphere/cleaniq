@@ -185,7 +185,7 @@ const sections = [
     content: [
       "If you have any questions or concerns about this Privacy Policy, or if you wish to exercise your data rights, please contact our privacy officer:",
       "Email: info@cleaniqservices.com",
-      "Phone: +44 (0) 7752 476 368",
+      "Phone: +44 (0) 7846 726 428",
       "Address: 20 Swan St, Manchester, M4 5JW",
       "We will respond to all inquiries within 30 days of receipt.",
     ],
@@ -375,10 +375,10 @@ const PrivacyPolicy = () => {
                   <div>
                     <h3 className="font-black text-primary-dark mb-1">Phone</h3>
                     <a
-                      href="tel:+447752476368"
+                      href="tel:+447846726428"
                       className="text-primary hover:text-primary-dark transition-colors font-bold"
                     >
-                      +44 (0) 7752 476 368
+                      +44 (0) 7846 726 428
                     </a>
                   </div>
                 </div>

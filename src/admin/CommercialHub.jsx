@@ -408,7 +408,7 @@ ${vendingPhotos.length ? `<div class="sh"><div class="sh-bar"></div><span class=
 ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additional Notes</span><div class="sh-rule"></div></div><div class="notes">${notes}</div>` : ""}
 </div>
 <div class="foot">
-  <div class="foot-l"><strong>Cleaniq Services Ltd</strong><br>cleaniqservices.com · +44 7752 476368</div>
+  <div class="foot-l"><strong>Cleaniq Services Ltd</strong><br>cleaniqservices.com · +44 7846 726428</div>
   <div class="foot-r">Generated ${fmtDate(today)}<br>Confidential — For client use only</div>
 </div>
 </div>

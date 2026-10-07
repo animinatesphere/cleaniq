@@ -241,9 +241,9 @@ const findPostcode = (text) => {
   return m ? `${m[1]} ${m[2]}`.toUpperCase() : "";
 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Callers WhatsApp or text what can't be taken on a call (e.g. their email) to this number.
-const TEXT_NUMBER = "+44 7752 476368";
-const TEXT_NUMBER_SPOKEN = "oh seven seven five two, four seven six, three six eight";
+// Callers WhatsApp what can't be taken on a call (e.g. their email) to this number.
+const TEXT_NUMBER = "+44 7846 726428"; // our WhatsApp line (texts/SMS aren't received)
+const TEXT_NUMBER_SPOKEN = "oh seven eight four six, seven two six, four two eight";
 const TEXT_EMAIL = "info@cleaniqservices.com";
 const TEXT_EMAIL_SPOKEN = "info at cleaniq services dot com";
 const ROOMS = { bedrooms: "Bedroom", bathrooms: "Bathroom", kitchens: "Kitchen", livingRooms: "Living Room" };
@@ -268,7 +268,7 @@ async function createAiBooking(args, ctx) {
   if (!args.customerConfirmed) problems.push("the customer has not explicitly confirmed the summary and price yet");
   if (!NAME_RE.test(args.firstName || "") || args.firstName.trim().length < 2) problems.push("first name (letters only)");
   if (!NAME_RE.test(args.lastName || "") || args.lastName.trim().length < 2) problems.push("last name (letters only)");
-  // Phone calls never take an email (too easily misheard): the caller WhatsApps/texts it after.
+  // Phone calls never take an email (too easily misheard): the caller WhatsApps it after.
   const phoneCall = ctx.channel === "voice";
   if (!phoneCall && !EMAIL_RE.test(args.email || "")) problems.push("a valid email address");
   if (phoneCall && args.frequency && args.frequency !== "Once") {
@@ -348,8 +348,8 @@ async function createAiBooking(args, ctx) {
     createdByAdmin: null,
     meta: {
       coupon: null, source: "ai-receptionist", conversationId: ctx.conversationId || null,
-      // Phone booking: the caller WhatsApps/texts their email; admin adds it, then presses Resend.
-      ...(phoneCall ? { emailToCome: `Caller will WhatsApp/text their email to ${TEXT_NUMBER}` } : {}),
+      // Phone booking: the caller WhatsApps their email; admin adds it, then presses Resend.
+      ...(phoneCall ? { emailToCome: `Caller will WhatsApp their email to ${TEXT_NUMBER}` } : {}),
     },
   };
 
@@ -368,7 +368,7 @@ async function createAiBooking(args, ctx) {
     when: `${args.date} ${when.label}`,
     visits,
     nextStep: phoneCall
-      ? `The booking is scheduled. Say: "Your clean is scheduled for <day> at <time>, reference <bookingRef>. Could you WhatsApp or text your email address and booking reference to us on ${TEXT_NUMBER_SPOKEN}, or email them to ${TEXT_EMAIL_SPOKEN}? We'll email your confirmation and payment link. Your booking is confirmed once you've paid." Our team will call or text them shortly to take the full address.`
+      ? `The booking is scheduled. Say: "Your clean is scheduled for <day> at <time>, reference <bookingRef>. Could you WhatsApp your email address and booking reference to us on ${TEXT_NUMBER_SPOKEN}, or email them to ${TEXT_EMAIL_SPOKEN}? We'll email your confirmation and payment link. Your booking is confirmed once you've paid." Our team will call or text them shortly to take the full address.`
       : `A confirmation email with a secure payment link has been sent to ${payload.customer.email}. The booking is confirmed once payment is completed.${areaOnly(ctx) ? " Our team will call or text them shortly to take the full address." : ""}`,
   };
 }

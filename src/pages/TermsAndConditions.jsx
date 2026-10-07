@@ -280,10 +280,10 @@ const TermsAndConditions = () => {
               <Mail size={16} /> info@cleaniqservices.com
             </a>
             <a
-              href="tel:+447752476368"
+              href="tel:+447846726428"
               className="flex items-center justify-center gap-2 bg-white/10 text-white font-black text-sm px-6 py-4 rounded-2xl hover:bg-white/20 transition-all border border-white/10"
             >
-              <Phone size={16} /> +44 7752 476368
+              <Phone size={16} /> +44 7846 726428
             </a>
           </div>
           <p className="mt-8 text-slate-500 text-xs font-bold">

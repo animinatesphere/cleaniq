@@ -519,7 +519,7 @@ export default function Campaigns() {
                 </button>
               </div>
               <textarea required rows={14}
-                placeholder={"Hi [Name],\n\nIt's been a while since we last cleaned for you, so we wanted to say thank you for choosing Cleaniq Services.\n\nIf cleaning has slipped down the list lately, here's something to help...\n\nBest,\n[Your name]\nCleaniq Services Ltd\n+44 7752 476368 · cleaniqservices.com\n[Business address]\n\n[Unsubscribe]"}
+                placeholder={"Hi [Name],\n\nIt's been a while since we last cleaned for you, so we wanted to say thank you for choosing Cleaniq Services.\n\nIf cleaning has slipped down the list lately, here's something to help...\n\nBest,\n[Your name]\nCleaniq Services Ltd\n+44 7846 726428 · cleaniqservices.com\n[Business address]\n\n[Unsubscribe]"}
                 value={form.body} onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
                 className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 text-base outline-none focus:border-emerald-500/60 transition-colors resize-y leading-relaxed" />
               <div className="flex flex-wrap gap-2 mt-3">
@@ -578,7 +578,7 @@ export default function Campaigns() {
                     {/* Footer */}
                     <div style={{ background: "#111827", padding: "18px 32px", borderRadius: "0 0 10px 10px" }}>
                       <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#f9fafb", fontFamily: "sans-serif" }}>Cleaniq Services Limited</p>
-                      <p style={{ margin: "5px 0 0", fontSize: 11, color: "#9ca3af", fontFamily: "sans-serif" }}>info@cleaniqservices.com · +44 7752 476368 · Greater Manchester, UK</p>
+                      <p style={{ margin: "5px 0 0", fontSize: 11, color: "#9ca3af", fontFamily: "sans-serif" }}>info@cleaniqservices.com · +44 7846 726428 · Greater Manchester, UK</p>
                       <p style={{ margin: "10px 0 0", paddingTop: 10, borderTop: "1px solid #1f2937", fontSize: 10, color: "#6b7280", fontFamily: "sans-serif" }}>
                         You received this because you're a Cleaniq Services customer. &nbsp;·&nbsp;
                         <span style={{ color: "#6b7280", textDecoration: "underline" }}>Unsubscribe</span>
@@ -705,7 +705,7 @@ export default function Campaigns() {
             <div>
               <label className={labelCls}>Message Body</label>
               <textarea rows={13}
-                placeholder={"Hi [Name],\n\nIt's been a little while since we last cleaned for you, so we wanted to say thank you for choosing Cleaniq Services.\n\nIf cleaning has slipped down the list lately, here's something to help...\n\nBest,\n[Your name]\nCleaniq Services Ltd\n+44 7752 476368 · cleaniqservices.com\n[Business address]\n\n[Unsubscribe]"}
+                placeholder={"Hi [Name],\n\nIt's been a little while since we last cleaned for you, so we wanted to say thank you for choosing Cleaniq Services.\n\nIf cleaning has slipped down the list lately, here's something to help...\n\nBest,\n[Your name]\nCleaniq Services Ltd\n+44 7846 726428 · cleaniqservices.com\n[Business address]\n\n[Unsubscribe]"}
                 value={newTpl.body} onChange={e => setNewTpl(n => ({ ...n, body: e.target.value }))}
                 className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 text-base outline-none focus:border-emerald-500/60 transition-colors resize-y leading-relaxed" />
               <div className="flex flex-wrap gap-2 mt-3">

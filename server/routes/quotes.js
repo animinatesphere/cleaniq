@@ -991,7 +991,7 @@ function generateQuoteEmail(quote) {
             <tr>
               <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 24px 40px; text-align: center;">
                 <p style="margin: 0; font-size: 13px; font-weight: bold; color: #0f172a; font-family: Arial, Helvetica, sans-serif;">Cleaniq Services Limited</p>
-                <p style="margin: 6px 0 0; font-size: 12px; color: #64748b; font-family: Arial, Helvetica, sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+                <p style="margin: 6px 0 0; font-size: 12px; color: #64748b; font-family: Arial, Helvetica, sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7846 726428</p>
                 <p style="margin: 10px 0 0; font-size: 11px; color: #94a3b8; font-family: Arial, Helvetica, sans-serif;">This is a confidential quote intended solely for the recipient named above.</p>
               </td>
             </tr>

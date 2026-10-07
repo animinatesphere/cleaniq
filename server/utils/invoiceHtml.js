@@ -107,7 +107,7 @@ function buildBookingInvoiceHtml(booking, opts = {}) {
         <p style="margin:0 0 8px;font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;border-bottom:2px solid #d1fae5;padding-bottom:5px;">From</p>
         <p style="margin:0;font-size:15px;font-weight:800;color:#0f172a;">Cleaniq Services Ltd</p>
         <p style="margin:3px 0 0;font-size:12px;color:#64748b;">info@cleaniqservices.com</p>
-        <p style="margin:2px 0 0;font-size:12px;color:#64748b;">+44 7752 476368</p>
+        <p style="margin:2px 0 0;font-size:12px;color:#64748b;">+44 7846 726428</p>
         <p style="margin:2px 0 0;font-size:12px;color:#64748b;">cleaniqservices.com</p>
       </td>
     </tr></table>
@@ -184,7 +184,7 @@ function buildBookingInvoiceHtml(booking, opts = {}) {
   </td></tr>
   <tr><td style="background:#0f172a;padding:16px 44px;text-align:center;">
     <p style="margin:0;font-size:11px;color:#94a3b8;font-weight:600;">Cleaniq Services Limited</p>
-    <p style="margin:4px 0 0;font-size:10px;color:#94a3b8;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+    <p style="margin:4px 0 0;font-size:10px;color:#94a3b8;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7846 726428</p>
     <p style="margin:6px 0 0;font-size:9px;color:#64748b;">&copy; ${new Date().getFullYear()} Cleaniq Services. All rights reserved.</p>
     ${customerEmail ? `<p style="margin:8px 0 0;font-size:9px;color:#475569;">Don&#39;t want to receive emails? <a href="https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(customerEmail)}" style="color:#64748b;">Unsubscribe</a></p>` : ""}
   </td></tr>

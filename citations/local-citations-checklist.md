@@ -15,7 +15,7 @@ Template fields to complete for each listing:
 
 - Business name: CLEANIQ Services
 - Address: First Floor, Swan Buildings, 20 Swan Street, Manchester, M4 5JW
-- Phone: +44 7752 476368
+- Phone: +44 7846 726428
 - Website: https://www.cleaniqservices.com
 - Opening hours: Mo-Su 08:00-18:00
 - Services: End of tenancy, Deep clean, Airbnb, Office cleaning

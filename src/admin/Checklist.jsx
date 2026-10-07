@@ -198,7 +198,7 @@ const Checklist = () => {
       </p>
     </div>
     <p style="font-size:11px;color:#94a3b8;margin-top:24px;padding-top:16px;border-top:1px solid #f1f5f9;">
-      Cleaniq Services &middot; info@cleaniqservices.com &middot; +44 7752 476368
+      Cleaniq Services &middot; info@cleaniqservices.com &middot; +44 7846 726428
     </p>
   </div>
 </body></html>`;
