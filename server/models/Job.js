@@ -40,6 +40,8 @@ const jobSchema = new mongoose.Schema({
   jobArrivedTime:     { type: Date, default: null },
   jobStartTime:       { type: Date, default: null },
   jobEndTime:         { type: Date, default: null },
+  cancelledAt:        { type: Date, default: null },
+  cancelReason:       { type: String, default: "" },
   createdAt:          { type: Date, default: Date.now },
 });
 

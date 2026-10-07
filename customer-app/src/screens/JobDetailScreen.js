@@ -8,7 +8,7 @@ import {
   ChevronLeft, ChevronRight, MapPin, Calendar, Clock, Briefcase,
   User, FileText, AlertCircle, CheckCircle2, Circle,
   Phone, Home, Repeat, ShoppingBag, PawPrint,
-  UserCheck, Hash, Zap, CalendarDays,
+  UserCheck, Hash, Zap, CalendarDays, XCircle,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
@@ -189,6 +189,9 @@ export default function JobDetailScreen({ navigation, route }) {
   const [selSlot,      setSelSlot]      = useState("");
   const [prefTime,     setPrefTime]     = useState("");
   const [rescheduling, setRescheduling] = useState(false);
+  const [showCancel,   setShowCancel]   = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelling,   setCancelling]   = useState(false);
   const today = new Date();
   const [calYear,  setCalYear]  = useState(today.getFullYear());
   const [calMonth, setCalMonth] = useState(today.getMonth());
@@ -227,6 +230,25 @@ export default function JobDetailScreen({ navigation, route }) {
     } catch (err) {
       Alert.alert("Error", err.message);
     } finally { setRescheduling(false); }
+  };
+
+  const handleCancelJob = async () => {
+    setCancelling(true);
+    try {
+      const token = await AsyncStorage.getItem("customerToken");
+      const res = await fetch(`${API_URL}/jobs/${jobId}/cancel`, {
+        method: "PUT",
+        headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` },
+        body: JSON.stringify({ reason: cancelReason.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Couldn't cancel the job");
+      setShowCancel(false);
+      Alert.alert("Job cancelled", "Your job has been cancelled. Our team has been notified" + (job?.assignedWorkerName ? " and the cleaner has been told not to go." : "."));
+      loadJob();
+    } catch (err) {
+      Alert.alert("Couldn't cancel", err.message);
+    } finally { setCancelling(false); }
   };
 
   if (loading) return (
@@ -557,8 +579,60 @@ export default function JobDetailScreen({ navigation, route }) {
           </TouchableOpacity>
         )}
 
+        {/* ── Cancel button ───────────────────────────────────────── */}
+        {RESCHEDULE_STATUSES.includes(job.status) && (
+          <TouchableOpacity
+            style={s.cancelJobBtn}
+            onPress={() => { setCancelReason(""); setShowCancel(true); }}
+            activeOpacity={0.85}
+          >
+            <XCircle size={18} color={tc(G.error)} strokeWidth={2} />
+            <Text style={s.cancelJobBtnTxt}>Cancel Job</Text>
+          </TouchableOpacity>
+        )}
+
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* ── Cancel Modal ──────────────────────────────────────────── */}
+      <Modal visible={showCancel} transparent animationType="slide" onRequestClose={() => !cancelling && setShowCancel(false)}>
+        <KeyboardAvoidingView style={{ flex:1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          <View style={s.modalOverlay}>
+            <View style={s.modalSheet}>
+              <View style={s.modalHandle} />
+              <Text style={s.modalTitle}>Cancel this job?</Text>
+              <Text style={s.modalSub}>
+                {job.service}{job.schedule?.date ? ` · ${new Date(job.schedule.date).toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short" })}` : ""}
+                {job.assignedWorkerName ? `\n${job.assignedWorkerName} will be told not to go.` : ""}
+              </Text>
+              <TextInput
+                value={cancelReason}
+                onChangeText={setCancelReason}
+                placeholder="Reason (optional)"
+                placeholderTextColor={tc(G.muted)}
+                multiline
+                maxLength={500}
+                style={s.cancelInput}
+              />
+              <View style={s.modalActions}>
+                <TouchableOpacity style={s.modalCancel} onPress={() => setShowCancel(false)} disabled={cancelling}>
+                  <Text style={s.modalCancelTxt}>Keep Job</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[s.cancelConfirm, cancelling && { opacity:0.5 }]}
+                  onPress={handleCancelJob}
+                  disabled={cancelling}
+                >
+                  {cancelling
+                    ? <ActivityIndicator size="small" color={tc("#fff")} />
+                    : <Text style={s.modalConfirmTxt}>Yes, Cancel Job</Text>
+                  }
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* ── Reschedule Modal ──────────────────────────────────────── */}
       <Modal visible={showModal} transparent animationType="slide" onRequestClose={() => setShowModal(false)}>
@@ -759,4 +833,9 @@ const s = themed(StyleSheet.create({
   modalCancelTxt:{ fontSize:14, fontWeight:"700", color:G.med },
   modalConfirm:{ flex:2, paddingVertical:14, borderRadius:14, backgroundColor:G.primary, alignItems:"center", ...shGreen },
   modalConfirmTxt:{ fontSize:14, fontWeight:"800", color:"#fff" },
+  // Cancel job
+  cancelJobBtn:{ flexDirection:"row", alignItems:"center", justifyContent:"center", gap:10, backgroundColor:"#fff", borderWidth:1.5, borderColor:G.error, borderRadius:16, paddingVertical:15, marginHorizontal:16, marginBottom:12 },
+  cancelJobBtnTxt:{ fontSize:15, fontWeight:"800", color:G.error },
+  cancelInput:{ borderWidth:1.5, borderColor:G.border, borderRadius:14, padding:14, minHeight:80, textAlignVertical:"top", fontSize:14, color:G.dark, marginBottom:16 },
+  cancelConfirm:{ flex:2, paddingVertical:14, borderRadius:14, backgroundColor:G.error, alignItems:"center" },
 }));

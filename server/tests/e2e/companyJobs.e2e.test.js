@@ -180,3 +180,42 @@ test("cleaner's live location: only the booking's customer or an admin can see i
   assert.equal(own.data.lat, 53.48);
   assert.equal((await loc(adminToken)).status, 200, "admin");
 });
+
+test("a company can cancel its own job in the app until the cleaner starts; the cleaner is told", async () => {
+  const r = await postJob("");
+  const job = await Job.findOne({ jobId: r.data.jobId });
+  await call("PUT", `/jobs/${job._id}/approve`);
+  const booking = await Booking.findOne({ bookingId: r.data.bookingId });
+  await call("POST", `/workers/jobs/${booking._id}/accept`, { workerId: worker, workerName: "Sam Cole" });
+  assert.equal(await jobStatus(r.data.jobId), "assigned");
+
+  // Another company can't cancel it.
+  const other = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role: "company" }, process.env.JWT_SECRET);
+  assert.equal((await call("PUT", `/jobs/${job._id}/cancel`, {}, other)).status, 403);
+
+  const res = await call("PUT", `/jobs/${job._id}/cancel`, { reason: "Tenant moved out early" }, companyToken);
+  assert.equal(res.status, 200, JSON.stringify(res.data));
+  const after = await Job.findById(job._id);
+  assert.equal(after.status, "cancelled");
+  assert.equal(after.cancelReason, "Tenant moved out early");
+  assert.equal((await Booking.findById(booking._id)).status, "Cancelled");
+  assert.ok(!(await offers()).includes(booking.bookingId), "no longer offered to cleaners");
+  const told = await (async () => {
+    for (let i = 0; i < 80; i++) {
+      const n = await Notification.findOne({ workerId: worker, title: "Job cancelled", bookingId: booking.bookingId });
+      if (n) return n;
+      await new Promise((ok) => setTimeout(ok, 50));
+    }
+  })();
+  assert.match(told.message, /cancelled by Lane Lettings\. Please don't go\./);
+
+  // Twice: already cancelled.
+  assert.match((await call("PUT", `/jobs/${job._id}/cancel`, {}, companyToken)).data.message, /already cancelled/);
+});
+
+test("a job the cleaner has started can't be cancelled from the app", async () => {
+  const started = await Job.findOne({ status: "in_progress" });
+  const res = await call("PUT", `/jobs/${started._id}/cancel`, {}, companyToken);
+  assert.equal(res.status, 400);
+  assert.equal((await Job.findById(started._id)).status, "in_progress");
+});
