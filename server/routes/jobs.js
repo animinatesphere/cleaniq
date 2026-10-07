@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 const { nanoid } = require("nanoid");
 const Job = require("../models/Job");
 const Booking = require("../models/Booking");
@@ -379,6 +380,81 @@ router.put("/:id/reschedule", verifyCompany, async (req, res) => {
     }).catch(() => {}));
 
     res.json({ message: "Job rescheduled successfully.", job });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT /api/jobs/:id/cancel — company cancels their own job (until the cleaner has started).
+// The linked booking is cancelled too, the cleaner (if any) is told, and admin is emailed.
+const CANCELLABLE = ["pending_review", "approved", "assigned"];
+router.put("/:id/cancel", verifyCompany, async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Job not found." });
+    const job = await Job.findById(req.params.id);
+    if (!job) return res.status(404).json({ message: "Job not found." });
+    if (String(job.company?.id) !== String(req.customer.id))
+      return res.status(403).json({ message: "You can only cancel your own jobs." });
+    if (!CANCELLABLE.includes(job.status))
+      return res.status(400).json({ message: job.status === "cancelled" ? "This job is already cancelled." : `This job can't be cancelled now (status: ${job.status.replace("_", " ")}).` });
+
+    const booking = job.linkedBookingId ? await Booking.findById(job.linkedBookingId) : null;
+    if (booking && ["Arrived", "In Progress", "Completed"].includes(booking.status))
+      return res.status(400).json({ message: "The cleaner has already started this job, so it can't be cancelled. Please contact us." });
+
+    const reason = String(req.body?.reason || "").trim().slice(0, 500);
+    // Atomic: only one cancel goes through.
+    const updated = await Job.findOneAndUpdate(
+      { _id: job._id, status: { $in: CANCELLABLE } },
+      { $set: { status: "cancelled", cancelledAt: new Date(), cancelReason: reason } },
+      { new: true },
+    );
+    if (!updated) return res.status(409).json({ message: "This job has just changed. Please refresh." });
+
+    let workerId = null;
+    if (booking && !["Cancelled", "Rejected"].includes(booking.status)) {
+      workerId = booking.assignedWorker;
+      booking.status = "Cancelled";
+      booking.meta = { ...(booking.meta || {}), cancelledBy: "company", cancelReason: reason, cancelledAt: new Date() };
+      booking.markModified("meta");
+      await booking.save();
+    }
+
+    const when = updated.schedule?.date
+      ? new Date(updated.schedule.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+      : "—";
+
+    // Tell the cleaner it's off.
+    if (workerId) {
+      const msg = `${updated.service} on ${when} (${booking.bookingId}) was cancelled by ${updated.company?.name || "the company"}. Please don't go.`;
+      Notification.create({ workerId, title: "Job cancelled", message: msg, type: "job", bookingId: booking.bookingId }).catch(() => {});
+      require("../utils/pushNotifications").sendPushToUser("worker", workerId, "Job cancelled ❌", msg, { type: "job_cancelled", bookingId: booking.bookingId }).catch(() => {});
+    }
+
+    const row = (k, v) => `<tr style="border-bottom:1px solid #f1f5f9;"><td style="font-size:13px;color:#64748b;font-weight:600;">${k}</td><td align="right" style="font-size:13px;font-weight:700;">${v}</td></tr>`;
+    const table = `<table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+      ${row("Job Reference", updated.jobId)}${row("Company", updated.company?.name || "—")}${row("Service", updated.service)}${row("Date", `${when} · ${updated.schedule?.timeSlot || "—"}`)}${reason ? row("Reason", reason.replace(/</g, "&lt;")) : ""}${updated.assignedWorkerName ? row("Cleaner", updated.assignedWorkerName) : ""}
+    </table>`;
+    const wrap = (title, sub, body) => `<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;background:#fff;">
+      <div style="background:#083D2E;padding:32px;text-align:center;"><h1 style="color:#6EE7B7;margin:0;font-size:22px;">${title}</h1><p style="color:#94a3b8;margin-top:6px;">${sub}</p></div>
+      <div style="padding:32px;color:#1e293b;">${body}</div></div>`;
+
+    setImmediate(() => sendEmail({
+      to: ADMIN_EMAIL,
+      subject: `❌ Job Cancelled — ${updated.jobId} | ${updated.company?.name || ""}`,
+      html: wrap("Job Cancelled", `${updated.company?.name || "A company"} cancelled a job in the app`,
+        `${table}${workerId ? `<p style="font-size:13px;color:#64748b;margin-top:16px;">The cleaner has been told not to go.</p>` : ""}${booking?.payment?.status === "Completed" ? `<p style="font-size:13px;color:#b45309;margin-top:8px;font-weight:700;">This job was already paid — check whether a refund is due.</p>` : ""}`),
+    }).catch(() => {}));
+    if (updated.company?.email) {
+      setImmediate(() => sendEmail({
+        to: updated.company.email,
+        subject: `Job Cancelled — ${updated.jobId} | Cleaniq Services`,
+        html: wrap("Job Cancelled", "Your job has been cancelled",
+          `<p>Hi <strong>${updated.company.name || ""}</strong>, we've cancelled this job as you asked.</p>${table}<p style="font-size:13px;color:#64748b;margin-top:16px;">If this was a mistake, just post the job again or contact us at info@cleaniqservices.com.</p>`),
+      }).catch(() => {}));
+    }
+
+    res.json({ message: "Job cancelled.", job: updated });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
