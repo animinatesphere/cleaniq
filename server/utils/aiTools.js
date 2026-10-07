@@ -244,6 +244,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Callers WhatsApp or text what can't be taken on a call (e.g. their email) to this number.
 const TEXT_NUMBER = "+44 7752 476368";
 const TEXT_NUMBER_SPOKEN = "oh seven seven five two, four seven six, three six eight";
+const TEXT_EMAIL = "info@cleaniqservices.com";
+const TEXT_EMAIL_SPOKEN = "info at cleaniq services dot com";
 const ROOMS = { bedrooms: "Bedroom", bathrooms: "Bathroom", kitchens: "Kitchen", livingRooms: "Living Room" };
 
 async function uniqueBookingId() {
@@ -366,7 +368,7 @@ async function createAiBooking(args, ctx) {
     when: `${args.date} ${when.label}`,
     visits,
     nextStep: phoneCall
-      ? `The booking is scheduled. Ask the caller to WhatsApp or text their email address and booking reference to us on ${TEXT_NUMBER_SPOKEN}; the team will then email the confirmation and a secure payment link. The booking is confirmed once payment is completed. Our team will call or text them shortly to take the full address.`
+      ? `The booking is scheduled. Say: "Your clean is scheduled for <day> at <time>, reference <bookingRef>. Could you WhatsApp or text your email address and booking reference to us on ${TEXT_NUMBER_SPOKEN}, or email them to ${TEXT_EMAIL_SPOKEN}? We'll email your confirmation and payment link. Your booking is confirmed once you've paid." Our team will call or text them shortly to take the full address.`
       : `A confirmation email with a secure payment link has been sent to ${payload.customer.email}. The booking is confirmed once payment is completed.${areaOnly(ctx) ? " Our team will call or text them shortly to take the full address." : ""}`,
   };
 }
@@ -1001,7 +1003,7 @@ async function guardInventedRefs(reply, known, retry) {
 }
 
 module.exports = {
-  TEXT_NUMBER, TEXT_NUMBER_SPOKEN,
+  TEXT_NUMBER, TEXT_NUMBER_SPOKEN, TEXT_EMAIL, TEXT_EMAIL_SPOKEN,
   refsIn,
   trackRefs,
   guardInventedRefs,
