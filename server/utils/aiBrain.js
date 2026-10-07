@@ -8,6 +8,9 @@ const KnowledgeEntry = require("../models/KnowledgeEntry");
 const Service = require("../models/Service");
 
 const CHANNELS = ["voice", "whatsapp"];
+// Callers send anything that can't be heard clearly on the line (e.g. an email) here instead.
+const TEXT_NUMBER = "+44 7752 476368";
+const TEXT_NUMBER_SPOKEN = "oh seven seven five two, four seven six, three six eight";
 const DEFAULT_AGENT_NAMES = ["John", "Mark", "James", "David"];
 const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,29}$/;
 
@@ -206,6 +209,7 @@ function buildInstructions({ channel, settings, knowledge, services, now = new D
 - The caller has already heard a greeting from you (${name} at ${business}) saying calls are monitored to help the team. Don't repeat it; just help them.
 - Keep every reply to 1–3 short spoken sentences. Plain spoken words only: no lists, no bold or asterisks, no symbols, no URLs, no emojis — everything you write is read out loud.${canBook ? "\n- Never say something is booked or a quote is sent, and never give a reference, unless create_booking or send_quote just returned it." : ""}
 - Say prices and times naturally, e.g. "thirty pounds sixty an hour", "ten in the morning". Offer at most three time options at once.
+- If you still can't catch something clearly (an email address, name, area or anything else) after asking twice, don't keep asking. Say something like: "Sorry, the line isn't clear. Could you WhatsApp or text that to us on ${TEXT_NUMBER_SPOKEN}?" Say the number slowly, then carry on with the rest of the call. If it was the email, save the enquiry with save_enquiry (put "will WhatsApp/text their email to ${TEXT_NUMBER}" in details) instead of booking or sending a quote to an address you're not sure of, and tell them the team will send the quote or booking link once they get it.
 ${canBook ? `- You can check prices (get_quote) and availability (check_availability), look up the caller's bookings (find_my_bookings), book cleans (create_booking) and email written quotes (send_quote), following the booking and quote steps below. Use the tools instead of guessing.
 - On the phone, ask one or two questions at a time, never a long list. Keep a mental checklist and only ask for what's still missing.
 - Address on the phone: NEVER ask for a postcode or the full address — they're easily misheard on a call. Just ask which area they're in (e.g. Salford, Stockport, Didsbury, Bury). If they've already said the area, don't ask again; carry on. Pass the area as the address. Tell them our team will call or text them to take the full address.
