@@ -35,7 +35,8 @@ async function sendAutoIntro(booking, workerId) {
     const prefs = prefsOf(worker);
     if (!prefs.autoIntro.enabled) return;
     const ref = booking.bookingId;
-    if (await WorkerCustomerMessage.exists({ bookingId: ref, senderType: "Worker" })) return;
+    // Once per cleaner per booking: if the job moves to another cleaner, they introduce themselves too.
+    if (await WorkerCustomerMessage.exists({ bookingId: ref, senderType: "Worker", workerId: worker._id })) return;
     const text = introText(prefs.autoIntro.text, { workerName: worker.firstName, booking });
     await WorkerCustomerMessage.create({
       bookingId: ref,

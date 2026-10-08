@@ -144,6 +144,42 @@ test("accepting sends the cleaner's automatic intro message (once), unless switc
   assert.equal(await WorkerCustomerMessage.countDocuments({ bookingId: b2.bookingId }), 0);
 });
 
+test("job moves to another cleaner: they send their own intro, and only see their own messages", async () => {
+  const first = await Worker.create({ workerId: "W-HX", firstName: "Hex", lastName: "Sean", email: "hx@test.com", phone: "5", region: "UK", status: "Active", postcode: "BL0 0HL" });
+  const second = await Worker.create({ workerId: "W-SO", firstName: "Solomon", lastName: "Okoro", email: "so@test.com", phone: "6", region: "UK", status: "Active", postcode: "BL0 0HL" });
+  const b = await job();
+  const waitMsgs = async (n) => {
+    for (let i = 0; i < 40; i++) {
+      const m = await WorkerCustomerMessage.find({ bookingId: b.bookingId, senderType: "Worker" }).sort({ createdAt: 1 }).lean();
+      if (m.length >= n) return m;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return [];
+  };
+  await call("POST", `/jobs/${b._id}/accept`, { workerId: String(first._id), workerName: "Hex Sean" });
+  assert.match((await waitMsgs(1))[0].text, /^Hello, I'm Hex,/);
+  await call("POST", `/jobs/${b._id}/cancel`, { workerId: String(first._id) });
+  await WorkerCustomerMessage.create({ bookingId: b.bookingId, workerId: first._id, customerEmail: "ann@test.com", senderType: "Customer", senderName: "Ann", text: "Key is under the mat" });
+
+  await call("POST", `/jobs/${b._id}/accept`, { workerId: String(second._id), workerName: "Solomon Okoro" });
+  const msgs = await waitMsgs(2);
+  assert.equal(msgs.length, 2);
+  assert.match(msgs[1].text, /^Hello, I'm Solomon,/);
+
+  // Solomon's chat: his intro and the customer's message — not Hex's intro shown as his.
+  const chat = express();
+  chat.use(express.json());
+  chat.use("/api/worker-chat", require("../../routes/worker-chat"));
+  const srv = chat.listen(0);
+  const res = await fetch(`http://127.0.0.1:${srv.address().port}/api/worker-chat/${b.bookingId}?workerId=${second._id}`);
+  const thread = await res.json();
+  srv.close();
+  assert.equal(thread.length, 2);
+  assert.ok(thread.some((m) => /^Hello, I'm Solomon/.test(m.text)));
+  assert.ok(thread.some((m) => m.text === "Key is under the mat"));
+  assert.ok(!thread.some((m) => /Hex/.test(m.text)), "no previous cleaner's messages");
+});
+
 test("My offers lists recent suitable jobs with their status", async () => {
   const r = await call("GET", `/${worker._id}/offers-history`);
   assert.equal(r.status, 200);

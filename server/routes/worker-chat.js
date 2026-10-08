@@ -37,7 +37,12 @@ router.get("/:bookingId", async (req, res) => {
         });
     }
 
-    const messages = await WorkerCustomerMessage.find({ bookingId })
+    // A job can change cleaner: show this cleaner only their own messages (plus the customer's),
+    // never a previous cleaner's messages as if they had sent them.
+    const messages = await WorkerCustomerMessage.find({
+      bookingId,
+      $or: [{ senderType: { $ne: "Worker" } }, { workerId }],
+    })
       .sort({ createdAt: 1 })
       .limit(500);
 
