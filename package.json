@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/spa-shell.mjs && (vite build --ssr src/entry-server.jsx --outDir dist-ssr && NODE_ENV=production node scripts/prerender.mjs || echo '[prerender] skipped')",
     "optimize-images": "node ./scripts/optimize-images.js",
     "lint": "eslint .",
     "preview": "vite preview"

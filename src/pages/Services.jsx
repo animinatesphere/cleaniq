@@ -442,7 +442,7 @@ const Services = () => {
                   className="w-16 h-16 md:w-20 md:h-20 rounded-[24px] md:rounded-3xl bg-white flex items-center justify-center shadow-xl"
                 >
                   {React.cloneElement(service.icon, {
-                    size: window.innerWidth < 768 ? 32 : 40,
+                    size: typeof window !== "undefined" && window.innerWidth < 768 ? 32 : 40,
                   })}
                 </motion.div>
                 <div>
@@ -546,7 +546,7 @@ const Services = () => {
                 >
                   <div className="text-secondary transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12">
                     {React.cloneElement(item.icon, {
-                      size: window.innerWidth < 768 ? 24 : 28,
+                      size: typeof window !== "undefined" && window.innerWidth < 768 ? 24 : 28,
                     })}
                   </div>
                   <span className="font-bold text-[10px] md:text-sm uppercase tracking-[0.2em]">
