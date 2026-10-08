@@ -18,7 +18,7 @@ export default function GoogleReviewsSection({ className = "bg-slate-50/50" }) {
               ))}
             </div>
             <p className="text-sm font-bold text-primary-dark">
-              {GOOGLE_RATING} on Google · {GOOGLE_REVIEW_COUNT} reviews
+              {GOOGLE_RATING} stars on Google 
             </p>
           </div>
         </div>
