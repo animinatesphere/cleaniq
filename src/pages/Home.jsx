@@ -191,7 +191,7 @@ const Home = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white shadow-xl shadow-primary/5 text-primary font-black text-[10px] md:text-sm mb-4 md:mb-8 border border-primary/5">
+            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white shadow-xl shadow-primary/5 text-primary font-black text-[10px] md:text-sm mb-4 md:mb-8 border border-primary/5 mt-10">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
@@ -214,7 +214,7 @@ const Home = () => {
 
             <p className="text-base md:text-xl text-slate-600 mb-6 md:mb-10 max-w-lg leading-relaxed font-medium">
               {region.id === "UK"
-                ? "Looking for reliable cleaners near you? Our vetted local cleaners handle regular house cleaning, end of tenancy, deep, oven and carpet cleaning across Greater Manchester."
+                ? "Looking for reliable cleaners near me? Our vetted local cleaners handle regular house cleaning, end of tenancy, deep, oven and carpet cleaning across Greater Manchester."
                 : "We provide reliable professional maid and janitorial services. Whether you need a regular weekly clean or specialised Airbnb cleaning, our vetted pros take care of your space."}
             </p>
 
