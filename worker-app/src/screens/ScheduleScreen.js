@@ -1,841 +1,450 @@
-import React, { useState, useEffect, useContext } from "react";
-import { getDisplayTime } from "../utils/timeUtils";
+// My Schedule — the cleaner's calendar.
+// Month view (weeks start on Monday) with a dot on every day that has a job, the chosen day's jobs
+// underneath, the next upcoming jobs, and the Availability tab for marking free days.
+import React, { useState, useContext, useMemo, useCallback } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
+  View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity,
+  ActivityIndicator, RefreshControl, Alert,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import {
-  Calendar,
-  MapPin,
-  Clock,
-  AlertCircle,
-  ChevronRight,
-  Briefcase,
-  Mail,
-  ChevronLeft,
-  Check,
+  Calendar, MapPin, Clock, ChevronRight, ChevronLeft, Check, Repeat, Sun, Briefcase, PoundSterling, Timer,
 } from "lucide-react-native";
 import axios from "axios";
-import {
-  NEU_BG,
-  neuRaised,
-  neuRaisedSm,
-  neuInset,
-  neuCircle,
-} from "../theme/neumorphic";
+import { NEU_BG } from "../theme/neumorphic";
 import { tc, tcs, themed, ts } from "../theme/dark";
+import { formatTime12h } from "../utils/timeUtils";
 
-// ── Design tokens ──────────────────────────────────────────
 const C = {
-  bg: "#F4F6F8",
-  surface: "#FFFFFF",
-  surfaceMuted: "#F4F6F8",
-
-  border: "#EEF1F4",
-  borderStrong: "#CFE8DC",
-
-  green: "#0F6B4C",
-  greenDark: "#0A5C43",
-  greenDeep: "#074936",
-  greenDim: "#CFE8DC",
-  greenPale: "#E8F5EE",
-
-  amber: "#F59E0B",
-  blue: "#3B82F6",
-  red: "#EF4444",
-
-  text: "#111827",
-  textSub: "#6B7280",
-  textMute: "#9CA3AF",
+  bg: "#F4F6F8", surface: "#FFFFFF", border: "#EEF1F4",
+  green: "#0F6B4C", greenDark: "#0A5C43", greenDeep: "#074936", greenDim: "#CFE8DC", greenPale: "#E8F5EE",
+  blue: "#2563EB", bluePale: "#DBEAFE", amber: "#D97706", amberPale: "#FEF3C7",
+  grey: "#64748B", greyPale: "#F1F5F9",
+  text: "#111827", textSub: "#6B7280", textMute: "#9CA3AF",
 };
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const getStatusColor = (status) => {
-  switch (status?.toLowerCase()) {
-    case "completed":
-      return C.green;
-    case "in_progress":
-      return C.blue;
-    case "assigned":
-      return "#4F46E5";
-    case "pending":
-      return C.amber;
-    default:
-      return C.textSub;
-  }
+/* ── date helpers (all in the phone's local time) ─────────────────── */
+const keyOf = (d) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+const sameDay = (a, b) => keyOf(a) === keyOf(b);
+const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const jobDate = (job) => {
+  const raw = job.schedule?.date || job.date;
+  return raw ? new Date(raw) : null;
+};
+// "10:00" → minutes after midnight, for sorting and the end time.
+const startMinutes = (job) => {
+  const t = String(job.schedule?.preferredTime || job.schedule?.timeSlot || "");
+  const m = t.match(/^(\d{1,2}):(\d{2})/);
+  if (m) return Number(m[1]) * 60 + Number(m[2]);
+  if (/morning/i.test(t)) return 8 * 60;
+  if (/afternoon/i.test(t)) return 12 * 60;
+  if (/evening/i.test(t)) return 17 * 60;
+  return 24 * 60;
+};
+const hoursOf = (job) => Number(job.details?.duration || job.workerDuration || 0);
+const payOf = (job) => (Number(job.workerRate) || 0) * hoursOf(job);
+const fmtMins = (mins) => formatTime12h(`${String(Math.floor(mins / 60) % 24).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`);
+const timeRange = (job) => {
+  const s = startMinutes(job);
+  if (s >= 24 * 60) return job.schedule?.timeSlot || "Time to be confirmed";
+  const h = hoursOf(job);
+  return h ? `${fmtMins(s)} – ${fmtMins(Math.round(s + h * 60))}` : fmtMins(s);
+};
+const area = (job) => {
+  const pc = String(job.details?.postcode || "").trim();
+  const district = pc ? pc.split(" ")[0].toUpperCase() : "";
+  const addr = String(job.details?.address || "").split(",").map((x) => x.trim()).filter(Boolean);
+  const town = addr.length > 1 ? addr[addr.length - 1].replace(pc, "").trim() : "";
+  return [town || job.details?.area, district].filter(Boolean).join(" · ") || "Location in job details";
+};
+const money = (n) => `£${n.toFixed(2)}`;
+
+// Booking status → what the cleaner sees.
+const statusOf = (job) => {
+  const s = String(job.status || "").toLowerCase();
+  if (s === "completed") return { label: "Done", color: C.grey, bg: C.greyPale };
+  if (["arrived", "in progress", "in_progress"].includes(s)) return { label: "In progress", color: C.blue, bg: C.bluePale };
+  if (s === "pending") return { label: "Not paid yet", color: C.amber, bg: C.amberPale };
+  return { label: "Upcoming", color: C.green, bg: C.greenPale };
 };
 
 const ScheduleScreen = ({ navigation }) => {
   const { workerInfo } = useContext(AuthContext);
-  const [schedule, setSchedule] = useState([]);
+  const today = startOfDay(new Date());
+  const [jobs, setJobs] = useState([]);
   const [availability, setAvailability] = useState({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState("jobs");
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [tab, setTab] = useState("calendar");
+  const [month, setMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selected, setSelected] = useState(today);
   const [saving, setSaving] = useState(false);
 
-  const fetchSchedule = async () => {
-    try {
-      if (!workerInfo?.id) {
-        setLoading(false);
-        setRefreshing(false);
-        return;
-      }
-      const workerId = workerInfo.id;
-      try {
-        const scheduleRes = await axios.get(
-          `${API_URL}/workers/${workerId}/schedule`,
-        );
-        setSchedule(scheduleRes.data || []);
-      } catch (e) {
-        setSchedule([]);
-      }
-      try {
-        const availRes = await axios.get(
-          `${API_URL}/workers/${workerId}/availability`,
-        );
-        setAvailability(availRes.data || {});
-      } catch (e) {
-        setAvailability({});
-      }
-    } catch (error) {
-      setSchedule([]);
-      setAvailability({});
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSchedule();
+  const load = useCallback(async () => {
+    if (!workerInfo?.id) { setLoading(false); setRefreshing(false); return; }
+    const [s, a] = await Promise.allSettled([
+      axios.get(`${API_URL}/workers/${workerInfo.id}/schedule`),
+      axios.get(`${API_URL}/workers/${workerInfo.id}/availability`),
+    ]);
+    setJobs(s.status === "fulfilled" && Array.isArray(s.value.data) ? s.value.data : []);
+    setAvailability(a.status === "fulfilled" && a.value.data ? a.value.data : {});
+    setLoading(false);
+    setRefreshing(false);
   }, [workerInfo?.id]);
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchSchedule();
-  };
+  // On open, and when coming back from a job (accepted, completed…).
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  const getDaysInMonth = (date) =>
-    new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-
-  const getFirstDayOfMonth = (date) =>
-    new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-
-  const handleAvailabilityToggle = async (day) => {
-    const dateKey = `date-${currentMonth.getFullYear()}-${currentMonth.getMonth() + 1}-${day}`;
-    const newAvailability = { ...availability };
-    if (!newAvailability[dateKey]) {
-      newAvailability[dateKey] = true;
-    } else {
-      delete newAvailability[dateKey];
+  // Jobs grouped by day.
+  const byDay = useMemo(() => {
+    const map = {};
+    for (const j of jobs) {
+      const d = jobDate(j);
+      if (!d || isNaN(d)) continue;
+      (map[keyOf(d)] ||= []).push(j);
     }
-    setAvailability(newAvailability);
+    for (const k of Object.keys(map)) map[k].sort((a, b) => startMinutes(a) - startMinutes(b));
+    return map;
+  }, [jobs]);
+
+  const monthJobs = useMemo(() => jobs.filter((j) => {
+    const d = jobDate(j);
+    return d && d.getFullYear() === month.getFullYear() && d.getMonth() === month.getMonth();
+  }), [jobs, month]);
+  const monthHours = monthJobs.reduce((s, j) => s + hoursOf(j), 0);
+  const monthPay = monthJobs.reduce((s, j) => s + payOf(j), 0);
+
+  const upcoming = useMemo(() => jobs
+    .filter((j) => { const d = jobDate(j); return d && startOfDay(d) >= today && String(j.status).toLowerCase() !== "completed"; })
+    .sort((a, b) => jobDate(a) - jobDate(b) || startMinutes(a) - startMinutes(b))
+    .slice(0, 5), [jobs]);
+
+  const selectedJobs = byDay[keyOf(selected)] || [];
+  const changeMonth = (delta) => setMonth(new Date(month.getFullYear(), month.getMonth() + delta, 1));
+  const goToday = () => { setMonth(new Date(today.getFullYear(), today.getMonth(), 1)); setSelected(today); };
+
+  // Monday-first grid: blanks before the 1st, then each day.
+  const cells = useMemo(() => {
+    const first = new Date(month.getFullYear(), month.getMonth(), 1);
+    const lead = (first.getDay() + 6) % 7; // Mon = 0 … Sun = 6
+    const count = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+    const out = Array.from({ length: lead }, () => null);
+    for (let d = 1; d <= count; d++) out.push(new Date(month.getFullYear(), month.getMonth(), d));
+    while (out.length % 7) out.push(null);
+    return out;
+  }, [month]);
+
+  const toggleAvailability = async (date) => {
+    const k = `date-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    const before = availability;
+    const next = { ...availability };
+    if (next[k]) delete next[k]; else next[k] = true;
+    setAvailability(next);
     setSaving(true);
     try {
-      await axios.put(`${API_URL}/workers/${workerInfo.id}/availability`, {
-        availability: newAvailability,
-      });
-    } catch (error) {
-      Alert.alert("Error", "Failed to update availability");
-      setAvailability(availability);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const renderCalendarDays = () => {
-    const daysInMonth = getDaysInMonth(currentMonth);
-    const firstDay = getFirstDayOfMonth(currentMonth);
-    const days = [];
-
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<View key={`empty-${i}`} style={styles.emptyDay} />);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateKey = `date-${currentMonth.getFullYear()}-${currentMonth.getMonth() + 1}-${day}`;
-      const isAvailable = availability[dateKey];
-      const isToday =
-        new Date().getDate() === day &&
-        new Date().getMonth() === currentMonth.getMonth() &&
-        new Date().getFullYear() === currentMonth.getFullYear();
-
-      days.push(
-        <TouchableOpacity
-          key={day}
-          style={[
-            styles.calendarDay,
-            isToday && styles.calendarDayToday,
-            isAvailable && styles.calendarDayAvailable,
-          ]}
-          onPress={() => handleAvailabilityToggle(day)}
-          disabled={saving}
-        >
-          <Text
-            style={[
-              styles.calendarDayText,
-              isAvailable && styles.calendarDayTextAvailable,
-              isToday && !isAvailable && styles.calendarDayTextToday,
-            ]}
-          >
-            {day}
-          </Text>
-          {isAvailable && (
-            <View style={styles.availableBadge}>
-              <Check size={8} color={tc("#FFFFFF")} />
-            </View>
-          )}
-        </TouchableOpacity>,
-      );
-    }
-    return days;
+      await axios.put(`${API_URL}/workers/${workerInfo.id}/availability`, { availability: next });
+    } catch {
+      Alert.alert("Couldn't save", "Your availability wasn't saved. Please try again.");
+      setAvailability(before);
+    } finally { setSaving(false); }
   };
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={tc(C.green)} />
-      </View>
-    );
+    return <View style={styles.loading}><ActivityIndicator size="large" color={tc(C.green)} /></View>;
   }
 
-  const renderJobCard = (job) => {
-    const jobDate = job.schedule?.date || job.date;
-    const timeSlot =
-      getDisplayTime(job.schedule) || `${job.startTime} - ${job.endTime}`;
-    const address = (job.details?.address || job.address || '') + (job.details?.postcode ? ', ' + job.details.postcode : '');
-    const statusColor = getStatusColor(job.status);
+  /* ── pieces ─────────────────────────────────────────────────────── */
+  const MonthHeader = () => (
+    <View style={styles.monthNav}>
+      <TouchableOpacity style={styles.navBtn} onPress={() => changeMonth(-1)} hitSlop={8}>
+        <ChevronLeft size={20} color={tc(C.greenDark)} />
+      </TouchableOpacity>
+      <Text style={styles.monthTitle}>{month.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</Text>
+      <TouchableOpacity style={styles.navBtn} onPress={() => changeMonth(1)} hitSlop={8}>
+        <ChevronRight size={20} color={tc(C.greenDark)} />
+      </TouchableOpacity>
+    </View>
+  );
 
+  const WeekdayRow = () => (
+    <View style={styles.weekRow}>
+      {WEEKDAYS.map((d) => <Text key={d} style={[styles.weekday, (d === "Sat" || d === "Sun") && styles.weekend]}>{d}</Text>)}
+    </View>
+  );
+
+  const JobCard = ({ job, showDate }) => {
+    const st = statusOf(job);
+    const d = jobDate(job);
+    const pay = payOf(job);
     return (
       <TouchableOpacity
-        key={job._id || job.id}
         style={styles.jobCard}
-        activeOpacity={0.8}
-        onPress={() =>
-          navigation.navigate("AcceptedBookingDetail", { bookingId: job._id })
-        }
+        activeOpacity={0.85}
+        onPress={() => navigation.navigate("AcceptedBookingDetail", { bookingId: job._id })}
       >
-        {/* Left accent */}
-        <View style={[styles.jobAccent, ts({ backgroundColor: statusColor })]} />
-
-        <View style={styles.jobCardInner}>
-          {/* Top row */}
-          <View style={styles.jobCardTop}>
-            {/* Date box */}
-            <View style={styles.dateBox}>
-              <Text style={styles.dateDay}>
-                {new Date(jobDate).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                })}
-              </Text>
-              <Text style={styles.dateMonth}>
-                {new Date(jobDate).toLocaleDateString("en-GB", {
-                  month: "short",
-                })}
-              </Text>
+        <View style={[styles.jobBar, ts({ backgroundColor: st.color })]} />
+        <View style={styles.jobBody}>
+          <View style={styles.jobTop}>
+            <View style={styles.timeRow}>
+              <Clock size={14} color={tc(C.green)} />
+              <Text style={styles.timeText}>{timeRange(job)}</Text>
             </View>
-
-            {/* Title + time */}
-            <View style={styles.jobMeta}>
-              <Text style={styles.jobTitle}>
-                {job.service || job.serviceType || "Cleaning Service"}
-              </Text>
-              <View style={styles.metaRow}>
-                <Clock size={12} color={tc(C.textSub)} />
-                <Text style={styles.metaText}>{timeSlot}</Text>
-              </View>
-            </View>
-
-            {/* Status pill */}
-            <View
-              style={[
-                styles.statusPill,
-                ts({ backgroundColor: statusColor + "20" }),
-              ]}
-            >
-              <Text style={[styles.statusPillText, ts({ color: statusColor })]}>
-                {job.status}
-              </Text>
+            <View style={[styles.pill, ts({ backgroundColor: st.bg })]}>
+              <Text style={[styles.pillText, ts({ color: st.color })]}>{st.label}</Text>
             </View>
           </View>
-
-          {/* Location row */}
-          <View style={styles.locationRow}>
-            <View style={styles.locationIconWrap}>
-              <MapPin size={13} color={tc(C.green)} />
-            </View>
-            <Text style={styles.locationText} numberOfLines={1}>
-              {address || "Location pending"}
-            </Text>
+          <Text style={styles.jobTitle} numberOfLines={1}>{job.service || "Cleaning"}</Text>
+          {showDate && d && (
+            <Text style={styles.jobDate}>{d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</Text>
+          )}
+          <View style={styles.metaRow}>
+            <MapPin size={13} color={tc(C.textSub)} />
+            <Text style={styles.metaText} numberOfLines={1}>{area(job)}</Text>
           </View>
-
-          {/* Footer */}
-          <View style={styles.jobCardFooter}>
-            <View>
-              <Text style={styles.payoutLabel}>Est. Payout</Text>
-              <Text style={styles.payoutAmount}>
-                £
-                {(
-                  (job.workerRate || 0) *
-                  (job.details?.duration ||
-                    job.workerDuration ||
-                    job.duration ||
-                    0)
-                ).toFixed(2)}
-              </Text>
+          <View style={styles.jobFoot}>
+            <View style={styles.chips}>
+              {hoursOf(job) > 0 && (
+                <View style={styles.chip}><Timer size={12} color={tc(C.textSub)} /><Text style={styles.chipText}>{hoursOf(job)}h</Text></View>
+              )}
+              {job.regular && (
+                <View style={styles.chip}><Repeat size={12} color={tc(C.green)} /><Text style={[styles.chipText, ts({ color: C.green })]}>Regular</Text></View>
+              )}
+              {job.customer?.firstName ? (
+                <View style={styles.chip}><Text style={styles.chipText}>{job.customer.firstName}</Text></View>
+              ) : null}
             </View>
-            <View style={styles.detailsBtn}>
-              <Text style={styles.detailsBtnText}>Details</Text>
-              <ChevronRight size={13} color={tc(C.green)} />
-            </View>
+            {pay > 0 && <Text style={styles.pay}>{money(pay)}</Text>}
           </View>
         </View>
+        <ChevronRight size={18} color={tc(C.textMute)} style={{ alignSelf: "center", marginRight: 10 }} />
       </TouchableOpacity>
     );
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* ── Header ── */}
-      <View style={styles.header}>
-        <View style={styles.headerIconWrap}>
-          <Calendar size={18} color={tc(C.greenDark)} />
+  const CalendarTab = () => (
+    <>
+      {/* Month summary */}
+      <View style={styles.summary}>
+        <View style={styles.summaryItem}>
+          <Briefcase size={16} color={tc(C.greenDim)} />
+          <Text style={styles.summaryValue}>{monthJobs.length}</Text>
+          <Text style={styles.summaryLabel}>{monthJobs.length === 1 ? "job" : "jobs"}</Text>
         </View>
-        <Text style={styles.headerTitle}>My Schedule</Text>
-        <View style={{ width: 38 }} />
+        <View style={styles.summaryDivider} />
+        <View style={styles.summaryItem}>
+          <Timer size={16} color={tc(C.greenDim)} />
+          <Text style={styles.summaryValue}>{Number(monthHours.toFixed(1))}</Text>
+          <Text style={styles.summaryLabel}>hours</Text>
+        </View>
+        <View style={styles.summaryDivider} />
+        <View style={styles.summaryItem}>
+          <PoundSterling size={16} color={tc(C.greenDim)} />
+          <Text style={styles.summaryValue}>{money(monthPay).replace(".00", "")}</Text>
+          <Text style={styles.summaryLabel}>est. pay</Text>
+        </View>
       </View>
 
-      <View style={styles.headerDivider} />
+      {/* Calendar */}
+      <View style={styles.card}>
+        <MonthHeader />
+        <WeekdayRow />
+        <View style={styles.grid}>
+          {cells.map((date, i) => {
+            if (!date) return <View key={`b${i}`} style={styles.cell} />;
+            const dayJobs = byDay[keyOf(date)] || [];
+            const isToday = sameDay(date, today);
+            const isSel = sameDay(date, selected);
+            const isPast = date < today;
+            return (
+              <TouchableOpacity key={keyOf(date)} style={styles.cell} onPress={() => setSelected(date)} activeOpacity={0.7}>
+                <View style={[styles.dayCircle, isToday && styles.dayToday, isSel && styles.daySelected]}>
+                  <Text style={[styles.dayNum, isPast && styles.dayPast, isToday && styles.dayNumToday, isSel && styles.dayNumSelected]}>
+                    {date.getDate()}
+                  </Text>
+                </View>
+                <View style={styles.dots}>
+                  {dayJobs.slice(0, 3).map((j, k) => (
+                    <View key={k} style={[styles.dot, ts({ backgroundColor: isSel ? C.green : statusOf(j).color })]} />
+                  ))}
+                  {dayJobs.length > 3 && <Text style={styles.more}>+</Text>}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        <View style={styles.legend}>
+          {[["Upcoming", C.green], ["In progress", C.blue], ["Done", C.grey]].map(([l, c]) => (
+            <View key={l} style={styles.legendItem}>
+              <View style={[styles.legendDot, ts({ backgroundColor: c })]} />
+              <Text style={styles.legendText}>{l}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
 
-      {/* ── Tabs ── */}
-      <View style={styles.tabBar}>
-        {["jobs", "availability"].map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={[styles.tabItem, activeTab === tab && styles.tabItemActive]}
-            onPress={() => setActiveTab(tab)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === tab && styles.tabTextActive,
-              ]}
-            >
-              {tab === "jobs" ? "My Jobs" : "Availability"}
-            </Text>
+      {/* Selected day */}
+      <View style={styles.sectionHead}>
+        <Text style={styles.sectionTitle}>
+          {sameDay(selected, today) ? "Today" : selected.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+        </Text>
+        <Text style={styles.sectionCount}>
+          {selectedJobs.length ? `${selectedJobs.length} ${selectedJobs.length === 1 ? "job" : "jobs"}` : ""}
+        </Text>
+      </View>
+      {selectedJobs.length ? (
+        selectedJobs.map((j) => <JobCard key={j._id} job={j} />)
+      ) : (
+        <View style={styles.freeDay}>
+          <Sun size={22} color={tc(C.green)} />
+          <Text style={styles.freeTitle}>No jobs this day</Text>
+          <Text style={styles.freeSub}>New offers appear in the Jobs feed.</Text>
+        </View>
+      )}
+
+      {/* Coming up */}
+      {upcoming.length > 0 && (
+        <>
+          <View style={[styles.sectionHead, { marginTop: 22 }]}>
+            <Text style={styles.sectionTitle}>Coming up</Text>
+          </View>
+          {upcoming.map((j) => <JobCard key={`u${j._id}`} job={j} showDate />)}
+        </>
+      )}
+    </>
+  );
+
+  const AvailabilityTab = () => (
+    <View style={styles.card}>
+      <MonthHeader />
+      <WeekdayRow />
+      <View style={styles.grid}>
+        {cells.map((date, i) => {
+          if (!date) return <View key={`a${i}`} style={styles.cell} />;
+          const on = availability[`date-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`];
+          const isToday = sameDay(date, today);
+          return (
+            <TouchableOpacity key={`a${keyOf(date)}`} style={styles.cell} onPress={() => toggleAvailability(date)} disabled={saving} activeOpacity={0.7}>
+              <View style={[styles.dayCircle, isToday && styles.dayToday, on && styles.dayAvailable]}>
+                <Text style={[styles.dayNum, isToday && styles.dayNumToday, on && styles.dayNumSelected]}>{date.getDate()}</Text>
+              </View>
+              <View style={styles.dots}>{on ? <Check size={10} color={tc(C.green)} /> : null}</View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      <Text style={styles.hint}>Tap the days you're free to work. Tap again to remove.</Text>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.headerTitle}>My Schedule</Text>
+          <Text style={styles.headerSub}>{today.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</Text>
+        </View>
+        <TouchableOpacity style={styles.todayBtn} onPress={goToday}>
+          <Calendar size={14} color={tc(C.green)} />
+          <Text style={styles.todayText}>Today</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.tabs}>
+        {[["calendar", "Calendar"], ["availability", "Availability"]].map(([k, l]) => (
+          <TouchableOpacity key={k} style={[styles.tab, tab === k && styles.tabActive]} onPress={() => setTab(k)}>
+            <Text style={[styles.tabText, tab === k && styles.tabTextActive]}>{l}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <ScrollView
-        style={styles.content}
+        style={styles.scroll}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={tcs([C.green], "bg")}
-            tintColor={tc(C.green)}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} colors={tcs([C.green], "bg")} tintColor={tc(C.green)} />}
       >
-        {activeTab === "jobs" ? (
-          schedule.length === 0 ? (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIconWrap}>
-                <Calendar size={36} color={tc(C.green)} />
-              </View>
-              <Text style={styles.emptyTitle}>No scheduled jobs</Text>
-              <Text style={styles.emptySub}>
-                When you accept a job offer, it will appear here.
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.jobList}>
-              {schedule.map((job) => renderJobCard(job))}
-            </View>
-          )
-        ) : (
-          // ── Availability tab ──
-          <View style={styles.availContainer}>
-            <View style={styles.calendarCard}>
-              {/* Month nav */}
-              <View style={styles.monthNav}>
-                <TouchableOpacity
-                  style={styles.monthNavBtn}
-                  onPress={() =>
-                    setCurrentMonth(
-                      new Date(
-                        currentMonth.getFullYear(),
-                        currentMonth.getMonth() - 1,
-                      ),
-                    )
-                  }
-                >
-                  <ChevronLeft size={20} color={tc(C.greenDark)} />
-                </TouchableOpacity>
-                <Text style={styles.monthTitle}>
-                  {currentMonth.toLocaleDateString("en-GB", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </Text>
-                <TouchableOpacity
-                  style={styles.monthNavBtn}
-                  onPress={() =>
-                    setCurrentMonth(
-                      new Date(
-                        currentMonth.getFullYear(),
-                        currentMonth.getMonth() + 1,
-                      ),
-                    )
-                  }
-                >
-                  <ChevronRight size={20} color={tc(C.greenDark)} />
-                </TouchableOpacity>
-              </View>
-
-              {/* Day headers */}
-              <View style={styles.dayHeaderRow}>
-                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                  <Text key={d} style={styles.dayHeader}>
-                    {d}
-                  </Text>
-                ))}
-              </View>
-
-              {/* Grid */}
-              <View style={styles.calendarGrid}>{renderCalendarDays()}</View>
-
-              {/* Legend */}
-              <View style={styles.legend}>
-                <View style={styles.legendItem}>
-                  <View
-                    style={[styles.legendSwatch, ts({ backgroundColor: C.green })]}
-                  />
-                  <Text style={styles.legendText}>Available</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View
-                    style={[
-                      styles.legendSwatch,
-                      ts({
-                        backgroundColor: C.greenPale,
-                        borderWidth: 1,
-                        borderColor: C.greenDim,
-                      }),
-                    ]}
-                  />
-                  <Text style={styles.legendText}>Not set</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View
-                    style={[
-                      styles.legendSwatch,
-                      ts({
-                        backgroundColor: C.greenPale,
-                        borderWidth: 2,
-                        borderColor: C.green,
-                      }),
-                    ]}
-                  />
-                  <Text style={styles.legendText}>Today</Text>
-                </View>
-              </View>
-
-              <Text style={styles.availHint}>
-                Tap dates to mark yourself as available
-              </Text>
-            </View>
-          </View>
-        )}
-
-        <View style={{ height: 40 }} />
+        {tab === "calendar" ? CalendarTab() : AvailabilityTab()}
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-// ─────────────────────────────────────────────────────────────
-// STYLES
-// ─────────────────────────────────────────────────────────────
 const styles = themed(StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: NEU_BG,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: NEU_BG,
-  },
+  container: { flex: 1, backgroundColor: NEU_BG },
+  loading: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: NEU_BG },
+  scroll: { flex: 1 },
 
-  // ── Header ────────────────────────────────────────────────
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: NEU_BG,
-  },
-  headerDivider: {
-    height: 2,
-    backgroundColor: C.green,
-    opacity: 0.15,
-  },
-  headerIconWrap: {
-    ...neuCircle,
-    width: 38,
-    height: 38,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: C.text,
-    letterSpacing: -0.2,
-  },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 14, paddingBottom: 12 },
+  headerTitle: { fontSize: 26, fontWeight: "800", color: C.text, letterSpacing: -0.5 },
+  headerSub: { fontSize: 13, color: C.textSub, fontWeight: "600", marginTop: 2 },
+  todayBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: C.greenPale, borderWidth: 1, borderColor: C.greenDim, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+  todayText: { fontSize: 13, fontWeight: "800", color: C.green },
 
-  // ── Tabs ──────────────────────────────────────────────────
-  tabBar: {
-    flexDirection: "row",
-    ...neuInset,
-    marginHorizontal: 16,
-    marginTop: 4,
-    marginBottom: 8,
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-  },
-  tabItem: {
-    flex: 1,
-    paddingVertical: 11,
-    alignItems: "center",
-    borderRadius: 9,
-    marginHorizontal: 2,
-  },
-  tabItemActive: {
-    ...neuRaisedSm,
-    borderRadius: 9,
-  },
-  tabText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: C.textSub,
-  },
-  tabTextActive: {
-    color: C.green,
-    fontWeight: "700",
-  },
+  tabs: { flexDirection: "row", marginHorizontal: 16, marginBottom: 14, backgroundColor: C.surface, borderRadius: 14, padding: 4, borderWidth: 1, borderColor: C.border },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center" },
+  tabActive: { backgroundColor: C.green },
+  tabText: { fontSize: 14, fontWeight: "700", color: C.textSub },
+  tabTextActive: { color: "#FFFFFF" },
 
-  // ── Content ───────────────────────────────────────────────
-  content: {
-    flex: 1,
-  },
-  jobList: {
-    padding: 16,
-    gap: 12,
-  },
+  summary: { flexDirection: "row", alignItems: "center", backgroundColor: C.greenDeep, borderRadius: 20, paddingVertical: 16, marginBottom: 14 },
+  summaryItem: { flex: 1, alignItems: "center", gap: 3 },
+  summaryValue: { fontSize: 20, fontWeight: "900", color: "#FFFFFF" },
+  summaryLabel: { fontSize: 11, fontWeight: "700", color: "#A7F3D0", textTransform: "uppercase", letterSpacing: 0.6 },
+  summaryDivider: { width: 1, height: 38, backgroundColor: "rgba(255,255,255,0.15)" },
 
-  // ── Job Card ──────────────────────────────────────────────
-  jobCard: {
-    ...neuRaisedSm,
-    borderRadius: 16,
-    flexDirection: "row",
-    overflow: "hidden",
-    marginBottom: 2,
-  },
-  jobAccent: {
-    width: 4,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
-  },
-  jobCardInner: {
-    flex: 1,
-    padding: 14,
-  },
-  jobCardTop: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 12,
-    gap: 10,
-  },
-  dateBox: {
-    backgroundColor: C.greenPale,
-    borderRadius: 10,
-    paddingVertical: 7,
-    paddingHorizontal: 10,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: C.greenDim,
-    minWidth: 44,
-  },
-  dateDay: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: C.greenDeep,
-  },
-  dateMonth: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: C.green,
-    textTransform: "uppercase",
-  },
-  jobMeta: {
-    flex: 1,
-  },
-  jobTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: C.text,
-    marginBottom: 4,
-  },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  metaText: {
-    fontSize: 12,
-    color: C.textSub,
-  },
-  statusPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-  },
-  statusPillText: {
-    fontSize: 10,
-    fontWeight: "700",
-    textTransform: "capitalize",
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: C.surfaceMuted,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  locationIconWrap: {
-    ...neuCircle,
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  locationText: {
-    flex: 1,
-    fontSize: 12,
-    color: C.textSub,
-  },
-  jobCardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-  },
-  payoutLabel: {
-    fontSize: 10,
-    color: C.textMute,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    marginBottom: 2,
-  },
-  payoutAmount: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: C.green,
-  },
-  detailsBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: C.greenPale,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: C.greenDim,
-  },
-  detailsBtnText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: C.greenDark,
-  },
+  card: { backgroundColor: C.surface, borderRadius: 22, padding: 14, borderWidth: 1, borderColor: C.border, shadowColor: "#0F172A", shadowOpacity: 0.05, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
+  monthNav: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
+  navBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: C.greenPale, alignItems: "center", justifyContent: "center" },
+  monthTitle: { fontSize: 17, fontWeight: "800", color: C.text },
+  weekRow: { flexDirection: "row", marginBottom: 4 },
+  weekday: { flex: 1, textAlign: "center", fontSize: 12, fontWeight: "700", color: C.textSub },
+  weekend: { color: C.textMute },
+  grid: { flexDirection: "row", flexWrap: "wrap" },
+  cell: { width: `${100 / 7}%`, alignItems: "center", paddingVertical: 4 },
+  dayCircle: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
+  dayToday: { borderWidth: 2, borderColor: C.green },
+  daySelected: { backgroundColor: C.green, borderColor: C.green },
+  dayAvailable: { backgroundColor: C.green },
+  dayNum: { fontSize: 15, fontWeight: "700", color: C.text },
+  dayPast: { color: C.textMute },
+  dayNumToday: { color: C.green, fontWeight: "900" },
+  dayNumSelected: { color: "#FFFFFF" },
+  dots: { flexDirection: "row", gap: 3, height: 8, alignItems: "center", marginTop: 2 },
+  dot: { width: 6, height: 6, borderRadius: 3 },
+  more: { fontSize: 9, fontWeight: "900", color: C.textSub, lineHeight: 9 },
+  legend: { flexDirection: "row", justifyContent: "center", gap: 18, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: C.border },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 12, fontWeight: "600", color: C.textSub },
+  hint: { textAlign: "center", fontSize: 13, color: C.textSub, fontWeight: "600", marginTop: 12 },
 
-  // ── Empty ─────────────────────────────────────────────────
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 70,
-    paddingHorizontal: 32,
-  },
-  emptyIconWrap: {
-    ...neuCircle,
-    width: 80,
-    height: 80,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: C.text,
-    marginBottom: 8,
-  },
-  emptySub: {
-    fontSize: 14,
-    color: C.textSub,
-    textAlign: "center",
-    lineHeight: 20,
-  },
+  sectionHead: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginTop: 20, marginBottom: 10, paddingHorizontal: 2 },
+  sectionTitle: { fontSize: 18, fontWeight: "800", color: C.text },
+  sectionCount: { fontSize: 13, fontWeight: "700", color: C.textSub },
 
-  // ── Availability / Calendar ────────────────────────────────
-  availContainer: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  calendarCard: {
-    ...neuRaised,
-    borderRadius: 20,
-    padding: 16,
-  },
-  monthNav: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-  },
-  monthNavBtn: {
-    ...neuCircle,
-    width: 36,
-    height: 36,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  monthTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: C.text,
-  },
-  dayHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 10,
-  },
-  dayHeader: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: C.green,
-    width: "14.28%",
-    textAlign: "center",
-  },
-  calendarGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 16,
-  },
-  emptyDay: {
-    width: "14.28%",
-    aspectRatio: 1,
-  },
-  calendarDay: {
-    width: "14.28%",
-    aspectRatio: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 3,
-    borderRadius: 8,
-    backgroundColor: C.greenPale,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  calendarDayToday: {
-    borderWidth: 2,
-    borderColor: C.green,
-  },
-  calendarDayAvailable: {
-    backgroundColor: C.green,
-    borderColor: C.greenDark,
-    borderWidth: 1,
-  },
-  calendarDayText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: C.textSub,
-  },
-  calendarDayTextAvailable: {
-    color: "#FFFFFF",
-    fontWeight: "800",
-  },
-  calendarDayTextToday: {
-    color: C.greenDark,
-    fontWeight: "800",
-  },
-  availableBadge: {
-    position: "absolute",
-    top: 2,
-    right: 2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: C.greenDark,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  legend: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    ...neuInset,
-    borderRadius: 10,
-    marginBottom: 12,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  legendSwatch: {
-    width: 14,
-    height: 14,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: 11,
-    color: C.textSub,
-    fontWeight: "600",
-  },
-  availHint: {
-    fontSize: 12,
-    color: C.textMute,
-    textAlign: "center",
-  },
+  jobCard: { flexDirection: "row", backgroundColor: C.surface, borderRadius: 18, marginBottom: 10, overflow: "hidden", borderWidth: 1, borderColor: C.border },
+  jobBar: { width: 5 },
+  jobBody: { flex: 1, padding: 14, gap: 5 },
+  jobTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  timeRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  timeText: { fontSize: 14, fontWeight: "800", color: C.green },
+  pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+  pillText: { fontSize: 11, fontWeight: "800" },
+  jobTitle: { fontSize: 16, fontWeight: "800", color: C.text },
+  jobDate: { fontSize: 13, fontWeight: "600", color: C.textSub },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  metaText: { flex: 1, fontSize: 13, color: C.textSub, fontWeight: "500" },
+  jobFoot: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 4 },
+  chips: { flexDirection: "row", gap: 6, flexWrap: "wrap", flex: 1 },
+  chip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: C.bg, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  chipText: { fontSize: 12, fontWeight: "700", color: C.textSub },
+  pay: { fontSize: 16, fontWeight: "900", color: C.text },
+
+  freeDay: { alignItems: "center", backgroundColor: C.surface, borderRadius: 18, paddingVertical: 24, borderWidth: 1, borderColor: C.border, borderStyle: "dashed", gap: 4 },
+  freeTitle: { fontSize: 15, fontWeight: "800", color: C.text, marginTop: 4 },
+  freeSub: { fontSize: 13, color: C.textSub, fontWeight: "500" },
 }));
 
 export default ScheduleScreen;

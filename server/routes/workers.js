@@ -1439,15 +1439,25 @@ router.get("/:id/notifications", async (req, res) => {
 // GET worker's schedule (assigned bookings)
 router.get("/:id/schedule", async (req, res) => {
   try {
+    // The cleaner's calendar: their jobs (not cancelled), with what they're paid. Never the
+    // customer's email or phone — just their first name.
     const schedule = await Booking.find({
       assignedWorker: req.params.id,
+      status: { $nin: ["Cancelled", "Rejected", "Blackout"] },
     })
       .sort({ "schedule.date": 1 })
-      .select(
-        "bookingId service status schedule details customer payment assignedWorkerName",
-      );
+      .select("bookingId service status schedule details customer.firstName assignedWorkerName workerRate workerDuration isShift meta.subscriptionRef")
+      .lean();
 
-    res.json(schedule || []);
+    res.json((schedule || []).map((b) => ({
+      ...b,
+      details: {
+        address: b.details?.address || "", postcode: b.details?.postcode || "", area: b.details?.area || "",
+        duration: b.details?.duration, frequency: b.details?.frequency,
+      },
+      regular: Boolean(b.meta?.subscriptionRef),
+      meta: undefined,
+    })));
   } catch (error) {
     console.error("Error fetching schedule:", error);
     res.status(500).json({ error: "Failed to fetch schedule" });
