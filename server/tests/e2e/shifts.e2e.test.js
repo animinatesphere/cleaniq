@@ -168,8 +168,10 @@ test("each worker is paid for their hours; the customer hears once, when the las
   await settle();
   const parent = await Booking.findOne({ bookingId: "BK-SPLIT" });
   assert.equal(parent.status, "Completed");
-  assert.equal(customerEmailsTo().length, 1);
-  assert.match(customerEmailsTo()[0].subject, /clean is done/);
+  // Once, for the whole job: the "clean is done" email and the invoice.
+  assert.equal(customerEmailsTo().filter((m) => /clean is done/.test(m.subject)).length, 1);
+  assert.equal(customerEmailsTo().filter((m) => /Invoice/.test(m.subject)).length, 1);
+  assert.equal(customerEmailsTo().length, 2);
   assert.equal(customerPushes().length, 1);
 
   const pay = await Withdrawal.find({}).sort({ workerName: 1 });

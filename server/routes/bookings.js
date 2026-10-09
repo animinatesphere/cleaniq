@@ -19,18 +19,8 @@ const { syncCompanyJob } = require("../utils/companyJobs");
 const { workerRateFor } = require("../utils/workerRate");
 const Notification = require("../models/Notification");
 
-// Generate a PDF invoice attachment; returns [] if Puppeteer is unavailable
-async function buildInvoiceAttachment(booking) {
-  try {
-    const { buildBookingInvoiceHtml } = require("../utils/invoiceHtml");
-    const { htmlToPdfBuffer } = require("../utils/pdf");
-    const html = buildBookingInvoiceHtml(booking, { includeDownloadButton: false });
-    const buf = await htmlToPdfBuffer(html, `Cleaniq Invoice ${booking.bookingId}`);
-    return [{ filename: `Cleaniq-Invoice-${booking.bookingId}.pdf`, content: buf.toString("base64") }];
-  } catch {
-    return [];
-  }
-}
+// PDF invoice attachment and the once-per-booking completion invoice (utils/bookingInvoice.js).
+const { buildInvoiceAttachment, sendCompletionInvoice } = require("../utils/bookingInvoice");
 
 // Public booking creation endpoint (no admin auth) - used by frontend
 // Creates a booking record from client POST and returns the saved booking.
@@ -1065,23 +1055,8 @@ router.put("/:id", async (req, res) => {
         }
       }
 
-      try {
-        const invoiceAttachments = await buildInvoiceAttachment(updatedBooking);
-        await sendEmail({
-          to: updatedBooking.customer.email,
-          subject: `Your Cleaniq Invoice & Receipt: ${updatedBooking.bookingId}`,
-          html: templates.invoiceReceipt(updatedBooking),
-          attachments: invoiceAttachments,
-        });
-        console.log(
-          `📧 Invoice email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`,
-        );
-      } catch (invoiceErr) {
-        console.error(
-          `❌ Failed to send invoice email for ${updatedBooking.bookingId}:`,
-          invoiceErr.message,
-        );
-      }
+      // Invoice & receipt (once per booking — not again if the cleaner already completed it).
+      await sendCompletionInvoice(updatedBooking);
 
       // Schedule post-service automation sequence
       try {
