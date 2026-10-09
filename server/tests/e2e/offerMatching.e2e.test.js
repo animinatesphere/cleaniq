@@ -180,6 +180,22 @@ test("job moves to another cleaner: they send their own intro, and only see thei
   assert.ok(!thread.some((m) => /Hex/.test(m.text)), "no previous cleaner's messages");
 });
 
+test("schedule (calendar): the cleaner's jobs with pay, no cancelled ones, never the customer's email or phone", async () => {
+  const w = await Worker.create({ workerId: "W-CAL", firstName: "Cal", lastName: "Endar", email: "cal@test.com", phone: "7", region: "UK", status: "Active" });
+  await job({ assignedWorker: w._id, status: "Assigned", customer: { firstName: "Ann", lastName: "Skinner", email: "ann@test.com", phone: "07700900111" } });
+  await job({ assignedWorker: w._id, status: "Cancelled" });
+  const r = await call("GET", `/${w._id}/schedule`);
+  assert.equal(r.status, 200);
+  assert.equal(r.data.length, 1);
+  const j = r.data[0];
+  assert.equal(j.workerRate, 13);
+  assert.equal(j.details.duration, 3);
+  assert.equal(j.customer.firstName, "Ann");
+  assert.equal(j.customer.email, undefined);
+  assert.equal(j.customer.phone, undefined);
+  assert.equal(JSON.stringify(r.data).includes("ann@test.com"), false);
+});
+
 test("My offers lists recent suitable jobs with their status", async () => {
   const r = await call("GET", `/${worker._id}/offers-history`);
   assert.equal(r.status, 200);
