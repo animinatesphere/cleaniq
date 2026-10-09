@@ -58,10 +58,53 @@ const hasPets = (b) => {
   return (b.details?.extras || []).some((e) => /pet on premises:\s*yes/i.test(String(e?.name || e)));
 };
 
+// Service types by keyword, most specific first ("Carpet Deep Clean" is carpet, not deep cleaning).
+const SERVICE_TYPES = [
+  ["carpet", /carpet|rug/],
+  ["upholstery", /upholster|sofa|mattress/],
+  ["oven", /oven|hob|extractor/],
+  ["fridge", /fridge|freezer/],
+  ["window", /window/],
+  ["tenancy", /tenancy|move[\s-]?(in|out)|vacate|check[\s-]?out clean/],
+  ["construction", /construction|builder|renovation/],
+  ["airbnb", /airbnb|short[\s-]?let|holiday let|turnover/],
+  ["office", /office|commercial|workplace/],
+  ["deep", /deep/],
+  ["regular", /regular|domestic|house|home clean|general|standard/],
+];
+const typeOf = (name) => {
+  const n = String(name || "").toLowerCase();
+  const hit = SERVICE_TYPES.find(([, re]) => re.test(n));
+  return hit ? hit[0] : null;
+};
+// A booking's service can list several quote items: "Carpet Deep Clean Bedrooms, Carpet Deep Clean Stairs".
+const serviceParts = (service) => String(service || "").split(/\s*(?:,|\+|\n)\s*/).map((x) => x.trim()).filter(Boolean);
+
+/** Does the job's service suit a cleaner who chose `selected` services? (empty = all services) */
+function serviceMatches(selected, service) {
+  if (!selected?.length) return true;
+  const chosen = selected.map((s) => String(s).toLowerCase());
+  const chosenTypes = new Set(chosen.map(typeOf).filter(Boolean));
+  const parts = serviceParts(service);
+  if (!parts.length) return true;
+  let known = false;
+  for (const part of parts) {
+    const p = part.toLowerCase();
+    if (chosen.includes(p) || chosen.some((c) => p.startsWith(c) || c.startsWith(p))) return true;
+    const t = typeOf(p);
+    if (t) {
+      known = true;
+      if (chosenTypes.has(t)) return true;
+    }
+  }
+  // Nothing we recognise (a custom quote item): show it rather than hide it from everyone.
+  return !known;
+}
+
 // Does this job suit this cleaner? jobPoint/homePoint are {lat,lng} (or null when unknown).
 function checkMatch(prefs, booking, { jobPoint = null, homePoint = null } = {}) {
   const fails = [];
-  if (prefs.services.length && !prefs.services.some((s) => s.toLowerCase() === String(booking.service || "").toLowerCase())) fails.push("service");
+  if (!serviceMatches(prefs.services, booking.service)) fails.push("service");
   if (prefs.refusePets && hasPets(booking)) fails.push("pets");
 
   const startAt = booking.schedule?.date ? buildBookingDateTime(booking.schedule.date, booking.schedule.timeSlot, booking.schedule.preferredTime) : null;
@@ -159,6 +202,6 @@ function introText(template, { workerName, booking }) {
 }
 
 module.exports = {
-  DAYS, TRAVEL_MODES, DEFAULT_INTRO, defaultPreferences, prefsOf, checkMatch, payFor,
+  DAYS, TRAVEL_MODES, DEFAULT_INTRO, defaultPreferences, prefsOf, checkMatch, payFor, serviceMatches,
   offersForWorker, workersForJob, introText, jobPostcode,
 };

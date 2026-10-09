@@ -1017,26 +1017,7 @@ async function finishForCustomer(booking) {
         `💳 ✅ Payment captured for booking ${booking.bookingId} - Status: ${capturedPayment.status}`,
       );
 
-      try {
-        await sendEmail({
-          to: booking.customer.email,
-          subject: `✓ Payment Captured: Cleaniq Booking ${booking.bookingId}`,
-          html: `
-            <h2>Payment Captured</h2>
-            <p>Hi ${booking.customer.firstName},</p>
-            <p>Your cleaning service has been completed successfully!</p>
-            <p><strong>Booking Reference:</strong> ${booking.bookingId}</p>
-            <p><strong>Service:</strong> ${booking.service}</p>
-            <p><strong>Amount Charged:</strong> ${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
-            <p>Your payment has been successfully processed. Thank you for choosing Cleaniq!</p>
-          `,
-        });
-      } catch (emailErr) {
-        console.error(
-          "⚠️ Failed to send payment capture email:",
-          emailErr,
-        );
-      }
+      // The customer gets the Invoice & Receipt email for this (sent once the clean is completed).
     } catch (captureErr) {
       console.error(
         `❌ Failed to capture payment for booking ${booking.bookingId}:`,
