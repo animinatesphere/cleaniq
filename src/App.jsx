@@ -28,6 +28,7 @@ import CustomerSignup from "./pages/account/Signup";
 import CustomerDashboard from "./pages/account/Dashboard";
 import CreatorDashboard from "./pages/account/CreatorDashboard";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import WorkerApp from "./pages/WorkerApp";
 import { CustomerAuthProvider } from "./context/CustomerAuthContext";
 
 // Admin Imports
@@ -128,6 +129,7 @@ function App() {
             <Route path="/locations/:area" element={<LocationDetail />} />
             <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/worker-app" element={<WorkerApp />} />
 
             {/* Customer Account Routes */}
             <Route path="/account/login" element={<CustomerLogin />} />

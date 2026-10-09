@@ -515,8 +515,8 @@ const redesigned = {
     }),
 
   staffAppInvite: (staff) => {
-    const androidLink = "https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk";
-    const iosLink = "https://apps.apple.com/us/app/cleaniq-service-pro/id6784165706"; // Cleaniq Service Pro on the App Store
+    const androidLink = require("./appLinks").workerAndroidLink(); // permanent link, forwards to the current APK
+    const iosLink = require("./appLinks").workerIos(); // Cleaniq Service Pro on the App Store
     const dl = (href, label, subText, bg) =>
       `<a href="${esc(href)}" target="_blank" style="display:block;background-color:${bg};color:#ffffff;padding:16px 12px;border-radius:10px;text-decoration:none;font-family:${FONT};font-weight:700;font-size:14px;line-height:20px;text-align:center;">${label}<br /><span style="font-size:12px;font-weight:400;color:#cbd5e1;">${subText}</span></a>`;
     return layout({
@@ -534,6 +534,7 @@ const redesigned = {
           <td class="stack" width="50%" valign="top" style="padding:0 6px 0 0;">${dl(iosLink, "iPhone", "App Store", BRAND.dark)}</td>
           <td class="stack" width="50%" valign="top" style="padding:0 0 0 6px;">${dl(androidLink, "Android", "Direct APK", BRAND.green)}</td>
         </tr></table>
+        ${p("<strong>Android:</strong> if your phone says the app is from an unknown source, tap <em>Settings → Allow from this source</em>, then <em>Install</em>. Step-by-step help: <a href=\"https://cleaniqservices.com/worker-app\" style=\"color:" + BRAND.green + ";font-weight:700;\">cleaniqservices.com/worker-app</a>", "font-size:13px;color:#64748b;")}
 
         ${sectionTitle("Your login credentials")}
         ${kv([

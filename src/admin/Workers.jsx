@@ -30,6 +30,10 @@ const whenText = (d) => {
   return `${t.toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" })} · ${ago}`;
 };
 const money = (n) => `£${Number(n || 0).toFixed(2)}`;
+// Where cleaners download the app (iPhone + Android, with install help).
+const WORKER_APP_PAGE = "https://cleaniqservices.com/worker-app";
+const inviteMessage = (c) =>
+  `Hi ${c.firstName || ""}, welcome to Cleaniq! 🎉\n\nDownload the Cleaniq Service Pro app: ${WORKER_APP_PAGE}\n\nLog in with:\nEmail: ${c.email}\nTemporary password: ${c.tempPassword}\n\nPlease change your password after you log in.`;
 
 const Workers = () => {
   const { region } = useRegion();
@@ -108,6 +112,7 @@ const Workers = () => {
         setWorkers([data, ...workers]);
         setShowAddModal(false);
         setNewCredentials({
+          firstName: data.firstName,
           email: data.email,
           tempPassword: data.tempPassword,
         });
@@ -606,7 +611,31 @@ const Workers = () => {
                   </button>
                 </div>
               </div>
+              <div>
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">
+                  App download (iPhone &amp; Android)
+                </p>
+                <div className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10 gap-2">
+                  <a href={WORKER_APP_PAGE} target="_blank" rel="noreferrer" className="font-bold text-emerald-400 text-sm truncate hover:underline">
+                    {WORKER_APP_PAGE.replace("https://", "")}
+                  </a>
+                  <button
+                    onClick={() => copyToClipboard(WORKER_APP_PAGE)}
+                    className="p-2 bg-white/5 text-white/40 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-400 transition-all shrink-0"
+                  >
+                    {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                  </button>
+                </div>
+              </div>
             </div>
+
+            <p className="text-white/40 text-xs font-medium mb-3">The welcome email with these details and the download buttons has been sent to the worker.</p>
+            <button
+              onClick={() => copyToClipboard(inviteMessage(newCredentials))}
+              className="w-full py-3 mb-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+            >
+              {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />} Copy message for WhatsApp
+            </button>
 
             <button
               onClick={() => setShowCredsModal(false)}
@@ -744,6 +773,17 @@ const Workers = () => {
                 <div className="flex items-center justify-between bg-white/5 px-4 py-3 rounded-xl border border-white/10">
                   <span className="font-bold text-sm text-white">{workerDetailModal.email}</span>
                   <button onClick={() => copyToClipboard(workerDetailModal.email)} className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-white/40 hover:text-emerald-400 transition-colors">
+                    {copied ? <CheckCircle2 size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Where to download the app */}
+              <div>
+                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">App Download Link</p>
+                <div className="flex items-center justify-between bg-white/5 px-4 py-3 rounded-xl border border-white/10 gap-2">
+                  <a href={WORKER_APP_PAGE} target="_blank" rel="noreferrer" className="font-bold text-sm text-emerald-400 truncate hover:underline">{WORKER_APP_PAGE.replace("https://", "")}</a>
+                  <button onClick={() => copyToClipboard(WORKER_APP_PAGE)} className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-white/40 hover:text-emerald-400 transition-colors shrink-0">
                     {copied ? <CheckCircle2 size={14} className="text-emerald-400" /> : <Copy size={14} />}
                   </button>
                 </div>
