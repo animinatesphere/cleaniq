@@ -948,9 +948,8 @@ const templates = {
   `,
 
   staffAppInvite: (staff) => {
-    const androidLink =
-      "https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk";
-    const iosLink = "https://apps.apple.com/us/app/cleaniq-service-pro/id6784165706"; // Cleaniq Service Pro on the App Store
+    const androidLink = require("./appLinks").workerAndroidLink(); // permanent link, forwards to the current APK
+    const iosLink = require("./appLinks").workerIos(); // Cleaniq Service Pro on the App Store
 
     return `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; background-color: #f1f5f9; padding: 24px 0;">

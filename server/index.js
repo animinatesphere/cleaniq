@@ -223,6 +223,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/app", require("./routes/appLinks")); // worker app download links (public)
 app.use("/api/auth", authRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/blog", blogRoutes);
