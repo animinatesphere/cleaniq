@@ -196,6 +196,17 @@ test("schedule (calendar): the cleaner's jobs with pay, no cancelled ones, never
   assert.equal(JSON.stringify(r.data).includes("ann@test.com"), false);
 });
 
+test("a quote booking with several items (carpet bedrooms, receptions, stairs) reaches carpet cleaners", async () => {
+  const carpet = await Worker.create({ workerId: "W-CP", firstName: "Cara", lastName: "Pet", email: "cp@test.com", phone: "8", region: "UK", status: "Active", postcode: "BL0 0HL",
+    preferences: { services: ["Carpet Cleaning"] } });
+  const deep = await Worker.create({ workerId: "W-DP", firstName: "Dee", lastName: "P", email: "dp@test.com", phone: "9", region: "UK", status: "Active", postcode: "BL0 0HL",
+    preferences: { services: ["Deep Cleaning"] } });
+  const b = await job({ service: "Carpet Deep Clean Bedrooms, Carpet Deep Clean Receptions, Carpet Deep Clean Stairs and landing" });
+  const ids = async (w) => (await call("GET", `/jobs?region=UK&workerId=${w._id}`)).data.map((j) => j.bookingId);
+  assert.ok((await ids(carpet)).includes(b.bookingId), "carpet cleaner sees it");
+  assert.ok(!(await ids(deep)).includes(b.bookingId), "deep-clean-only cleaner doesn't");
+});
+
 test("My offers lists recent suitable jobs with their status", async () => {
   const r = await call("GET", `/${worker._id}/offers-history`);
   assert.equal(r.status, 200);

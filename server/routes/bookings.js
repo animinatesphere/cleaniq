@@ -1026,27 +1026,7 @@ router.put("/:id", async (req, res) => {
             `💳 ✅ Payment captured for booking ${updatedBooking.bookingId} - Status: ${capturedPayment.status}`,
           );
 
-          // Send payment captured email to customer
-          try {
-            await sendEmail({
-              to: updatedBooking.customer.email,
-              subject: `✓ Payment Captured: Cleaniq Booking ${updatedBooking.bookingId}`,
-              html: `
-                <h2>Payment Captured</h2>
-                <p>Hi ${updatedBooking.customer.firstName},</p>
-                <p>Your cleaning service has been completed successfully!</p>
-                <p><strong>Booking Reference:</strong> ${updatedBooking.bookingId}</p>
-                <p><strong>Service:</strong> ${updatedBooking.service}</p>
-                <p><strong>Amount Charged:</strong> ${updatedBooking.payment.currency === "GBP" ? "£" : "₦"}${updatedBooking.payment.amount}</p>
-                <p>Your payment has been successfully processed. Thank you for choosing Cleaniq!</p>
-              `,
-            });
-            console.log(
-              `✅ Payment captured email sent to: ${updatedBooking.customer.email}`,
-            );
-          } catch (emailErr) {
-            console.error("⚠️ Failed to send payment capture email:", emailErr);
-          }
+          // The customer gets the Invoice & Receipt email for this (sent once the clean is completed).
         } catch (captureErr) {
           console.error(
             `❌ Failed to capture payment for booking ${updatedBooking.bookingId}:`,
