@@ -1045,6 +1045,9 @@ async function finishForCustomer(booking) {
     }
   }
 
+  // Invoice & receipt — same as when admin marks it Completed (sent once per booking).
+  await require("../utils/bookingInvoice").sendCompletionInvoice(booking);
+
   // Notify customer
   await notifyCustomer(booking, {
     title: "All Done — Spotless!",
@@ -1086,7 +1089,9 @@ async function completeJob(booking) {
     // Regular clean not charged yet (arrival/start were skipped): charge it now.
     await chargeVisitOnArrival(booking);
 
-    // Update worker wallet and create Withdrawal
+    // Update worker wallet and create Withdrawal. A problem here must never stop the customer's
+    // payment, invoice and emails below.
+    try {
     if (booking.assignedWorker) {
       const Worker = require("../models/Worker");
       const Withdrawal = require("../models/Withdrawal");
@@ -1154,6 +1159,9 @@ async function completeJob(booking) {
           );
         }
       }
+    }
+    } catch (walletErr) {
+      console.error(`⚠️ Worker wallet update failed for ${booking.bookingId} (customer is still charged and invoiced):`, walletErr.message);
     }
 
     // Take the customer's payment and tell them it's done — for a normal job now; for a split

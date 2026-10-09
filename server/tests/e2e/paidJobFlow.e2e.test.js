@@ -297,3 +297,34 @@ test("regular cleaner: accepting makes Kelvin the regular cleaner; each paid wee
   assert.equal(stop.status, 200);
   assert.equal((await Subscription.findById(sub._id)).regularWorker.id, null);
 });
+
+test("invoice: sent when the cleaner completes the job in the app — once, even if admin marks it Completed too", async () => {
+  const r = await adminBooking({ details: { address: "9 Invoice St, M1 1AA", duration: 2, frequency: "Once", extras: [] } });
+  const ref = r.data.bookingId;
+  await confirmPaidBooking(r.data._id, { paymentIntentId: "pi_inv", captured: true });
+  await fetch(`${base}/workers/jobs/${r.data._id}/accept`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workerId: worker, workerName: "Sam Cole" }) });
+  await settle();
+  const invoices = () => emails.filter((m) => /Invoice/.test(m.subject || "") && (m.subject || "").includes(ref));
+  emails.length = 0;
+
+  await fetch(`${base}/workers/jobs/${r.data._id}/complete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  await settle();
+  assert.equal((await Booking.findById(r.data._id)).status, "Completed");
+  assert.equal(invoices().length, 1, "cleaner completing sends the invoice");
+  assert.equal(invoices()[0].to, r.data.customer.email);
+  assert.ok((await Booking.findById(r.data._id)).meta.invoiceSentAt);
+
+  // Admin then marks it Completed as well (or re-saves it): no second invoice.
+  await fetch(`${base}/bookings/${r.data._id}`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` }, body: JSON.stringify({ status: "In Progress" }) });
+  await fetch(`${base}/bookings/${r.data._id}`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` }, body: JSON.stringify({ status: "Completed" }) });
+  await settle();
+  assert.equal(invoices().length, 1, "never twice");
+});
+
+test("invoice: admin marking a job Completed still sends it", async () => {
+  const r = await adminBooking({ details: { address: "10 Invoice St, M1 1AA", duration: 2, frequency: "Once", extras: [] } });
+  emails.length = 0;
+  await fetch(`${base}/bookings/${r.data._id}`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` }, body: JSON.stringify({ status: "Completed" }) });
+  await settle();
+  assert.equal(emails.filter((m) => /Invoice/.test(m.subject || "") && m.subject.includes(r.data.bookingId)).length, 1);
+});
