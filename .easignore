@@ -3,8 +3,8 @@
 # Upload just the two Expo apps — not the website, server, videos or build output.
 /*
 !/.easignore
-!/worker-app/
-!/customer-app/
+!/worker-app
+!/customer-app
 
 # Never needed in a cloud build
 **/node_modules/
