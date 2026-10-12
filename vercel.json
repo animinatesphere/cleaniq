@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/pages/:slug((?!contact$)[^/]+)",
+      "destination": "/service/:slug",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

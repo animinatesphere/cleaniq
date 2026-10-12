@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { captureCreatorRef } from "./utils/creatorRef";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate, useParams } from "react-router-dom";
 import Navbar from "./component/Navbar";
 import TopNav from "./component/TopNav";
 import Footer from "./component/Footer";
@@ -94,6 +94,12 @@ import AiSettingsPage from "./admin/AiReceptionist/AiSettings";
 import AiConversations from "./admin/AiReceptionist/Conversations";
 import AiCalls from "./admin/AiReceptionist/Calls";
 
+// Service pages moved from /pages/<service> to /service/<service> (Vercel also 301-redirects).
+function OldServicePath() {
+  const { serviceSlug } = useParams();
+  return <Navigate to={`/service/${serviceSlug}`} replace />;
+}
+
 function App() {
   const location = useLocation();
   const isAdminPath   = location.pathname.startsWith("/admin");
@@ -125,7 +131,9 @@ function App() {
             <Route path="/cleaning/:city" element={<CityLanding />} />
             <Route path="/get-a-quote" element={<GetQuote />} />
             <Route path="/pages/contact" element={<Contact />} />
-            <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
+            <Route path="/service/:serviceSlug" element={<ServiceDetail />} />
+            {/* Old address: /pages/<service> → /service/<service> */}
+            <Route path="/pages/:serviceSlug" element={<OldServicePath />} />
             <Route path="/locations/:area" element={<LocationDetail />} />
             <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
