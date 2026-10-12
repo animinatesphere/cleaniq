@@ -84,7 +84,7 @@ export const SERVICE_PAGES = [
   },
 ];
 
-export const servicePagePath = (slug) => `/pages/${slug}`;
+export const servicePagePath = (slug) => `/service/${slug}`;
 
 // Services-page card key (e.g. "tenancy") → its service page path, or null if there isn't one.
 export const pathForLayoutKey = (key) => {

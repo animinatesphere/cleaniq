@@ -256,27 +256,27 @@ const CityLanding = () => {
           {[
             {
               name: "Bury",
-              // path: "/pages/end-of-tenancy-cleaning-manchester",
+              // path: "/service/end-of-tenancy-cleaning-manchester",
             },
             {
               name: " Stockport",
-              // path: "/pages/deep-cleaning-manchester",
+              // path: "/service/deep-cleaning-manchester",
             },
             {
               name: " Trafford",
-              // path: "/pages/airbnb-cleaning-manchester",
+              // path: "/service/airbnb-cleaning-manchester",
             },
             {
               name: "Manchester City Centre",
-              // path: "/pages/office-cleaning-manchester",
+              // path: "/service/office-cleaning-manchester",
             },
             {
               name: " Salford",
-              // path: "/pages/post-construction-cleaning-manchester",
+              // path: "/service/post-construction-cleaning-manchester",
             },
             {
               name: " Bolton",
-              // path: "/pages/post-construction-cleaning-manchester",
+              // path: "/service/post-construction-cleaning-manchester",
             },
           ].map((link, i) => (
             <Link

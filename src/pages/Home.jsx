@@ -379,7 +379,7 @@ const Home = () => {
             {[
               {
                 title: "End of Tenancy Cleaning",
-                path: "/pages/end-of-tenancy-cleaning-manchester",
+                path: "/service/end-of-tenancy-cleaning-manchester",
                 desc: "Comprehensive move-out cleaning to ensure you get your deposit back.",
                 icon: <HomeIcon size={32} />,
                 keyword: "Move-out specialists",
@@ -387,7 +387,7 @@ const Home = () => {
               },
               {
                 title: "Office Cleaning",
-                path: "/pages/office-cleaning-manchester",
+                path: "/service/office-cleaning-manchester",
                 desc: "Professional janitorial services for your workspace.",
                 icon: <Briefcase size={32} />,
                 keyword: "Expert office cleaning",
@@ -395,7 +395,7 @@ const Home = () => {
               },
               {
                 title: "Deep Clean",
-                path: "/pages/deep-cleaning-manchester",
+                path: "/service/deep-cleaning-manchester",
                 desc: "Specialized deep cleaning services for a total refresh.",
                 icon: <Zap size={32} />,
                 keyword: "Deep cleaning",
@@ -403,7 +403,7 @@ const Home = () => {
               },
               {
                 title: "Airbnb Cleaning",
-                path: "/pages/airbnb-cleaning-manchester",
+                path: "/service/airbnb-cleaning-manchester",
                 desc: "Professional turnover services for your short-let rental.",
                 icon: <Star size={32} />,
                 keyword: "Short-let specialist",

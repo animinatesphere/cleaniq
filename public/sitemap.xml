@@ -39,27 +39,27 @@
   
   <!-- Service Pages -->
   <url>
-    <loc>https://www.cleaniqservices.com/pages/end-of-tenancy-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/end-of-tenancy-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.cleaniqservices.com/pages/deep-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/deep-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.cleaniqservices.com/pages/airbnb-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/airbnb-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.cleaniqservices.com/pages/office-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/office-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.cleaniqservices.com/pages/post-construction-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/post-construction-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -81,7 +81,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.cleaniqservices.com/pages/general-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/general-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -131,17 +131,17 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.cleaniqservices.com/pages/regular-house-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/regular-house-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.cleaniqservices.com/pages/oven-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/oven-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.cleaniqservices.com/pages/carpet-cleaning-manchester</loc>
+    <loc>https://www.cleaniqservices.com/service/carpet-cleaning-manchester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
