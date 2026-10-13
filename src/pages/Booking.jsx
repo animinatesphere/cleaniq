@@ -974,96 +974,61 @@ const Booking = () => {
     }
   };
 
-  // Dev mode submit - skip payment processing. Confirmed working, disabled.
-  // Uncomment along with the matching button in the JSX below to re-enable
-  // for future pricing diagnostics (it submits a real booking with
-  // payment.method "Dev Mode" so it's obvious in the data).
-  // const handleDevModeSubmit = async () => {
-  //   if (!formData.serviceType) {
-  //     console.error("Submission Blocked: Service type is missing.");
-  //     showNotification(
-  //       "Please select a service type before completing your booking.",
-  //     );
-  //     return;
-  //   }
-
-  //   console.log("🧪 [DEV MODE] Rate breakdown:", {
-  //     region: region.id,
-  //     serviceType: formData.serviceType,
-  //     baseRate: dynamicRates[cleanKey(formData.serviceType)],
-  //     duration: formData.duration,
-  //     extras: formData.extras,
-  //     extraRates: Object.keys(formData.extras).map((name) => ({
-  //       name,
-  //       qty: formData.extras[name],
-  //       rateFound: dynamicRates[cleanKey(name)],
-  //     })),
-  //     totalPrice,
-  //   });
-
-  //   const bookingPayload = {
-  //     bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
-  //     customer: {
-  //       firstName: formData.firstName || "Customer",
-  //       lastName: formData.lastName || "User",
-  //       email: formData.email || "pending@cleaniq.com",
-  //       phone: formData.phone || "000",
-  //     },
-  //     service: formData.serviceType,
-  //     details: {
-  //       address: `${formData.address}${formData.addressLine2 ? ", " + formData.addressLine2 : ""}${formData.postcode ? ", " + formData.postcode : ""}`,
-  //       frequency: formData.frequency,
-  //       duration: formData.duration,
-  //       extras: [
-  //         ...Object.entries(formData.extras)
-  //           .filter((entry) => entry[1] > 0)
-  //           .map(([n, q]) => `${n} (x${q})`),
-  //         ...Object.entries(formData.property)
-  //           .filter((entry) => entry[1] > 0)
-  //           .map(([n, q]) => `${n} (x${q})`),
-  //         `Parking: ${formData.parking}`,
-  //         `Entry: ${formData.keyAccess}`,
-  //         `Pet on premises: ${formData.hasPet || "Not specified"}`,
-  //         `Instructions: ${formData.specialInstructions || "None"}`,
-  //       ],
-  //     },
-  //     schedule: {
-  //       date: formData.date,
-  //       timeSlot: formData.timeSlot,
-  //       preferredTime: formData.preferredTime,
-  //     },
-  //     leadSource: formData.leadSource || "Organic",
-  //     suppliesProvidedBy: formData.suppliesProvidedBy || "Cleaniq",
-  //     payment: {
-  //       amount: totalPrice,
-  //       currency: "GBP",
-  //       method: "Dev Mode",
-  //       transactionId: "DEV-TEST-NO-PAYMENT",
-  //     },
-  //     region: region.id,
-  //   };
-  //   setIsSubmitting(true);
-  //   try {
-  //     const response = await fetch(
-  //       `${import.meta.env.VITE_API_URL}/bookings/public`,
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify(bookingPayload),
-  //       },
-  //     );
-  //     if (response.ok) {
-  //       localStorage.removeItem("ciq_booking_draft");
-  //       setIsSubmitted(true);
-  //       console.log("✅ [DEV MODE] Booking submitted without payment!");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error saving booking:", error);
-  //     showNotification("Error submitting booking. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
+  // 🧪 Admin-only TEST booking: no payment taken. Shown only when you're logged in as admin in
+  // this browser; the server checks the admin login too (POST /bookings/dev-test).
+  const adminToken = (() => { try { return localStorage.getItem("adminToken") || ""; } catch { return ""; } })();
+  const [devNotifyCleaners, setDevNotifyCleaners] = useState(false);
+  const handleDevModeSubmit = async () => {
+    if (!formData.serviceType) {
+      showNotification("Please select a service type before completing your booking.");
+      return;
+    }
+    const bookingPayload = {
+      customer: {
+        firstName: formData.firstName || "Test",
+        lastName: formData.lastName || "Customer",
+        email: formData.email || "test@cleaniqservices.com",
+        phone: formData.phone || "",
+      },
+      service: formData.serviceType,
+      details: {
+        address: `${formData.address}${formData.addressLine2 ? ", " + formData.addressLine2 : ""}${formData.postcode ? ", " + formData.postcode : ""}`,
+        postcode: formData.postcode || "",
+        frequency: formData.frequency,
+        duration: formData.duration,
+        extras: [
+          ...Object.entries(formData.extras).filter((e) => e[1] > 0).map(([n, q]) => `${n} (x${q})`),
+          ...Object.entries(formData.property).filter((e) => e[1] > 0).map(([n, q]) => `${n} (x${q})`),
+          `Parking: ${formData.parking}`,
+          `Entry: ${formData.keyAccess}`,
+          `Pet on premises: ${formData.hasPet || "Not specified"}`,
+          `Instructions: ${formData.specialInstructions || "None"}`,
+        ],
+      },
+      schedule: { date: formData.date, timeSlot: formData.timeSlot, preferredTime: formData.preferredTime },
+      suppliesProvidedBy: formData.suppliesProvidedBy || "Cleaniq",
+      payment: { amount: totalPrice },
+      region: region.id,
+      notifyCleaners: devNotifyCleaners,
+    };
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings/dev-test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify(bookingPayload),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || (response.status === 401 ? "Log in to admin again, then retry." : "Test booking failed."));
+      localStorage.removeItem("ciq_booking_draft");
+      showNotification(`Test booking ${data.bookingId} created — no payment taken.`, "success");
+      setIsSubmitted(true);
+    } catch (error) {
+      showNotification(error.message || "Error submitting test booking.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (authLoading) {
     return <LoadingOverlay message="Loading account..." />;
@@ -2228,29 +2193,24 @@ const Booking = () => {
                                   </Elements>
                                 )}
 
-                                {/* Dev Mode: Skip Payment Button - confirmed working,
-                                    removed from view. Uncomment + wrap in
-                                    `import.meta.env.DEV &&` to bring back for testing. */}
-                                {/* <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl flex items-center justify-between">
-                                  <div>
-                                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider">
-                                      🧪 Dev Mode: Test Booking
-                                    </p>
-                                    <p className="text-[8px] text-blue-600 mt-1">
-                                      Submit without payment for testing - check
-                                      console for rate breakdown
-                                    </p>
+                                {adminToken && (
+                                  <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl">
+                                    <div className="flex items-center justify-between gap-3">
+                                      <div>
+                                        <p className="text-[11px] font-black text-blue-700 uppercase tracking-wider">🧪 Admin test booking</p>
+                                        <p className="text-[11px] text-blue-700 mt-1">Creates a real booking marked TEST, with no payment. Only you see this (admin login).</p>
+                                      </div>
+                                      <button type="button" onClick={handleDevModeSubmit} disabled={isSubmitting}
+                                        className="shrink-0 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-black text-xs px-4 py-2.5 rounded-xl whitespace-nowrap transition-all">
+                                        {isSubmitting ? "Submitting…" : "Book without paying"}
+                                      </button>
+                                    </div>
+                                    <label className="mt-3 flex items-center gap-2 text-[11px] font-bold text-blue-700">
+                                      <input type="checkbox" checked={devNotifyCleaners} onChange={(e) => setDevNotifyCleaners(e.target.checked)} />
+                                      Also send it to cleaners as a real job offer (to test the worker app)
+                                    </label>
                                   </div>
-                                  <button
-                                    onClick={handleDevModeSubmit}
-                                    disabled={isSubmitting}
-                                    className="ml-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-black font-black text-[9px] px-4 py-2 rounded-xl whitespace-nowrap transition-all"
-                                  >
-                                    {isSubmitting
-                                      ? "Submitting..."
-                                      : "Skip Payment"}
-                                  </button>
-                                </div> */}
+                                )}
                               </div>
                             )}
                           </div>
