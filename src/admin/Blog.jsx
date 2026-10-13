@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Trash2,
   Edit2,
@@ -11,7 +11,25 @@ import {
   Users,
   MessageCircle,
   Check,
+  Link2,
+  Sparkles,
+  CalendarClock,
 } from "lucide-react";
+
+// <input type="datetime-local"> value (local time) ↔ Date
+const toLocalInput = (d) => {
+  const x = new Date(d);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}T${pad(x.getHours())}:${pad(x.getMinutes())}`;
+};
+const fmtWhen = (d) => new Date(d).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+// Draft / Scheduled / Published, from published + publishAt.
+const statusOf = (post) => {
+  if (!post.published) return "draft";
+  if (post.publishAt && new Date(post.publishAt) > new Date()) return "schedule";
+  return "now";
+};
+const EMPTY_POST = { title: "", description: "", content: "", author: "Cleaniq Services Team", published: false, status: "draft", publishAt: "", image: null };
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
 
@@ -26,6 +44,8 @@ const AdminBlog = () => {
   const [commentsModal, setCommentsModal] = useState(null);
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
+  const contentRef = useRef(null);
+  const [ai, setAi] = useState({ open: false, topic: "", keywords: "", loading: false, error: "" });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -84,6 +104,44 @@ const AdminBlog = () => {
     });
   };
 
+  // Insert a [text](link) at the cursor in the article.
+  const insertLink = () => {
+    const el = contentRef.current;
+    const start = el?.selectionStart ?? formData.content.length;
+    const end = el?.selectionEnd ?? start;
+    const selected = formData.content.slice(start, end);
+    const text = window.prompt("Link text (the words people click):", selected || "");
+    if (text === null || !text.trim()) return;
+    const url = window.prompt("Link address — a page on our site like /service/deep-cleaning-manchester or /get-a-quote, or a full https:// address:", "https://");
+    if (url === null || !url.trim() || url.trim() === "https://") return;
+    const md = `[${text.trim()}](${url.trim()})`;
+    const content = formData.content.slice(0, start) + md + formData.content.slice(end);
+    setFormData((f) => ({ ...f, content }));
+    requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(start + md.length, start + md.length); });
+  };
+
+  // Claude writes a draft into the form (nothing is saved until you press Save).
+  const draftWithAi = async () => {
+    if (ai.topic.trim().length < 5) return setAi((a) => ({ ...a, error: "Tell Claude what the post should be about." }));
+    if ((formData.title || formData.content) && !confirm("Replace the title, summary and article in the form with Claude's draft?")) return;
+    setAi((a) => ({ ...a, loading: true, error: "" }));
+    try {
+      const res = await fetch(`${API_URL}/blog/admin/ai-draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: ai.topic, keywords: ai.keywords }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "The AI draft failed. Please try again.");
+      setFormData((f) => ({ ...f, title: data.title, description: data.description, content: data.content }));
+      setAi((a) => ({ ...a, loading: false, open: false }));
+      setSuccessMessage("Draft ready — read it through, add a photo, then publish or schedule it.");
+      setTimeout(() => setSuccessMessage(""), 5000);
+    } catch (err) {
+      setAi((a) => ({ ...a, loading: false, error: err.message }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -104,7 +162,16 @@ const AdminBlog = () => {
       form.append("description", formData.description);
       form.append("content", formData.content);
       form.append("author", formData.author);
-      form.append("published", String(formData.published));
+      if (formData.status === "schedule") {
+        if (!formData.publishAt) {
+          alert("Choose the date and time the post should go live.");
+          setSubmitting(false);
+          return;
+        }
+        form.append("publishAt", new Date(formData.publishAt).toISOString());
+      }
+      form.append("status", formData.status);
+      form.append("published", String(formData.status !== "draft"));
 
       if (formData.image instanceof File) {
         form.append("image", formData.image);
@@ -122,30 +189,24 @@ const AdminBlog = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save blog post");
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to save blog post");
       }
 
-      const message = editingId
-        ? "Post updated successfully!"
-        : "Post created successfully!";
+      const message = formData.status === "schedule"
+        ? `Post scheduled for ${fmtWhen(formData.publishAt)}`
+        : editingId ? "Post updated successfully!" : "Post created successfully!";
       setSuccessMessage(message);
       setTimeout(() => setSuccessMessage(""), 3000);
 
-      setFormData({
-        title: "",
-        description: "",
-        content: "",
-        author: "Cleaniq Services Team",
-        published: false,
-        image: null,
-      });
+      setFormData({ ...EMPTY_POST });
       setImagePreview(null);
       setEditingId(null);
       setShowForm(false);
       fetchPosts();
     } catch (error) {
       console.error("Error saving post:", error);
-      alert("Error saving blog post");
+      alert(error.message || "Error saving blog post");
     } finally {
       setSubmitting(false);
     }
@@ -158,6 +219,8 @@ const AdminBlog = () => {
       content: post.content,
       author: post.author,
       published: post.published,
+      status: statusOf(post),
+      publishAt: post.publishAt && statusOf(post) === "schedule" ? toLocalInput(post.publishAt) : "",
       image: null,
     });
     setImagePreview(post.image);
@@ -193,14 +256,7 @@ const AdminBlog = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      title: "",
-      description: "",
-      content: "",
-      author: "Cleaniq Services Team",
-      published: false,
-      image: null,
-    });
+    setFormData({ ...EMPTY_POST });
     setImagePreview(null);
     setEditingId(null);
     setShowForm(false);
@@ -264,8 +320,8 @@ const AdminBlog = () => {
     return <LoadingOverlay message="Loading blog posts..." />;
   }
 
-  const publishedCount = posts.filter((p) => p.published).length;
-  const draftCount = posts.length - publishedCount;
+  const publishedCount = posts.filter((p) => statusOf(p) === "now").length;
+  const draftCount = posts.filter((p) => statusOf(p) === "draft").length;
 
   return (
     <div className="min-h-screen bg-[#061A13]">
@@ -383,6 +439,30 @@ const AdminBlog = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+                <div className="rounded-xl border border-violet-400/25 bg-violet-500/[0.07] p-5">
+                  <button type="button" onClick={() => setAi((a) => ({ ...a, open: !a.open, error: "" }))}
+                    className="flex w-full items-center justify-between text-left">
+                    <span className="flex items-center gap-2 font-black text-white"><Sparkles size={18} className="text-violet-300" /> Draft with AI (Claude)</span>
+                    <span className="text-xs font-bold text-violet-200/70">{ai.open ? "Close" : "Open"}</span>
+                  </button>
+                  {ai.open && (
+                    <div className="mt-4 space-y-3">
+                      <p className="text-xs text-white/50 font-medium">Claude writes the title, summary and article with links to our pages. Nothing is published — you check it, add a photo, then publish or schedule. Each draft costs a few pence.</p>
+                      <input value={ai.topic} onChange={(e) => setAi((a) => ({ ...a, topic: e.target.value }))}
+                        placeholder="What's the post about? e.g. End of tenancy cleaning checklist for Manchester renters"
+                        className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/25 focus:outline-none focus:border-violet-400/50" />
+                      <input value={ai.keywords} onChange={(e) => setAi((a) => ({ ...a, keywords: e.target.value }))}
+                        placeholder="Keywords (optional) e.g. deposit back, Salford, landlord inspection"
+                        className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/25 focus:outline-none focus:border-violet-400/50" />
+                      {ai.error && <p className="text-sm font-bold text-rose-300">{ai.error}</p>}
+                      <button type="button" onClick={draftWithAi} disabled={ai.loading}
+                        className="px-5 py-3 rounded-xl font-black text-sm bg-violet-500 hover:bg-violet-400 text-white disabled:opacity-60 flex items-center gap-2">
+                        <Sparkles size={16} /> {ai.loading ? "Claude is writing… (about 30–60 seconds)" : "Write the draft"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-black text-white/70 mb-3 uppercase tracking-wider">
                     Post Title *
@@ -485,7 +565,15 @@ const AdminBlog = () => {
                   <label className="block text-sm font-black text-white/70 mb-3 uppercase tracking-wider">
                     Full Article Content
                   </label>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <button type="button" onClick={insertLink}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-white/80 hover:bg-white/10">
+                      <Link2 size={14} /> Insert link
+                    </button>
+                    <span className="text-[11px] text-white/40 font-medium">Blank line = new paragraph · <code>## </code> = subheading · <code>- </code> = bullet · <code>[words](/get-a-quote)</code> = link</span>
+                  </div>
                   <textarea
+                    ref={contentRef}
                     name="content"
                     value={formData.content}
                     onChange={handleInputChange}
@@ -504,23 +592,25 @@ const AdminBlog = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-4 p-5 bg-[#071D16] rounded-xl border border-white/10">
-                  <input
-                    type="checkbox"
-                    name="published"
-                    checked={formData.published}
-                    onChange={handleInputChange}
-                    id="published"
-                    className="w-6 h-6 cursor-pointer accent-emerald-500 rounded"
-                  />
-                  <label
-                    htmlFor="published"
-                    className="font-bold text-white cursor-pointer flex-1"
-                  >
-                    {formData.published
-                      ? "🟢 Publish immediately"
-                      : "🔴 Save as draft"}
-                  </label>
+                <div className="p-5 bg-[#071D16] rounded-xl border border-white/10 space-y-4">
+                  <p className="text-sm font-black text-white/70 uppercase tracking-wider">When should it go live?</p>
+                  <div className="grid sm:grid-cols-3 gap-2">
+                    {[["now", "🟢 Publish now"], ["schedule", "🕒 Schedule for later"], ["draft", "📝 Save as draft"]].map(([v, label]) => (
+                      <button key={v} type="button" onClick={() => setFormData((f) => ({ ...f, status: v, published: v !== "draft", publishAt: v === "schedule" ? (f.publishAt || toLocalInput(Date.now() + 24 * 3600 * 1000)) : f.publishAt }))}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold border transition-all ${formData.status === v ? "bg-emerald-500/20 border-emerald-500/50 text-white" : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {formData.status === "schedule" && (
+                    <div>
+                      <label className="block text-xs font-black text-white/50 mb-2 uppercase tracking-wider">Go live on</label>
+                      <input type="datetime-local" value={formData.publishAt} min={toLocalInput(Date.now())}
+                        onChange={(e) => setFormData((f) => ({ ...f, publishAt: e.target.value }))}
+                        className="px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-emerald-500/50 [color-scheme:dark]" />
+                      {formData.publishAt && <p className="text-xs text-sky-300 font-bold mt-2">It will appear on the website by itself on {fmtWhen(formData.publishAt)}.</p>}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t border-white/7">
@@ -589,8 +679,8 @@ const AdminBlog = () => {
                             {post.title}
                           </h3>
                           <p className="text-sm text-white/40 font-bold mt-1">
-                            {new Date(post.createdAt).toLocaleDateString(
-                              "en-US",
+                            {new Date(post.publishAt || post.createdAt).toLocaleDateString(
+                              "en-GB",
                               {
                                 year: "numeric",
                                 month: "short",
@@ -599,7 +689,12 @@ const AdminBlog = () => {
                             )}
                           </p>
                         </div>
-                        {post.published ? (
+                        {statusOf(post) === "schedule" ? (
+                          <span className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-sky-500/15 border border-sky-500/25 text-sky-300 rounded-full text-[10px] font-black whitespace-nowrap">
+                            <CalendarClock size={12} />
+                            Scheduled · {fmtWhen(post.publishAt)}
+                          </span>
+                        ) : post.published ? (
                           <span className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 rounded-full text-[10px] font-black whitespace-nowrap">
                             <Eye size={12} />
                             Published

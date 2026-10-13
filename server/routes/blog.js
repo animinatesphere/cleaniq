@@ -5,6 +5,30 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const { moveToTrash } = require("../utils/trash");
+const mongoose = require("mongoose");
+const adminAuth = require("../middleware/adminAuth");
+
+// Live on the website: published, and its scheduled time (if any) has come.
+const liveFilter = () => ({
+  published: true,
+  $or: [{ publishAt: null }, { publishAt: { $exists: false } }, { publishAt: { $lte: new Date() } }],
+});
+
+// Admin form → published + publishAt. status: "now" | "schedule" | "draft"
+// (older admin pages send only published "true"/"false").
+function publishFields(body, existing = null) {
+  const status = body.status || (String(body.published) === "true" ? "now" : "draft");
+  if (status === "draft") return { published: false, publishAt: existing?.publishAt ?? null };
+  if (status === "schedule") {
+    const at = new Date(body.publishAt);
+    if (Number.isNaN(at.getTime())) return { error: "Please choose a valid date and time to publish." };
+    if (at.getTime() < Date.now() - 60 * 1000) return { error: "The scheduled time is in the past. Choose a future time, or Publish now." };
+    return { published: true, publishAt: at };
+  }
+  // Publish now: keep the original go-live time if it already went live, else now.
+  const was = existing?.publishAt && existing.publishAt <= new Date() && existing.published ? existing.publishAt : null;
+  return { published: true, publishAt: was || new Date() };
+}
 
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, "../uploads/blog");
@@ -42,7 +66,7 @@ const upload = multer({
 });
 
 // Debug endpoint - GET all blog posts (published and unpublished) for testing
-router.get("/debug/all", async (req, res) => {
+router.get("/debug/all", adminAuth, async (req, res) => {
   try {
     const posts = await BlogPost.find().sort({ createdAt: -1 });
     res.json({
@@ -60,6 +84,23 @@ router.get("/debug/all", async (req, res) => {
   }
 });
 
+// POST /api/blog/admin/ai-draft — Claude drafts a post for the editor (nothing is saved).
+router.post("/admin/ai-draft", adminAuth, express.json(), async (req, res) => {
+  try {
+    const topic = String(req.body?.topic || "").trim().slice(0, 300);
+    if (topic.length < 5) return res.status(400).json({ error: "Tell Claude what the post should be about." });
+    const draft = await require("../utils/blogWriter").draftBlogPost({
+      topic,
+      keywords: String(req.body?.keywords || "").trim().slice(0, 300),
+      notes: String(req.body?.notes || "").trim().slice(0, 1000),
+    });
+    res.json(draft);
+  } catch (error) {
+    console.error("[blog] AI draft failed:", error.message);
+    res.status(502).json({ error: error.message || "The AI draft failed. Please try again." });
+  }
+});
+
 // GET all published blog posts (for public blog page)
 router.get("/", async (req, res) => {
   try {
@@ -67,12 +108,16 @@ router.get("/", async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const posts = await BlogPost.find({ published: true })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    // Newest first by go-live time (older posts without one use their created date).
+    const posts = await BlogPost.aggregate([
+      { $match: liveFilter() },
+      { $addFields: { liveAt: { $ifNull: ["$publishAt", "$createdAt"] } } },
+      { $sort: { liveAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+    ]);
 
-    const total = await BlogPost.countDocuments({ published: true });
+    const total = await BlogPost.countDocuments(liveFilter());
 
     res.json({
       posts,
@@ -88,8 +133,10 @@ router.get("/", async (req, res) => {
 // GET single blog post
 router.get("/:id", async (req, res) => {
   try {
-    const post = await BlogPost.findByIdAndUpdate(
-      req.params.id,
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ error: "Blog post not found" });
+    // Drafts and scheduled posts aren't visible before they go live.
+    const post = await BlogPost.findOneAndUpdate(
+      { _id: req.params.id, ...liveFilter() },
       { $inc: { views: 1 } },
       { new: true },
     );
@@ -105,7 +152,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // GET all posts for admin (published and unpublished)
-router.get("/admin/all", async (req, res) => {
+router.get("/admin/all", adminAuth, async (req, res) => {
   try {
     const posts = await BlogPost.find().sort({ createdAt: -1 });
     res.json(posts);
@@ -115,9 +162,9 @@ router.get("/admin/all", async (req, res) => {
 });
 
 // CREATE new blog post with image
-router.post("/", upload.single("image"), async (req, res) => {
+router.post("/", adminAuth, upload.single("image"), async (req, res) => {
   try {
-    const { title, description, content, author, published } = req.body;
+    const { title, description, content, author } = req.body;
 
     if (!title || !description || !req.file) {
       return res
@@ -125,6 +172,11 @@ router.post("/", upload.single("image"), async (req, res) => {
         .json({ error: "Title, description, and image are required" });
     }
 
+    const live = publishFields(req.body);
+    if (live.error) {
+      fs.unlink(req.file.path, () => {});
+      return res.status(400).json({ error: live.error });
+    }
     const imagePath = `/uploads/blog/${req.file.filename}`;
 
     const newPost = new BlogPost({
@@ -133,7 +185,8 @@ router.post("/", upload.single("image"), async (req, res) => {
       content: content || "",
       image: imagePath,
       author: author || "Cleaniq Team",
-      published: published === "true" ? true : false,
+      published: live.published,
+      publishAt: live.publishAt,
     });
 
     await newPost.save();
@@ -150,9 +203,10 @@ router.post("/", upload.single("image"), async (req, res) => {
 });
 
 // UPDATE blog post
-router.put("/:id", upload.single("image"), async (req, res) => {
+router.put("/:id", adminAuth, upload.single("image"), async (req, res) => {
   try {
     const { title, description, content, author, published } = req.body;
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ error: "Blog post not found" });
     const post = await BlogPost.findById(req.params.id);
 
     if (!post) {
@@ -169,7 +223,15 @@ router.put("/:id", upload.single("image"), async (req, res) => {
     if (description) post.description = description;
     if (content) post.content = content;
     if (author) post.author = author;
-    if (published !== undefined) post.published = published === "true";
+    if (req.body.status || published !== undefined) {
+      const live = publishFields(req.body, post);
+      if (live.error) {
+        if (req.file) fs.unlink(req.file.path, () => {});
+        return res.status(400).json({ error: live.error });
+      }
+      post.published = live.published;
+      post.publishAt = live.publishAt;
+    }
 
     // Update image if new one is provided
     if (req.file) {
@@ -199,7 +261,7 @@ router.put("/:id", upload.single("image"), async (req, res) => {
 });
 
 // DELETE blog post
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const post = await BlogPost.findById(req.params.id);
 

@@ -211,7 +211,7 @@ const Blog = () => {
                             </span>
                             <span className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full">
                               <Calendar size={16} />
-                              {new Date(featuredPost.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              {new Date(featuredPost.publishAt || featuredPost.createdAt).toLocaleDateString("en-GB", { month: "short", day: "numeric", year: "numeric" })}
                             </span>
                           </div>
                           <h2 className="text-5xl font-black text-white mb-4 leading-tight group-hover:text-primary transition-colors">
@@ -236,7 +236,7 @@ const Blog = () => {
                         </span>
                         <span className="flex items-center gap-1.5">
                           <Calendar size={13} />
-                          {new Date(featuredPost.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          {new Date(featuredPost.publishAt || featuredPost.createdAt).toLocaleDateString("en-GB", { month: "short", day: "numeric", year: "numeric" })}
                         </span>
                       </div>
                       <h2 className="text-xl font-black text-black mb-2 leading-snug group-hover:text-primary transition-colors line-clamp-3">

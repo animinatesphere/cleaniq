@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
+import { BlogContent } from "../utils/blogContent";
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -284,7 +285,7 @@ const BlogDetail = () => {
                   <div className="flex items-center gap-2">
                     <Calendar size={16} className="text-primary" />
                     <span>
-                      {new Date(post.createdAt).toLocaleDateString("en-US", {
+                      {new Date(post.publishAt || post.createdAt).toLocaleDateString("en-GB", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -345,8 +346,8 @@ const BlogDetail = () => {
           >
             {/* Full Content */}
             {post.content && (
-              <div className="text-slate-700 leading-relaxed text-base sm:text-lg whitespace-pre-wrap space-y-6 mb-16">
-                {post.content}
+              <div className="mb-16">
+                <BlogContent text={post.content} />
               </div>
             )}
 
