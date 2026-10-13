@@ -38,6 +38,8 @@ test.before(async () => {
     { name: "Double Oven Cleaning", region: "UK", rate: 62.5, type: "flat", category: "Extras" },
     { name: "Fridge and freezer", region: "UK", rate: 30, type: "flat", category: "Extras" },
     { name: "Stairs/Landing", region: "UK", rate: 15, type: "Cleaning", category: "Extras" },
+    { name: "Carpet cleaning", region: "UK", rate: 30, type: "flat", category: "Base" },
+    { name: "Window Cleaning", region: "UK", rate: 40, type: "flat", category: "Base" },
   ]);
   const app = express();
   app.use(express.json());
@@ -114,9 +116,39 @@ test("supplies brought by Cleaniq add the supplies fee, like the receptionist's 
   assert.equal(q.suppliesProvidedBy, "Cleaniq");
 });
 
+test("carpet cleaning is a fixed price: carpets × carpet price (full price), no hours or supplies needed", async () => {
+  const res = await send(good({ email: "carpet@test.uk", service: "Carpet cleaning", hours: "", supplies: "", carpet: "", carpets: "3", stairs: "1", extras: {} }));
+  const body = await res.json();
+  assert.equal(res.status, 200, JSON.stringify(body));
+  assert.equal(body.instantQuote, true);
+  const q = await Quote.findOne({ quoteRef: body.quoteRef }).lean();
+  const item = q.items[0];
+  assert.equal(item.billingType, "flat");
+  assert.equal(item.qty, 3);
+  assert.equal(item.unitPrice, 30, "carpet clean on its own: no 60% add-on discount");
+  assert.deepEqual(item.extras.map((e) => [e.name, e.qty, e.unitPrice]), [["Stairs/Landing", 1, 15]]);
+  assert.equal(q.subtotal, 90 + 15);
+});
+
+test("oven cleaning is a fixed price for the oven type; carpet/oven jobs still need their count/type", async () => {
+  const res = await send(good({ email: "ovenonly@test.uk", service: "Oven cleaning", hours: "", supplies: "", carpet: "", carpets: "", stairs: "", extras: { oven: true, ovenType: "Double oven" } }));
+  const body = await res.json();
+  assert.equal(body.instantQuote, true, JSON.stringify(body));
+  const q = await Quote.findOne({ quoteRef: body.quoteRef }).lean();
+  assert.equal(q.items[0].billingType, "flat");
+  assert.equal(q.items[0].unitPrice, 62.5, "full price, not 20% off");
+  assert.equal(q.items[0].description, "Double oven");
+  assert.equal(q.subtotal, 62.5);
+
+  const noOven = await send(good({ email: "x1@test.uk", service: "Oven cleaning", hours: "", supplies: "", extras: {} }));
+  assert.match((await noOven.json()).message, /type of oven/);
+  const noCarpets = await send(good({ email: "x2@test.uk", service: "Carpet cleaning", hours: "", supplies: "", carpet: "", carpets: "" }));
+  assert.match((await noCarpets.json()).message, /how many carpets/);
+});
+
 test("services not priced by the hour go to the team instead (customer gets 'we received it')", async () => {
   emails.length = 0;
-  const res = await send(good({ email: "oven@test.uk", service: "Oven cleaning" }));
+  const res = await send(good({ email: "oven@test.uk", service: "Window Cleaning" }));
   const body = await res.json();
   assert.equal(body.instantQuote, false);
   assert.equal(await Quote.countDocuments({ email: "oven@test.uk" }), 0);

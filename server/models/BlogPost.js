@@ -27,6 +27,13 @@ const blogPostSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // When the post goes live on the website. Published posts with a future date are "scheduled":
+    // hidden until then, then shown automatically. null = live since it was created.
+    publishAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
     views: {
       type: Number,
       default: 0,

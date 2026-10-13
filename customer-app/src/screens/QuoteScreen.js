@@ -24,6 +24,13 @@ import { tc, tcs, themed } from "../theme/dark";
 const CARPET_WITH = "With Carpet Cleaning (Save 60%)";
 const CARPET_WITHOUT = "Without Carpet Cleaning";
 const OVEN_TYPES = ["Single oven", "Double oven", "Range oven"];
+// Carpet and oven cleaning are fixed-price jobs: no hours — priced per carpet / per oven type.
+const flatKindOf = (service) => {
+  const n = String(service || "").toLowerCase();
+  if (n.includes("carpet")) return "carpet";
+  if (n.includes("oven")) return "oven";
+  return null;
+};
 const FRIDGE_TYPES = ["Single fridge", "Fridge freezer", "American fridge freezer"];
 const HOUR_CHOICES = [2, 3, 4, 5, 6, 7, 8, 10];
 const PROPERTY_TYPES = [
@@ -182,18 +189,37 @@ const QuoteScreen = ({ navigation }) => {
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setExtra = (patch) => setForm((f) => ({ ...f, extras: { ...f.extras, ...patch } }));
+  const flat = flatKindOf(form.service);
+  // Switching service: carpet/oven jobs have no hours or supplies question.
+  const chooseService = (name) => setForm((f) => {
+    const kind = flatKindOf(name);
+    const wasFlat = flatKindOf(f.service);
+    return {
+      ...f,
+      service: name,
+      hours: kind ? "" : f.hours,
+      supplies: kind ? "" : f.supplies,
+      carpet: kind || wasFlat ? "" : f.carpet,
+      carpets: kind || wasFlat === "carpet" ? null : f.carpets,
+      extras: kind === "carpet" ? { oven: false, ovenType: "", fridge: false, fridgeType: "" }
+        : kind === "oven" ? { oven: true, ovenType: wasFlat === "oven" ? f.extras.ovenType : "", fridge: false, fridgeType: "" }
+        : wasFlat === "oven" ? { ...f.extras, oven: false, ovenType: "" } : f.extras,
+    };
+  });
 
   const check = (n) => {
     const fail = (m) => { setError(m); return false; };
     if (n === 1) {
       if (!form.service) return fail("Please choose a service.");
-      if (!form.hours) return fail("Please choose how many hours you'd like.");
+      if (flat === "carpet" && !(form.carpets > 0)) return fail("Please tell us how many carpets / rooms to clean.");
+      if (flat === "oven" && !form.extras.ovenType) return fail("Please choose the type of oven.");
+      if (!flat && !form.hours) return fail("Please choose how many hours you'd like.");
       if (form.address.trim().length < 5) return fail("Please enter the full address of the property.");
       if (!POSTCODE_RE.test(form.postcode.trim())) return fail("Please enter a valid UK postcode, e.g. M1 1AA.");
-      if (!form.supplies) return fail("Please choose who provides the cleaning supplies.");
+      if (!flat && !form.supplies) return fail("Please choose who provides the cleaning supplies.");
     }
     if (n === 3) {
-      if (form.carpet === CARPET_WITH && !(form.carpets > 0)) return fail("Please tell us how many carpets to clean.");
+      if (!flat && form.carpet === CARPET_WITH && !(form.carpets > 0)) return fail("Please tell us how many carpets to clean.");
       if (form.extras.oven && !form.extras.ovenType) return fail("Please confirm the type of oven.");
       if (form.extras.fridge && !form.extras.fridgeType) return fail("Please confirm the type of fridge.");
     }
@@ -210,9 +236,14 @@ const QuoteScreen = ({ navigation }) => {
     setStep(n);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   };
-  const next = () => { if (check(step)) goTo(step + 1); };
-  const back = () => { setError(""); if (step > 1) goTo(step - 1); else navigation.goBack(); };
+  // Carpet and oven cleaning have no add-ons, so they skip that step.
+  const skips = (n) => Boolean(flat) && n === 3;
+  const after = (n) => (skips(n + 1) ? n + 2 : n + 1);
+  const before = (n) => (skips(n - 1) ? n - 2 : n - 1);
+  const next = () => { if (check(step)) goTo(after(step)); };
+  const back = () => { setError(""); if (step > 1) goTo(before(step)); else navigation.goBack(); };
   const jump = (n) => {
+    if (skips(n)) return;
     if (n < step) { setError(""); return goTo(n); }
     for (let i = step; i < n; i++) if (!check(i)) return;
     goTo(n);
@@ -239,9 +270,9 @@ const QuoteScreen = ({ navigation }) => {
 
   const summary = useMemo(() => [
     form.service,
-    form.hours && `${form.hours}h`,
+    flat === "carpet" ? form.carpets && `${form.carpets} carpets` : flat === "oven" ? form.extras.ovenType : form.hours && `${form.hours}h`,
     form.postcode.toUpperCase(),
-  ].filter(Boolean).join(" · "), [form.service, form.hours, form.postcode]);
+  ].filter(Boolean).join(" · "), [form.service, form.hours, form.postcode, form.carpets, form.extras.ovenType, flat]);
 
   // ── Done ──
   if (done) {
@@ -327,8 +358,8 @@ const QuoteScreen = ({ navigation }) => {
             const on = step === n;
             const past = step > n;
             return (
-              <TouchableOpacity key={n} onPress={() => jump(n)} activeOpacity={0.85}
-                style={[styles.tab, on && styles.tabOn, past && styles.tabPast]}>
+              <TouchableOpacity key={n} onPress={() => jump(n)} activeOpacity={0.85} disabled={skips(n)}
+                style={[styles.tab, on && styles.tabOn, past && styles.tabPast, skips(n) && { opacity: 0.35 }]}>
                 {past ? <CheckCircle2 size={15} color={tc(C.primary)} strokeWidth={2.2} /> : <Icon size={15} color={tc(on ? "#fff" : C.textMuted)} strokeWidth={2.2} />}
                 <Text style={[styles.tabTxt, on && styles.tabTxtOn, past && styles.tabTxtPast]}>{label}</Text>
               </TouchableOpacity>
@@ -348,7 +379,7 @@ const QuoteScreen = ({ navigation }) => {
                   const Icon = serviceIcon(name);
                   const on = form.service === name;
                   return (
-                    <Choice key={name} selected={on} onPress={() => set("service", name)} style={styles.serviceCard}>
+                    <Choice key={name} selected={on} onPress={() => chooseService(name)} style={styles.serviceCard}>
                       <View style={[styles.serviceIcon, on && { backgroundColor: tc(C.primary, "bg") }]}>
                         <Icon size={19} color={tc(on ? "#fff" : C.primary)} strokeWidth={2} />
                       </View>
@@ -359,26 +390,49 @@ const QuoteScreen = ({ navigation }) => {
               </View>
 
               <View style={styles.gap} />
-              <Title hint="How long you'd like your cleaner for. Prices are per hour.">How many hours?</Title>
-              <View style={styles.grid4}>
-                {HOUR_CHOICES.map((h) => (
-                  <Choice key={h} tick={false} selected={Number(form.hours) === h} onPress={() => set("hours", h)} style={styles.hourChip}>
-                    <Text style={styles.hourTxt}>{h}h</Text>
-                  </Choice>
-                ))}
-              </View>
+              {flat === "carpet" ? (
+                <>
+                  <Title hint="Fixed price per carpet or room — no hourly charge.">How many carpets / rooms?</Title>
+                  <Stepper label="Carpets / rooms" Icon={Layers} value={form.carpets} max={20} onChange={(v) => set("carpets", v)} />
+                </>
+              ) : flat === "oven" ? (
+                <>
+                  <Title hint="Fixed price for your type of oven — no hourly charge.">Which oven?</Title>
+                  {OVEN_TYPES.map((t) => (
+                    <Choice key={t} selected={form.extras.ovenType === t} onPress={() => setExtra({ oven: true, ovenType: t })} style={styles.rowChoice}>
+                      <Flame size={19} color={tc(form.extras.ovenType === t ? C.primary : C.textMuted)} strokeWidth={2} />
+                      <Text style={styles.rowChoiceTxt}>{t}</Text>
+                    </Choice>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <Title hint="How long you'd like your cleaner for. Prices are per hour.">How many hours?</Title>
+                  <View style={styles.grid4}>
+                    {HOUR_CHOICES.map((h) => (
+                      <Choice key={h} tick={false} selected={Number(form.hours) === h} onPress={() => set("hours", h)} style={styles.hourChip}>
+                        <Text style={styles.hourTxt}>{h}h</Text>
+                      </Choice>
+                    ))}
+                  </View>
+                </>
+              )}
 
               <View style={styles.gap} />
               <Title>Where is the property?</Title>
               <Field Icon={House} label="Full address *" value={form.address} onChangeText={(v) => set("address", v)} placeholder="House number, street, town" autoCapitalize="words" textContentType="fullStreetAddress" />
               <Field Icon={MapPin} label="Post code *" value={form.postcode} onChangeText={(v) => set("postcode", v.toUpperCase())} placeholder="M1 1AA" autoCapitalize="characters" textContentType="postalCode" />
-              <Text style={styles.label}>Cleaning supplies & equipment *</Text>
-              {[["Cleaniq", "Cleaniq brings everything"], ["Customer", "I'll provide supplies"]].map(([v, text]) => (
-                <Choice key={v} selected={form.supplies === v} onPress={() => set("supplies", v)} style={styles.rowChoice}>
-                  <SprayCan size={19} color={tc(form.supplies === v ? C.primary : C.textMuted)} strokeWidth={2} />
-                  <Text style={styles.rowChoiceTxt}>{text}</Text>
-                </Choice>
-              ))}
+              {!flat && (
+                <>
+                  <Text style={styles.label}>Cleaning supplies & equipment *</Text>
+                  {[["Cleaniq", "Cleaniq brings everything"], ["Customer", "I'll provide supplies"]].map(([v, text]) => (
+                    <Choice key={v} selected={form.supplies === v} onPress={() => set("supplies", v)} style={styles.rowChoice}>
+                      <SprayCan size={19} color={tc(form.supplies === v ? C.primary : C.textMuted)} strokeWidth={2} />
+                      <Text style={styles.rowChoiceTxt}>{text}</Text>
+                    </Choice>
+                  ))}
+                </>
+              )}
             </>
           )}
 
@@ -412,6 +466,8 @@ const QuoteScreen = ({ navigation }) => {
 
           {step === 3 && (
             <>
+              {flat !== "carpet" && (
+              <>
               <Title hint="Add it to your clean and save 60%.">Carpet cleaning</Title>
               <Choice selected={form.carpet === CARPET_WITH} onPress={() => set("carpet", form.carpet === CARPET_WITH ? "" : CARPET_WITH)} style={styles.carpetCard}>
                 <View style={styles.saveBadge}><Text style={styles.saveBadgeTxt}>SAVE 60%</Text></View>
@@ -425,8 +481,10 @@ const QuoteScreen = ({ navigation }) => {
               )}
 
               <View style={styles.gap} />
+              </>
+              )}
               <Title hint="Optional — tick anything you'd like included.">Save 20% on additional services</Title>
-              {extraCard("oven", "Oven Cleaning", Flame, "ovenType", OVEN_TYPES, "Type of oven")}
+              {flat !== "oven" && extraCard("oven", "Oven Cleaning", Flame, "ovenType", OVEN_TYPES, "Type of oven")}
               {extraCard("fridge", "Fridge Cleaning", Refrigerator, "fridgeType", FRIDGE_TYPES, "Type of fridge")}
             </>
           )}
@@ -489,7 +547,7 @@ const QuoteScreen = ({ navigation }) => {
           {step < STEPS.length ? (
             <TouchableOpacity onPress={next} style={[styles.primaryBtn, { flex: 1 }]} activeOpacity={0.85}>
               <View style={styles.btnRow}>
-                <Text style={styles.primaryBtnTxt}>Next: {STEPS[step].label}</Text>
+                <Text style={styles.primaryBtnTxt}>Next: {STEPS[after(step) - 1].label}</Text>
                 <ArrowRight size={17} color={tc("#fff")} strokeWidth={2.4} />
               </View>
             </TouchableOpacity>
