@@ -224,9 +224,10 @@ const GetQuote = () => {
       service: name,
       hours: kind ? "" : f.hours,
       supplies: kind ? "" : f.supplies,
-      carpet: kind === "carpet" || wasFlat === "carpet" ? "" : f.carpet,
-      carpets: kind === "carpet" || wasFlat === "carpet" ? null : f.carpets,
-      extras: kind === "oven" ? { ...f.extras, oven: true }
+      carpet: kind || wasFlat ? "" : f.carpet,
+      carpets: kind || wasFlat === "carpet" ? null : f.carpets,
+      extras: kind === "carpet" ? { oven: false, ovenType: "", fridge: false, fridgeType: "" }
+        : kind === "oven" ? { oven: true, ovenType: wasFlat === "oven" ? f.extras.ovenType : "", fridge: false, fridgeType: "" }
         : wasFlat === "oven" ? { ...f.extras, oven: false, ovenType: "" } : f.extras,
     };
   });
@@ -271,10 +272,15 @@ const GetQuote = () => {
     setStep(n);
     requestAnimationFrame(() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
-  const next = () => { if (checkStep(step)) goTo(step + 1); };
-  const back = () => { setErrorMsg(""); setStatus("idle"); goTo(step - 1); };
+  // Carpet and oven cleaning have no add-ons, so they skip that step.
+  const skips = (n) => Boolean(flat) && n === 3;
+  const after = (n) => (skips(n + 1) ? n + 2 : n + 1);
+  const before = (n) => (skips(n - 1) ? n - 2 : n - 1);
+  const next = () => { if (checkStep(step)) goTo(after(step)); };
+  const back = () => { setErrorMsg(""); setStatus("idle"); goTo(before(step)); };
   // Chips: go back freely; forward only through steps that are complete.
   const jump = (n) => {
+    if (skips(n)) return;
     if (n < step) { setErrorMsg(""); setStatus("idle"); return goTo(n); }
     for (let i = step; i < n; i++) if (!checkStep(i)) return;
     goTo(n);
@@ -507,9 +513,10 @@ const GetQuote = () => {
                   </p>
                   <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                     {STEPS.map(({ n, label, icon: Icon }) => (
-                      <button key={n} type="button" onClick={() => jump(n)}
+                      <button key={n} type="button" onClick={() => jump(n)} disabled={skips(n)}
                         className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2.5 text-[11px] font-black transition sm:flex-row sm:gap-2 sm:text-xs ${
-                          step === n ? "bg-primary text-white shadow-lg shadow-primary/25"
+                          skips(n) ? "bg-slate-50 text-slate-300 line-through cursor-default"
+                            : step === n ? "bg-primary text-white shadow-lg shadow-primary/25"
                             : step > n ? "bg-primary/10 text-primary"
                             : "bg-slate-50 text-slate-400"
                         }`}>
@@ -648,12 +655,14 @@ const GetQuote = () => {
                           )}
                         </Section>
                         )}
-                        <Section n={flat === "carpet" ? 1 : 2} title="Save 20% on additional services" hint="Optional — tick anything you'd like included.">
+                        {flat !== "carpet" && (
+                        <Section n={2} title="Save 20% on additional services" hint="Optional — tick anything you'd like included.">
                           <div className="grid gap-3">
                             {flat !== "oven" && extraCard("oven", "Oven Cleaning", Flame, "ovenType", OVEN_TYPES, "Type of oven")}
                             {extraCard("fridge", "Fridge Cleaning", Refrigerator, "fridgeType", FRIDGE_TYPES, "Type of fridge")}
                           </div>
                         </Section>
+                        )}
                       </>
                     )}
 
@@ -727,7 +736,7 @@ const GetQuote = () => {
                   {step < STEPS.length ? (
                     <button type="button" onClick={next}
                       className="group flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-primary/25 transition hover:bg-primary-dark active:scale-[0.99]">
-                      Next: {STEPS[step].label} <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                      Next: {STEPS[after(step) - 1].label} <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                     </button>
                   ) : (
                     <button type="submit" disabled={status === "loading"}

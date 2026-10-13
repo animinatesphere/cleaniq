@@ -50,8 +50,7 @@ async function priceFlatRequest(q, services, kind) {
 
   const wanted = [];
   if (kind === "carpet" && q.stairs > 0) wanted.push([STAIRS_ITEM, q.stairs, 0]);
-  if (kind === "carpet" && q.ovenType) wanted.push([OVEN_ITEMS[q.ovenType], 1, EXTRA_DISCOUNT]);
-  if (q.fridgeType) wanted.push([FRIDGE_ITEMS[q.fridgeType], 1, EXTRA_DISCOUNT]);
+  // Carpet and oven cleaning have no add-ons (only stairs/landing for carpets).
   const extras = [];
   for (const [name, qty, discount] of wanted) {
     const line = addOn(services, name, qty, discount);

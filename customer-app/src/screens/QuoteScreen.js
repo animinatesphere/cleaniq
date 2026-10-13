@@ -199,9 +199,10 @@ const QuoteScreen = ({ navigation }) => {
       service: name,
       hours: kind ? "" : f.hours,
       supplies: kind ? "" : f.supplies,
-      carpet: kind === "carpet" || wasFlat === "carpet" ? "" : f.carpet,
-      carpets: kind === "carpet" || wasFlat === "carpet" ? null : f.carpets,
-      extras: kind === "oven" ? { ...f.extras, oven: true }
+      carpet: kind || wasFlat ? "" : f.carpet,
+      carpets: kind || wasFlat === "carpet" ? null : f.carpets,
+      extras: kind === "carpet" ? { oven: false, ovenType: "", fridge: false, fridgeType: "" }
+        : kind === "oven" ? { oven: true, ovenType: wasFlat === "oven" ? f.extras.ovenType : "", fridge: false, fridgeType: "" }
         : wasFlat === "oven" ? { ...f.extras, oven: false, ovenType: "" } : f.extras,
     };
   });
@@ -235,9 +236,14 @@ const QuoteScreen = ({ navigation }) => {
     setStep(n);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   };
-  const next = () => { if (check(step)) goTo(step + 1); };
-  const back = () => { setError(""); if (step > 1) goTo(step - 1); else navigation.goBack(); };
+  // Carpet and oven cleaning have no add-ons, so they skip that step.
+  const skips = (n) => Boolean(flat) && n === 3;
+  const after = (n) => (skips(n + 1) ? n + 2 : n + 1);
+  const before = (n) => (skips(n - 1) ? n - 2 : n - 1);
+  const next = () => { if (check(step)) goTo(after(step)); };
+  const back = () => { setError(""); if (step > 1) goTo(before(step)); else navigation.goBack(); };
   const jump = (n) => {
+    if (skips(n)) return;
     if (n < step) { setError(""); return goTo(n); }
     for (let i = step; i < n; i++) if (!check(i)) return;
     goTo(n);
@@ -352,8 +358,8 @@ const QuoteScreen = ({ navigation }) => {
             const on = step === n;
             const past = step > n;
             return (
-              <TouchableOpacity key={n} onPress={() => jump(n)} activeOpacity={0.85}
-                style={[styles.tab, on && styles.tabOn, past && styles.tabPast]}>
+              <TouchableOpacity key={n} onPress={() => jump(n)} activeOpacity={0.85} disabled={skips(n)}
+                style={[styles.tab, on && styles.tabOn, past && styles.tabPast, skips(n) && { opacity: 0.35 }]}>
                 {past ? <CheckCircle2 size={15} color={tc(C.primary)} strokeWidth={2.2} /> : <Icon size={15} color={tc(on ? "#fff" : C.textMuted)} strokeWidth={2.2} />}
                 <Text style={[styles.tabTxt, on && styles.tabTxtOn, past && styles.tabTxtPast]}>{label}</Text>
               </TouchableOpacity>
@@ -541,7 +547,7 @@ const QuoteScreen = ({ navigation }) => {
           {step < STEPS.length ? (
             <TouchableOpacity onPress={next} style={[styles.primaryBtn, { flex: 1 }]} activeOpacity={0.85}>
               <View style={styles.btnRow}>
-                <Text style={styles.primaryBtnTxt}>Next: {STEPS[step].label}</Text>
+                <Text style={styles.primaryBtnTxt}>Next: {STEPS[after(step) - 1].label}</Text>
                 <ArrowRight size={17} color={tc("#fff")} strokeWidth={2.4} />
               </View>
             </TouchableOpacity>
