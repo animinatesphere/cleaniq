@@ -101,6 +101,30 @@ router.post("/admin/ai-draft", adminAuth, express.json(), async (req, res) => {
   }
 });
 
+// Blog autopilot: Claude writes and posts on a schedule (utils/blogAutopilot.js).
+router.get("/admin/autopilot", adminAuth, async (req, res) => {
+  try {
+    res.json(await require("../utils/blogAutopilot").getSettings());
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router.put("/admin/autopilot", adminAuth, express.json(), async (req, res) => {
+  try {
+    res.json(await require("../utils/blogAutopilot").saveSettings(req.body || {}));
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+router.post("/admin/autopilot/run-now", adminAuth, async (req, res) => {
+  try {
+    const post = await require("../utils/blogAutopilot").runNow();
+    res.status(201).json(post);
+  } catch (error) {
+    res.status(502).json({ error: error.message });
+  }
+});
+
 // GET all published blog posts (for public blog page)
 router.get("/", async (req, res) => {
   try {
