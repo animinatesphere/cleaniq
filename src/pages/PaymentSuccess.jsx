@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { trackPurchaseForBooking } from "../utils/analytics";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, CalendarDays, Mail, Home } from "lucide-react";
 import { Helmet } from "react-helmet-async";
@@ -6,6 +7,8 @@ import { Helmet } from "react-helmet-async";
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const bookingId = searchParams.get("bookingId");
+  // Google Analytics 4 purchase, once the server has the payment.
+  useEffect(() => { if (bookingId) trackPurchaseForBooking(bookingId); }, [bookingId]);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4 py-20">

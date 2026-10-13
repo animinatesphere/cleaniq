@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const express = require("express");
 const { tokensOf } = require("../utils/pushNotifications");
 const router = express.Router();
@@ -21,35 +22,6 @@ const Notification = require("../models/Notification");
 
 // PDF invoice attachment and the once-per-booking completion invoice (utils/bookingInvoice.js).
 const { buildInvoiceAttachment, sendCompletionInvoice } = require("../utils/bookingInvoice");
-
-// POST /api/bookings/dev-test — admin-only TEST booking from the website's booking page, with no
-// payment taken. Marked clearly (payment method "Dev Mode", £0 charged, BK-TEST-…) and switched
-// off for cleaners (no job alerts) unless notifyCleaners is set.
-router.post("/dev-test", require("../middleware/adminAuth"), async (req, res) => {
-  try {
-    const b = req.body || {};
-    if (!b.service) return res.status(400).json({ message: "Choose a service first." });
-    const amount = Math.max(0, Number(b.payment?.amount) || 0);
-    const payload = {
-      ...b,
-      bookingId: `BK-TEST-${Math.floor(100000 + Math.random() * 900000)}`,
-      status: "Confirmed",
-      noPaymentRequired: true,
-      leadSource: "Dev Test",
-      createdByAdmin: req.admin?.username || "admin",
-      hiddenFromWorkers: !b.notifyCleaners,
-      payment: { amount, currency: "GBP", method: "Dev Mode", status: "Completed", transactionId: "DEV-TEST-NO-PAYMENT" },
-      meta: { ...(b.meta || {}), devTest: true, source: "website-dev-test" },
-    };
-    delete payload._id;
-    delete payload.notifyCleaners;
-    const booking = await createBooking(payload);
-    console.log(`🧪 Test booking ${booking.bookingId} created by ${payload.createdByAdmin} (no payment)`);
-    res.status(201).json({ bookingId: booking.bookingId, _id: booking._id });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
 
 // Public booking creation endpoint (no admin auth) - used by frontend
 // Creates a booking record from client POST and returns the saved booking.
@@ -315,6 +287,33 @@ router.get("/availability/:date/:serviceType", async (req, res) => {
 });
 
 // GET /api/bookings/:id/invoice — public, no auth needed (linked from customer emails)
+// GET /api/bookings/:id/purchase-summary — for Google Analytics "purchase" on the website's
+// payment return pages. Only once the booking is paid, and only what was bought — no personal
+// details. :id is the booking's database id or its reference.
+router.get("/:id/purchase-summary", async (req, res) => {
+  try {
+    const ref = String(req.params.id || "");
+    const query = mongoose.isValidObjectId(ref) ? { _id: ref } : { bookingId: ref };
+    const b = await Booking.findOne(query).select("bookingId service status payment details.duration details.frequency meta.devTest").lean();
+    if (!b) return res.status(404).json({ paid: false });
+    const p = b.payment || {};
+    const paid = ["Completed", "Authorized", "Paid"].includes(p.status) && p.method !== "Dev Mode" && !b.meta?.devTest;
+    if (!paid) return res.json({ paid: false });
+    res.json({
+      paid: true,
+      transactionId: b.bookingId,
+      service: b.service,
+      value: Math.round(Number(p.amount || 0) * 100) / 100,
+      tax: Math.round(Number(p.taxAmount || 0) * 100) / 100,
+      currency: p.currency === "NGN" ? "NGN" : "GBP",
+      hours: Number(b.details?.duration) || null,
+      frequency: b.details?.frequency || "Once",
+    });
+  } catch (err) {
+    res.status(500).json({ paid: false });
+  }
+});
+
 router.get("/:id/invoice", async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);

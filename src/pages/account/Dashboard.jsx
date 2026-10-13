@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { trackPurchaseForBooking } from '../../utils/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -83,6 +84,8 @@ export default function CustomerDashboard() {
   // Show payment success toast when redirected from Stripe
   useEffect(() => {
     if (searchParams.get('payment') === 'success') {
+      // Google Analytics 4 purchase, once the server has the payment.
+      trackPurchaseForBooking(searchParams.get('bookingId') || searchParams.get('booking'));
       setSuccessToast('Payment received! Your booking is confirmed.');
       setTimeout(() => setSuccessToast(''), 6000);
     }

@@ -329,20 +329,18 @@ test("invoice: admin marking a job Completed still sends it", async () => {
   assert.equal(emails.filter((m) => /Invoice/.test(m.subject || "") && m.subject.includes(r.data.bookingId)).length, 1);
 });
 
-test("admin test booking from the website: no payment, marked TEST, no cleaner alerts; refused without admin login", async () => {
-  const body = { service: "Deep Clean", customer: { firstName: "Tess", lastName: "T", email: "tess@test.uk", phone: "07700900999" },
-    details: { address: "1 Test St, M1 1AA", duration: 2, frequency: "Once", extras: [] }, schedule: { date: inDays(5), preferredTime: "10:00" }, payment: { amount: 61.7 } };
-  const noAuth = await fetch(`${base}/bookings/dev-test`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  assert.equal(noAuth.status, 401);
-  const res = await fetch(`${base}/bookings/dev-test`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` }, body: JSON.stringify(body) });
-  assert.equal(res.status, 201);
-  const { bookingId } = await res.json();
-  assert.match(bookingId, /^BK-TEST-\d{6}$/);
-  const b = await Booking.findOne({ bookingId }).lean();
-  assert.equal(b.status, "Confirmed");
-  assert.equal(b.payment.method, "Dev Mode");
-  assert.equal(b.leadSource, "Dev Test");
-  assert.equal(b.hiddenFromWorkers, true);
-  await settle();
-  assert.deepEqual(await alertsFor(bookingId), { notifications: 0, emails: 0 });
+test("purchase summary for Google Analytics: only once paid, and no personal details", async () => {
+  const r = await adminBooking({ details: { address: "5 GA St, M1 1AA", duration: 2, frequency: "Once", extras: [] } });
+  const get = async (id) => (await fetch(`${base}/bookings/${id}/purchase-summary`)).json();
+  assert.deepEqual(await get(r.data._id), { paid: false });
+  await confirmPaidBooking(r.data._id, { paymentIntentId: "pi_ga", captured: true });
+  const s = await get(r.data._id);
+  assert.equal(s.paid, true);
+  assert.equal(s.transactionId, r.data.bookingId);
+  assert.ok(s.value > 0);
+  assert.equal(s.currency, "GBP");
+  const byRef = await get(r.data.bookingId);
+  assert.equal(byRef.transactionId, r.data.bookingId);
+  const text = JSON.stringify(s);
+  for (const secret of [r.data.customer.email, r.data.customer.phone, "GA St"]) assert.ok(!text.includes(secret), `leaks ${secret}`);
 });
