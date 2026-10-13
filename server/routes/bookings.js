@@ -23,6 +23,35 @@ const Notification = require("../models/Notification");
 // PDF invoice attachment and the once-per-booking completion invoice (utils/bookingInvoice.js).
 const { buildInvoiceAttachment, sendCompletionInvoice } = require("../utils/bookingInvoice");
 
+// POST /api/bookings/dev-test — admin-only TEST booking from the website's booking page, with no
+// payment taken. Marked clearly (payment method "Dev Mode", £0 charged, BK-TEST-…) and switched
+// off for cleaners (no job alerts) unless notifyCleaners is set.
+router.post("/dev-test", require("../middleware/adminAuth"), async (req, res) => {
+  try {
+    const b = req.body || {};
+    if (!b.service) return res.status(400).json({ message: "Choose a service first." });
+    const amount = Math.max(0, Number(b.payment?.amount) || 0);
+    const payload = {
+      ...b,
+      bookingId: `BK-TEST-${Math.floor(100000 + Math.random() * 900000)}`,
+      status: "Confirmed",
+      noPaymentRequired: true,
+      leadSource: "Dev Test",
+      createdByAdmin: req.admin?.username || "admin",
+      hiddenFromWorkers: !b.notifyCleaners,
+      payment: { amount, currency: "GBP", method: "Dev Mode", status: "Completed", transactionId: "DEV-TEST-NO-PAYMENT" },
+      meta: { ...(b.meta || {}), devTest: true, source: "website-dev-test" },
+    };
+    delete payload._id;
+    delete payload.notifyCleaners;
+    const booking = await createBooking(payload);
+    console.log(`🧪 Test booking ${booking.bookingId} created by ${payload.createdByAdmin} (no payment)`);
+    res.status(201).json({ bookingId: booking.bookingId, _id: booking._id });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // Public booking creation endpoint (no admin auth) - used by frontend
 // Creates a booking record from client POST and returns the saved booking.
 // WARNING: This endpoint is intentionally minimal to unblock customer flow.
