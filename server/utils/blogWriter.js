@@ -53,7 +53,7 @@ async function businessFacts() {
  * @param {{ topic: string, keywords?: string, notes?: string }} input
  * @returns {Promise<{ title: string, description: string, content: string }>}
  */
-async function draftBlogPost({ topic, keywords = "", notes = "" }) {
+async function draftBlogPost({ topic, keywords = "", notes = "", avoidTitles = [] }) {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not set on the server.");
   const sdk = require("@anthropic-ai/sdk");
   const Anthropic = sdk.default || sdk;
@@ -78,6 +78,7 @@ Formatting for "content" (the website shows exactly this — no other markup):
     `Topic: ${topic}`,
     keywords && `Keywords to work in naturally: ${keywords}`,
     notes && `Extra notes from the team: ${notes}`,
+    avoidTitles.length && `Already on our blog — pick a different angle, don't repeat these:\n${avoidTitles.map((t) => `- ${t}`).join("\n")}`,
   ].filter(Boolean).join("\n");
 
   const response = await client.beta.messages.create({

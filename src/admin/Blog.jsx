@@ -14,6 +14,7 @@ import {
   Link2,
   Sparkles,
   CalendarClock,
+  Bot,
 } from "lucide-react";
 
 // <input type="datetime-local"> value (local time) ↔ Date
@@ -46,6 +47,40 @@ const AdminBlog = () => {
   const [loadingComments, setLoadingComments] = useState(false);
   const contentRef = useRef(null);
   const [ai, setAi] = useState({ open: false, topic: "", keywords: "", loading: false, error: "" });
+  // Autopilot: Claude writes and posts on a schedule.
+  const [auto, setAuto] = useState(null);
+  const [autoOpen, setAutoOpen] = useState(false);
+  const [autoBusy, setAutoBusy] = useState("");
+  const [autoMsg, setAutoMsg] = useState("");
+  const loadAutopilot = async () => {
+    try {
+      const r = await fetch(`${API_URL}/blog/admin/autopilot`);
+      if (r.ok) { const d = await r.json(); setAuto({ ...d, imagesText: (d.images || []).join("\n") }); }
+    } catch { /* ignore */ }
+  };
+  useEffect(() => { loadAutopilot(); }, []);
+  const saveAutopilot = async (patch = {}) => {
+    setAutoBusy("save"); setAutoMsg("");
+    try {
+      const body = { enabled: auto.enabled, everyDays: auto.everyDays, time: auto.time, instructions: auto.instructions, mode: auto.mode, images: auto.imagesText, ...patch };
+      const r = await fetch(`${API_URL}/blog/admin/autopilot`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || "Couldn't save the autopilot.");
+      setAuto({ ...d, imagesText: (d.images || []).join("\n") });
+      setAutoMsg(d.enabled ? `Saved — next post ${fmtWhen(d.nextRunAt)}.` : "Saved — autopilot is off.");
+    } catch (err) { setAutoMsg(err.message); } finally { setAutoBusy(""); }
+  };
+  const autopilotNow = async () => {
+    if (!confirm(auto.mode === "draft" ? "Ask Claude to write a post now and save it as a draft?" : "Ask Claude to write a post now and publish it straight away?")) return;
+    setAutoBusy("run"); setAutoMsg("");
+    try {
+      const r = await fetch(`${API_URL}/blog/admin/autopilot/run-now`, { method: "POST" });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || "Claude couldn't write the post.");
+      setAutoMsg(`${d.published ? "Posted" : "Saved as draft"}: ${d.title}`);
+      fetchPosts(); loadAutopilot();
+    } catch (err) { setAutoMsg(err.message); } finally { setAutoBusy(""); }
+  };
 
   const [formData, setFormData] = useState({
     title: "",
@@ -418,6 +453,78 @@ const AdminBlog = () => {
           </div>
         </motion.div>
 
+        {auto && (
+          <div className="mb-8 bg-[#0B2D22] rounded-2xl border border-violet-400/25 overflow-hidden">
+            <button type="button" onClick={() => setAutoOpen((o) => !o)} className="w-full flex items-center justify-between gap-4 p-5 text-left">
+              <span className="flex items-center gap-3">
+                <span className="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center"><Bot size={20} /></span>
+                <span>
+                  <span className="block font-black text-white">Blog autopilot (Claude)</span>
+                  <span className="block text-xs font-bold text-white/50">
+                    {auto.enabled ? `On · every ${auto.everyDays === 7 ? "week" : `${auto.everyDays} days`} at ${auto.time} · next post ${auto.nextRunAt ? fmtWhen(auto.nextRunAt) : "—"}` : "Off — Claude can write and post for you on a schedule"}
+                  </span>
+                </span>
+              </span>
+              <span className={`text-[10px] font-black px-2.5 py-1 rounded-full ${auto.enabled ? "bg-emerald-500/15 text-emerald-300" : "bg-white/5 text-white/40"}`}>{auto.enabled ? "ON" : "OFF"}</span>
+            </button>
+            {autoOpen && (
+              <div className="px-5 pb-5 space-y-4 border-t border-white/10 pt-5">
+                <div>
+                  <label className="block text-xs font-black text-white/60 mb-2 uppercase tracking-wider">Instructions for Claude</label>
+                  <textarea rows={5} value={auto.instructions} onChange={(e) => setAuto((a) => ({ ...a, instructions: e.target.value }))}
+                    placeholder="e.g. Write helpful cleaning tips for homeowners, tenants and landlords in Manchester. Mix topics: end of tenancy, deep cleaning, regular cleaning, seasonal tips, Airbnb hosting. Friendly, practical, no jargon."
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/25 focus:outline-none focus:border-violet-400/50" />
+                  <p className="text-[11px] text-white/40 mt-1">Claude picks a new topic each time from these instructions, never repeats a title, and links to our service pages.</p>
+                </div>
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-black text-white/60 mb-2 uppercase tracking-wider">How often</label>
+                    <select value={auto.everyDays} onChange={(e) => setAuto((a) => ({ ...a, everyDays: Number(e.target.value) }))}
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#071D16] text-white">
+                      <option value={2}>Every 2 days</option><option value={3}>Every 3 days</option><option value={4}>Every 4 days</option><option value={7}>Every week</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black text-white/60 mb-2 uppercase tracking-wider">Time (UK)</label>
+                    <input type="time" value={auto.time} onChange={(e) => setAuto((a) => ({ ...a, time: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white [color-scheme:dark]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black text-white/60 mb-2 uppercase tracking-wider">What to do with it</label>
+                    <select value={auto.mode} onChange={(e) => setAuto((a) => ({ ...a, mode: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#071D16] text-white">
+                      <option value="publish">Publish straight away</option><option value="draft">Save as draft for me to check</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-white/60 mb-2 uppercase tracking-wider">Extra cover photo links (optional)</label>
+                  <textarea rows={2} value={auto.imagesText} onChange={(e) => setAuto((a) => ({ ...a, imagesText: e.target.value }))}
+                    placeholder="One https:// photo link per line"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/25 focus:outline-none focus:border-violet-400/50 text-sm" />
+                  <p className="text-[11px] text-white/40 mt-1">Each post uses the photo used longest ago — from your existing posts plus any links here.</p>
+                </div>
+                {auto.lastResult && <p className="text-xs font-bold text-white/60">Last run {auto.lastRunAt ? fmtWhen(auto.lastRunAt) : ""}: {auto.lastResult}</p>}
+                {autoMsg && <p className="text-sm font-bold text-violet-200">{autoMsg}</p>}
+                <div className="flex flex-wrap gap-3">
+                  <button type="button" disabled={!!autoBusy} onClick={() => saveAutopilot({ enabled: !auto.enabled })}
+                    className={`px-5 py-3 rounded-xl font-black text-sm text-white disabled:opacity-60 ${auto.enabled ? "bg-rose-500/80 hover:bg-rose-500" : "bg-emerald-500 hover:bg-emerald-400"}`}>
+                    {auto.enabled ? "Turn autopilot off" : "Save & turn autopilot on"}
+                  </button>
+                  {auto.enabled && (
+                    <button type="button" disabled={!!autoBusy} onClick={() => saveAutopilot()}
+                      className="px-5 py-3 rounded-xl font-black text-sm bg-white/10 hover:bg-white/15 text-white disabled:opacity-60">Save changes</button>
+                  )}
+                  <button type="button" disabled={!!autoBusy || !auto.instructions} onClick={autopilotNow}
+                    className="px-5 py-3 rounded-xl font-black text-sm bg-violet-500 hover:bg-violet-400 text-white disabled:opacity-60 flex items-center gap-2">
+                    <Sparkles size={16} /> {autoBusy === "run" ? "Claude is writing… (about a minute)" : "Post one now"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {showForm && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -605,6 +712,15 @@ const AdminBlog = () => {
                   {formData.status === "schedule" && (
                     <div>
                       <label className="block text-xs font-black text-white/50 mb-2 uppercase tracking-wider">Go live on</label>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {[[2, "In 2 days"], [3, "In 3 days"], [4, "In 4 days"], [7, "In 1 week"]].map(([d, label]) => (
+                          <button key={d} type="button"
+                            onClick={() => { const t = new Date(Date.now() + d * 86400000); t.setHours(9, 0, 0, 0); setFormData((f) => ({ ...f, publishAt: toLocalInput(t) })); }}
+                            className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-white/80 hover:bg-sky-500/15 hover:border-sky-400/40">
+                            {label}
+                          </button>
+                        ))}
+                      </div>
                       <input type="datetime-local" value={formData.publishAt} min={toLocalInput(Date.now())}
                         onChange={(e) => setFormData((f) => ({ ...f, publishAt: e.target.value }))}
                         className="px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-emerald-500/50 [color-scheme:dark]" />
@@ -714,6 +830,7 @@ const AdminBlog = () => {
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-3 border-t border-white/6">
                         <div className="text-xs text-white/40 font-bold space-y-1 sm:space-y-0 sm:space-x-4 sm:flex">
                           <span>👤 {post.author}</span>
+                          {post.source === "autopilot" && <span>🤖 Autopilot</span>}
                           <span>👁️ {post.views || 0} views</span>
                         </div>
 

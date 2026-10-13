@@ -106,6 +106,7 @@ mongoose
     startAutomationEngine();
     require("./utils/subscriptions").startSubscriptionScheduler();
     require("./utils/creators").startCreatorScheduler();
+    require("./utils/blogAutopilot").startBlogAutopilot();
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 

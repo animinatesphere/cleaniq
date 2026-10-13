@@ -29,6 +29,11 @@ const blogPostSchema = new mongoose.Schema(
     },
     // When the post goes live on the website. Published posts with a future date are "scheduled":
     // hidden until then, then shown automatically. null = live since it was created.
+    // "manual" (written in admin) or "autopilot" (written and posted by Claude on a schedule).
+    source: {
+      type: String,
+      default: "manual",
+    },
     publishAt: {
       type: Date,
       default: null,
