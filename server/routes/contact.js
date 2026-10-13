@@ -156,23 +156,31 @@ function readQuoteRequest(body = {}) {
   if (!q.name) return { error: "Please enter your full name." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(q.email)) return { error: "Please enter a valid email address." };
   if (q.address.length < 5) return { error: "Please enter the full address of the property." };
-  if (!q.supplies) return { error: "Please choose who provides the cleaning supplies." };
+  // Carpet / oven cleaning are fixed-price: no hours, and our own equipment (no supplies question).
+  const flat = require("../utils/instantQuote").flatKindOf(q.service);
+  if (flat) { q.hours = 0; q.supplies = ""; }
+  if (!flat && !q.supplies) return { error: "Please choose who provides the cleaning supplies." };
   if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/.test(q.postcode)) return { error: "Please enter a valid UK postcode." };
   // Hours the customer wants, in half hours (prices are hourly).
-  if (!(q.hours >= 1 && q.hours <= 12 && Number.isInteger(q.hours * 2))) return { error: "Please choose how many hours you'd like." };
+  if (!flat && !(q.hours >= 1 && q.hours <= 12 && Number.isInteger(q.hours * 2))) return { error: "Please choose how many hours you'd like." };
+  if (flat === "carpet") {
+    q.carpets = count(body.carpets, 20) || 0;
+    if (q.carpets < 1) return { error: "Please tell us how many carpets / rooms to clean." };
+  }
   if (q.property && !QUOTE_OPTIONS.property.includes(q.property)) return { error: "Please choose a property type from the list." };
   if (q.carpet && !QUOTE_OPTIONS.carpet.includes(q.carpet)) return { error: "Please choose with or without carpet cleaning." };
-  if (q.carpet === QUOTE_OPTIONS.carpet[0]) {
+  if (!flat && q.carpet === QUOTE_OPTIONS.carpet[0]) {
     q.carpets = count(body.carpets, 20) || 0;
     if (q.carpets < 1) return { error: "Please tell us how many carpets to clean." };
   }
   if (q.date && (!/^\d{4}-\d{2}-\d{2}$/.test(q.date) || Number.isNaN(Date.parse(q.date)))) return { error: "Please choose a valid date." };
 
   const extras = body.extras || {};
+  if (flat === "oven" && !extras.oven) return { error: "Please choose the type of oven." };
   if (extras.oven) {
     if (!QUOTE_OPTIONS.oven.includes(extras.ovenType)) return { error: "Please confirm the type of oven." };
     q.ovenType = extras.ovenType;
-    q.extras.push(`Oven Cleaning (${extras.ovenType})`);
+    if (flat !== "oven") q.extras.push(`Oven Cleaning (${extras.ovenType})`);
   }
   if (extras.fridge) {
     if (!QUOTE_OPTIONS.fridge.includes(extras.fridgeType)) return { error: "Please confirm the type of fridge." };
@@ -192,7 +200,7 @@ function quoteRows(q) {
     ["Phone", q.phone],
     ["Address", q.address],
     ["Postcode", q.postcode],
-    ["Hours", q.hours],
+    q.hours ? ["Hours", q.hours] : ["Pricing", "Fixed price (no hours)"],
     ["Property type", q.property],
     ["Bedrooms", q.bedrooms],
     ["Bathrooms", q.bathrooms],
@@ -206,7 +214,8 @@ function quoteRows(q) {
     ["Stairs / landings", q.stairs],
     ["Preferred date", ukDate],
     ["Preferred arrival time", q.time],
-    ["Carpet cleaning", q.carpets ? `${q.carpet} — ${q.carpets} carpet${q.carpets === 1 ? "" : "s"}` : q.carpet],
+    ["Carpet cleaning", q.carpets ? `${q.carpet || "Fixed price"} — ${q.carpets} carpet${q.carpets === 1 ? "" : "s"}` : q.carpet],
+    ["Oven", require("../utils/instantQuote").flatKindOf(q.service) === "oven" ? q.ovenType : ""],
     ["Additional services (20% off)", q.extras.join(", ")],
     ["Creator code", q.ref],
     ["Additional information", q.notes],

@@ -31,6 +31,13 @@ const FALLBACK_SERVICES = [
   "End of Tenancy Cleaning", "Deep Cleaning", "Regular House Cleaning", "Airbnb Cleaning",
   "Post Construction Cleaning", "Office Cleaning", "Carpet cleaning", "Oven cleaning", "General Cleaning",
 ];
+// Carpet and oven cleaning are fixed-price jobs: no hours — priced per carpet / per oven type.
+const flatKindOf = (service) => {
+  const n = String(service || "").toLowerCase();
+  if (n.includes("carpet")) return "carpet";
+  if (n.includes("oven")) return "oven";
+  return null;
+};
 // Most-asked-for first; anything else from the price list follows alphabetically.
 const SERVICE_ORDER = ["end of tenancy", "deep", "regular", "airbnb", "construction", "office", "carpet", "oven", "general"];
 
@@ -207,6 +214,22 @@ const GetQuote = () => {
   }, []);
 
   const set = (name, value) => setForm((f) => ({ ...f, [name]: value }));
+  const flat = flatKindOf(form.service);
+  // Switching service: carpet/oven jobs have no hours or supplies question.
+  const chooseService = (name) => setForm((f) => {
+    const kind = flatKindOf(name);
+    const wasFlat = flatKindOf(f.service);
+    return {
+      ...f,
+      service: name,
+      hours: kind ? "" : f.hours,
+      supplies: kind ? "" : f.supplies,
+      carpet: kind === "carpet" || wasFlat === "carpet" ? "" : f.carpet,
+      carpets: kind === "carpet" || wasFlat === "carpet" ? null : f.carpets,
+      extras: kind === "oven" ? { ...f.extras, oven: true }
+        : wasFlat === "oven" ? { ...f.extras, oven: false, ovenType: "" } : f.extras,
+    };
+  });
   const setExtra = (patch) => setForm((f) => ({ ...f, extras: { ...f.extras, ...patch } }));
   const onChange = (e) => set(e.target.name, e.target.value);
   // Bookings start from tomorrow (same as the accept page).
@@ -222,13 +245,15 @@ const GetQuote = () => {
   const checkStep = (n) => {
     if (n === 1) {
       if (!form.service) return fail("Please choose a service.");
-      if (!form.hours) return fail("Please choose how many hours you'd like.");
+      if (flat === "carpet" && !(form.carpets > 0)) return fail("Please tell us how many carpets / rooms to clean.");
+      if (flat === "oven" && !form.extras.ovenType) return fail("Please choose the type of oven.");
+      if (!flat && !form.hours) return fail("Please choose how many hours you'd like.");
       if (form.address.trim().length < 5) return fail("Please enter the full address of the property.");
       if (!POSTCODE_RE.test(form.postcode.trim())) return fail("Please enter a valid UK postcode, e.g. M1 1AA.");
-      if (!form.supplies) return fail("Please choose who provides the cleaning supplies.");
+      if (!flat && !form.supplies) return fail("Please choose who provides the cleaning supplies.");
     }
     if (n === 3) {
-      if (form.carpet === CARPET_WITH && !(form.carpets > 0)) return fail("Please tell us how many carpets to clean.");
+      if (!flat && form.carpet === CARPET_WITH && !(form.carpets > 0)) return fail("Please tell us how many carpets to clean.");
       if (form.extras.oven && !form.extras.ovenType) return fail("Please confirm the type of oven.");
       if (form.extras.fridge && !form.extras.fridgeType) return fail("Please confirm the type of fridge.");
     }
@@ -256,7 +281,9 @@ const GetQuote = () => {
   };
 
   const done = [
-    !!form.service, !!form.hours, form.address.trim().length >= 5, POSTCODE_RE.test(form.postcode.trim()), !!form.supplies,
+    !!form.service,
+    flat === "carpet" ? form.carpets > 0 : flat === "oven" ? !!form.extras.ovenType : !!form.hours,
+    form.address.trim().length >= 5, POSTCODE_RE.test(form.postcode.trim()), flat ? true : !!form.supplies,
     form.name.trim().length > 1, EMAIL_RE.test(form.email.trim()), form.consent,
   ];
   const progress = Math.round((done.filter(Boolean).length / done.length) * 100);
@@ -264,11 +291,11 @@ const GetQuote = () => {
   const extrasText = useMemo(() => {
     const e = form.extras;
     return [
-      form.carpet === CARPET_WITH && form.carpets && `${form.carpets} carpet${form.carpets === 1 ? "" : "s"}`,
-      e.oven && `Oven${e.ovenType ? ` (${e.ovenType.toLowerCase()})` : ""}`,
+      flat !== "carpet" && form.carpet === CARPET_WITH && form.carpets && `${form.carpets} carpet${form.carpets === 1 ? "" : "s"}`,
+      flat !== "oven" && e.oven && `Oven${e.ovenType ? ` (${e.ovenType.toLowerCase()})` : ""}`,
       e.fridge && `Fridge${e.fridgeType ? ` (${e.fridgeType.toLowerCase()})` : ""}`,
     ].filter(Boolean).join(", ");
-  }, [form.extras, form.carpet, form.carpets]);
+  }, [form.extras, form.carpet, form.carpets, flat]);
 
   const rooms = [
     form.bedrooms !== null && `${form.bedrooms} bed`,
@@ -506,7 +533,7 @@ const GetQuote = () => {
                               const Icon = serviceIcon(name);
                               const on = form.service === name;
                               return (
-                                <Choice key={name} selected={on} onClick={() => set("service", name)} className="flex min-h-[104px] flex-col justify-between p-3.5 sm:p-4">
+                                <Choice key={name} selected={on} onClick={() => chooseService(name)} className="flex min-h-[104px] flex-col justify-between p-3.5 sm:p-4">
                                   <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${on ? "bg-primary text-white" : "bg-primary/10 text-primary"}`}>
                                     <Icon size={20} />
                                   </span>
@@ -516,21 +543,42 @@ const GetQuote = () => {
                             })}
                           </div>
                         </Section>
+                        {flat === "carpet" ? (
+                          <Section n={2} title="How many carpets / rooms?" hint="Fixed price per carpet or room — no hourly charge.">
+                            <div className="sm:max-w-sm">
+                              <Stepper label="Carpets / rooms" icon={Layers} value={form.carpets} max={20} onChange={(v) => set("carpets", v)} />
+                            </div>
+                          </Section>
+                        ) : flat === "oven" ? (
+                          <Section n={2} title="Which oven?" hint="Fixed price for your type of oven — no hourly charge.">
+                            <div className="grid gap-2.5 sm:grid-cols-3">
+                              {OVEN_TYPES.map((t) => (
+                                <Choice key={t} selected={form.extras.ovenType === t} onClick={() => setExtra({ oven: true, ovenType: t })} className="flex items-center gap-3 p-4">
+                                  <Flame size={20} className={form.extras.ovenType === t ? "text-primary" : "text-slate-400"} />
+                                  <span className="text-sm font-black text-slate-900">{t}</span>
+                                </Choice>
+                              ))}
+                            </div>
+                          </Section>
+                        ) : (
                         <Section n={2} title="How many hours?" hint="How long you'd like your cleaner for. Prices are per hour.">
-                          <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
-                            {HOUR_CHOICES.map((h) => (
-                              <Choice key={h} tick={false} selected={Number(form.hours) === h} onClick={() => set("hours", h)}
-                                className="flex h-14 items-center justify-center">
-                                <span className="text-base font-black text-slate-900">{h}h</span>
-                              </Choice>
-                            ))}
-                          </div>
-                        </Section>
+                            <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+                              {HOUR_CHOICES.map((h) => (
+                                <Choice key={h} tick={false} selected={Number(form.hours) === h} onClick={() => set("hours", h)}
+                                  className="flex h-14 items-center justify-center">
+                                  <span className="text-base font-black text-slate-900">{h}h</span>
+                                </Choice>
+                              ))}
+                            </div>
+                          </Section>
+                        )}
                         <Section n={3} title="Where is the property?">
                           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
                             <IconInput icon={House} label="Full address *" name="address" value={form.address} onChange={onChange} placeholder="House number, street, town" autoComplete="street-address" />
                             <IconInput icon={MapPin} label="Post code *" name="postcode" value={form.postcode} onChange={onChange} placeholder="M1 1AA" autoComplete="postal-code" className="uppercase" />
                           </div>
+                          {!flat && (
+                            <>
                           <p className={`${fieldLabel} mt-5`}>Cleaning supplies & equipment *</p>
                           <div className="grid gap-2.5 sm:grid-cols-2">
                             {[["Cleaniq", "Cleaniq brings everything"], ["Customer", "I'll provide supplies"]].map(([v, text]) => (
@@ -540,6 +588,8 @@ const GetQuote = () => {
                               </Choice>
                             ))}
                           </div>
+                            </>
+                          )}
                         </Section>
                       </>
                     )}
@@ -580,6 +630,7 @@ const GetQuote = () => {
 
                     {step === 3 && (
                       <>
+                        {flat !== "carpet" && (
                         <Section n={1} title="Carpet cleaning" hint="Add it to your clean and save 60%.">
                           <div className="grid gap-3 sm:grid-cols-2">
                             <Choice selected={form.carpet === CARPET_WITH} onClick={() => set("carpet", form.carpet === CARPET_WITH ? "" : CARPET_WITH)} className="p-4 sm:p-5">
@@ -596,9 +647,10 @@ const GetQuote = () => {
                             </div>
                           )}
                         </Section>
-                        <Section n={2} title="Save 20% on additional services" hint="Optional — tick anything you'd like included.">
+                        )}
+                        <Section n={flat === "carpet" ? 1 : 2} title="Save 20% on additional services" hint="Optional — tick anything you'd like included.">
                           <div className="grid gap-3">
-                            {extraCard("oven", "Oven Cleaning", Flame, "ovenType", OVEN_TYPES, "Type of oven")}
+                            {flat !== "oven" && extraCard("oven", "Oven Cleaning", Flame, "ovenType", OVEN_TYPES, "Type of oven")}
                             {extraCard("fridge", "Fridge Cleaning", Refrigerator, "fridgeType", FRIDGE_TYPES, "Type of fridge")}
                           </div>
                         </Section>
@@ -699,9 +751,15 @@ const GetQuote = () => {
                   <p className="text-[11px] font-black uppercase tracking-widest text-emerald-300">Your request</p>
                   <h3 className="mt-1 text-xl font-black tracking-tight">{form.service || "Choose a service"}</h3>
                   <div className="mt-4 divide-y divide-white/10 border-y border-white/10">
-                    <SummaryRow label="Hours" value={form.hours ? `${form.hours} hours` : ""} />
+                    {flat === "carpet" ? (
+                      <SummaryRow label="Carpets" value={form.carpets ? `${form.carpets} · fixed price` : ""} />
+                    ) : flat === "oven" ? (
+                      <SummaryRow label="Oven" value={form.extras.ovenType ? `${form.extras.ovenType} · fixed price` : ""} />
+                    ) : (
+                      <SummaryRow label="Hours" value={form.hours ? `${form.hours} hours` : ""} />
+                    )}
                     <SummaryRow label="Postcode" value={form.postcode.toUpperCase()} />
-                    <SummaryRow label="Supplies" value={form.supplies === "Cleaniq" ? "Cleaniq brings" : form.supplies === "Customer" ? "Your own" : ""} />
+                    {!flat && <SummaryRow label="Supplies" value={form.supplies === "Cleaniq" ? "Cleaniq brings" : form.supplies === "Customer" ? "Your own" : ""} />}
                     <SummaryRow label="Property" value={[form.property, rooms].filter(Boolean).join(" · ")} />
                     <SummaryRow label="Add-ons" value={extrasText} />
                     <SummaryRow label="When" value={[prettyDate, form.time && ampm(form.time)].filter(Boolean).join(", ")} />

@@ -20,6 +20,15 @@ const FRIDGE_ITEMS = { "Single fridge": "Single fridge", "Fridge freezer": "Frid
 const CARPET_ITEM = "Carpet Cleaning";
 const STAIRS_ITEM = "Stairs/Landing";
 
+// Carpet and oven cleaning are fixed-price jobs (no hours): priced per carpet / per oven type
+// from the price list, at full price (the 60% / 20% savings are for add-ons to a clean).
+const flatKindOf = (service) => {
+  const n = String(service || "").toLowerCase();
+  if (/carpet/.test(n)) return "carpet";
+  if (/oven/.test(n)) return "oven";
+  return null;
+};
+
 // Customer-typed text goes into the quote emails (theirs and the team copy): no HTML tags.
 const plain = (v) => String(v ?? "").replace(/[<>]/g, "").trim();
 const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -33,8 +42,39 @@ function addOn(services, name, qty, discount = 0) {
 }
 
 /** Builds the quote lines for a checked quote request (see readQuoteRequest in routes/contact.js). */
+async function priceFlatRequest(q, services, kind) {
+  const main = kind === "carpet"
+    ? (q.carpets > 0 ? addOn(services, CARPET_ITEM, q.carpets) : { missing: "number of carpets" })
+    : (q.ovenType ? addOn(services, OVEN_ITEMS[q.ovenType], 1) : { missing: "type of oven" });
+  if (main.missing) return { skipped: `"${main.missing}" has no price in the price list` };
+
+  const wanted = [];
+  if (kind === "carpet" && q.stairs > 0) wanted.push([STAIRS_ITEM, q.stairs, 0]);
+  if (kind === "carpet" && q.ovenType) wanted.push([OVEN_ITEMS[q.ovenType], 1, EXTRA_DISCOUNT]);
+  if (q.fridgeType) wanted.push([FRIDGE_ITEMS[q.fridgeType], 1, EXTRA_DISCOUNT]);
+  const extras = [];
+  for (const [name, qty, discount] of wanted) {
+    const line = addOn(services, name, qty, discount);
+    if (line.missing) return { skipped: `"${line.missing}" has no price in the price list` };
+    extras.push(line);
+  }
+  const item = {
+    service: q.service,
+    customService: "",
+    description: kind === "oven" ? q.ovenType : `${q.carpets} carpet${q.carpets === 1 ? "" : "s"} / room${q.carpets === 1 ? "" : "s"}`,
+    billingType: "flat",
+    qty: main.qty,
+    unitPrice: main.unitPrice,
+    extras,
+    subtotal: money(main.unitPrice * main.qty + extras.reduce((sum, e) => sum + e.unitPrice * e.qty, 0)),
+  };
+  return { items: [item] };
+}
+
 async function priceQuoteRequest(q) {
   const services = await loadUkServices();
+  const kind = flatKindOf(q.service);
+  if (kind) return priceFlatRequest(q, services, kind);
   const base = services.find((s) => s.type === "hourly" && s.category !== "Extras" && norm(s.name) === norm(q.service));
   if (!base) return { skipped: `${q.service} isn't priced by the hour, so the team will quote it` };
   if (!(q.hours >= 1)) return { skipped: "No hours chosen" };
@@ -148,4 +188,5 @@ async function sendInstantQuote(request) {
   return { quoteRef: quote.quoteRef, grandTotal };
 }
 
-module.exports = { priceQuoteRequest, sendInstantQuote, CARPET_DISCOUNT, EXTRA_DISCOUNT };
+module.exports = {
+  flatKindOf, priceQuoteRequest, sendInstantQuote, CARPET_DISCOUNT, EXTRA_DISCOUNT };
