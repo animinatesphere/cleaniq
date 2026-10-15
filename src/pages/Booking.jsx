@@ -2212,6 +2212,7 @@ const Booking = () => {
                                   </Elements>
                                 )}
 
+                                {/* 🧪 Admin test button — switched off. To switch it back on, remove this comment wrapper.
                                 {adminToken && (
                                   <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl">
                                     <div className="flex items-center justify-between gap-3">
@@ -2230,6 +2231,7 @@ const Booking = () => {
                                     </label>
                                   </div>
                                 )}
+                                */}
 
                               </div>
                             )}
