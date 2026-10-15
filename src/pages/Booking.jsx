@@ -987,7 +987,14 @@ const Booking = () => {
 
   // 🧪 Admin-only TEST booking: no payment taken. Shown only when you're logged in as admin in
   // this browser; the server checks the admin login too (POST /bookings/dev-test).
-  const adminToken = (() => { try { return localStorage.getItem("adminToken") || ""; } catch { return ""; } })();
+  // Only a login that hasn't expired counts (admin logins last 8 hours).
+  const adminToken = (() => {
+    try {
+      const t = localStorage.getItem("adminToken") || "";
+      const exp = JSON.parse(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).exp;
+      return exp && exp * 1000 > Date.now() ? t : "";
+    } catch { return ""; }
+  })();
   const [devNotifyCleaners, setDevNotifyCleaners] = useState(false);
   const handleDevModeSubmit = async () => {
     if (!formData.serviceType) {
@@ -1030,7 +1037,8 @@ const Booking = () => {
         body: JSON.stringify(bookingPayload),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || (response.status === 401 ? "Log in to admin again, then retry." : "Test booking failed."));
+      if (response.status === 401) throw new Error("Your admin login has expired. Log in again at /admin in this browser, then come back and press the test button.");
+      if (!response.ok) throw new Error(data.message || "Test booking failed.");
       localStorage.removeItem("ciq_booking_draft");
       showNotification(`Test booking ${data.bookingId} created — no payment taken.`, "success");
       setIsSubmitted(true);
