@@ -135,6 +135,23 @@ const LineItem = ({ item, index, onChange, onPatch, onRemove, catalogue, service
       billingType: svc.type === "hourly" ? "hourly" : "flat",
       unitPrice: priceFor(svc, frequency) || "",
       qty: svc.type === "hourly" && Number(item.qty) < 2 ? 3 : item.qty,
+      // Switching to/from Regular Cleaning re-applies the stairs rule.
+      extras: /regular/i.test(name)
+        ? stairsRule(name, item.extras || [])
+        : (item.extras || []).map((e) => (isStairs(e.name) && Number(e.unitPrice) === 0 ? { ...e, unitPrice: Number(addOns.find((a) => a.name === e.name)?.rate) || 0 } : e)),
+    });
+  };
+  // Regular cleaning without carpet cleaning: stairs/landings are included at £0 (same as the
+  // website quote). Adding carpet cleaning puts stairs back to their normal price.
+  const isStairs = (name) => /stairs|landing/i.test(name);
+  const stairsRule = (service, extras) => {
+    if (!/regular/i.test(service || "")) return extras;
+    const carpet = extras.some((e) => /carpet/i.test(e.name) && Number(e.qty) > 0);
+    return extras.map((e) => {
+      if (!isStairs(e.name)) return e;
+      const normal = Number(addOns.find((a) => a.name === e.name)?.rate) || 0;
+      if (!carpet) return { ...e, unitPrice: 0 };
+      return Number(e.unitPrice) === 0 ? { ...e, unitPrice: normal } : e;
     });
   };
   const extraQty = (name) => Number((item.extras || []).find((e) => e.name === name)?.qty || 0);
@@ -146,7 +163,10 @@ const LineItem = ({ item, index, onChange, onPatch, onRemove, catalogue, service
       const qty = Math.max(0, Number(current?.qty || 0) + delta);
       const price = unitPrice !== undefined ? unitPrice : current?.unitPrice ?? (Number(svc.rate) || 0);
       const rest = list.filter((e) => e.name !== svc.name);
-      return { extras: qty > 0 ? [...rest, { name: svc.name, qty, unitPrice: price }] : rest };
+      const next = qty > 0 ? [...rest, { name: svc.name, qty, unitPrice: price }] : rest;
+      // A price typed by hand for stairs is kept; otherwise the stairs rule decides.
+      if (unitPrice !== undefined && isStairs(svc.name)) return { extras: next };
+      return { extras: stairsRule(it.service, next) };
     });
   return (
     <div className="border border-white/7 rounded-2xl bg-[#0B2D22] overflow-hidden hover:border-emerald-500/30 transition-all">
