@@ -82,11 +82,14 @@ async function priceQuoteRequest(q) {
   if (q.carpets > 0) wanted.push([CARPET_ITEM, q.carpets, CARPET_DISCOUNT]);
   if (q.ovenType) wanted.push([OVEN_ITEMS[q.ovenType], 1, EXTRA_DISCOUNT]);
   if (q.fridgeType) wanted.push([FRIDGE_ITEMS[q.fridgeType], 1, EXTRA_DISCOUNT]);
-  if (q.stairs > 0) wanted.push([STAIRS_ITEM, q.stairs, 0]);
+  // Regular cleaning without carpet cleaning: stairs/landings are included at £0.
+  const freeStairs = /regular/.test(norm(base.name)) && q.carpet === "Without Carpet Cleaning";
+  if (q.stairs > 0) wanted.push([STAIRS_ITEM, q.stairs, freeStairs ? 100 : 0]);
   const extras = [];
   for (const [name, qty, discount] of wanted) {
     const line = addOn(services, name, qty, discount);
     if (line.missing) return { skipped: `"${line.missing}" has no price in the price list` };
+    if (name === STAIRS_ITEM && freeStairs) line.name = `${STAIRS_ITEM} – included`;
     extras.push(line);
   }
 
