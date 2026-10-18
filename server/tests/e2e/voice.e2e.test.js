@@ -138,8 +138,12 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
   await waitFor(() => AiCall.exists({ twilioCallSid: "CA6" }));
   s.ws.send(JSON.stringify({ type: "prompt", voicePrompt: "How much is a deep clean", last: false }));
   s.ws.send(JSON.stringify({ type: "prompt", voicePrompt: "for three hours?", last: true }));
-  await waitFor(() => s.received.find((m) => m.type === "text"));
-  assert.deepEqual(s.received[0], { type: "text", token: "That would be 92.55 pounds.", last: true });
+  await waitFor(() => s.received.find((m) => m.type === "text" && m.last));
+  // Looking up the price: the caller hears a short "one moment" first, then the answer.
+  assert.equal(s.received[0].type, "text");
+  assert.equal(s.received[0].last, false);
+  assert.match(s.received[0].token, /moment|second|check/i);
+  assert.deepEqual(s.received[1], { type: "text", token: "That would be 92.55 pounds.", last: true });
 
   const call = await waitFor(async () => {
     const c = await AiCall.findOne({ twilioCallSid: "CA6" }).lean();

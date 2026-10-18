@@ -187,6 +187,7 @@ function handleRelaySession(ws, deps = {}) {
         return { ok: true, instruction: "Tell the caller in one short sentence that you're putting them through now." };
       }
       if (!VOICE_TOOL_NAMES.includes(name)) return { error: `${name} isn't available on phone calls.` };
+      holdOn();
       return baseRunner(name, args);
     }, state.knownRefs);
     const tools = [...declarations.filter((d) => VOICE_TOOL_NAMES.includes(d.name)).map(forCall), ...(canTransfer ? [TRANSFER_TOOL] : [])];
@@ -198,6 +199,15 @@ function handleRelaySession(ws, deps = {}) {
     let pending = "";
     let spoken = "";
     let holding = false;
+    // Looking something up (prices, free slots, a booking) takes a moment: if the caller hasn't
+    // heard anything yet this turn, say so instead of leaving them in silence. Once per turn.
+    let heldOn = false;
+    const HOLD_LINES = ["One moment, let me check that.", "Bear with me a second.", "Let me just check that for you."];
+    const holdOn = () => {
+      if (heldOn || spoken || pending.trim() || state.ending) return;
+      heldOn = true;
+      send({ type: "text", token: HOLD_LINES[state.turns % HOLD_LINES.length], last: false });
+    };
     const CLAIM_RE = /\b(?:BK|CLQ|Q|SUB)-[A-Z0-9]|\b(booked|booking (?:is|has been) (?:confirmed|made)|you're all set|(?:quote|it)(?: has been| is)? (?:sent|emailed) to)\b/i;
     const flush = (all) => {
       const re = all ? /^[\s\S]+$/ : /^[\s\S]*?[.!?…:](?=\s)\s+/;

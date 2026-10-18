@@ -102,22 +102,29 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
   const conversation = await AiConversation.findById(conversationId);
   if (!conversation || conversation.status !== "ai") return; // staff took over meanwhile
 
-  const recentAiReplies = await AiMessage.countDocuments({
-    conversation: conversation._id,
-    ...realAiReply(),
-    createdAt: { $gte: new Date(Date.now() - 60 * 60 * 1000) },
-  });
+  // The reply limits, the chat history and the AI instructions are fetched at the same time
+  // (one after another they added a noticeable wait before every reply).
+  const [recentAiReplies, repliesToday, latest, system] = await Promise.all([
+    AiMessage.countDocuments({
+      conversation: conversation._id,
+      ...realAiReply(),
+      createdAt: { $gte: new Date(Date.now() - 60 * 60 * 1000) },
+    }),
+    AiMessage.countDocuments({
+      ...realAiReply(),
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    }),
+    AiMessage.find({ conversation: conversation._id }).sort({ createdAt: -1 }).limit(HISTORY_LIMIT).lean(),
+    conversation.agentName
+      ? getInstructions("whatsapp", { customerName: conversation.name, canBook: true, agentName: conversation.agentName }).catch(() => null)
+      : null,
+  ]);
   if (recentAiReplies >= hourlyReplyLimit()) {
     console.warn(`[whatsapp] AI reply limit reached for ${conversation.phone}; handing to staff`);
     await AiConversation.updateOne({ _id: conversation._id }, { $set: { status: "human", needsAttention: true } });
     await sendAndRecord(conversation, "ai", HANDOFF_TEXT, { send });
     return;
   }
-
-  const repliesToday = await AiMessage.countDocuments({
-    ...realAiReply(),
-    createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-  });
   if (repliesToday >= dailyReplyLimit()) {
     console.warn(`[whatsapp] daily AI reply limit (${dailyReplyLimit()}) reached; handing ${conversation.phone} to staff`);
     await AiConversation.updateOne({ _id: conversation._id }, { $set: { needsAttention: true } });
@@ -125,9 +132,7 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
     return;
   }
 
-  const history = (
-    await AiMessage.find({ conversation: conversation._id }).sort({ createdAt: -1 }).limit(HISTORY_LIMIT).lean()
-  ).reverse();
+  const history = latest.reverse();
   // Nothing new to answer (e.g. a burst of messages was already covered by the previous reply).
   if (!history.length || history[history.length - 1].role !== "customer") return;
 
@@ -139,7 +144,7 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
       conversation.agentName = pickAgentName(settings);
       await AiConversation.updateOne({ _id: conversation._id }, { $set: { agentName: conversation.agentName } });
     }
-    const system = await getInstructions("whatsapp", { customerName: conversation.name, canBook: true, agentName: conversation.agentName });
+    const instructions = system || (await getInstructions("whatsapp", { customerName: conversation.name, canBook: true, agentName: conversation.agentName }));
     // References already created in this chat (bookings, quotes) are real; anything else isn't.
     const known = new Set(history.flatMap((m) => (m.tools || []).flatMap((t) => refsIn(t.detail))));
     const runTool = trackRefs(makeToolRunner({
@@ -148,7 +153,7 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
       conversationId: String(conversation._id),
       onTool: (event) => toolEvents.push(event),
     }), known);
-    const ask = (note = "") => ai({ system: note ? `${system}\n\n${note}` : system, history, tools: bookingTools, runTool, forceTool: confirmationTool(history) });
+    const ask = (note = "") => ai({ system: note ? `${instructions}\n\n${note}` : instructions, history, tools: bookingTools, runTool, forceTool: confirmationTool(history) });
     reply = await ask();
     if (reply) {
       const checked = await guardInventedRefs(reply, known, ask);
