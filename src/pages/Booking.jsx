@@ -191,7 +191,7 @@ const REGULAR_EVERY = { Weekly: "every week", Fortnightly: "every two weeks", Mo
 // (same rule as the server's utils/pricing.js).
 const defaultFrequencies = (name = "") => {
   const n = String(name).toLowerCase();
-  if (n.includes("regular")) return ["Weekly", "Fortnightly"];
+  if (n.includes("regular")) return ["Weekly", "Fortnightly", "Monthly"];
   if (n.includes("deep")) return ["Monthly", "Quarterly"];
   return [];
 };
@@ -853,7 +853,7 @@ const Booking = () => {
   const pricedFrequencies = REGULAR_FREQUENCIES.filter((f) => regularRates[cleanKey(formData.serviceType)]?.[f] > 0);
   const offeredFrequencies = [
     "Once",
-    ...(pricedFrequencies.length ? pricedFrequencies : defaultFrequencies(formData.serviceType)),
+    ...REGULAR_FREQUENCIES.filter((f) => pricedFrequencies.includes(f) || defaultFrequencies(formData.serviceType).includes(f)),
   ];
   const isRegular = formData.frequency !== "Once" && offeredFrequencies.includes(formData.frequency);
   // £ per hour of the first clean (or a flat amount), same as the server.

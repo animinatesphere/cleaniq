@@ -232,13 +232,14 @@ const FREQUENCY_LABEL = { Once: "One-off", Weekly: "Weekly", Fortnightly: "Fortn
 const FREQUENCY_FIELD = { Weekly: "weeklyRate", Fortnightly: "fortnightlyRate", Monthly: "monthlyRate", Quarterly: "quarterlyRate" };
 const defaultFrequencies = (name = "") => {
   const n = String(name).toLowerCase();
-  if (n.includes("regular")) return ["Weekly", "Fortnightly"];
+  if (n.includes("regular")) return ["Weekly", "Fortnightly", "Monthly"];
   if (n.includes("deep")) return ["Monthly", "Quarterly"];
   return [];
 };
 const offeredFrequenciesFor = (svc, name) => {
   const priced = REGULAR_FREQUENCIES.filter((f) => Number(svc?.[FREQUENCY_FIELD[f]]) > 0);
-  return ["Once", ...(priced.length ? priced : defaultFrequencies(name))];
+  const defaults = defaultFrequencies(name);
+  return ["Once", ...REGULAR_FREQUENCIES.filter((f) => priced.includes(f) || defaults.includes(f))];
 };
 
 const NewBookingPage = () => {

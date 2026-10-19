@@ -10,20 +10,21 @@ const FREQUENCY_FIELD = {
 };
 const REGULAR_FREQUENCIES = ["Weekly", "Fortnightly", "Monthly", "Quarterly"];
 
-// Until admin prices any regular option for a service, these are offered at the one-off price.
+// Always offered for these services; a frequency without its own price uses the one-off price.
 // Same rule in the website (Booking.jsx) and customer app (BookingScreen.js).
 function defaultFrequencies(name = "") {
   const n = String(name).toLowerCase();
-  if (n.includes("regular")) return ["Weekly", "Fortnightly"];
+  if (n.includes("regular")) return ["Weekly", "Fortnightly", "Monthly"];
   if (n.includes("deep")) return ["Monthly", "Quarterly"];
   return [];
 }
 
-// Frequencies a customer can book for this service: One-off plus every regular one with a price,
-// or the defaults above when none is priced yet.
+// Frequencies a customer can book for this service: One-off, the defaults above (Regular: weekly,
+// fortnightly, monthly; Deep: monthly, every 3 months) and any other frequency admin has priced.
 function offeredFrequencies(service) {
   const priced = REGULAR_FREQUENCIES.filter((f) => Number(service?.[FREQUENCY_FIELD[f]]) > 0);
-  return ["Once", ...(priced.length ? priced : defaultFrequencies(service?.name))];
+  const defaults = defaultFrequencies(service?.name);
+  return ["Once", ...REGULAR_FREQUENCIES.filter((f) => priced.includes(f) || defaults.includes(f))];
 }
 
 function rateForFrequency(service, frequency) {

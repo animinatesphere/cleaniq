@@ -36,16 +36,19 @@ test("AI quotes use the weekly price for a weekly clean", () => {
   assert.equal(calculateQuote([regular], { service: "Regular House Cleaning", hours: 2 }).total, 41.8);
 });
 
-test("only priced frequencies are offered; one-off always", () => {
+test("frequencies: one-off always, the service defaults (Regular weekly/fortnightly/monthly, Deep monthly/quarterly) and anything priced", () => {
   const { offeredFrequencies } = require("../utils/pricing");
   assert.deepEqual(offeredFrequencies({ rate: 20.9, weeklyRate: 17.9, fortnightlyRate: 18.9 }), ["Once", "Weekly", "Fortnightly"]);
   assert.deepEqual(offeredFrequencies({ rate: 30.85, monthlyRate: 28, quarterlyRate: 29 }), ["Once", "Monthly", "Quarterly"]);
   assert.deepEqual(offeredFrequencies({ rate: 25 }), ["Once"]);
-  // Defaults until admin prices any regular option:
-  assert.deepEqual(offeredFrequencies({ name: "Regular House Cleaning", rate: 20.9 }), ["Once", "Weekly", "Fortnightly"]);
+  // Always offered for Regular / Deep (unpriced ones use the one-off price):
+  assert.deepEqual(offeredFrequencies({ name: "Regular House Cleaning", rate: 20.9 }), ["Once", "Weekly", "Fortnightly", "Monthly"]);
+  assert.deepEqual(offeredFrequencies({ name: "Regular House Cleaning", rate: 20.9, weeklyRate: 17.9, fortnightlyRate: 18.9 }), ["Once", "Weekly", "Fortnightly", "Monthly"]);
+  assert.equal(rateForFrequency({ name: "Regular House Cleaning", rate: 20.9, weeklyRate: 17.9 }, "Monthly"), 20.9);
   assert.deepEqual(offeredFrequencies({ name: "Deep Cleaning", rate: 30.85 }), ["Once", "Monthly", "Quarterly"]);
   assert.deepEqual(offeredFrequencies({ name: "Office Cleaning", rate: 20.8 }), ["Once"]);
-  assert.deepEqual(offeredFrequencies({ name: "Deep Cleaning", rate: 30.85, monthlyRate: 28 }), ["Once", "Monthly"], "admin prices win");
+  assert.deepEqual(offeredFrequencies({ name: "Deep Cleaning", rate: 30.85, monthlyRate: 28 }), ["Once", "Monthly", "Quarterly"]);
+  assert.deepEqual(offeredFrequencies({ name: "Office Cleaning", rate: 20.8, weeklyRate: 19 }), ["Once", "Weekly"], "anything admin prices is added");
   assert.equal(rateForFrequency({ rate: 30.85, quarterlyRate: 29 }, "Quarterly"), 29);
   assert.equal(rateForFrequency({ rate: 30.85, monthlyRate: 28 }, "Monthly"), 28);
 });

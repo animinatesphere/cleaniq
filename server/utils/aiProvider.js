@@ -248,8 +248,8 @@ async function generateReplyClaude({ system, history, tools, runTool, forceTool,
     if (response.stop_reason !== "tool_use" || !toolUses.length) {
       const text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
       if (!text) {
-        console.warn(`[ai] empty reply from claude (stop: ${response.stop_reason})`);
-        return null;
+        console.warn(`[ai] empty reply from claude (stop: ${response.stop_reason}) — asking for a plain reply`);
+        return wrapUp(api, { model, system, messages, claudeTools, options, started });
       }
       if (response.stop_reason === "max_tokens") console.warn("[ai] claude reply hit max_tokens");
       console.log(`[ai] claude (${response.model}) replied in ${Date.now() - started}ms${round ? ` after ${round} tool round(s)` : ""}`);
@@ -272,8 +272,31 @@ async function generateReplyClaude({ system, history, tools, runTool, forceTool,
     );
     messages.push({ role: "user", content: results });
   }
-  console.warn(`[ai] gave up after ${MAX_TOOL_ROUNDS} tool rounds`);
-  return null;
+  // Out of lookups: rather than failing ("technical issue"), answer with what we have.
+  console.warn(`[ai] ${MAX_TOOL_ROUNDS} tool rounds used — asking for a plain reply`);
+  return wrapUp((client || getAnthropic()).beta.messages, { model, system, messages, claudeTools, options, started });
+}
+
+// One last request with no tools allowed: the customer always gets a real answer (or the team
+// hand-off if even that fails), never a loop or a "technical issue" for a fixable mix-up.
+const WRAP_UP_NOTE = "\n\nNo more lookups for this message. Reply to the customer now in a few short sentences, using what you already know. If something couldn't be done (a price, a frequency we don't offer, a booking), say so kindly, give the options we do have, and offer to pass it to the team. Never invent a price or a reference.";
+async function wrapUp(api, { model, system, messages, claudeTools, options, started }) {
+  try {
+    const response = await api.create({
+      model,
+      max_tokens: 1500,
+      system: cachedSystem(`${system}${WRAP_UP_NOTE}`),
+      messages: messages.at(-1)?.role === "assistant" ? [...messages, { role: "user", content: "(Please reply to me now.)" }] : messages,
+      ...(claudeTools ? { tools: claudeTools, tool_choice: { type: "none" } } : {}),
+      ...options,
+    });
+    const text = (response.content || []).filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+    if (text) console.log(`[ai] claude wrap-up reply in ${Date.now() - started}ms`);
+    return text || null;
+  } catch (err) {
+    console.warn(`[ai] wrap-up reply failed: ${err.message}`);
+    return null;
+  }
 }
 
 module.exports = { generateReply, generateReplyClaude, toGeminiContents, echoableContent, claudeRequestOptions, cachedSystem, PROVIDER };

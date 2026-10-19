@@ -115,7 +115,7 @@ const REGULAR_EVERY   = { Weekly: "every week", Fortnightly: "every two weeks", 
 // (same rule as the server's utils/pricing.js).
 const defaultFrequencies = (name = "") => {
   const n = String(name).toLowerCase();
-  if (n.includes("regular")) return ["Weekly", "Fortnightly"];
+  if (n.includes("regular")) return ["Weekly", "Fortnightly", "Monthly"];
   if (n.includes("deep")) return ["Monthly", "Quarterly"];
   return [];
 };
@@ -422,7 +422,7 @@ const BookingScreen = ({ navigation, route }) => {
   // Regular cleans: first clean paid now (card saved), each following clean charged when the
   // cleaner arrives. The customer must agree before booking.
   const pricedFrequencies = REGULAR_FREQUENCIES.filter((f) => regularRates[form.serviceType]?.[f] > 0);
-  const offeredFrequencies = ["Once", ...(pricedFrequencies.length ? pricedFrequencies : defaultFrequencies(form.serviceType))];
+  const offeredFrequencies = ["Once", ...REGULAR_FREQUENCIES.filter((f) => pricedFrequencies.includes(f) || defaultFrequencies(form.serviceType).includes(f))];
   const isRegular = form.frequency !== "Once" && offeredFrequencies.includes(form.frequency);
   // Switching to a service that isn't offered at the chosen frequency goes back to one-off.
   const frequencyOffered = offeredFrequencies.includes(form.frequency);

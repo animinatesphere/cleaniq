@@ -136,3 +136,21 @@ test("with onText, the reply is streamed piece by piece", async () => {
   assert.equal(reply, "Hello there. How can I help?");
   assert.deepEqual(pieces, ["Hello ", "there. ", "How can I help?"]);
 });
+
+test("out of tool rounds: one last plain reply (no tools) instead of failing", async () => {
+  const requests = [];
+  const loop = { stop_reason: "tool_use", content: [{ type: "tool_use", id: "t", name: "check_postcode", input: { postcode: "BL6 4HL" } }] };
+  const client = fakeClaude([loop, loop, loop, loop, loop, loop, { stop_reason: "end_turn", content: [{ type: "text", text: "Weekly, fortnightly or monthly are available — which suits you?" }] }], requests);
+  const reply = await generateReplyClaude({ system: "S", history, client, tools: [{ name: "check_postcode" }], runTool: async () => ({ valid: true }) });
+  assert.equal(reply, "Weekly, fortnightly or monthly are available — which suits you?");
+  const last = requests.at(-1);
+  assert.deepEqual(last.tool_choice, { type: "none" });
+  assert.match(last.system.map((b) => b.text).join(""), /No more lookups for this message/);
+});
+
+test("an empty reply gets one plain retry", async () => {
+  const requests = [];
+  const client = fakeClaude([{ stop_reason: "end_turn", content: [] }, { stop_reason: "end_turn", content: [{ type: "text", text: "Sure — which date?" }] }], requests);
+  assert.equal(await generateReplyClaude({ system: "S", history, client }), "Sure — which date?");
+  assert.equal(requests.length, 2);
+});
