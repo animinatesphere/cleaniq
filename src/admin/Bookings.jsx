@@ -1231,7 +1231,7 @@ const Bookings = () => {
     const fetchServices = async () => {
       try {
         const token = localStorage.getItem("adminToken") || "";
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/services?region=UK`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = await res.json();

@@ -919,7 +919,7 @@ const QuoteBuilder = () => {
   }, []);
 
   useEffect(() => {
-    fetch(`${API}/services`)
+    fetch(`${API}/services?region=UK`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
