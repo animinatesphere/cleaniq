@@ -4,7 +4,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, Lock } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2, Lock, LockOpen } from "lucide-react";
 import { AdminCalendar } from "./Bookings";
 
 const API = import.meta.env.VITE_API_URL;
@@ -129,6 +129,16 @@ export default function Calendar() {
     : new Date(`${anchor.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
   const today = localToday();
   const open = (b) => navigate(`/admin/jobs/${b._id}`);
+  // Block / unblock a whole day from the calendar (the same "All Day" block as the Availability tab).
+  const [busyDay, setBusyDay] = useState("");
+  const toggleDay = async (d) => {
+    const blocked = blockedDays.has(d);
+    const label = new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+    if (!window.confirm(blocked ? `Unblock ${label}? Customers will be able to book it again.` : `Block ${label}? Customers won't be able to book this day.`)) return;
+    setBusyDay(d);
+    await toggleAvailability(new Date(`${d}T12:00:00`), blocked);
+    setBusyDay("");
+  };
   const inRange = [...byDay.values()].flat();
 
   // ── Availability tab: the existing block-a-day / block-a-slot / recurring tools ─────────
@@ -248,7 +258,11 @@ export default function Calendar() {
                     <div key={d} className={`min-h-28 p-1.5 ${blocked ? "bg-[repeating-linear-gradient(135deg,#0B2D22,#0B2D22_8px,#0f3a2c_8px,#0f3a2c_16px)]" : "bg-[#0B2D22]"} ${inMonth ? "" : "opacity-40"}`}>
                       <div className="mb-1 flex items-center justify-between">
                         <p className={`inline-grid h-6 w-6 place-items-center rounded-full text-xs font-bold ${d === today ? "bg-emerald-400 text-[#061a13]" : "text-white/60"}`}>{Number(d.slice(8))}</p>
-                        {blocked && <span className="flex items-center gap-1 text-[10px] font-bold text-white/50"><Lock size={10} /> Blocked</span>}
+                        <button onClick={() => toggleDay(d)} disabled={busyDay === d || d < today} title={blocked ? "Unblock this day" : "Block this day"}
+                          className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold transition-colors disabled:cursor-default ${blocked ? "bg-rose-400/15 text-rose-300 hover:bg-rose-400/25" : "text-white/25 hover:bg-white/10 hover:text-white/70"} ${d < today && !blocked ? "invisible" : ""}`}>
+                          {busyDay === d ? <Loader2 size={10} className="animate-spin" /> : blocked ? <Lock size={10} /> : <LockOpen size={10} />}
+                          {blocked ? "Blocked" : "Block"}
+                        </button>
                       </div>
                       <div className="space-y-1">
                         {items.slice(0, 3).map((b) => (
@@ -266,10 +280,10 @@ export default function Calendar() {
                 })}
               </div>
               {/* Phones: a simple list of the days that have jobs */}
-              <AgendaList days={range.days.filter((d) => d.slice(0, 7) === anchor.slice(0, 7))} byDay={byDay} blockedDays={blockedDays} today={today} onOpen={open} className="md:hidden" />
+              <AgendaList days={range.days.filter((d) => d.slice(0, 7) === anchor.slice(0, 7))} byDay={byDay} blockedDays={blockedDays} today={today} onOpen={open} onToggleDay={toggleDay} busyDay={busyDay} className="md:hidden" />
             </>
           ) : (
-            <AgendaList days={range.days} byDay={byDay} blockedDays={blockedDays} today={today} showEmpty onOpen={open} />
+            <AgendaList days={range.days} byDay={byDay} blockedDays={blockedDays} today={today} showEmpty onOpen={open} onToggleDay={toggleDay} busyDay={busyDay} />
           )}
         </>
       )}
@@ -277,7 +291,7 @@ export default function Calendar() {
   );
 }
 
-function AgendaList({ days, byDay, blockedDays, today, onOpen, showEmpty, className = "" }) {
+function AgendaList({ days, byDay, blockedDays, today, onOpen, onToggleDay, busyDay, showEmpty, className = "" }) {
   const shown = days.filter((d) => showEmpty || byDay.get(d)?.length || blockedDays.has(d));
   if (!shown.length) return <Card className={className}><p className="text-sm text-white/50">No bookings in this period.</p></Card>;
   return (
@@ -286,11 +300,20 @@ function AgendaList({ days, byDay, blockedDays, today, onOpen, showEmpty, classN
         {shown.map((d) => (
           <motion.div key={d} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="p-4">
+              <div className="flex items-center justify-between gap-2">
               <p className={`flex items-center gap-2 text-sm font-extrabold ${d === today ? "text-emerald-300" : "text-white"}`}>
                 {new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" })}
                 {d === today && " · Today"}
-                {blockedDays.has(d) && <span className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-bold text-white/60"><Lock size={10} /> Blocked</span>}
+                {blockedDays.has(d) && <span className="flex items-center gap-1 rounded-full bg-rose-400/15 px-2 py-0.5 text-[11px] font-bold text-rose-300"><Lock size={10} /> Blocked</span>}
               </p>
+              {onToggleDay && d >= today && (
+                <button onClick={() => onToggleDay(d)} disabled={busyDay === d}
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-bold text-white/70 hover:bg-white/10 hover:text-white">
+                  {busyDay === d ? <Loader2 size={12} className="animate-spin" /> : blockedDays.has(d) ? <LockOpen size={12} /> : <Lock size={12} />}
+                  {blockedDays.has(d) ? "Unblock" : "Block day"}
+                </button>
+              )}
+              </div>
               {(byDay.get(d) || []).length ? (
                 <ul className="mt-2 space-y-1.5">
                   {byDay.get(d).map((b) => (
