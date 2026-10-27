@@ -419,6 +419,76 @@ async function rescheduleAiBooking(args, ctx) {
   const when = await resolveSchedule({ ...args, hours: booking.details?.duration }, { excludeBookingId: booking._id });
   if (when.error) return when;
 
+  const rescheduleCount = Number(booking.meta?.rescheduleCount || 0);
+  const requiresFee = rescheduleCount >= 1;
+  if (requiresFee && !booking.meta?.rescheduleFeePaidAt) {
+    const feeAmount = 20;
+    if (ctx.dryRun) {
+      return {
+        dryRun: true,
+        requiresPayment: true,
+        feeAmount,
+        bookingRef: booking.bookingId,
+        newWhen: `${args.date} ${when.label}`,
+        nextStep: "The customer has already rescheduled once, so a £20 reschedule fee applies before the booking can be moved. Create a Stripe link and ask them to pay before calling reschedule_booking again.",
+      };
+    }
+
+    const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      customer_email: booking.customer?.email || undefined,
+      payment_intent_data: {
+        capture_method: "manual",
+        metadata: {
+          bookingId: booking._id.toString(),
+          bookingRef: booking.bookingId,
+          company: "Cleaniq Services",
+          type: "reschedule_fee",
+        },
+      },
+      line_items: [{
+        price_data: {
+          currency: "gbp",
+          product_data: {
+            name: `Reschedule fee - ${booking.bookingId}`,
+            description: `Second reschedule fee for ${booking.bookingId}`,
+          },
+          unit_amount: Math.round(feeAmount * 100),
+        },
+        quantity: 1,
+      }],
+      metadata: {
+        bookingId: booking._id.toString(),
+        bookingRef: booking.bookingId,
+        type: "reschedule_fee",
+      },
+      success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/payment/success?bookingId=${booking._id}&rescheduleFee=paid`,
+      cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/`,
+    });
+
+    booking.meta = booking.meta || {};
+    booking.meta.pendingReschedule = {
+      date: args.date,
+      time: when.schedule?.timeSlot || when.schedule?.preferredTime || args.time,
+      whenLabel: `${args.date} ${when.label}`,
+      sessionId: session.id,
+      sessionUrl: session.url,
+      createdAt: new Date(),
+    };
+    await booking.save();
+
+    return {
+      requiresPayment: true,
+      feeAmount,
+      checkoutUrl: session.url,
+      bookingRef: booking.bookingId,
+      newWhen: `${args.date} ${when.label}`,
+      nextStep: `A £20 Stripe payment link has been sent. Ask the customer to pay it before the reschedule is applied. Once payment succeeds, call reschedule_booking again with customerConfirmed true.`,
+    };
+  }
+
   if (ctx.dryRun) return { dryRun: true, message: "TEST MODE: booking not changed.", bookingRef: booking.bookingId, newWhen: `${args.date} ${when.label}` };
 
   const { rescheduleBooking } = require("../routes/bookings");

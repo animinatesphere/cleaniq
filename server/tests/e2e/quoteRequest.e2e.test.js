@@ -74,7 +74,7 @@ test("a quote request is saved as a lead, sent to the team and confirmed to the 
   assert.match(team.html, /Instant quote CLQ-/);
 });
 
-test("an instant quote is emailed from the price list: hours × rate, 60% off carpets, 20% off oven/fridge", async () => {
+test("an instant quote is emailed from the price list: 60% off carpets only when 2+ are booked, 20% off oven/fridge", async () => {
   emails.length = 0;
   const res = await send(good({ email: "price@test.uk", stairs: "1" }));
   const body = await res.json();
@@ -105,6 +105,17 @@ test("an instant quote is emailed from the price list: hours × rate, 60% off ca
   assert.match(toCustomer[0].subject, /Quote/);
   assert.match(toCustomer[0].html, /accept/i);
   assert.equal((await Lead.findOne({ email: "price@test.uk", source: "Quote Form" })).stage, "Quoted");
+});
+
+test("a single carpet keeps the carpet add-on but removes the 60% discount", async () => {
+  const res = await send(good({ email: "singlecarpet@test.uk", carpet: "With Carpet Cleaning (Save 60%)", carpets: "1", stairs: "0", extras: {} }));
+  const body = await res.json();
+  assert.equal(res.status, 200, JSON.stringify(body));
+  assert.equal(body.instantQuote, true);
+  const q = await Quote.findOne({ quoteRef: body.quoteRef }).lean();
+  const item = q.items[0];
+  assert.deepEqual(item.extras.map((e) => [e.name, e.qty, e.unitPrice]), [["Carpet Cleaning", 1, 30]]);
+  assert.equal(q.subtotal, 75 + 30);
 });
 
 test("supplies brought by Cleaniq add the supplies fee, like the receptionist's quotes", async () => {

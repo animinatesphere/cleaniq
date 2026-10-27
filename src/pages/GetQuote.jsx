@@ -215,6 +215,7 @@ const GetQuote = () => {
 
   const set = (name, value) => setForm((f) => ({ ...f, [name]: value }));
   const flat = flatKindOf(form.service);
+  const carpetDiscountActive = form.carpet === CARPET_WITH && Number(form.carpets || 0) >= 2;
   // Switching service: carpet/oven jobs have no hours or supplies question.
   const chooseService = (name) => setForm((f) => {
     const kind = flatKindOf(name);
@@ -638,10 +639,10 @@ const GetQuote = () => {
                     {step === 3 && (
                       <>
                         {flat !== "carpet" && (
-                        <Section n={1} title="Carpet cleaning" hint="Add it to your clean and save 60%.">
+                        <Section n={1} title="Carpet cleaning" hint="Add it to your clean and save 60% when you book 2+ carpets.">
                           <div className="grid gap-3 sm:grid-cols-2">
                             <Choice selected={form.carpet === CARPET_WITH} onClick={() => set("carpet", form.carpet === CARPET_WITH ? "" : CARPET_WITH)} className="p-4 sm:p-5">
-                              <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-700">Save 60%</span>
+                              {carpetDiscountActive && <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-700">Save 60%</span>}
                               <span className="mt-3 block text-base font-black text-slate-900">With carpet cleaning</span>
                             </Choice>
                             <Choice selected={form.carpet === CARPET_WITHOUT} onClick={() => set("carpet", form.carpet === CARPET_WITHOUT ? "" : CARPET_WITHOUT)} className="flex items-end p-4 sm:p-5">

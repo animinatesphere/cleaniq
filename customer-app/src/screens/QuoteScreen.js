@@ -190,6 +190,7 @@ const QuoteScreen = ({ navigation }) => {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setExtra = (patch) => setForm((f) => ({ ...f, extras: { ...f.extras, ...patch } }));
   const flat = flatKindOf(form.service);
+  const carpetDiscountActive = form.carpet === CARPET_WITH && Number(form.carpets || 0) >= 2;
   // Switching service: carpet/oven jobs have no hours or supplies question.
   const chooseService = (name) => setForm((f) => {
     const kind = flatKindOf(name);
@@ -468,9 +469,9 @@ const QuoteScreen = ({ navigation }) => {
             <>
               {flat !== "carpet" && (
               <>
-              <Title hint="Add it to your clean and save 60%.">Carpet cleaning</Title>
+              <Title hint="Add it to your clean and save 60% when you book 2+ carpets.">Carpet cleaning</Title>
               <Choice selected={form.carpet === CARPET_WITH} onPress={() => set("carpet", form.carpet === CARPET_WITH ? "" : CARPET_WITH)} style={styles.carpetCard}>
-                <View style={styles.saveBadge}><Text style={styles.saveBadgeTxt}>SAVE 60%</Text></View>
+                {carpetDiscountActive && <View style={styles.saveBadge}><Text style={styles.saveBadgeTxt}>SAVE 60%</Text></View>}
                 <Text style={styles.carpetTxt}>With carpet cleaning</Text>
               </Choice>
               <Choice selected={form.carpet === CARPET_WITHOUT} onPress={() => set("carpet", form.carpet === CARPET_WITHOUT ? "" : CARPET_WITHOUT)} style={styles.carpetCard}>

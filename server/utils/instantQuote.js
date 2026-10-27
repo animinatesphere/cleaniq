@@ -13,6 +13,7 @@ const { rateForFrequency } = require("./pricing");
 const CARPET_DISCOUNT = 60;
 const EXTRA_DISCOUNT = 20;
 const MAX_PER_EMAIL_PER_DAY = 3;
+const CARPET_WITH = "With Carpet Cleaning (Save 60%)";
 
 // Form choice → price-list name (admin → Price List).
 const OVEN_ITEMS = { "Single oven": "Single Oven Cleaning", "Double oven": "Double Oven Cleaning", "Range oven": "Range Oven Cleaning" };
@@ -79,7 +80,10 @@ async function priceQuoteRequest(q) {
   if (!(q.hours >= 1)) return { skipped: "No hours chosen" };
 
   const wanted = [];
-  if (q.carpets > 0) wanted.push([CARPET_ITEM, q.carpets, CARPET_DISCOUNT]);
+  if (q.carpets > 0) {
+    const discount = q.carpet === CARPET_WITH && q.carpets >= 2 ? CARPET_DISCOUNT : 0;
+    wanted.push([CARPET_ITEM, q.carpets, discount]);
+  }
   if (q.ovenType) wanted.push([OVEN_ITEMS[q.ovenType], 1, EXTRA_DISCOUNT]);
   if (q.fridgeType) wanted.push([FRIDGE_ITEMS[q.fridgeType], 1, EXTRA_DISCOUNT]);
   // Regular cleaning without carpet cleaning: stairs/landings are included at £0.

@@ -348,7 +348,27 @@ app.post(
         if (bookingId && session.payment_intent) {
           const booking = await Booking.findById(bookingId);
           if (booking) {
-            if (isAdditionalHours && additionalHoursAmount > 0) {
+            if (session.metadata?.type === "reschedule_fee") {
+              const pending = booking.meta?.pendingReschedule;
+              if (pending) {
+                booking.meta = booking.meta || {};
+                booking.meta.rescheduleFeePaidAt = new Date();
+                booking.meta.rescheduleFeePaymentIntentId = session.payment_intent;
+                booking.meta.pendingReschedule = null;
+                await booking.save();
+
+                const { rescheduleBooking } = require("./routes/bookings");
+                if (pending.date && (pending.time || pending.whenLabel)) {
+                  const [date, timeSlot] = [pending.date, pending.time || "09:00"];
+                  await rescheduleBooking(booking, { date, timeSlot, preferredTime: pending.time || "" });
+                  await sendEmail({
+                    to: booking.customer.email,
+                    subject: `✅ Reschedule fee paid — booking moved: ${booking.bookingId}`,
+                    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;"><h2 style="color:#0A5C43;">✅ Reschedule fee paid</h2><p>Your fee has been paid and your booking has been moved to ${pending.whenLabel || `${date} ${timeSlot}`}. Your updated booking details are in your confirmation email.</p></div>`,
+                  }).catch(() => {});
+                }
+              }
+            } else if (isAdditionalHours && additionalHoursAmount > 0) {
               const additionalAmount = session.amount_total
                 ? session.amount_total / 100
                 : 0;
@@ -430,7 +450,27 @@ app.post(
         if (bookingId) {
           const booking = await Booking.findById(bookingId);
           if (booking) {
-            if (isAdditionalHours && additionalHoursAmount > 0) {
+            if (pi.metadata?.type === "reschedule_fee") {
+              const pending = booking.meta?.pendingReschedule;
+              if (pending) {
+                booking.meta = booking.meta || {};
+                booking.meta.rescheduleFeePaidAt = new Date();
+                booking.meta.rescheduleFeePaymentIntentId = pi.id;
+                booking.meta.pendingReschedule = null;
+                await booking.save();
+
+                const { rescheduleBooking } = require("./routes/bookings");
+                if (pending.date && (pending.time || pending.whenLabel)) {
+                  const whenTime = pending.time || "09:00";
+                  await rescheduleBooking(booking, { date: pending.date, timeSlot: whenTime, preferredTime: pending.time || "" });
+                  await sendEmail({
+                    to: booking.customer.email,
+                    subject: `✅ Reschedule fee paid — booking moved: ${booking.bookingId}`,
+                    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;"><h2 style="color:#0A5C43;">✅ Reschedule fee paid</h2><p>Your fee has been paid and your booking has been moved to ${pending.whenLabel || `${pending.date} ${whenTime}`}. Your updated booking details are in your confirmation email.</p></div>`,
+                  }).catch(() => {});
+                }
+              }
+            } else if (isAdditionalHours && additionalHoursAmount > 0) {
               const result = await applyAdditionalHoursPayment(booking, {
                 additionalHoursAmount,
                 additionalAmount: pi.amount_received / 100,
@@ -460,7 +500,7 @@ app.post(
             } else if (
               WAITING.includes(booking.status) &&
               !pi.metadata?.subscriptionRef &&
-              !["subscription_first", "visit_payment", "cancellation_fee"].includes(pi.metadata?.type)
+              !["subscription_first", "visit_payment", "cancellation_fee", "reschedule_fee"].includes(pi.metadata?.type)
             ) {
               // Paid straight away (no hold) while still waiting for payment: confirm it now.
               await confirmPaidBooking(booking._id, { paymentIntentId: pi.id, captured: true, amount: pi.amount_received / 100, currency: pi.currency });

@@ -1446,6 +1446,12 @@ async function rescheduleBooking(booking, { date, timeSlot, preferredTime }) {
   const oldSlot = booking.schedule?.timeSlot || "—";
   const oldPref = booking.schedule?.preferredTime || "";
 
+  booking.meta = booking.meta || {};
+  const nextRescheduleCount = Number(booking.meta.rescheduleCount || 0) + 1;
+  booking.meta.rescheduleCount = nextRescheduleCount;
+  booking.meta.rescheduleFeePaidAt = booking.meta.rescheduleFeePaidAt || null;
+  booking.meta.pendingReschedule = null;
+
   booking.schedule = {
     ...booking.schedule,
     date:          new Date(date),
