@@ -698,10 +698,14 @@ const NewBookingPage = () => {
         ? "Select one"
         : "";
     if (f === "details.duration")
-      return !v || Number(v) < 1
+      return !v || !Number.isFinite(Number(v))
+        ? "Enter a valid duration"
+        : Number(v) < 1
         ? "Min 1 hour"
         : Number(v) > 50
           ? "Max 50 hours"
+          : !Number.isInteger(Number(v) * 2)
+            ? "Use increments of 0.5 hours"
           : "";
     if (f === "schedule.date") return !v ? "Required" : "";
     if (f === "schedule.timeSlot") return !v ? "Required" : "";
@@ -795,7 +799,11 @@ const NewBookingPage = () => {
       const payload = {
         ...data,
         bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
-        details: { ...data.details, extras: extrasWithRates },
+        details: {
+          ...data.details,
+          duration: Number(data.details.duration),
+          extras: extrasWithRates,
+        },
         payment: {
           amount: createTotal,
           ...(applyTax && taxAmount > 0 ? { taxRate: tax.rate, taxAmount, taxLabel: tax.label } : {}),
@@ -1117,20 +1125,12 @@ const NewBookingPage = () => {
                         </button>
                       ))}
                       <input
-                        type="number"
-                        min="1"
-                        max="50"
-                        placeholder="…"
-                        value={
-                          data.details.duration > 8 ? data.details.duration : ""
-                        }
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Custom"
+                        value={data.details.duration || ""}
                         onChange={(e) => {
-                          const v = parseInt(e.target.value);
-                          if (!isNaN(v))
-                            set(
-                              "details.duration",
-                              Math.min(50, Math.max(1, v)),
-                            );
+                          set("details.duration", e.target.value);
                         }}
                         className="w-20 h-9 px-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition"
                       />

@@ -1511,9 +1511,13 @@ const Bookings = () => {
       return "";
     }
     if (fieldPath === "details.duration") {
-      if (!value || Number(value) < 1)
+      if (!value || !Number.isFinite(Number(value)))
+        return "Enter a valid duration";
+      if (Number(value) < 1)
         return "Duration must be at least 1 hour";
       if (Number(value) > 50) return "Duration must not exceed 50 hours";
+      if (!Number.isInteger(Number(value) * 2))
+        return "Duration must use increments of 0.5 hours";
       return "";
     }
     if (fieldPath === "details.Bedroom") {
@@ -4923,19 +4927,14 @@ ${extrasRows}
                             </div>
                             <div className="relative">
                               <input
-                                type="number"
-                                min="1"
-                                max="50"
-                                step="1"
-                                placeholder="Or type a custom number"
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Type a custom duration"
                                 value={createData.details.duration || ""}
                                 onChange={(e) => {
-                                  const val = parseInt(e.target.value, 10);
                                   handleFieldChange(
                                     "details.duration",
-                                    Number.isNaN(val)
-                                      ? 0
-                                      : Math.min(50, Math.max(1, val)),
+                                    e.target.value,
                                   );
                                 }}
                                 className={`w-full p-3 rounded-xl bg-white/5 border-2 transition-all text-sm text-white font-bold focus:outline-none focus:ring-2 ${
@@ -4949,8 +4948,8 @@ ${extrasRows}
                               </span>
                             </div>
                             <p className="text-[10px] text-white/40 mt-1.5">
-                              Any custom duration from 1 to 50 hours — drives
-                              the price automatically.
+                              Enter 1 to 50 hours in 0.5-hour increments — the
+                              price updates automatically.
                             </p>
                             {formErrors["details.duration"] && (
                               <p className="text-rose-500 text-[10px] font-bold mt-1.5">
@@ -6119,6 +6118,7 @@ ${extrasRows}
                           bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
                           details: {
                             ...createData.details,
+                            duration: Number(createData.details.duration),
                             extras: extrasWithRates,
                           },
                           payment: {

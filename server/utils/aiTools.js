@@ -89,6 +89,7 @@ function calculateQuote(services, { service, hours, extras = [], suppliesProvide
   }
   const h = Number(hours);
   if (!Number.isFinite(h) || h < 1 || h > 50) return { error: "Hours must be between 1 and 50." };
+  if (!Number.isInteger(h * 2)) return { error: "Hours must be in 0.5-hour increments, such as 2.5." };
   const freqError = frequencyProblem(base, frequency || "Once");
   if (freqError) return { error: freqError };
 
@@ -780,7 +781,7 @@ const declarations = [
       type: "object",
       properties: {
         service: { type: "string", description: "Cleaning service name exactly as listed under 'Cleaning services'." },
-        hours: { type: "number", description: "Number of hours (1–50)." },
+        hours: { type: "number", minimum: 1, maximum: 50, description: "Number of hours (1–50), in 0.5-hour increments; for example, 2.5." },
         extras: extrasSchema,
         suppliesProvidedBy: { type: "string", enum: ["Cleaniq", "Customer"], description: "Who brings the cleaning supplies and equipment." },
         frequency: { type: "string", enum: ["Once", "Weekly", "Fortnightly", "Monthly", "Quarterly"], description: "How often (Quarterly = every 3 months). Regular cleans can have their own hourly price." },
@@ -796,7 +797,7 @@ const declarations = [
       properties: {
         date: { type: "string", description: "The date as the customer said it (e.g. \"next Friday\", \"the 28th\") or YYYY-MM-DD" },
         time: { type: "string", description: "Arrival time to check, HH:MM" },
-        hours: { type: "number", description: "Job length in hours" },
+        hours: { type: "number", minimum: 1, maximum: 50, description: "Job length in hours, including half-hours (for example 2.5)." },
       },
       required: ["date"],
     },
@@ -815,7 +816,7 @@ const declarations = [
         frequency: { type: "string", enum: FREQUENCIES, description: "Once, or a regular series — only the frequencies offered for the service (see the price list)" },
         suppliesProvidedBy: { type: "string", enum: ["Cleaniq", "Customer"] },
         service: { type: "string" },
-        hours: { type: "number" },
+        hours: { type: "number", minimum: 1, maximum: 50, description: "Exact duration in hours, including half-hours (for example 2.5)." },
         bedrooms: { type: "integer" },
         bathrooms: { type: "integer" },
         kitchens: { type: "integer" },

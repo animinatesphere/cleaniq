@@ -22,6 +22,16 @@ test("quote = hourly rate × hours + extras (same as the admin form)", () => {
   assert.equal(q.total, 397.7);
 });
 
+test("AI quotes accept half-hour durations and reject other fractions", () => {
+  const halfHourQuote = calculateQuote(services, {
+    service: "Deep Clean",
+    hours: 2.5,
+  });
+  assert.equal(halfHourQuote.hours, 2.5);
+  assert.equal(halfHourQuote.labour, 77.13);
+  assert.match(calculateQuote(services, { service: "Deep Clean", hours: 2.25 }).error, /0\.5-hour increments/);
+});
+
 test("supplies fee is added only when Cleaniq brings the supplies", () => {
   const withSupplies = calculateQuote(services, { service: "Deep Clean", hours: 3, suppliesProvidedBy: "Cleaniq" }, 10);
   assert.equal(withSupplies.total, 102.55);
@@ -43,6 +53,7 @@ test("arrival time + hours shown as a time window", () => {
   const { formatWindow } = require("../utils/aiTools");
   assert.equal(formatWindow("08:00", 4), "8am–12pm");
   assert.equal(formatWindow("09:30", 3), "9:30am–12:30pm");
+  assert.equal(formatWindow("09:30", 2.5), "9:30am–12pm");
   assert.equal(formatWindow("14:00", 2.5), "2pm–4:30pm");
   assert.equal(formatWindow("10:00"), "10am");
 });

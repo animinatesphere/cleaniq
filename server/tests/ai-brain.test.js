@@ -42,6 +42,7 @@ test("booking rules only when the channel can book", () => {
   assert.match(withTools, /especially your address and email/);
   assert.match(withTools, /How the cleaner gets in/);
   assert.match(withTools, /Cleaning supplies and equipment: shall we bring them \(£10\.00 per visit\)/);
+  assert.match(withTools, /0\.5-hour increments \(for example, 2\.5 hours\)/);
   assert.match(withTools, /call find_my_bookings/);
   assert.match(withTools, /call reschedule_booking with customerConfirmed true/);
   assert.match(withTools, /Example of the booking pattern/);
@@ -166,7 +167,7 @@ test("phone calls never ask for an email: the caller WhatsApps or emails it, the
 
 test("quotes ask the type of cleaning, hours, when, name, email, address and supplies — then confirm", () => {
   const p = buildInstructions({ channel: "whatsapp", settings, knowledge, services, now, canBook: true });
-  assert.match(p, /1\. Type of cleaning .*\n  2\. How many hours\n  3\. When they'd like it: the date, and what time the cleaner should arrive\n  4\. Full name\n  5\. Email address/);
+  assert.match(p, /1\. Type of cleaning .*\n  2\. How many hours \(including half-hours such as 2\.5\)\n  3\. When they'd like it: the date, and what time the cleaner should arrive\n  4\. Full name\n  5\. Email address/);
   assert.match(p, /Property address with postcode \(call check_postcode/);
   assert.match(p, /CONFIRMATION STEP — never skip it: send ONE summary with the type of cleaning, hours, date and arrival time, the customer's name, email/);
 });

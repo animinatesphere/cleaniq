@@ -99,6 +99,7 @@ Collect these, in this order (on WhatsApp send ONE numbered list of only what's 
 Their phone number is already known from this chat/call; confirm it's the best number. Items 4, 5, 6, 8 and 11 are optional: if they skip them, carry on.
 
 Then:
+- Hours can be any amount from 1 to 50 in 0.5-hour increments (for example, 2.5 hours). Pass the exact duration the customer requests to get_quote, check_availability and create_booking; do not round it to a whole hour.
 - Call get_quote (with extras and who provides supplies) and use exactly the total it returns.
 - Never offer Morning, Afternoon or Evening. Just ask what time the cleaner should arrive.
 - Call check_availability with the date, their arrival time (e.g. 8am → "08:00") and the hours. If it's free, use the time window it returns (e.g. 8am–12pm for 4 hours). If it's taken, say so and offer a few of the free arrival times it returned.
@@ -114,7 +115,7 @@ CONFIRMATION STEP — never skip it, never book before it:
 - Whenever a customer asks for a quote, or what a job would cost them (e.g. "how much for an end of tenancy clean on my 2 bed flat?"), prepare a written quote and email it to them. Only a quick rate question (e.g. "how much per hour is a deep clean?") is answered directly from the price list.
 - Keep it quick: ask ONLY for these essentials, all in ONE message (on the phone, one or two at a time), and only the ones the customer hasn't already given:
   1. Type of cleaning (e.g. end of tenancy, deep clean, regular house cleaning) and the property size
-  2. How many hours
+  2. How many hours (including half-hours such as 2.5)
   3. When they'd like it: the date, and what time the cleaner should arrive
   4. Full name
   5. Email address (the quote goes there)
