@@ -2308,24 +2308,22 @@ const Booking = () => {
                                   </Elements>
                                 )}
 
-                                {adminToken && (
-                                  <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl">
-                                    <div className="flex items-center justify-between gap-3">
-                                      <div>
-                                        <p className="text-[11px] font-black text-blue-700 uppercase tracking-wider">🧪 Admin test booking</p>
-                                        <p className="text-[11px] text-blue-700 mt-1">Creates a real booking marked TEST, with no payment. Only you see this (admin login).</p>
-                                      </div>
-                                      <button type="button" onClick={handleDevModeSubmit} disabled={isSubmitting}
-                                        className="shrink-0 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-black text-xs px-4 py-2.5 rounded-xl whitespace-nowrap transition-all">
-                                        {isSubmitting ? "Submitting…" : "Book without paying"}
-                                      </button>
+                                <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                      <p className="text-[11px] font-black text-blue-700 uppercase tracking-wider">🧪 Admin test booking</p>
+                                      <p className="text-[11px] text-blue-700 mt-1">Creates a real booking marked TEST, with no payment. Requires an active admin login.</p>
                                     </div>
-                                    <label className="mt-3 flex items-center gap-2 text-[11px] font-bold text-blue-700">
-                                      <input type="checkbox" checked={devNotifyCleaners} onChange={(e) => setDevNotifyCleaners(e.target.checked)} />
-                                      Also send it to cleaners as a real job offer (to test the worker app)
-                                    </label>
+                                    <button type="button" onClick={handleDevModeSubmit} disabled={isSubmitting}
+                                      className="shrink-0 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-black text-xs px-4 py-2.5 rounded-xl whitespace-nowrap transition-all">
+                                      {isSubmitting ? "Submitting…" : "Book without paying"}
+                                    </button>
                                   </div>
-                                )}
+                                  <label className="mt-3 flex items-center gap-2 text-[11px] font-bold text-blue-700">
+                                    <input type="checkbox" checked={devNotifyCleaners} onChange={(e) => setDevNotifyCleaners(e.target.checked)} />
+                                    Also send it to cleaners as a real job offer (to test the worker app)
+                                  </label>
+                                </div>
                                
 
                               </div>
