@@ -12,6 +12,8 @@ import {
   Plus,
   Minus,
   CheckCircle2,
+  CalendarDays,
+  Mail,
   MapPin,
   Clock,
   Info,
@@ -222,6 +224,7 @@ const Booking = () => {
 
   const [step, setStep] = useState(returnedStep);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedBooking, setSubmittedBooking] = useState(null);
 
   const [bookedDates, setBookedDates] = useState([]);
   const [flexibleRangesByDate, setFlexibleRangesByDate] = useState({});
@@ -975,6 +978,7 @@ const Booking = () => {
           service: formData.serviceType,
           frequency: formData.frequency,
         });
+        setSubmittedBooking(bookingData);
         setIsSubmitted(true);
       }
     } catch (error) {
@@ -1041,6 +1045,7 @@ const Booking = () => {
       if (!response.ok) throw new Error(data.message || "Test booking failed.");
       localStorage.removeItem("ciq_booking_draft");
       showNotification(`Test booking ${data.bookingId} created — no payment taken.`, "success");
+      setSubmittedBooking(data);
       setIsSubmitted(true);
     } catch (error) {
       showNotification(error.message || "Error submitting test booking.");
@@ -1054,32 +1059,123 @@ const Booking = () => {
   }
 
   if (isSubmitted) {
+    const booking = submittedBooking || {};
+    const bookingDate = booking.schedule?.date || formData.date;
+    const formattedDate = bookingDate
+      ? new Date(bookingDate).toLocaleDateString("en-GB", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "Europe/London",
+        })
+      : "";
+    const appointmentTime = booking.schedule?.preferredTime || formData.preferredTime || booking.schedule?.timeSlot || formData.timeSlot;
+    const bookingReference = booking.bookingId || booking._id;
+    const displayedAmount = Number(booking.payment?.amount ?? amountToday);
+
     return (
-      <div
-        className="pt-40 pb-20 min-h-screen bg-white flex items-center justify-center px-6 text-center"
-        style={{ backgroundColor: "#ffffff" }}
-      >
+      <div className="relative min-h-screen overflow-hidden bg-slate-50 px-4 py-16 sm:px-6 sm:py-24">
+        <Helmet>
+          <title>Booking Confirmed — Cleaniq Services</title>
+        </Helmet>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-br from-[#06291E] via-[#08734F] to-emerald-500" />
+        <div className="pointer-events-none absolute -right-20 top-20 h-72 w-72 rounded-full bg-emerald-300/20 blur-3xl" />
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="relative mx-auto max-w-2xl"
         >
-          <div className="w-20 h-20 bg-[#10B981] rounded-[24px] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-[#10B981]/20 rotate-12">
-            <CheckCircle2 size={40} className="text-white" />
+          <div className="overflow-hidden rounded-[32px] bg-white shadow-2xl shadow-slate-900/10">
+            <div className="px-6 pb-8 pt-10 text-center text-white sm:px-12 sm:pt-12">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
+                <CheckCircle2 size={36} strokeWidth={2.2} />
+              </div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-100">
+                Booking complete
+              </p>
+              <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
+                Thank you, {booking.customer?.firstName || formData.firstName || "there"}!
+              </h1>
+              <p className="mx-auto mt-3 max-w-md text-sm font-medium leading-relaxed text-white/80 sm:text-base">
+                {isRegular
+                  ? `Your regular clean is set up ${regularEvery}. Check your email for your booking and payment details.`
+                  : "Your booking is confirmed. We’ve sent the details to your email address."}
+              </p>
+            </div>
+
+            <div className="px-6 pb-8 sm:px-10">
+              {bookingReference && (
+                <div className="-mt-1 flex items-center justify-between gap-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4 sm:px-5">
+                  <span className="text-xs font-black uppercase tracking-wider text-emerald-800">
+                    Booking reference
+                  </span>
+                  <span className="font-mono text-lg font-black tracking-wide text-emerald-950">
+                    {bookingReference}
+                  </span>
+                </div>
+              )}
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4">
+                  <CalendarDays size={19} className="mt-0.5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Appointment</p>
+                    <p className="mt-1 text-sm font-bold text-slate-800">{formattedDate || "Date to be confirmed"}</p>
+                    {appointmentTime && <p className="mt-0.5 text-xs font-semibold text-slate-500">{appointmentTime}</p>}
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4">
+                  <MapPin size={19} className="mt-0.5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Service</p>
+                    <p className="mt-1 text-sm font-bold text-slate-800">{booking.service || formData.serviceType}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                      {booking.details?.duration || formData.duration} hours · {booking.details?.frequency || formData.frequency}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4">
+                  <Mail size={19} className="mt-0.5 shrink-0 text-emerald-600" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Confirmation sent to</p>
+                    <p className="mt-1 break-all text-sm font-bold text-slate-800">{booking.customer?.email || formData.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 p-4">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">
+                      {tax.enabled ? `Includes ${tax.label || "tax"}` : "Payment details in your email"}
+                    </p>
+                  </div>
+                  <p className="text-xl font-black text-slate-900">£{displayedAmount.toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-slate-200 px-4 py-4">
+                <p className="text-sm font-extrabold text-slate-800">What happens next?</p>
+                <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
+                  {isRegular
+                    ? "Your first clean is paid. Future visits will be charged to your saved card 24 hours before each appointment."
+                    : "Check your inbox for your booking confirmation and payment details. Your card payment is securely authorised and will be captured after the clean."}
+                </p>
+              </div>
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link to="/" className="btn-primary inline-flex flex-1 items-center justify-center rounded-2xl px-6 py-4 text-sm">
+                  Return Home
+                </Link>
+                <Link to="/account/dashboard" className="inline-flex flex-1 items-center justify-center rounded-2xl border border-slate-200 px-6 py-4 text-sm font-black text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700">
+                  View My Bookings
+                </Link>
+              </div>
+            </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-4 tracking-tighter">
-            Confirmed!
-          </h1>
-          <p className="text-slate-500 font-bold mb-10 max-w-md mx-auto">
-            {isRegular
-              ? `Your regular clean is set up ${regularEvery}. Your first clean is paid; each following clean is charged 24 hours before it. Check your email for the details.`
-              : "Check your email for confirmation."}
+          <p className="mt-5 text-center text-xs font-medium text-slate-400">
+            Thank you for choosing Cleaniq Services.
           </p>
-          <Link
-            to="/"
-            className="btn-primary inline-flex px-10 py-4 rounded-full text-sm"
-          >
-            Return Home
-          </Link>
         </motion.div>
       </div>
     );
