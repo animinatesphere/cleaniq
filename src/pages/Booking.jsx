@@ -989,20 +989,29 @@ const Booking = () => {
   };
 
 
-  // 🧪 Admin-only TEST booking: no payment taken. Shown only when you're logged in as admin in
-  // this browser; the server checks the admin login too (POST /bookings/dev-test).
-  // Only a login that hasn't expired counts (admin logins last 8 hours).
-  const adminToken = (() => {
-    try {
-      const t = localStorage.getItem("adminToken") || "";
-      const exp = JSON.parse(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).exp;
-      return exp && exp * 1000 > Date.now() ? t : "";
-    } catch { return ""; }
-  })();
+  // The server also verifies this token on POST /bookings/dev-test.
   const [devNotifyCleaners, setDevNotifyCleaners] = useState(false);
   const handleDevModeSubmit = async () => {
     if (!formData.serviceType) {
       showNotification("Please select a service type before completing your booking.");
+      return;
+    }
+    const token = localStorage.getItem("adminToken") || "";
+    if (!token) {
+      showNotification("No admin login was found for this website in this browser. Sign in at /admin, then reload this booking page.");
+      return;
+    }
+    try {
+      const payload = token.split(".")[1];
+      if (!payload) throw new Error("Invalid token");
+      const encoded = payload.replace(/-/g, "+").replace(/_/g, "/");
+      const claims = JSON.parse(atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, "=")));
+      if (claims.exp && claims.exp * 1000 <= Date.now()) {
+        showNotification("Your admin login has expired. Sign in again at /admin, then reload this booking page.");
+        return;
+      }
+    } catch {
+      showNotification("The saved admin login could not be read. Sign in again at /admin, then reload this booking page.");
       return;
     }
     const bookingPayload = {
@@ -1037,12 +1046,17 @@ const Booking = () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings/dev-test`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(bookingPayload),
       });
       const data = await response.json().catch(() => ({}));
-      if (response.status === 401) throw new Error("Your admin login has expired. Log in again at /admin in this browser, then come back and press the test button.");
-      if (!response.ok) throw new Error(data.message || "Test booking failed.");
+      if (!response.ok) {
+        const detail = data.message || `Request failed with status ${response.status}`;
+        if (response.status === 401) {
+          throw new Error(`The backend rejected the admin login (${detail}). Sign in at /admin on this same website, reload this page and try again.`);
+        }
+        throw new Error(detail);
+      }
       localStorage.removeItem("ciq_booking_draft");
       showNotification(`Test booking ${data.bookingId} created — no payment taken.`, "success");
       setSubmittedBooking(data);
@@ -1963,7 +1977,7 @@ const Booking = () => {
                                 </div>
 
                                 {/* Custom Time Input */}
-                                <div className="border-t border-slate-200 pt-4 space-y-3">
+                                {/* <div className="border-t border-slate-200 pt-4 space-y-3">
                                   <div className="flex items-center justify-between">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                       ⏰ Custom Time
@@ -2061,7 +2075,7 @@ const Booking = () => {
                                   <p className="text-[8px] text-slate-400">
                                     💡 If left empty, we'll default to 12:30 PM
                                   </p>
-                                </div>
+                                </div> */}
                               </div>
                             </div>
                           )}
@@ -2308,6 +2322,7 @@ const Booking = () => {
                                   </Elements>
                                 )}
 
+                                {/* Test booking is disabled; coupon codes are the supported discount flow.
                                 <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl">
                                   <div className="flex items-center justify-between gap-3">
                                     <div>
@@ -2324,6 +2339,7 @@ const Booking = () => {
                                     Also send it to cleaners as a real job offer (to test the worker app)
                                   </label>
                                 </div>
+                                */}
                                
 
                               </div>
