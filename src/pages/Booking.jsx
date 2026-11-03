@@ -1968,7 +1968,7 @@ const Booking = () => {
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                       ⏰ Custom Time
                                     </p>
-                                    {/* <button
+                                    <button
                                       type="button"
                                       onClick={() => {
                                         const testDate = new Date();
@@ -2000,7 +2000,7 @@ const Booking = () => {
                                       className="text-[8px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition"
                                     >
                                       🧪 Dev Test Fill
-                                    </button> */}
+                                    </button>
                                   </div>
                                   <div className="flex gap-2 items-center">
                                     <input
