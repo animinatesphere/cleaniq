@@ -254,7 +254,14 @@ export default function CampaignDetail() {
                       </div>
                       <span className="text-white/80 text-sm truncate">{name}</span>
                     </div>
-                    <span className="text-white/40 text-xs truncate">{send.contactEmail}</span>
+                    <div className="min-w-0">
+                      <span className="block text-white/40 text-xs truncate">{send.contactEmail}</span>
+                      {send.status === "failed" && send.error && (
+                        <p title={send.error} className="mt-1 text-rose-400/80 text-[10px] leading-snug line-clamp-2">
+                          {send.error}
+                        </p>
+                      )}
+                    </div>
                     <span className="text-white/40 text-xs">Step {send.stepIndex + 1}</span>
                     <div className="flex items-center gap-1">
                       <span className={`flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${STATUS_COLOR[send.status] || STATUS_COLOR.skipped}`}>

@@ -388,15 +388,27 @@ function buildEmailHtml(rawBody, unsubUrl, replySubject) {
 }
 
 function buildPlainEmailHtml(rawBody, unsubUrl) {
-  const content = (rawBody || "")
-    .split(/\n/)
-    .map((line) => line.trim() ? `<p>${line}</p>` : `<br>`)
-    .join("");
+  const escapeHtml = (text) =>
+    text.replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    })[char]);
+  const paragraphs = String(rawBody || "")
+    .trim()
+    .split(/\r?\n(?:[ \t]*\r?\n)+/)
+    .filter(Boolean)
+    .map((paragraph) => paragraph.split(/\r?\n/).map(escapeHtml).join("<br>"));
+  const content = paragraphs
+    .map((paragraph) => `<p style="margin:0 0 12px;">${paragraph}</p>`)
+    .join("\n");
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1e293b;">
 ${content}
-<p style="margin-top:32px;font-size:11px;color:#94a3b8;">
+<p style="margin:16px 0 0;font-size:11px;line-height:1.4;color:#94a3b8;">
   <a href="${unsubUrl}" style="color:#64748b;text-decoration:underline;">Unsubscribe</a>
 </p>
 </body></html>`;
@@ -885,6 +897,7 @@ async function detectRepliesForMailbox(mailbox) {
 module.exports = {
   encrypt,
   decrypt,
+  buildPlainEmailHtml,
   buildOAuth2Client,
   buildMsAuthUrl,
   exchangeMsCode,

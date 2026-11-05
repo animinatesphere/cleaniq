@@ -11,6 +11,10 @@ const WAITING = ["Pending", "Awaiting Payment"];
 
 const findQuery = (ref) => (mongoose.isValidObjectId(ref) ? { _id: ref } : { bookingId: String(ref || "") });
 
+function shouldSendPaymentCaptureEmail(paymentStatus) {
+  return !["Authorized", "Completed"].includes(paymentStatus);
+}
+
 /**
  * @param {string} ref booking _id (or booking reference)
  * @param {{ paymentIntentId: string, captured?: boolean, amount?: number, currency?: string }} payment
@@ -95,4 +99,4 @@ async function afterConfirmed(booking, { amount, currency } = {}) {
   await require("./automationEngine").rescheduleBookingReminders(booking).catch((e) => console.error("Reminder error:", e.message));
 }
 
-module.exports = { confirmPaidBooking, afterConfirmed, WAITING };
+module.exports = { confirmPaidBooking, afterConfirmed, shouldSendPaymentCaptureEmail, WAITING };

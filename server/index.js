@@ -253,7 +253,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");
 const Booking = require("./models/Booking");
 const { sendEmail, templates } = require("./utils/emailService");
 const { sendCapiEvent } = require("./utils/metaCapi");
-const { confirmPaidBooking, WAITING } = require("./utils/bookingPayments");
+const { confirmPaidBooking, shouldSendPaymentCaptureEmail, WAITING } = require("./utils/bookingPayments");
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 const applyAdditionalHoursPayment = async (
@@ -511,18 +511,21 @@ app.post(
                 await Booking.updateOne({ _id: booking._id }, { $set: { "payment.status": "Completed", "payment.capturedAt": new Date(), "payment.stripePaymentIntentId": pi.id } });
               }
             } else {
-              // Regular payment completed
+              // An authorized booking already received its confirmation when the card was held.
+              // Don't send a second customer email when that hold is captured, or on webhook retries.
+              const sendCaptureEmail = shouldSendPaymentCaptureEmail(booking.payment?.status);
               booking.payment = booking.payment || {};
               booking.payment.status = "Completed"; // Payment has been captured
               booking.payment.capturedAt = new Date();
               await booking.save();
 
-              // Send Payment Capture Confirmation Email
-              await sendEmail({
-                to: booking.customer.email,
-                subject: `✓ Payment Captured: Cleaniq Booking ${booking.bookingId}`,
-                html: templates.paymentSuccessCustomer(booking),
-              });
+              if (sendCaptureEmail && booking.customer?.email) {
+                await sendEmail({
+                  to: booking.customer.email,
+                  subject: `✓ Payment Captured: Cleaniq Booking ${booking.bookingId}`,
+                  html: templates.paymentSuccessCustomer(booking),
+                });
+              }
 
               console.log(`✅ Payment captured for booking ${bookingId}`);
             }
