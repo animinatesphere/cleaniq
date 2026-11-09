@@ -6,9 +6,20 @@ const { moveToTrash } = require('../utils/trash');
 
 // POST /api/contact — forward a contact form message to the organisation email
 router.post('/', async (req, res) => {
-  const { name, email, phone, subject, message } = req.body;
+  const { commercial, error: commercialError } = readCommercial(req.body);
+  if (commercialError) return res.status(400).json({ message: commercialError });
 
-  if (!name || !email || !message) {
+  // Everything the visitor typed is escaped before it goes into the email.
+  const name = escHtml(clean(req.body.name, 100));
+  const email = clean(req.body.email, 150);
+  const emailHtml = escHtml(email);
+  const phone = escHtml(clean(req.body.phone, 30));
+  const rawSubject = clean(req.body.subject, 150) || (commercial ? `Commercial cleaning — ${commercial.type} (${commercial.hours}h)` : '');
+  const subject = escHtml(rawSubject);
+  const rawMessage = clean(req.body.message, 5000);
+  const message = escHtml(rawMessage);
+
+  if (!name || !email || (!message && !commercial)) {
     return res.status(400).json({ message: 'Name, email and message are required.' });
   }
 
@@ -30,7 +41,7 @@ router.post('/', async (req, res) => {
           <tr>
             <td style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
               <p style="margin: 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Email</p>
-              <a href="mailto:${email}" style="margin: 4px 0 0; font-size: 15px; font-weight: 700; color: #005B41; display: block;">${email}</a>
+              <a href="mailto:${emailHtml}" style="margin: 4px 0 0; font-size: 15px; font-weight: 700; color: #005B41; display: block;">${emailHtml}</a>
             </td>
           </tr>
           ${phone ? `
@@ -47,10 +58,17 @@ router.post('/', async (req, res) => {
               <p style="margin: 4px 0 0; font-size: 15px; font-weight: 700; color: #0F172A;">${subject}</p>
             </td>
           </tr>` : ''}
+          ${commercial ? `
+          <tr>
+            <td style="padding: 12px 16px; background: #ecfdf5; border-bottom: 1px solid #e2e8f0;">
+              <p style="margin: 0; font-size: 10px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 1px;">Commercial cleaning</p>
+              <p style="margin: 4px 0 0; font-size: 15px; font-weight: 700; color: #0F172A;">${escHtml(commercial.type)} · ${commercial.hours} hour${commercial.hours === 1 ? '' : 's'}</p>
+            </td>
+          </tr>` : ''}
           <tr>
             <td style="padding: 12px 16px; background: #f8fafc; border-radius: 0 0 12px 12px;">
               <p style="margin: 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Message</p>
-              <p style="margin: 8px 0 0; font-size: 14px; font-weight: 500; color: #475569; white-space: pre-wrap;">${message}</p>
+              <p style="margin: 8px 0 0; font-size: 14px; font-weight: 500; color: #475569; white-space: pre-wrap;">${message || '—'}</p>
             </td>
           </tr>
         </table>
@@ -70,17 +88,20 @@ router.post('/', async (req, res) => {
   try {
     await sendEmail({
       to: process.env.EMAIL_USER || 'info@cleaniqservices.com',
-      subject: subject ? `📩 Contact Enquiry: ${subject}` : `📩 New Contact Enquiry from ${name}`,
+      subject: rawSubject ? `${commercial ? '🏢' : '📩'} Contact Enquiry: ${rawSubject}` : `📩 New Contact Enquiry from ${clean(req.body.name, 100)}`,
       html,
     });
 
     // Store as a lead so it's available for email marketing campaigns later.
     const lead = await Lead.create({
-      name,
+      name: clean(req.body.name, 100),
       email,
-      phone: phone || '',
-      message,
-      source: 'Contact Form',
+      phone: clean(req.body.phone, 30),
+      message: commercial
+        ? `Commercial cleaning: ${commercial.type} — ${commercial.hours} hour${commercial.hours === 1 ? '' : 's'}${rawMessage ? `\n\n${rawMessage}` : ''}`
+        : rawMessage,
+      serviceInterest: commercial ? `Commercial Cleaning — ${commercial.type}` : clean(req.body.service, 100),
+      source: commercial ? 'Commercial Enquiry' : 'Contact Form',
     });
 
     // One-time automated acknowledgement to the person who reached out.
@@ -120,6 +141,27 @@ const count = (v, max) => {
   const n = Number(v);
   return Number.isInteger(n) && n >= 0 && n <= max ? n : null;
 };
+
+// Commercial cleaning enquiry from the contact page (Services → Commercial cleaning → Get a quote).
+// Returns { commercial: null } for a normal message, { commercial: { type, hours } } or { error }.
+const COMMERCIAL_TYPES = [
+  "Event Cleaning",
+  "Restaurant Cleaning",
+  "Contract Cleaning",
+  "Communal Area Cleaning",
+  "Commercial Cleaning",
+  "Gym Cleaning",
+];
+function readCommercial(body = {}) {
+  if (!body.commercialType) return { commercial: null };
+  const type = clean(body.commercialType, 60);
+  if (!COMMERCIAL_TYPES.includes(type)) return { error: "Please choose the type of commercial cleaning." };
+  const hours = Number(body.hours);
+  if (!Number.isFinite(hours) || hours < 1 || hours > 200 || Math.round(hours * 2) !== hours * 2) {
+    return { error: "Please enter how many hours you need (1 to 200)." };
+  }
+  return { commercial: { type, hours } };
+}
 
 // Checks the form; returns { quote } or { error }.
 function readQuoteRequest(body = {}) {
@@ -363,3 +405,5 @@ router.delete('/leads/:id', async (req, res) => {
 module.exports = router;
 module.exports.readQuoteRequest = readQuoteRequest;
 module.exports.QUOTE_OPTIONS = QUOTE_OPTIONS;
+module.exports.readCommercial = readCommercial;
+module.exports.COMMERCIAL_TYPES = COMMERCIAL_TYPES;
