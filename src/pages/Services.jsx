@@ -2,6 +2,18 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { pathForLayoutKey } from "../utils/servicePages";
+
+const COMMERCIAL_TYPES = [
+  "Event Cleaning",
+  "Restaurant Cleaning",
+  "Contract Cleaning",
+  "Communal Area Cleaning",
+  "Commercial Cleaning",
+  "Gym Cleaning",
+];
+const COMMERCIAL_CONTACT = "/pages/contact?type=commercial";
+// Where the whole card links to: commercial goes to the quote form, others to their service page.
+const cardPath = (service) => (service.quoteOnly ? COMMERCIAL_CONTACT : pathForLayoutKey(service.id));
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
@@ -299,7 +311,23 @@ const Services = () => {
       }
     });
 
-    return mapped.sort((a, b) => a.rawRate - b.rawRate);
+    // Commercial cleaning isn't booked online: the card asks for a quote on the contact page.
+    const withCommercial = mapped.map((m) =>
+      m.id === "commercial"
+        ? {
+            ...m,
+            title: "Commercial Cleaning",
+            tag: "Business & commercial cleaning",
+            description:
+              "Events, restaurants, gyms, communal areas and contract cleaning. Tell us what you need and how many hours, and we'll send you a quote.",
+            features: COMMERCIAL_TYPES,
+            pricing: "Custom quote",
+            quoteOnly: true,
+          }
+        : m,
+    );
+
+    return withCommercial.sort((a, b) => a.rawRate - b.rawRate);
   }, [dbServices, region]);
 
   const containerVariants = {
@@ -415,13 +443,13 @@ const Services = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              className={`flex flex-col lg:flex-row gap-8 lg:gap-16 items-center p-5 md:p-12 rounded-[32px] md:rounded-[60px] glass overflow-hidden relative shadow-xl shadow-primary/5 ${pathForLayoutKey(service.id) ? "cursor-pointer hover:shadow-2xl transition-shadow" : ""} ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}
+              className={`flex flex-col lg:flex-row gap-8 lg:gap-16 items-center p-5 md:p-12 rounded-[32px] md:rounded-[60px] glass overflow-hidden relative shadow-xl shadow-primary/5 ${cardPath(service) ? "cursor-pointer hover:shadow-2xl transition-shadow" : ""} ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}
             >
               {/* The whole card opens the service page; Book Service sits above this link. */}
-              {pathForLayoutKey(service.id) && (
+              {cardPath(service) && (
                 <Link
-                  to={pathForLayoutKey(service.id)}
-                  aria-label={`${service.title}: see prices, what's included and reviews`}
+                  to={cardPath(service)}
+                  aria-label={service.quoteOnly ? `${service.title}: get a quote` : `${service.title}: see prices, what's included and reviews`}
                   className="absolute inset-0 z-10 rounded-[32px] md:rounded-[60px]"
                 />
               )}
@@ -480,10 +508,10 @@ const Services = () => {
 
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 md:6">
                     <Link
-                      to={`/booking?service=${encodeURIComponent(service.dbName)}`}
+                      to={service.quoteOnly ? COMMERCIAL_CONTACT : `/booking?service=${encodeURIComponent(service.dbName)}`}
                       className="btn-primary w-full sm:w-auto text-center py-4 relative z-20"
                     >
-                      Book Service
+                      {service.quoteOnly ? "Get a Quote" : "Book Service"}
                     </Link>
                     <span className="text-primary font-black text-xl md:text-2xl text-center">
                       {service.pricing}
