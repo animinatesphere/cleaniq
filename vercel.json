@@ -8,6 +8,18 @@
   ],
   "rewrites": [
     {
+      "source": "/blog",
+      "destination": "/api/blog-page"
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/api/blog-page?slug=:slug"
+    },
+    {
+      "source": "/sitemap-blog.xml",
+      "destination": "/api/sitemap-blog"
+    },
+    {
       "source": "/(.*)",
       "destination": "/app.html"
     }

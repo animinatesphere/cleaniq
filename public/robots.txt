@@ -6,3 +6,4 @@ Disallow: /admin/
 Disallow: /admin/*
 
 Sitemap: https://www.cleaniqservices.com/sitemap.xml
+Sitemap: https://www.cleaniqservices.com/sitemap-blog.xml
