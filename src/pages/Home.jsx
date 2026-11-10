@@ -131,43 +131,7 @@ const Home = () => {
         />
         <link rel="preload" as="image" href={air1} fetchpriority="high" />
         <meta name="twitter:card" content="summary_large_image" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CommercialCleaningService",
-            name: "Cleaniq Services",
-            image: "https://www.cleaniqservices.com/preview.jpg",
-            "@id": "https://www.cleaniqservices.com",
-            url: "https://www.cleaniqservices.com",
-            telephone: "+447846726428",
-            address: {
-              "@type": "PostalAddress",
-              streetAddress: "First Floor, Swan Buildings, 20 Swan St",
-              addressLocality: "Manchester",
-              postalCode: "M4 5JW",
-              addressCountry: "GB",
-            },
-            geo: {
-              "@type": "GeoCoordinates",
-              latitude: 53.4842,
-              longitude: -2.2361,
-            },
-            openingHoursSpecification: [
-              {
-                "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                ],
-                opens: "09:00",
-                closes: "17:00",
-              },
-            ],
-          })}
-        </script>
+        {/* Business details (address, hours, geo) live in one LocalBusiness block in index.html. */}
       </Helmet>
       <script type="application/ld+json">
         {JSON.stringify({
@@ -288,20 +252,21 @@ const Home = () => {
                 </a>
               </div>
               <div className="flex items-center gap-3 px-6 py-4">
-                <div className="flex -space-x-3">
-                  {[
-                    "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=face",
-                    "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=80&h=80&fit=crop&crop=face",
-                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-                  ].map((src, i) => (
-                    <img
-                      key={i}
-                      src={src}
-                      alt="Happy customer"
-                      className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-md"
-                    />
-                  ))}
-                </div>
+                {/* Real Google badge linking to our profile (not stock "customer" photos). */}
+                <a
+                  href="https://maps.app.goo.gl/UHcabzmFuj11wuLo9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Read our Google reviews"
+                  className="w-10 h-10 rounded-full bg-white border-2 border-white shadow-md flex items-center justify-center shrink-0"
+                >
+                  <svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true">
+                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+                    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+                  </svg>
+                </a>
                 <div>
                   <div className="flex text-secondary mb-0.5">
                     {[1, 2, 3, 4, 5].map((i) => (

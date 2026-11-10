@@ -297,19 +297,21 @@ const LocationDetail = () => {
           "@context": "https://schema.org",
           "@graph": [
             {
-              "@type": "LocalBusiness",
-              "name": "Cleaniq Services",
-              "url": "https://www.cleaniqservices.com",
-              "telephone": "+447846726428",
-              "address": {
-                "@type": "PostalAddress",
-                "streetAddress": "20 Swan St",
-                "addressLocality": "Manchester",
-                "postalCode": "M4 5JW",
-                "addressCountry": "GB"
-              },
-              "areaServed": [name, ...nearby],
-              "priceRange": "££"
+              // The business itself is described once (index.html, @id below); this page describes
+              // the service in this area, so search engines don't see a second business.
+              "@type": "Service",
+              "name": `Cleaning services in ${name}`,
+              "serviceType": "Cleaning service",
+              "url": `https://www.cleaniqservices.com/locations/${area}`,
+              "provider": { "@id": "https://www.cleaniqservices.com#localbusiness" },
+              "areaServed": [name, ...nearby].map((n) => ({ "@type": "Place", "name": n }))
+            },
+            {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.cleaniqservices.com/" },
+                { "@type": "ListItem", "position": 2, "name": `Cleaners in ${name}`, "item": `https://www.cleaniqservices.com/locations/${area}` }
+              ]
             },
             {
               "@type": "FAQPage",

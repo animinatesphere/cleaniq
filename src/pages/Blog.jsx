@@ -84,20 +84,13 @@ const Blog = () => {
 
   return (
     <>
+      {/* Keep in sync with api/blog-page.js, which serves this page's HTML to crawlers. */}
       <Helmet>
-        <title>
-          Blog — Cleaniq Services | Cleaning Tips & Industry Insights
-        </title>
-        <meta
-          name="description"
-          content="Read our latest blog posts about cleaning tips, industry insights, and service updates from Cleaniq Services. Expert advice for a cleaner home."
-        />
+        <title>Cleaning Tips & Guides | Cleaniq Services Blog</title>
+        <meta name="description" content="Practical cleaning advice for Manchester homes, rentals, Airbnbs and offices from Cleaniq Services: end of tenancy, deep cleaning, kitchens, mould and more." />
         <link rel="canonical" href="https://www.cleaniqservices.com/blog" />
-        <meta property="og:title" content="Blog — Cleaniq Services" />
-        <meta
-          property="og:description"
-          content="Read our latest blog posts about cleaning tips, industry insights, and service updates."
-        />
+        <meta property="og:title" content="Cleaning Tips & Guides | Cleaniq Services Blog" />
+        <meta property="og:description" content="Practical cleaning advice for Manchester homes, rentals, Airbnbs and offices from Cleaniq Services: end of tenancy, deep cleaning, kitchens, mould and more." />
       </Helmet>
 
       <div

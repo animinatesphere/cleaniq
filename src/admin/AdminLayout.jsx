@@ -34,6 +34,10 @@ function installAdminFetchAuth() {
 }
 
 const AdminLayout = () => {
+  // Admin pages don't set their own <title> (the site's default one is removed on load).
+  useEffect(() => {
+    document.title = "Cleaniq Admin";
+  }, []);
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem("adminToken"),
   );

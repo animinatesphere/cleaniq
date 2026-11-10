@@ -12,7 +12,7 @@ const SITE = "https://www.cleaniqservices.com";
 
 // Tags the page sets itself (react-helmet-async) replace the template's homepage ones.
 const TEMPLATE_TAGS = [
-  /<title>[\s\S]*?<\/title>/i,
+  /<title\b[^>]*>[\s\S]*?<\/title>/i,
   /<meta\s+name="description"[\s\S]*?\/?>/i,
   /<link\s+rel="canonical"[\s\S]*?\/?>/i,
   /<meta\s+property="og:url"[\s\S]*?\/?>/i,
@@ -60,7 +60,17 @@ function buildPage(template, route, rendered) {
   if (!own.canonical) { page = page.replace(TEMPLATE_TAGS[2], ""); extra.push(`<link rel="canonical" href="${attr(url)}" />`); }
   if (!own.ogUrl) { page = page.replace(TEMPLATE_TAGS[3], ""); extra.push(`<meta property="og:url" content="${attr(url)}" />`); }
 
-  page = page.replace("</head>", `${head}\n${extra.join("\n")}\n</head>`);
+  // Twitter cards fall back to the page's own title/description instead of the homepage defaults.
+  const ogTitle = head.match(/property="og:title"\s+content="([^"]*)"/i)?.[1] || head.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1];
+  const ogDesc = head.match(/property="og:description"\s+content="([^"]*)"/i)?.[1] || head.match(/name="description"\s+content="([^"]*)"/i)?.[1];
+  if (!own.twTitle && ogTitle) { page = page.replace(TEMPLATE_TAGS[6], ""); extra.push(`<meta name="twitter:title" content="${ogTitle}" />`); }
+  if (!own.twDesc && ogDesc) { page = page.replace(TEMPLATE_TAGS[7], ""); extra.push(`<meta name="twitter:description" content="${ogDesc}" />`); }
+  page = page.replace(/<meta\s+name="twitter:url"[\s\S]*?\/?>/i, `<meta name="twitter:url" content="${attr(url)}" />`);
+
+  // Mark everything this page put in <head> so src/main.jsx can remove it before React adds the
+  // same tags again in the browser (otherwise every page ends up with two titles, descriptions…).
+  const mark = (tags) => tags.replace(/<(title|meta|link|script)\b([^>]*?)(\s*\/?)>/gi, (m, tag, attrs, close) => `<${tag}${attrs} data-ssr${close}>`);
+  page = page.replace("</head>", `${mark(head)}\n${mark(extra.join("\n"))}\n</head>`);
   page = page.replace('<div id="root"></div>', `<div id="root">${html}</div>`);
   return page;
 }

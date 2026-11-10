@@ -13,6 +13,7 @@ import {
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
 import { BlogContent } from "../utils/blogContent";
+import { generateBlogSlug } from "../utils/slugGenerator";
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -178,51 +179,48 @@ const BlogDetail = () => {
     );
   }
 
+  const postUrl = `https://www.cleaniqservices.com/blog/${generateBlogSlug(post._id, post.title)}`;
+
   return (
     <>
       <Helmet>
-        <title>{post.title} — Cleaniq Services Blog</title>
+        {/* One string child: React 19 drops <title> elements with mixed children. */}
+        <title>{`${post.title} | Cleaniq Blog`}</title>
         <meta name="description" content={post.description} />
-        <link
-          rel="canonical"
-          href={`https://www.cleaniqservices.com/blog/${post._id}`}
-        />
+        <link rel="canonical" href={postUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={postUrl} />
         <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.description} />
-        {post.image && (
-          <meta
-            property="og:image"
-            content={`https://www.cleaniqservices.com${post.image}`}
-          />
-        )}
+        {post.image && <meta property="og:image" content={getImageUrl(post.image)} />}
+        <meta name="twitter:title" content={post.title} />
+        <meta name="twitter:description" content={post.description} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: [
+            "@graph": [
               {
-                "@type": "Question",
-                name: "Do you offer end of tenancy cleaning in Manchester City Centre?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits.",
-                },
+                "@type": "BlogPosting",
+                "@id": `${postUrl}#article`,
+                headline: post.title,
+                description: post.description,
+                ...(post.image ? { image: getImageUrl(post.image) } : {}),
+                datePublished: post.publishAt || post.createdAt,
+                dateModified: post.updatedAt || post.publishAt || post.createdAt,
+                mainEntityOfPage: postUrl,
+                author:
+                  post.author && post.author !== "Cleaniq Services Team"
+                    ? { "@type": "Person", name: post.author }
+                    : { "@type": "Organization", name: "Cleaniq Services", url: "https://www.cleaniqservices.com" },
+                publisher: { "@id": "https://www.cleaniqservices.com#localbusiness" },
               },
               {
-                "@type": "Question",
-                name: "How do I book a cleaning service with Cleaniq Services?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "You can book online in 60 seconds at cleaniqservices.com/booking — simply choose your service, pick a date and time, and a vetted professional will be assigned to you.",
-                },
-              },
-              {
-                "@type": "Question",
-                name: "Are Cleaniq Services cleaners background checked?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Yes, every Cleaniq Services cleaner undergoes a rigorous vetting process including face-to-face interviews, DBS background checks, and practical skills assessments before joining our platform.",
-                },
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                  { "@type": "ListItem", position: 1, name: "Home", item: "https://www.cleaniqservices.com/" },
+                  { "@type": "ListItem", position: 2, name: "Blog", item: "https://www.cleaniqservices.com/blog" },
+                  { "@type": "ListItem", position: 3, name: post.title, item: postUrl },
+                ],
               },
             ],
           })}

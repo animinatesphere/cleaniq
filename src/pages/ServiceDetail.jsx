@@ -1019,11 +1019,10 @@ const FAQItem = ({ q, a }) => {
           className={`shrink-0 text-slate-400 transition-transform duration-200 ${open ? "rotate-180 text-teal-600" : ""}`}
         />
       </button>
-      {open && (
-        <div className="pb-5">
-          <p className="text-slate-600 text-sm leading-relaxed">{a}</p>
-        </div>
-      )}
+      {/* Always in the HTML (hidden until opened) so search engines and AI tools can read the answer. */}
+      <div className="pb-5" hidden={!open}>
+        <p className="text-slate-600 text-sm leading-relaxed">{a}</p>
+      </div>
     </div>
   );
 };
@@ -1489,19 +1488,34 @@ const ServiceDetail = () => {
                     name: a,
                   }))
                 : { "@type": "City", name: "Manchester" },
-              provider: {
-                "@type": "LocalBusiness",
-                "@id": "https://www.cleaniqservices.com#localbusiness",
-                name: "Cleaniq Services",
-                telephone: "+447846726428",
-                address: {
-                  "@type": "PostalAddress",
-                  addressLocality: "Manchester",
-                  addressCountry: "GB",
-                },
-              },
+              url: `https://www.cleaniqservices.com/service/${serviceSlug}`,
+              provider: { "@id": "https://www.cleaniqservices.com#localbusiness" },
             })}
           </script>
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://www.cleaniqservices.com/" },
+                { "@type": "ListItem", position: 2, name: "Services", item: "https://www.cleaniqservices.com/services" },
+                { "@type": "ListItem", position: 3, name: service.heading, item: `https://www.cleaniqservices.com/service/${serviceSlug}` },
+              ],
+            })}
+          </script>
+          {ext?.faqs?.length > 0 && (
+            <script type="application/ld+json">
+              {JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: ext.faqs.map((f) => ({
+                  "@type": "Question",
+                  name: f.q,
+                  acceptedAnswer: { "@type": "Answer", text: typeof f.a === "string" ? f.a : String(f.a) },
+                })),
+              })}
+            </script>
+          )}
         </Helmet>
 
         {/* ══ HERO ═══════════════════════════════════════════════════ */}

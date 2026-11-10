@@ -156,7 +156,7 @@ const CityLanding = () => {
   return (
     <div className="overflow-x-hidden bg-white">
       <Helmet>
-        <title>Cleaning Services in {cityInfo.name} | Cleaniq Services</title>
+        <title>{`Cleaning Services in ${cityInfo.name} | Cleaniq Services`}</title>
         <meta
           name="description"
           content={`Professional cleaning services in ${cityInfo.name}. ${cityInfo.description}`}
