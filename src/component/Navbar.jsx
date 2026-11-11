@@ -27,7 +27,9 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    // passive: tells the browser this never blocks scrolling, so phones scroll smoothly.
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

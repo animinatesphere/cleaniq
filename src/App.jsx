@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, lazy, Suspense } from "react";
 import { captureCreatorRef } from "./utils/creatorRef";
 import { Routes, Route, useLocation, Navigate, useParams } from "react-router-dom";
 import Navbar from "./component/Navbar";
@@ -6,7 +6,6 @@ import TopNav from "./component/TopNav";
 import Footer from "./component/Footer";
 import ScrollToTop from "./component/ScrollToTop";
 import WhatsAppButton from "./component/WhatsAppButton";
-import Preloader from "./component/Preloader";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Booking from "./pages/Booking";
@@ -23,76 +22,78 @@ import BlogDetail from "./pages/BlogDetail";
 import CityLanding from "./pages/CityLanding";
 
 // Customer Account
-import CustomerLogin from "./pages/account/Login";
-import CustomerSignup from "./pages/account/Signup";
-import CustomerDashboard from "./pages/account/Dashboard";
-import CreatorDashboard from "./pages/account/CreatorDashboard";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import WorkerApp from "./pages/WorkerApp";
+const CustomerLogin = lazy(() => import("./pages/account/Login"));
+const CustomerSignup = lazy(() => import("./pages/account/Signup"));
+const CustomerDashboard = lazy(() => import("./pages/account/Dashboard"));
+const CreatorDashboard = lazy(() => import("./pages/account/CreatorDashboard"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const WorkerApp = lazy(() => import("./pages/WorkerApp"));
 import { CustomerAuthProvider } from "./context/CustomerAuthContext";
 
-// Admin Imports
-import AdminLayout from "./admin/AdminLayout";
-import Dashboard from "./admin/Dashboard";
-import Bookings from "./admin/Bookings";
-import AdminBookingPay from "./admin/AdminBookingPay";
-import Applicants from "./admin/Applicants";
-import Customers from "./admin/Customers";
-import Settings from "./admin/Settings";
-import ServicesManagement from "./admin/Services";
-import Workers from "./admin/Workers";
-import Chat from "./admin/Chat";
-import AdminBlog from "./admin/Blog";
-import StaffPay from "./admin/StaffPay";
-import Subscriptions from "./admin/Subscriptions";
-import Commission from "./admin/Commission";
-import AdminWithdrawals from "./admin/AdminWithdrawals";
-import AdminPayments from "./admin/AdminPayments";
-import QuoteBuilder from "./admin/QuoteBuilder";
-import QuoteHistory from "./admin/QuoteHistory";
-import OrgChart from "./admin/OrgChart";
-import Leads from "./admin/Leads";
-import Checklist from "./admin/Checklist";
-import Recurring from "./admin/Recurring";
-import Bin from "./admin/Bin";
-import EmailHistory from "./admin/EmailHistory";
-import InvoiceBuilder from "./admin/InvoiceBuilder";
-import Analytics from "./admin/Analytics";
-import GenerateLinksPage from "./admin/GenerateLinksPage";
-import Expenses from "./admin/Expenses";
-import Rota from "./admin/Rota";
-import Calendar from "./admin/Calendar";
-import NewBookingPage from "./admin/NewBookingPage";
-import Automations from "./admin/Automations";
-import SmsAutomation from "./admin/SmsAutomation";
-import Pipeline from "./admin/Pipeline";
-import Tasks from "./admin/Tasks";
-import Complaints from "./admin/Complaints";
-import Contracts from "./admin/Contracts";
-import WorkerPerformance from "./admin/WorkerPerformance";
-import Referrals from "./admin/Referrals";
-import Campaigns from "./admin/Campaigns";
-import CustomerProfile from "./admin/CustomerProfile";
-import CommercialHub, { PropertyReport } from "./admin/CommercialHub";
-import DomesticHub from "./admin/DomesticHub";
-import PriceList from "./admin/PriceList";
-import JobDetail from "./admin/JobDetail";
-import Jobs from "./admin/Jobs";
-import CompanyJobs from "./admin/CompanyJobs";
-import AssignJobs from "./admin/AssignJobs";
-import Coupons from "./admin/Coupons";
-import JobVisibility from "./admin/JobVisibility";
-import GuideDistribution from "./admin/GuideDistribution";
-import ColdEmail from "./admin/ColdEmail/index.jsx";
-import CampaignDetail from "./admin/ColdEmail/CampaignDetail.jsx";
-import TodoPage from "./admin/TodoPage";
-import DevPanel from "./admin/DevPanel";
-import AiReceptionistLayout from "./admin/AiReceptionist";
-import AiOverview from "./admin/AiReceptionist/Overview";
-import AiKnowledge from "./admin/AiReceptionist/Knowledge";
-import AiSettingsPage from "./admin/AiReceptionist/AiSettings";
-import AiConversations from "./admin/AiReceptionist/Conversations";
-import AiCalls from "./admin/AiReceptionist/Calls";
+// Admin, account and other rarely-visited pages are downloaded only when opened, so the public
+// website stays small and fast on phones.
+const AdminLayout = lazy(() => import("./admin/AdminLayout"));
+const Dashboard = lazy(() => import("./admin/Dashboard"));
+const Bookings = lazy(() => import("./admin/Bookings"));
+const AdminBookingPay = lazy(() => import("./admin/AdminBookingPay"));
+const Applicants = lazy(() => import("./admin/Applicants"));
+const Customers = lazy(() => import("./admin/Customers"));
+const Settings = lazy(() => import("./admin/Settings"));
+const ServicesManagement = lazy(() => import("./admin/Services"));
+const Workers = lazy(() => import("./admin/Workers"));
+const Chat = lazy(() => import("./admin/Chat"));
+const AdminBlog = lazy(() => import("./admin/Blog"));
+const StaffPay = lazy(() => import("./admin/StaffPay"));
+const Subscriptions = lazy(() => import("./admin/Subscriptions"));
+const Commission = lazy(() => import("./admin/Commission"));
+const AdminWithdrawals = lazy(() => import("./admin/AdminWithdrawals"));
+const AdminPayments = lazy(() => import("./admin/AdminPayments"));
+const QuoteBuilder = lazy(() => import("./admin/QuoteBuilder"));
+const QuoteHistory = lazy(() => import("./admin/QuoteHistory"));
+const OrgChart = lazy(() => import("./admin/OrgChart"));
+const Leads = lazy(() => import("./admin/Leads"));
+const Checklist = lazy(() => import("./admin/Checklist"));
+const Recurring = lazy(() => import("./admin/Recurring"));
+const Bin = lazy(() => import("./admin/Bin"));
+const EmailHistory = lazy(() => import("./admin/EmailHistory"));
+const InvoiceBuilder = lazy(() => import("./admin/InvoiceBuilder"));
+const Analytics = lazy(() => import("./admin/Analytics"));
+const GenerateLinksPage = lazy(() => import("./admin/GenerateLinksPage"));
+const Expenses = lazy(() => import("./admin/Expenses"));
+const Rota = lazy(() => import("./admin/Rota"));
+const Calendar = lazy(() => import("./admin/Calendar"));
+const NewBookingPage = lazy(() => import("./admin/NewBookingPage"));
+const Automations = lazy(() => import("./admin/Automations"));
+const SmsAutomation = lazy(() => import("./admin/SmsAutomation"));
+const Pipeline = lazy(() => import("./admin/Pipeline"));
+const Tasks = lazy(() => import("./admin/Tasks"));
+const Complaints = lazy(() => import("./admin/Complaints"));
+const Contracts = lazy(() => import("./admin/Contracts"));
+const WorkerPerformance = lazy(() => import("./admin/WorkerPerformance"));
+const Referrals = lazy(() => import("./admin/Referrals"));
+const Campaigns = lazy(() => import("./admin/Campaigns"));
+const CustomerProfile = lazy(() => import("./admin/CustomerProfile"));
+const CommercialHub = lazy(() => import("./admin/CommercialHub"));
+const PropertyReport = lazy(() => import("./admin/CommercialHub").then((m) => ({ default: m.PropertyReport })));
+const DomesticHub = lazy(() => import("./admin/DomesticHub"));
+const PriceList = lazy(() => import("./admin/PriceList"));
+const JobDetail = lazy(() => import("./admin/JobDetail"));
+const Jobs = lazy(() => import("./admin/Jobs"));
+const CompanyJobs = lazy(() => import("./admin/CompanyJobs"));
+const AssignJobs = lazy(() => import("./admin/AssignJobs"));
+const Coupons = lazy(() => import("./admin/Coupons"));
+const JobVisibility = lazy(() => import("./admin/JobVisibility"));
+const GuideDistribution = lazy(() => import("./admin/GuideDistribution"));
+const ColdEmail = lazy(() => import("./admin/ColdEmail/index.jsx"));
+const CampaignDetail = lazy(() => import("./admin/ColdEmail/CampaignDetail.jsx"));
+const TodoPage = lazy(() => import("./admin/TodoPage"));
+const DevPanel = lazy(() => import("./admin/DevPanel"));
+const AiReceptionistLayout = lazy(() => import("./admin/AiReceptionist"));
+const AiOverview = lazy(() => import("./admin/AiReceptionist/Overview"));
+const AiKnowledge = lazy(() => import("./admin/AiReceptionist/Knowledge"));
+const AiSettingsPage = lazy(() => import("./admin/AiReceptionist/AiSettings"));
+const AiConversations = lazy(() => import("./admin/AiReceptionist/Conversations"));
+const AiCalls = lazy(() => import("./admin/AiReceptionist/Calls"));
 
 // Service pages moved from /pages/<service> to /service/<service> (Vercel also 301-redirects).
 function OldServicePath() {
@@ -112,13 +113,13 @@ function App() {
   return (
     <CustomerAuthProvider>
       <div className="min-h-screen bg-slate-50 flex flex-col">
-        {!isAdminPath && !isDevPanel && <Preloader />}
         <ScrollToTop />
         {!isAdminPath && !isAccountPath && !isDevPanel && <TopNav />}
         {!isAdminPath && !isAccountPath && !isDevPanel && <Navbar />}
         {isAccountPath && <Navbar />}
 
         <main className="grow">
+          <Suspense fallback={<div className="min-h-[60vh]" />}>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
@@ -217,6 +218,7 @@ function App() {
               </Route>
             </Route>
           </Routes>
+          </Suspense>
         </main>
 
         {!isAdminPath && !isAccountPath && !isDevPanel && <Footer />}
