@@ -70,6 +70,19 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
+  /* Phones: the frosted-glass blur is redrawn on every scroll frame and makes scrolling jerky.
+     Use an almost-solid background instead; it looks the same on the light page background. */
+  @media (max-width: 1023px) {
+    .glass {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: none;
+    }
+    .glass-dark {
+      background: rgba(0, 59, 42, 0.97);
+      backdrop-filter: none;
+    }
+  }
+
   .btn-primary {
     @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-[#036847] text-white font-bold transition-all hover:bg-[#025a3d] hover:scale-105 active:scale-95 shadow-xl shadow-[#036847]/20 flex items-center justify-center gap-2;
   }
