@@ -905,6 +905,20 @@ router.post("/campaigns/:id/resume", async (req, res) => {
 });
 
 // GET /api/cold-email/campaigns/:id/sends?page=1&limit=50
+// POST /api/cold-email/campaigns/:id/retry-failed — puts this campaign's failed emails back in the
+// queue (sent at the normal pace and only in sending hours).
+router.post("/campaigns/:id/retry-failed", async (req, res) => {
+  try {
+    const result = await ColdSend.updateMany(
+      { campaignId: req.params.id, status: "failed" },
+      { $set: { status: "pending", scheduledAt: new Date(), attempts: 0 }, $unset: { error: "" } },
+    );
+    res.json({ retried: result.modifiedCount || 0 });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.get("/campaigns/:id/sends", async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page || "1"));

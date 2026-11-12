@@ -66,6 +66,22 @@ export default function CampaignDetail() {
     setActionBusy("");
   }
 
+  // Puts this campaign's failed emails back in the queue (they go out at the normal pace).
+  async function retryFailed() {
+    setActionBusy("retry");
+    try {
+      const r = await fetch(`${API}/cold-email/campaigns/${campaignId}/retry-failed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...auth() },
+      });
+      const d = await r.json().catch(() => ({}));
+      alert(r.ok ? (d.retried ? `${d.retried} email(s) will be sent again in the next few minutes (Mon–Fri, 8am–6pm).` : "No failed emails to retry.") : d.message || "Couldn't retry. Please try again.");
+      await Promise.all([loadCampaign(), loadSends()]);
+    } finally {
+      setActionBusy("");
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -203,7 +219,14 @@ export default function CampaignDetail() {
             <span className="ml-2 text-white/30 font-normal normal-case">{total.toLocaleString()} records</span>
           </h2>
           {/* Quick filter chips */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap justify-end">
+            <button
+              onClick={retryFailed}
+              disabled={actionBusy === "retry"}
+              className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg font-bold cursor-pointer bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 disabled:opacity-60 mr-1"
+            >
+              <RefreshCw size={11} className={actionBusy === "retry" ? "animate-spin" : ""} /> Retry failed
+            </button>
             {["", "pending", "sent", "replied", "failed", "skipped"].map((st) => (
               <button
                 key={st}
@@ -256,6 +279,11 @@ export default function CampaignDetail() {
                     </div>
                     <div className="min-w-0">
                       <span className="block text-white/40 text-xs truncate">{send.contactEmail}</span>
+                      {send.status === "pending" && send.error && (
+                        <p title={send.error} className="mt-1 text-amber-300/80 text-[10px] leading-snug line-clamp-2">
+                          {send.error}
+                        </p>
+                      )}
                       {send.status === "failed" && send.error && (
                         <p title={send.error} className="mt-1 text-rose-400/80 text-[10px] leading-snug line-clamp-2">
                           {send.error}

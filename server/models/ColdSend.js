@@ -16,6 +16,8 @@ const coldSendSchema = new mongoose.Schema({
   gmailMessageId:  { type: String },
   gmailThreadId:   { type: String },
   error:           { type: String },
+  // Network problems (e.g. "fetch failed") are retried automatically up to 3 times, 10 minutes apart.
+  attempts:        { type: Number, default: 0 },
   replyFrom:       { type: String },
   replySubject:    { type: String },
   replyBody:       { type: String },

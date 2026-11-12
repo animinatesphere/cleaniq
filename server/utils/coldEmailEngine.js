@@ -658,6 +658,12 @@ async function processSingleSend(send) {
 
 // ── Main send processor ───────────────────────────────────────────────────────
 
+// Errors worth retrying: the connection dropped, timed out, or Microsoft/Google were busy.
+const MAX_RETRIES = 3;
+function isTemporaryError(message = "") {
+  return /fetch failed|ECONNRESET|ETIMEDOUT|ECONNREFUSED|EAI_AGAIN|ENOTFOUND|socket hang up|UND_ERR|network|timeout|\b(429|500|502|503|504)\b|throttl|try again|ServiceUnavailable|TooManyRequests|backendError|rateLimitExceeded/i.test(message);
+}
+
 let sendRunning = false;
 
 async function processColdEmailSends() {
@@ -688,13 +694,25 @@ async function processColdEmailSends() {
         const result = await processSingleSend(send);
         if (result === "wait") waiting.add(String(send.campaignId));
       } catch (err) {
-        console.error(
-          `Cold send error (${send.contactEmail}):`,
-          err.message,
-        );
+        // Node's "fetch failed" hides the real reason (e.g. ECONNRESET) in err.cause — keep it.
+        const cause = err.cause ? `: ${err.cause.code || err.cause.message || err.cause}` : "";
+        const reason = `${err.message}${cause}`;
+        console.error(`Cold send error (${send.contactEmail}):`, reason);
+        const attempts = (send.attempts || 0) + 1;
+        if (isTemporaryError(reason) && attempts <= MAX_RETRIES) {
+          // Brief network/Microsoft/Google outage: try again in 10 minutes instead of failing.
+          await ColdSend.findByIdAndUpdate(send._id, {
+            status: "pending",
+            attempts,
+            error: `Retrying (${attempts}/${MAX_RETRIES}) after: ${reason}`,
+            scheduledAt: new Date(Date.now() + 10 * 60 * 1000),
+          });
+          continue;
+        }
         await ColdSend.findByIdAndUpdate(send._id, {
           status: "failed",
-          error: err.message,
+          attempts,
+          error: reason,
         });
         const tokenError =
           err.message &&
@@ -947,6 +965,7 @@ module.exports = {
   decrypt,
   buildPlainEmailHtml,
   htmlToText,
+  isTemporaryError,
   buildOAuth2Client,
   buildMsAuthUrl,
   exchangeMsCode,
