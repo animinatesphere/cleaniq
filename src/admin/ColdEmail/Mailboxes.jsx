@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Inbox, Trash2, Pause, Play, AlertCircle } from "lucide-react";
+import { Inbox, Trash2, Pause, Play, AlertCircle, ShieldCheck, CheckCircle2, XCircle, Loader2, Flame } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
 const token = () => localStorage.getItem("adminToken") || "";
@@ -34,6 +34,8 @@ export default function Mailboxes() {
   const [editId, setEditId]       = useState(null);
   const [editLimit, setEditLimit] = useState("");
   const [saving, setSaving]       = useState(false);
+  const [checking, setChecking]   = useState(null); // mailbox id whose domain is being checked
+  const [openHealth, setOpenHealth] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -68,6 +70,24 @@ export default function Mailboxes() {
     });
     setSaving(false);
     setEditId(null);
+    load();
+  }
+
+  // Reads the mailbox domain's DNS (SPF, DKIM, DMARC, MX) and shows what to fix at GoDaddy.
+  async function checkHealth(id) {
+    setChecking(id);
+    setOpenHealth(id);
+    try {
+      const r = await authFetch(`${API}/cold-email/mailboxes/${id}/health`);
+      const health = await r.json();
+      if (r.ok) setMailboxes((list) => list.map((b) => (b._id === id ? { ...b, health } : b)));
+    } finally {
+      setChecking(null);
+    }
+  }
+
+  async function setWarmup(box, body) {
+    await authFetch(`${API}/cold-email/mailboxes/${box._id}`, { method: "PATCH", body: JSON.stringify(body) });
     load();
   }
 
@@ -137,7 +157,11 @@ export default function Mailboxes() {
       ) : (
         <div className="grid gap-4">
           {mailboxes.map((box) => {
-            const pct    = box.dailyLimit > 0 ? Math.min(100, Math.round((box.sentToday / box.dailyLimit) * 100)) : 0;
+            const todayLimit = box.todayLimit ?? box.dailyLimit;
+            const warming = box.warmupEnabled !== false && todayLimit < box.dailyLimit;
+            const pct    = todayLimit > 0 ? Math.min(100, Math.round((box.sentToday / todayLimit) * 100)) : 0;
+            const health = box.health;
+            const healthBad = health?.checks?.some((c) => c.level === "bad");
             const isEdit = editId === box._id;
             const isOutlook = box.provider === "outlook";
             return (
@@ -184,7 +208,7 @@ export default function Mailboxes() {
                       <div className="flex justify-between text-xs mb-1.5">
                         <span className="text-white/40">Today's sends</span>
                         <span className={`font-bold ${pct >= 100 ? "text-rose-400" : pct >= 80 ? "text-amber-400" : "text-white/60"}`}>
-                          {box.sentToday} / {box.dailyLimit}
+                          {box.sentToday} / {todayLimit}
                         </span>
                       </div>
                       <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
@@ -193,6 +217,26 @@ export default function Mailboxes() {
                           style={{ width: `${pct}%` }}
                         />
                       </div>
+                    </div>
+
+                    {/* Warm-up: new mailboxes start at 5 a day and grow by 3 a day up to the daily limit */}
+                    <div className="mt-2 flex items-center gap-2 flex-wrap text-xs">
+                      <Flame size={12} className={warming ? "text-amber-400" : "text-white/30"} />
+                      {box.warmupEnabled === false ? (
+                        <span className="text-white/40">Warm-up off: full {box.dailyLimit} a day</span>
+                      ) : warming ? (
+                        <span className="text-amber-300/90">Warming up, day {box.warmupDay}: {todayLimit} today, +3 a day up to {box.dailyLimit}</span>
+                      ) : (
+                        <span className="text-emerald-400/80">Warmed up: {box.dailyLimit} a day</span>
+                      )}
+                      {box.warmupEnabled === false ? (
+                        <button onClick={() => setWarmup(box, { warmupEnabled: true })} className="text-white/30 hover:text-emerald-400 cursor-pointer">Turn on</button>
+                      ) : (
+                        <>
+                          <button onClick={() => { if (confirm("Restart warm-up from 5 emails a day? Use this if the mailbox has been landing in junk.")) setWarmup(box, { restartWarmup: true }); }} className="text-white/30 hover:text-amber-300 cursor-pointer">Restart</button>
+                          <button onClick={() => { if (confirm("Turn warm-up off? The mailbox will send its full daily limit straight away, which risks the junk folder for new mailboxes.")) setWarmup(box, { warmupEnabled: false }); }} className="text-white/30 hover:text-rose-400 cursor-pointer">Turn off</button>
+                        </>
+                      )}
                     </div>
 
                     {/* Daily limit edit */}
@@ -219,6 +263,40 @@ export default function Mailboxes() {
                         >
                           Daily limit: {box.dailyLimit} — Edit
                         </button>
+                      )}
+                    </div>
+
+                    {/* Domain health (SPF / DKIM / DMARC / MX) */}
+                    <div className="mt-3">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <button
+                          onClick={() => checkHealth(box._id)}
+                          disabled={checking === box._id}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300 cursor-pointer disabled:opacity-60"
+                        >
+                          {checking === box._id ? <Loader2 size={13} className="animate-spin" /> : <ShieldCheck size={13} />}
+                          {health ? "Re-check domain" : "Check domain (SPF / DKIM / DMARC)"}
+                        </button>
+                        {health && (
+                          <button onClick={() => setOpenHealth(openHealth === box._id ? null : box._id)} className={`text-xs font-bold cursor-pointer ${healthBad ? "text-rose-400" : "text-emerald-400/80"}`}>
+                            {healthBad ? `${health.checks.filter((c) => c.level === "bad").length} problem(s) to fix` : "All checks passed"} · {openHealth === box._id ? "Hide" : "Show"}
+                          </button>
+                        )}
+                      </div>
+                      {health && openHealth === box._id && (
+                        <div className="mt-3 space-y-2">
+                          {health.checks.map((c) => (
+                            <div key={c.key} className={`rounded-xl border p-3 ${c.level === "ok" ? "border-emerald-500/15 bg-emerald-500/[0.04]" : c.level === "warn" ? "border-amber-500/20 bg-amber-500/[0.05]" : "border-rose-500/20 bg-rose-500/[0.06]"}`}>
+                              <div className="flex items-center gap-2">
+                                {c.level === "ok" ? <CheckCircle2 size={14} className="text-emerald-400 shrink-0" /> : c.level === "warn" ? <AlertCircle size={14} className="text-amber-400 shrink-0" /> : <XCircle size={14} className="text-rose-400 shrink-0" />}
+                                <span className="text-white text-xs font-bold">{c.label}</span>
+                              </div>
+                              <p className="text-white/50 text-xs mt-1 break-words">{c.detail}</p>
+                              {c.fix && <p className="text-white/80 text-xs mt-2 leading-relaxed"><span className="font-bold text-amber-300">How to fix: </span>{c.fix}</p>}
+                            </div>
+                          ))}
+                          <p className="text-white/30 text-[11px]">Checked {new Date(health.checkedAt).toLocaleString("en-GB")}. DNS changes at GoDaddy can take up to an hour to show.</p>
+                        </div>
                       )}
                     </div>
                   </div>

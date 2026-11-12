@@ -10,6 +10,16 @@ const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
 const ColdTemplate = require("../models/ColdTemplate");
 const { resolveContactDomain } = require("../utils/contactDomain");
+const { checkDomain, effectiveDailyLimit, warmupDay, inSendingWindow } = require("../utils/deliverability");
+
+// What the admin page shows for a mailbox (never the tokens), with today's warm-up limit.
+const publicMailbox = (m) => ({
+  ...m,
+  accessToken: undefined,
+  refreshToken: undefined,
+  warmupDay: warmupDay(m),
+  todayLimit: effectiveDailyLimit(m),
+});
 
 const {
   encrypt,
@@ -180,13 +190,7 @@ router.get("/auth/microsoft/callback", async (req, res) => {
 router.get("/mailboxes", async (req, res) => {
   try {
     const mailboxes = await ColdMailbox.find().sort({ createdAt: 1 }).lean();
-    res.json(
-      mailboxes.map((m) => ({
-        ...m,
-        accessToken: undefined,
-        refreshToken: undefined,
-      })),
-    );
+    res.json(mailboxes.map(publicMailbox));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -195,16 +199,35 @@ router.get("/mailboxes", async (req, res) => {
 // PATCH /api/cold-email/mailboxes/:id — update daily limit or status
 router.patch("/mailboxes/:id", async (req, res) => {
   try {
-    const { dailyLimit, status } = req.body;
+    const { dailyLimit, status, warmupEnabled, restartWarmup } = req.body;
     const update = {};
     if (dailyLimit !== undefined)
       update.dailyLimit = Math.max(1, Math.min(10000, Number(dailyLimit)));
     if (status !== undefined) update.status = status;
+    if (warmupEnabled !== undefined) update.warmupEnabled = !!warmupEnabled;
+    if (restartWarmup) {
+      update.warmupEnabled = true;
+      update.warmupStartedAt = new Date();
+    }
     const box = await ColdMailbox.findByIdAndUpdate(req.params.id, update, {
       new: true,
     }).lean();
     if (!box) return res.status(404).json({ message: "Mailbox not found" });
-    res.json({ ...box, accessToken: undefined, refreshToken: undefined });
+    res.json(publicMailbox(box));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/cold-email/mailboxes/:id/health — checks the mailbox's domain DNS (MX, SPF, DKIM, DMARC)
+// and saves the result. Read-only: nothing in DNS is changed.
+router.get("/mailboxes/:id/health", async (req, res) => {
+  try {
+    const box = await ColdMailbox.findById(req.params.id).lean();
+    if (!box) return res.status(404).json({ message: "Mailbox not found" });
+    const health = await checkDomain(box.email.split("@")[1], box.provider);
+    await ColdMailbox.updateOne({ _id: box._id }, { $set: { health } });
+    res.json({ ...health, sendingWindowOpen: inSendingWindow() });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -964,7 +987,9 @@ router.delete("/suppression/:email", async (req, res) => {
 //  UNSUBSCRIBE  (public — no auth)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-router.get("/unsubscribe/:token", async (req, res) => {
+// GET = the link in the email; POST = Gmail/Yahoo's one-click "Unsubscribe" button
+// (List-Unsubscribe-Post header). Both remove the person the same way.
+const unsubscribeHandler = async (req, res) => {
   const unsubHtml = (heading, body) => `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${heading}</title>
@@ -1038,7 +1063,9 @@ h1{color:#0f172a;font-size:22px;font-weight:800;margin-bottom:12px}p{color:#6474
       ),
     );
   }
-});
+};
+router.get("/unsubscribe/:token", unsubscribeHandler);
+router.post("/unsubscribe/:token", unsubscribeHandler);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  MANUAL REPLY CHECK

@@ -1025,7 +1025,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
       : {
           name: "",
           fromName: "",
-          emailStyle: "branded",
+          emailStyle: "plain",
           mailboxIds: [],
           steps: [{ order: 0, subject: "", body: "", waitDays: 0 }],
           contactIds: [],
@@ -1630,16 +1630,16 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       {
-                        value: "branded",
-                        label: "Branded",
-                        desc: "Logo, header, reply button & footer",
-                        icon: "🎨",
+                        value: "plain",
+                        label: "Plain text (recommended)",
+                        desc: "Reads like a normal email, so it lands in the inbox far more often",
+                        icon: "✉️",
                       },
                       {
-                        value: "plain",
-                        label: "Plain text",
-                        desc: "Just your message — no logo or branding",
-                        icon: "✉️",
+                        value: "branded",
+                        label: "Branded",
+                        desc: "Logo, header & footer. Often goes to Promotions or junk for cold email",
+                        icon: "🎨",
                       },
                     ].map((opt) => {
                       const on = data.emailStyle === opt.value;

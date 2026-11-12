@@ -28,7 +28,9 @@ const coldCampaignSchema = new mongoose.Schema({
     unsubscribed: { type: Number, default: 0 },
     failed:       { type: Number, default: 0 },
   },
-  emailStyle:       { type: String, enum: ["branded", "plain"], default: "branded" },
+  // "plain" reads like a normal personal email and lands in the inbox far more often than the
+  // designed "branded" template, so it's the default for new campaigns.
+  emailStyle:       { type: String, enum: ["branded", "plain"], default: "plain" },
   createdAt:        { type: Date, default: () => new Date() },
   launchedAt:       { type: Date },
   scheduledStartAt: { type: Date },

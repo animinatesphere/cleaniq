@@ -7,6 +7,7 @@ const ColdContact = require("../models/ColdContact");
 const ColdCampaign = require("../models/ColdCampaign");
 const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
+const { effectiveDailyLimit, inSendingWindow, nextSendAfter } = require("./deliverability");
 
 // ── Token encryption ──────────────────────────────────────────────────────────
 
@@ -153,18 +154,33 @@ async function getGmailClient(mailbox) {
 
 // ── Gmail send ────────────────────────────────────────────────────────────────
 
-async function sendViaGmail(mailbox, { to, subject, html, fromName }) {
+async function sendViaGmail(mailbox, { to, subject, html, text, fromName, unsubUrl }) {
   const gmail = await getGmailClient(mailbox);
-  const from = fromName ? `${fromName} <${mailbox.email}>` : mailbox.email;
+  const from = fromName ? `=?UTF-8?B?${Buffer.from(fromName).toString("base64")}?= <${mailbox.email}>` : mailbox.email;
 
+  // A plain-text copy next to the HTML, and one-click unsubscribe headers (Gmail and Yahoo expect
+  // both from senders; emails without them are more likely to be filtered).
+  const boundary = `cq_${crypto.randomBytes(12).toString("hex")}`;
+  const b64 = (s) => Buffer.from(s, "utf8").toString("base64").replace(/(.{76})/g, "$1\r\n");
   const mime = [
     `MIME-Version: 1.0`,
     `From: ${from}`,
     `To: ${to}`,
     `Subject: =?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`,
-    `Content-Type: text/html; charset=UTF-8`,
+    ...(unsubUrl ? [`List-Unsubscribe: <${unsubUrl}>`, `List-Unsubscribe-Post: List-Unsubscribe=One-Click`] : []),
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
     ``,
-    html,
+    `--${boundary}`,
+    `Content-Type: text/plain; charset=UTF-8`,
+    `Content-Transfer-Encoding: base64`,
+    ``,
+    b64(text || htmlToText(html)),
+    `--${boundary}`,
+    `Content-Type: text/html; charset=UTF-8`,
+    `Content-Transfer-Encoding: base64`,
+    ``,
+    b64(html),
+    `--${boundary}--`,
   ].join("\r\n");
 
   const raw = Buffer.from(mime)
@@ -230,6 +246,20 @@ async function sendViaOutlook(mailbox, { to, subject, html, fromName }) {
 }
 
 // ── Template helpers ──────────────────────────────────────────────────────────
+// Plain-text version of an email for the text/plain part.
+function htmlToText(html) {
+  return String(html || "")
+    .replace(/<(style|title|head)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|tr|h[1-6]|li)>/gi, "\n")
+    .replace(/<a [^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, "$2 ($1)")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#847;/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 
 function personalizeTemplate(template, contact) {
   const fullName =
@@ -433,15 +463,27 @@ async function resetDailyCounters() {
 
 // ── Pick available mailbox ────────────────────────────────────────────────────
 
+// Returns { box } when a mailbox may send now, { wait: true } when every mailbox with room today is
+// still in its gap between emails, or {} when all of them have reached today's (warm-up) limit.
 async function pickMailbox(mailboxIds) {
+  const now = new Date();
   const boxes = await ColdMailbox.find({
     _id: { $in: mailboxIds },
     status: "active",
-  });
+  }).sort({ sentToday: 1 });
+  let wait = false;
   for (const box of boxes) {
-    if (box.sentToday < box.dailyLimit) return box;
+    if (box.sentToday >= effectiveDailyLimit(box, now)) continue;
+    // Claim this mailbox's next slot (only if it's free) so it sends one email per gap.
+    const claimed = await ColdMailbox.findOneAndUpdate(
+      { _id: box._id, $or: [{ nextSendAt: null }, { nextSendAt: { $lte: now } }] },
+      { $set: { nextSendAt: nextSendAfter(now) } },
+      { new: true },
+    );
+    if (claimed) return { box: claimed };
+    wait = true;
   }
-  return null;
+  return wait ? { wait: true } : {};
 }
 
 // ── Schedule next step ────────────────────────────────────────────────────────
@@ -526,10 +568,12 @@ async function processSingleSend(send) {
     });
   }
 
-  // Pick mailbox
-  const mailbox = await pickMailbox(campaign.mailboxIds);
+  // Pick mailbox (warm-up limit + gap between emails)
+  const picked = await pickMailbox(campaign.mailboxIds);
+  if (picked.wait) return "wait"; // a mailbox frees up in a few minutes; stays pending
+  const mailbox = picked.box;
   if (!mailbox) {
-    // Defer to tomorrow
+    // Every mailbox has reached today's limit: defer to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(
@@ -588,7 +632,9 @@ async function processSingleSend(send) {
     to: contact.email,
     subject,
     html: fullHtml,
+    text: `${campaign.emailStyle === "plain" ? body.trim() : htmlToText(fullHtml)}\n\nUnsubscribe: ${unsubUrl}`,
     fromName: campaign.fromName || "",
+    unsubUrl,
   };
   const result =
     mailbox.provider === "outlook"
@@ -620,6 +666,9 @@ async function processColdEmailSends() {
   try {
     await resetDailyCounters();
 
+    // Only send Monday–Friday, 8am–6pm UK time, like a person at work. Due emails wait until then.
+    if (!inSendingWindow()) return;
+
     const now = new Date();
     const pending = await ColdSend.find({
       status: "pending",
@@ -629,38 +678,37 @@ async function processColdEmailSends() {
       .limit(150)
       .lean();
 
-    // Process in parallel batches of 5 to stay within Gmail API rate limits
-    const CONCURRENCY = 5;
-    for (let i = 0; i < pending.length; i += CONCURRENCY) {
-      const chunk = pending.slice(i, i + CONCURRENCY);
-      await Promise.all(
-        chunk.map(async (send) => {
-          try {
-            await processSingleSend(send);
-          } catch (err) {
-            console.error(
-              `Cold send error (${send.contactEmail}):`,
-              err.message,
-            );
-            await ColdSend.findByIdAndUpdate(send._id, {
-              status: "failed",
-              error: err.message,
-            });
-            const tokenError =
-              err.message &&
-              (err.message.includes("invalid_grant") ||
-                err.message.includes("Invalid Credentials") ||
-                err.message.includes("InvalidAuthenticationToken") ||
-                err.message.includes("reconnect this mailbox"));
-            if (tokenError && send.mailboxId) {
-              await ColdMailbox.findByIdAndUpdate(send.mailboxId, {
-                status: "error",
-                errorMessage: err.message,
-              });
-            }
-          }
-        }),
-      );
+    // One at a time: each mailbox sends one email, then waits 4–9 minutes (see pickMailbox).
+    // When a campaign's mailboxes are all waiting, its other emails stay pending for the next run
+    // (every 2 minutes); other campaigns carry on.
+    const waiting = new Set();
+    for (const send of pending) {
+      if (waiting.has(String(send.campaignId))) continue;
+      try {
+        const result = await processSingleSend(send);
+        if (result === "wait") waiting.add(String(send.campaignId));
+      } catch (err) {
+        console.error(
+          `Cold send error (${send.contactEmail}):`,
+          err.message,
+        );
+        await ColdSend.findByIdAndUpdate(send._id, {
+          status: "failed",
+          error: err.message,
+        });
+        const tokenError =
+          err.message &&
+          (err.message.includes("invalid_grant") ||
+            err.message.includes("Invalid Credentials") ||
+            err.message.includes("InvalidAuthenticationToken") ||
+            err.message.includes("reconnect this mailbox"));
+        if (tokenError && send.mailboxId) {
+          await ColdMailbox.findByIdAndUpdate(send.mailboxId, {
+            status: "error",
+            errorMessage: err.message,
+          });
+        }
+      }
     }
   } finally {
     sendRunning = false;
@@ -898,6 +946,7 @@ module.exports = {
   encrypt,
   decrypt,
   buildPlainEmailHtml,
+  htmlToText,
   buildOAuth2Client,
   buildMsAuthUrl,
   exchangeMsCode,
