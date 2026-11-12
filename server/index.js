@@ -1,3 +1,12 @@
+// Connect over IPv4 first. On the VPS, connections to some hosts (e.g. Microsoft Graph for cold
+// email) hung until ETIMEDOUT when Node picked an IPv6 address the network can't route.
+require("dns").setDefaultResultOrder("ipv4first");
+try {
+  require("net").setDefaultAutoSelectFamily(true); // fall back to the other family if one hangs
+} catch {
+  /* older Node */
+}
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
