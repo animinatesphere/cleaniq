@@ -197,6 +197,19 @@ async function sendViaGmail(mailbox, { to, subject, html, text, fromName, unsubU
   return result.data;
 }
 
+// Microsoft's error as readable text: status, error code and message, plus a hint for new mailboxes.
+function graphError(res, body) {
+  const code = body?.error?.code || "";
+  const msg = body?.error?.message || res.statusText || "";
+  let text = [res.status, code, msg].filter(Boolean).join(" ");
+  if (res.status >= 500) {
+    text += " (Microsoft busy, or a new mailbox still being set up, which can take up to 24 hours; it retries automatically)";
+  } else if (/MailboxNotEnabled|MailboxNotFound|not provisioned/i.test(text)) {
+    text += " (this Microsoft 365 mailbox isn't ready yet; wait a few hours, then press Retry failed)";
+  }
+  return text;
+}
+
 // ── Microsoft Graph send ──────────────────────────────────────────────────────
 // Creates a draft first (so we get message ID + conversationId), then sends it.
 async function sendViaOutlook(mailbox, { to, subject, html, fromName }) {
@@ -223,9 +236,7 @@ async function sendViaOutlook(mailbox, { to, subject, html, fromName }) {
   );
   if (!createRes.ok) {
     const err = await createRes.json().catch(() => ({}));
-    throw new Error(
-      `MS Graph create: ${err?.error?.message || createRes.status}`,
-    );
+    throw new Error(`MS Graph create: ${graphError(createRes, err)}`);
   }
   const msg = await createRes.json();
 
@@ -239,7 +250,7 @@ async function sendViaOutlook(mailbox, { to, subject, html, fromName }) {
   );
   if (!sendRes.ok) {
     const err = await sendRes.json().catch(() => ({}));
-    throw new Error(`MS Graph send: ${err?.error?.message || sendRes.status}`);
+    throw new Error(`MS Graph send: ${graphError(sendRes, err)}`);
   }
 
   return { id: msg.id, conversationId: msg.conversationId };
