@@ -34,3 +34,5 @@ customer-app/.expo/
 customer-app/node_modules/
 worker-app/.expo/
 worker-app/node_modules/
+# Raw photos from jobs (DNG/HEIC, large): the website uses the processed copies in src/assets/before-after
+src/images/

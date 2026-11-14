@@ -25,9 +25,25 @@ import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import { whatsappLink } from "../utils/contact";
 import { useGoogleReviews } from "../utils/googleReviews";
-import sprayPhoto from "../assets/join-cleaner-spray.webp";
+import cleanerAtWork from "../assets/our-work/about-cleaner.jpg";
+import realBedroom from "../assets/our-work/airbnb-1.jpg";
+import realLivingRoom from "../assets/our-work/regular-2.jpg";
+import realEotKitchen from "../assets/our-work/end-of-tenancy-1.jpg";
+import realRegularLiving from "../assets/our-work/regular-4.jpg";
+import realGeneralKitchen from "../assets/our-work/regular-6.jpg";
+import realAirbnbRoom from "../assets/our-work/airbnb-4.jpg";
+import realOven from "../assets/our-work/oven-2.jpg";
+import realFridge from "../assets/our-work/deep-card.jpg";
 
-const photoFor = (slug) => SERVICE_PAGES.find((p) => p.slug === slug);
+// Real photos from our jobs for the service cards; services without one keep their stock photo.
+const REAL_SERVICE_PHOTOS = {
+  "end-of-tenancy-cleaning-manchester": realEotKitchen,
+  "deep-cleaning-manchester": realFridge,
+  "airbnb-cleaning-manchester": realAirbnbRoom,
+  "regular-house-cleaning-manchester": realRegularLiving,
+  "general-cleaning-manchester": realGeneralKitchen,
+  "oven-cleaning-manchester": realOven,
+};
 
 const trustStats = (g) => [
   { value: `${g.rating}★`, label: `Google rating from ${g.count} reviews` },
@@ -140,8 +156,6 @@ function SectionHeading({ eyebrow, title, children }) {
 const About = () => {
   const g = useGoogleReviews();
   const quoteLink = whatsappLink("Hi Cleaniq! I'd like to book a cleaner.");
-  const deep = photoFor("deep-cleaning-manchester");
-  const airbnb = photoFor("airbnb-cleaning-manchester");
 
   return (
     <div className="bg-white min-h-screen overflow-x-hidden">
@@ -202,33 +216,52 @@ const About = () => {
             </div>
           </motion.div>
 
+          {/* Real photos from our jobs: our cleaner at work, plus rooms after a clean */}
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="grid grid-cols-2 gap-4 md:gap-5"
+            className="relative grid grid-cols-2 gap-4 md:gap-5"
           >
-            <img
-              src={sprayPhoto}
-              alt="Cleaniq cleaner wiping down a table"
-              className="w-full h-full object-cover rounded-[32px] shadow-2xl shadow-primary/10 row-span-2"
-              width="640"
-              height="760"
-            />
-            <img
-              src={deep.image(700)}
-              alt={deep.imageAlt}
-              className="w-full aspect-square object-cover rounded-[32px] shadow-xl"
-              loading="lazy"
-              decoding="async"
-            />
-            <img
-              src={airbnb.image(700)}
-              alt={airbnb.imageAlt}
-              className="w-full aspect-square object-cover rounded-[32px] shadow-xl"
-              loading="lazy"
-              decoding="async"
-            />
+            <figure className="relative row-span-2 rounded-[32px] overflow-hidden shadow-2xl shadow-primary/10">
+              <img
+                src={cleanerAtWork}
+                alt="Cleaniq Services cleaner in uniform cleaning an oven"
+                className="w-full h-full object-cover"
+                width="800"
+                height="950"
+              />
+              <figcaption className="absolute bottom-3 left-3 right-3 px-4 py-3 rounded-2xl bg-white/90 backdrop-blur-sm text-xs font-bold text-primary-dark shadow-lg">
+                Our team at work in Manchester
+              </figcaption>
+            </figure>
+            <figure className="relative rounded-[32px] overflow-hidden shadow-xl">
+              <img
+                src={realBedroom}
+                alt="Airbnb bedroom made up by Cleaniq Services"
+                className="w-full aspect-square object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full bg-black/55 text-white text-[10px] font-black uppercase tracking-widest">
+                Airbnb turnover
+              </figcaption>
+            </figure>
+            <figure className="relative rounded-[32px] overflow-hidden shadow-xl">
+              <img
+                src={realLivingRoom}
+                alt="Living room after a clean by Cleaniq Services"
+                className="w-full aspect-square object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full bg-black/55 text-white text-[10px] font-black uppercase tracking-widest">
+                Regular clean
+              </figcaption>
+            </figure>
+            <span className="absolute -top-3 right-4 px-3 py-1.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
+              Real photos from our jobs
+            </span>
           </motion.div>
         </div>
       </section>
@@ -313,10 +346,14 @@ const About = () => {
                 >
                   <div className="aspect-[3/2] overflow-hidden">
                     <img
-                      src={p.image(600)}
-                      srcSet={`${p.image(400)} 400w, ${p.image(600)} 600w, ${p.image(900)} 900w`}
-                      sizes="(min-width: 1024px) 380px, (min-width: 640px) 45vw, 90vw"
-                      alt={p.imageAlt}
+                      {...(REAL_SERVICE_PHOTOS[p.slug]
+                        ? { src: REAL_SERVICE_PHOTOS[p.slug], alt: `${p.name} by Cleaniq Services: photo from one of our jobs` }
+                        : {
+                            src: p.image(600),
+                            srcSet: `${p.image(400)} 400w, ${p.image(600)} 600w, ${p.image(900)} 900w`,
+                            sizes: "(min-width: 1024px) 380px, (min-width: 640px) 45vw, 90vw",
+                            alt: p.imageAlt,
+                          })}
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"

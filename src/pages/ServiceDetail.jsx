@@ -5,6 +5,10 @@ import { useGoogleReviews } from "../utils/googleReviews";
 import { whatsappLink } from "../utils/contact";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
+import BeforeAfter from "../component/BeforeAfter";
+import { beforeAfterFor } from "../utils/beforeAfter";
+import OurWork from "../component/OurWork";
+import { ourWorkFor } from "../utils/ourWork";
 import {
   ShieldCheck,
   Calendar,
@@ -1828,6 +1832,22 @@ const ServiceDetail = () => {
                   </section>
 
                   <Divider />
+
+                  {/* Before & after photos for this service, when we have some */}
+                  {beforeAfterFor(serviceSlug).length > 0 && (
+                    <>
+                      <BeforeAfter slug={serviceSlug} title={`${service.heading}: before & after`} limit={4} />
+                      <Divider />
+                    </>
+                  )}
+
+                  {/* Gallery of real photos from our jobs for this service, when we have some */}
+                  {ourWorkFor(serviceSlug).length > 0 && (
+                    <>
+                      <OurWork slug={serviceSlug} />
+                      <Divider />
+                    </>
+                  )}
 
                   {/* Testimonials */}
                   <section>

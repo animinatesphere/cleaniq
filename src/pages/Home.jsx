@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { generateBlogSlug } from "../utils/slugGenerator";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
+import BeforeAfter from "../component/BeforeAfter";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { uploadUrl } from "../utils/uploads";
 import { AREAS } from "../utils/areas";
@@ -647,6 +648,11 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Before & after photos (appear once photos are added to src/assets/before-after) */}
+      <div className="max-w-7xl mx-auto px-6 w-full">
+        <BeforeAfter className="pt-24 md:pt-32" />
+      </div>
 
       {/* Google Reviews */}
       <GoogleReviewsSection />

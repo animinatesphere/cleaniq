@@ -5,6 +5,7 @@ import { AREAS } from "../utils/areas";
 import { whatsappLink } from "../utils/contact";
 import { useGoogleReviews } from "../utils/googleReviews";
 import { AREA_LOCAL } from "../utils/areaLocal";
+import BeforeAfter from "../component/BeforeAfter";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import {
   MapPin,
@@ -511,6 +512,9 @@ const LocationDetail = () => {
             </p>
           </section>
         )}
+
+        {/* Before & after photos from our jobs (not tied to this town, so the title doesn't say it is) */}
+        <BeforeAfter title="Before & after from our recent jobs" limit={3} />
 
         {/* Neighbourhoods */}
         {nearby.length > 0 && (
