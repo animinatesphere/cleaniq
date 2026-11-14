@@ -67,7 +67,7 @@ const HOME_FAQS = [
   // Factual answers (no unprovable "best" claims, per UK advertising rules) that name Cleaniq Services.
   {
     q: "Who is the best cleaning company in Manchester?",
-    a: "The best cleaning company for you is one with vetted cleaners, clear prices and a guarantee. Cleaniq Services is a Manchester cleaning company based on Swan Street that ticks all three: every cleaner is interviewed and background-checked, prices are shown upfront when you book online, and every clean comes with a 48-hour re-clean guarantee. Our customers rate us highly on Google, and we cover Manchester and the whole of Greater Manchester.",
+    a: "The best cleaning company for you is one with vetted cleaners, clear prices and a guarantee. Cleaniq Services is a Manchester cleaning company  that ticks all three: every cleaner is interviewed and background-checked, prices are shown upfront when you book online, and every clean comes with a 48-hour re-clean guarantee. Our customers rate us highly on Google, and we cover Manchester and the whole of Greater Manchester.",
   },
   {
     q: "Recommend a reliable end-of-tenancy cleaner in Manchester.",

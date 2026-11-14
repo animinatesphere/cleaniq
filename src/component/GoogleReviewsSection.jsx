@@ -72,7 +72,7 @@ export default function GoogleReviewsSection({ className = "bg-slate-50/50" }) {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        {/* <div className="text-center mt-12">
           <a
             href={url}
             target="_blank"
@@ -81,7 +81,7 @@ export default function GoogleReviewsSection({ className = "bg-slate-50/50" }) {
           >
             Read all {count} reviews on Google <ArrowRight size={18} />
           </a>
-        </div>
+        </div> */}
       </div>
     </section>
   );
