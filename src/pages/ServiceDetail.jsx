@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
-import { GOOGLE_RATING, GOOGLE_REVIEW_COUNT, GOOGLE_REVIEWS, GOOGLE_REVIEWS_URL } from "../utils/googleReviews";
+import { useGoogleReviews } from "../utils/googleReviews";
 import { whatsappLink } from "../utils/contact";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
@@ -1421,6 +1421,7 @@ const formatFromPrice = (s) =>
 /* ─── MAIN PAGE ─────────────────────────────────────────────────── */
 const ServiceDetail = () => {
   const { serviceSlug } = useParams();
+  const g = useGoogleReviews();
   const service = SERVICES_MAP[serviceSlug];
   const isEOT = serviceSlug === "end-of-tenancy-cleaning-manchester";
   const ext = service?.extended ? EXTENDED_MAP[service.extended] : null;
@@ -1571,9 +1572,9 @@ const ServiceDetail = () => {
                     ))}
                   </div>
                   <span className="text-sm text-slate-300">
-                    5.0 ·{" "}
+                    {g.rating} ·{" "}
                     <span className="text-white font-semibold">
-                      19 Google reviews
+                      {g.count} Google reviews
                     </span>
                   </span>
                 </div>
@@ -1642,7 +1643,7 @@ const ServiceDetail = () => {
         <div className="bg-[#0A1520] text-white">
           <div className="px-4 sm:px-6 lg:px-10 xl:px-16 py-4 flex flex-wrap gap-6 sm:gap-10 items-center">
             {[
-              { value: "5.0★", label: "Google rating (19 reviews)" },
+              { value: `${g.rating}★`, label: `Google rating (${g.count} reviews)` },
               { value: "48hr", label: "Re-clean guarantee" },
               { value: "100%", label: "Deposit protection goal" },
             ].map(({ value, label }) => (
@@ -1835,13 +1836,13 @@ const ServiceDetail = () => {
                       What Our Customers Say
                     </h2>
                     <p className="text-sm text-slate-500 mb-6">
-                      {GOOGLE_RATING}★ on Google from {GOOGLE_REVIEW_COUNT} reviews ·{" "}
-                      <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="text-teal-700 font-semibold hover:underline">
+                      {g.rating}★ on Google from {g.count} reviews ·{" "}
+                      <a href={g.url} target="_blank" rel="noopener noreferrer" className="text-teal-700 font-semibold hover:underline">
                         Read all reviews on Google
                       </a>
                     </p>
                     <div className="grid sm:grid-cols-3 gap-4 sm:gap-5">
-                      {GOOGLE_REVIEWS.map((t, i) => (
+                      {g.reviews.slice(0, 3).map((t, i) => (
                         <div
                           key={i}
                           className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3"
@@ -1961,7 +1962,7 @@ const ServiceDetail = () => {
                         },
                         {
                           icon: <Star size={15} />,
-                          text: "5.0★ from 19 Google reviews",
+                          text: `${g.rating}★ from ${g.count} Google reviews`,
                         },
                       ].map(({ icon, text }) => (
                         <div

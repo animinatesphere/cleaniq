@@ -45,4 +45,18 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// GET /api/reviews/google — live Google rating, review count and latest reviews for the website
+// (utils/googleReviews.js). 204 when the Google key isn't set, so the site uses its built-in reviews.
+router.get('/google', async (req, res) => {
+  try {
+    const data = await require('../utils/googleReviews').getReviews();
+    if (!data) return res.status(204).end();
+    res.set('Cache-Control', 'public, max-age=600');
+    res.json(data);
+  } catch (err) {
+    console.error('[google-reviews]', err.message);
+    res.status(204).end();
+  }
+});
+
 module.exports = router;

@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import { whatsappLink } from "../utils/contact";
-import { GOOGLE_RATING, GOOGLE_REVIEW_COUNT } from "../utils/googleReviews";
+import { useGoogleReviews } from "../utils/googleReviews";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import {
   MapPin,
@@ -253,6 +253,7 @@ const BOOKING_STEPS = [
 
 const LocationDetail = () => {
   const { area } = useParams();
+  const g = useGoogleReviews();
   const slug = area.toLowerCase();
   const locationData = LOCATIONS_MAP[slug];
 
@@ -279,7 +280,7 @@ const LocationDetail = () => {
     { icon: ShieldCheck, title: "Vetted local cleaners", desc: `Interviewed, background-checked cleaners who work across ${name} and nearby.` },
     { icon: Sparkles, title: "48-hour re-clean guarantee", desc: "Not happy with any part of the clean? We'll come back and re-clean it for free." },
     { icon: Leaf, title: "Eco-friendly products", desc: "Use your own, or our cleaners bring eco-friendly products and equipment for £10." },
-    { icon: Star, title: `${GOOGLE_RATING}★ on Google`, desc: `Rated ${GOOGLE_RATING} from ${GOOGLE_REVIEW_COUNT} Google reviews by our customers.` },
+    { icon: Star, title: `${g.rating}★ on Google`, desc: `Rated ${g.rating} from ${g.count} Google reviews by our customers.` },
   ];
 
   return (
@@ -383,7 +384,7 @@ const LocationDetail = () => {
             <h3 className="text-sm font-black text-primary-dark uppercase tracking-widest mb-4">Why Choose Us?</h3>
             <div className="space-y-3 text-left">
               <div className="flex items-center gap-3"><ShieldCheck size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">Vetted Local Cleaners</span></div>
-              <div className="flex items-center gap-3"><Star size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">{GOOGLE_RATING}★ on Google ({GOOGLE_REVIEW_COUNT} reviews)</span></div>
+              <div className="flex items-center gap-3"><Star size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">{g.rating}★ on Google ({g.count} reviews)</span></div>
               <div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">Eco-Friendly Products</span></div>
               <div className="flex items-center gap-3"><Sparkles size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">48-Hour Re-Clean Guarantee</span></div>
             </div>

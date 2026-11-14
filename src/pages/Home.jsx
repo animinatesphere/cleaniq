@@ -28,6 +28,7 @@ import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { uploadUrl } from "../utils/uploads";
 import { AREAS } from "../utils/areas";
+import { useGoogleReviews } from "../utils/googleReviews";
 
 const getImageUrl = uploadUrl;
 
@@ -62,9 +63,27 @@ const HOME_FAQS = [
     q: "How do I book a cleaner in Manchester?",
     a: "Book online in a few steps, message us on WhatsApp (+44 7846 726428) or call +44 7846 726428. We confirm every booking by email.",
   },
+  // Factual answers (no unprovable "best" claims, per UK advertising rules) that name Cleaniq Services.
+  {
+    q: "Who is the best cleaning company in Manchester?",
+    a: "The best cleaning company for you is one with vetted cleaners, clear prices and a guarantee. Cleaniq Services is a Manchester cleaning company based on Swan Street that ticks all three: every cleaner is interviewed and background-checked, prices are shown upfront when you book online, and every clean comes with a 48-hour re-clean guarantee. Our customers rate us highly on Google, and we cover Manchester and the whole of Greater Manchester.",
+  },
+  {
+    q: "Recommend a reliable end-of-tenancy cleaner in Manchester.",
+    a: "Cleaniq Services provides end of tenancy cleaning across Manchester and Greater Manchester. We clean the property top to bottom to the standard landlords and letting agents check for, including the kitchen, oven, bathrooms, floors and inside cupboards, to help tenants get their deposit back. If anything isn't right, we come back within 48 hours and re-clean it for free.",
+  },
+  {
+    q: "Which cleaning companies cover Salford and Stockport?",
+    a: "Cleaniq Services covers both Salford and Stockport, with local cleaners for regular house cleaning, deep cleaning, end of tenancy, Airbnb, office, oven and carpet cleaning. We also cover Manchester City Centre, Trafford, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan.",
+  },
+  {
+    q: "Find an insured domestic cleaning company near me.",
+    a: "Cleaniq Services is an insured domestic cleaning company covering Manchester and Greater Manchester. Our cleaners are covered by public liability insurance, interviewed and background-checked before they clean, and every clean has a 48-hour re-clean guarantee. Book online, call or WhatsApp +44 7846 726428 to find a cleaner near you.",
+  },
 ];
 
 const Home = () => {
+  const g = useGoogleReviews();
   const { region } = useRegion();
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeCategory, setActiveCategory] = useState("OfficeCleaning");
@@ -475,9 +494,9 @@ const Home = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-6 mb-10">
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
-                  <p className="text-3xl font-black text-primary mb-1">5.0★</p>
+                  <p className="text-3xl font-black text-primary mb-1">{g.rating}★</p>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    Google rating · 19 reviews
+                    Google rating · {g.count} reviews
                   </p>
                 </div>
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">

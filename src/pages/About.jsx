@@ -24,13 +24,13 @@ import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import { whatsappLink } from "../utils/contact";
-import { GOOGLE_RATING, GOOGLE_REVIEW_COUNT, GOOGLE_REVIEWS_URL } from "../utils/googleReviews";
+import { useGoogleReviews } from "../utils/googleReviews";
 import sprayPhoto from "../assets/join-cleaner-spray.webp";
 
 const photoFor = (slug) => SERVICE_PAGES.find((p) => p.slug === slug);
 
-const TRUST = [
-  { value: `${GOOGLE_RATING}★`, label: `Google rating from ${GOOGLE_REVIEW_COUNT} reviews` },
+const trustStats = (g) => [
+  { value: `${g.rating}★`, label: `Google rating from ${g.count} reviews` },
   { value: "48hr", label: "Re-clean guarantee" },
   { value: String(AREAS.length), label: "Areas across Greater Manchester" },
   { value: String(SERVICE_PAGES.length), label: "Cleaning services" },
@@ -138,6 +138,7 @@ function SectionHeading({ eyebrow, title, children }) {
 }
 
 const About = () => {
+  const g = useGoogleReviews();
   const quoteLink = whatsappLink("Hi Cleaniq! I'd like to book a cleaner.");
   const deep = photoFor("deep-cleaning-manchester");
   const airbnb = photoFor("airbnb-cleaning-manchester");
@@ -171,7 +172,7 @@ const About = () => {
             </p>
 
             <a
-              href={GOOGLE_REVIEWS_URL}
+              href={g.url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 mb-9 group"
@@ -182,7 +183,7 @@ const About = () => {
                 ))}
               </span>
               <span className="text-sm font-bold text-primary-dark group-hover:underline">
-                {GOOGLE_RATING} on Google · {GOOGLE_REVIEW_COUNT} reviews
+                {g.rating} on Google · {g.count} reviews
               </span>
             </a>
 
@@ -235,7 +236,7 @@ const About = () => {
       {/* ── Trust strip ──────────────────────────────────────────────── */}
       <section className="px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {TRUST.map((t) => (
+          {trustStats(g).map((t) => (
             <div key={t.label} className="p-6 md:p-7 rounded-[28px] bg-white border border-slate-100 shadow-lg shadow-primary/5 text-center">
               <p className="text-3xl md:text-4xl font-black text-primary tracking-tight">{t.value}</p>
               <p className="text-xs md:text-sm font-bold text-slate-500 mt-1.5">{t.label}</p>

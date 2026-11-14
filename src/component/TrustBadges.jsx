@@ -1,4 +1,6 @@
-const badges = [
+import { useGoogleReviews } from "../utils/googleReviews";
+
+const makeBadges = (g) => [
   {
     icon: (
       <svg
@@ -54,8 +56,8 @@ const badges = [
         />
       </svg>
     ),
-    title: "5.0★ on Google",
-    subtitle: "Rated 5 stars from 19 Google reviews",
+    title: `${g.rating}★ on Google`,
+    subtitle: `Rated ${g.rating} stars from ${g.count} Google reviews`,
   },
   {
     icon: (
@@ -79,6 +81,7 @@ const badges = [
 ];
 
 export default function TrustBadges() {
+  const badges = makeBadges(useGoogleReviews());
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 bg-white rounded-2xl px-6 py-5 shadow-sm border border-gray-100 w-fit">
       {badges.map((badge, i) => (
