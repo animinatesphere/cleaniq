@@ -27,6 +27,10 @@ export async function render(url) {
         </StaticRouter>
       </HelmetProvider>
     </StrictMode>,
+    // Keep each page's content inline. By default React moves big sections inside <Suspense> into a
+    // hidden block at the end of the HTML (swapped in by a script), so crawlers that don't run
+    // JavaScript would see an empty <main>.
+    { progressiveChunkSize: Number.POSITIVE_INFINITY },
   );
   const html = await streamToString(prelude);
   const h = helmetContext.helmet;

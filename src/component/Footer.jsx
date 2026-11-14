@@ -191,14 +191,23 @@ const Footer = () => {
                   </a>
                 </li>
               )}
-              {/* <li className="flex items-start gap-3 text-slate-400 group cursor-pointer">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-secondary/20 group-hover:text-secondary transition-colors mt-1">
-                  <MapPin size={16} />
-                </div>
-                <span className="text-sm font-semibold group-hover:text-white transition-colors leading-relaxed">
-                  {region?.contact?.address}
-                </span>
-              </li> */}
+              {region?.contact?.address && (
+                <li>
+                  <a
+                    href="https://maps.app.goo.gl/UHcabzmFuj11wuLo9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 text-slate-400 group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-secondary/20 group-hover:text-secondary transition-colors mt-1 shrink-0">
+                      <MapPin size={16} />
+                    </div>
+                    <address className="not-italic text-sm font-semibold group-hover:text-white transition-colors leading-relaxed">
+                      {region.contact.address}
+                    </address>
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 

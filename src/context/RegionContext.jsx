@@ -14,7 +14,7 @@ export const regions = {
     contact: {
       phone: "+44 7846 726428",
       email: "info@cleaniqservices.com",
-      address: "20 Swan St, Manchester, M4 5JW",
+      address: "20 Swan St, Manchester M4 5JW, United Kingdom",
     },
   },
   /*

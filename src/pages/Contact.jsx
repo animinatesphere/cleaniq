@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
-import { Mail, Phone, Send, CheckCircle2, AlertCircle, Loader2, Building2, Clock } from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Loader2, Building2, Clock } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -131,12 +131,12 @@ const Contact = () => {
                 value: "info@cleaniqservices.com",
                 href: "mailto:info@cleaniqservices.com",
               },
-              // {
-              //   icon: <MapPin size={20} />,
-              //   label: "Head Office",
-              //   value: "20 Swan St, Manchester M4 5JW",
-              //   href: null,
-              // },
+              {
+                icon: <MapPin size={20} />,
+                label: "Office Address",
+                value: "20 Swan St, Manchester M4 5JW, United Kingdom",
+                href: "https://maps.app.goo.gl/UHcabzmFuj11wuLo9",
+              },
             ].map((item) => (
               <div key={item.label} className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm flex gap-4 items-start">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -149,6 +149,7 @@ const Contact = () => {
                   {item.href ? (
                     <a
                       href={item.href}
+                      {...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                       className="font-extrabold text-primary-dark hover:text-primary transition-colors text-sm whitespace-pre-line"
                     >
                       {item.value}

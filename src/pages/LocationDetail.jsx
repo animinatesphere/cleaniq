@@ -4,17 +4,16 @@ import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import { whatsappLink } from "../utils/contact";
 import { useGoogleReviews } from "../utils/googleReviews";
+import { AREA_LOCAL } from "../utils/areaLocal";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import {
   MapPin,
   CheckCircle2,
-  Calendar,
   Star,
   ArrowRight,
   Home as HomeIcon,
   ShieldCheck,
   Sparkles,
-  Leaf,
   MessageCircle,
 } from "lucide-react";
 
@@ -221,7 +220,7 @@ const NEIGHBOURHOODS = {
   wigan: ["Leigh", "Ashton-in-Makerfield", "Hindley", "Standish", "Orrell", "Atherton"],
 };
 
-// FAQs every area page gets; an area's own FAQs come first.
+// Town-specific FAQs every area page gets (general questions are on the homepage and About page).
 const areaFaqs = (name, nearby) => [
   {
     q: `Do you have cleaners near me in ${name}?`,
@@ -231,25 +230,8 @@ const areaFaqs = (name, nearby) => [
     q: `What cleaning services do your cleaners offer in ${name}?`,
     a: `${SERVICE_PAGES.map((p) => p.name).join(", ")}. Each service page shows what's included and the latest prices.`,
   },
-  {
-    q: `Are your cleaners in ${name} vetted?`,
-    a: "Yes. Every cleaner has a face-to-face interview, background checks and a practical skills assessment before their first job.",
-  },
-  {
-    q: "Do I need to provide cleaning supplies?",
-    a: "You can use your own products, or our cleaners bring eco-friendly cleaning products and equipment for £10 per visit.",
-  },
-  {
-    q: "What if I'm not happy with the clean?",
-    a: "Tell us within 48 hours and we'll send a cleaner back to re-clean it for free.",
-  },
 ];
 
-const BOOKING_STEPS = [
-  { icon: Calendar, title: "Book online", desc: "Choose your cleaning service, the hours and a time that suits you." },
-  { icon: MessageCircle, title: "We confirm", desc: "We confirm your booking by email. Questions? Message us on WhatsApp." },
-  { icon: Sparkles, title: "Your cleaner arrives", desc: "A vetted local cleaner arrives on time and gets to work." },
-];
 
 const LocationDetail = () => {
   const { area } = useParams();
@@ -273,15 +255,13 @@ const LocationDetail = () => {
 
   const { name } = locationData;
   const nearby = NEIGHBOURHOODS[slug] || [];
-  const faqs = [...(locationData.faqs || []), ...areaFaqs(name, nearby)];
+  const local = AREA_LOCAL[slug];
+  const localFaq = local
+    ? [{ q: `Which ${name} postcodes do your cleaners cover?`, a: `Our cleaners cover ${local.postcodes.join(", ")}${nearby.length ? `, including ${nearby.join(", ")}` : ""}. Not sure if you're covered? Message us on WhatsApp with your postcode.` }]
+    : [];
+  const faqs = [...(locationData.faqs || []), ...localFaq, ...areaFaqs(name, nearby)];
   const otherAreas = AREAS.filter((a) => a.slug !== slug);
   const whatsapp = whatsappLink(`Hi Cleaniq! I'm looking for a cleaner in ${name}.`);
-  const whyUs = [
-    { icon: ShieldCheck, title: "Vetted local cleaners", desc: `Interviewed, background-checked cleaners who work across ${name} and nearby.` },
-    { icon: Sparkles, title: "48-hour re-clean guarantee", desc: "Not happy with any part of the clean? We'll come back and re-clean it for free." },
-    { icon: Leaf, title: "Eco-friendly products", desc: "Use your own, or our cleaners bring eco-friendly products and equipment for £10." },
-    { icon: Star, title: `${g.rating}★ on Google`, desc: `Rated ${g.rating} from ${g.count} Google reviews by our customers.` },
-  ];
 
   return (
     <div className="pt-36 bg-slate-50 min-h-screen">
@@ -509,25 +489,28 @@ const LocationDetail = () => {
           </div>
         </section>
 
-        {/* Why choose our cleaners */}
-        <section className="bg-white border border-slate-100 rounded-[40px] p-8 md:p-12 shadow-sm">
-          <h2 className="text-2xl md:text-4xl font-black text-primary-dark tracking-tight mb-8">
-            Why choose our cleaners in {name}?
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-5">
-            {whyUs.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex gap-4 p-5 rounded-3xl bg-slate-50 border border-slate-100">
-                <span className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <Icon size={22} />
-                </span>
-                <div>
-                  <h3 className="font-black text-primary-dark mb-1">{title}</h3>
-                  <p className="text-sm text-slate-500 font-medium leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+
+        {/* Local detail: homes in this area and what they need (unique per area) */}
+        {local && (
+          <section className="bg-white border border-slate-200 rounded-[36px] p-8 md:p-10 shadow-sm">
+            <h2 className="text-2xl md:text-3xl font-black text-primary-dark tracking-tight mb-4">
+              Homes in {name} and what they need
+            </h2>
+            <p className="text-slate-600 font-medium leading-relaxed max-w-4xl">{local.homes}</p>
+            <h3 className="text-lg font-bold text-primary-dark mt-8 mb-4">Tips for booking a cleaner in {name}</h3>
+            <ul className="grid gap-3 md:grid-cols-3">
+              {local.tips.map((tip) => (
+                <li key={tip} className="flex gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-sm font-medium text-slate-600">
+                  <CheckCircle2 size={18} className="text-primary shrink-0 mt-0.5" />
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm text-slate-500 font-semibold mt-6">
+              Postcodes we cover in {name}: <span className="text-primary-dark">{local.postcodes.join(", ")}</span>
+            </p>
+          </section>
+        )}
 
         {/* Neighbourhoods */}
         {nearby.length > 0 && (
@@ -551,27 +534,6 @@ const LocationDetail = () => {
           </section>
         )}
 
-        {/* How to book */}
-        <section className="bg-primary text-white rounded-[40px] p-8 md:p-12 relative overflow-hidden">
-          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/5 rounded-full" />
-          <h2 className="text-2xl md:text-4xl font-black tracking-tight mb-8 relative">
-            How to book a cleaner in {name}
-          </h2>
-          <div className="grid md:grid-cols-3 gap-5 relative">
-            {BOOKING_STEPS.map(({ icon: Icon, title, desc }, i) => (
-              <div key={title} className="p-6 rounded-3xl bg-white/[0.07] border border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="w-10 h-10 rounded-xl bg-white/10 text-secondary flex items-center justify-center">
-                    <Icon size={18} />
-                  </span>
-                  <span className="text-xs font-black text-white/50 uppercase tracking-widest">Step {i + 1}</span>
-                </div>
-                <h3 className="text-lg font-black mb-2">{title}</h3>
-                <p className="text-sm text-white/70 font-medium leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
       <GoogleReviewsSection />
