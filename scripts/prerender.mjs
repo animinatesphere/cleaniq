@@ -22,6 +22,16 @@ const TEMPLATE_TAGS = [
   /<meta\s+name="twitter:description"[\s\S]*?\/?>/i,
 ];
 
+// sitemap.xml for the pre-rendered pages (blog posts are in /sitemap-blog.xml, served live).
+function writeSitemap(routes) {
+  const today = new Date().toISOString().slice(0, 10);
+  const priority = (r) => (r === "/" ? "1.0" : /^\/(service|locations)\//.test(r) || r === "/services" ? "0.8" : r === "/privacy" || r === "/terms" ? "0.3" : "0.6");
+  const urls = routes
+    .map((r) => `  <url>\n    <loc>${SITE}${r === "/" ? "/" : r}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${priority(r)}</priority>\n  </url>`)
+    .join("\n");
+  fs.writeFileSync(path.join(dist, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`);
+}
+
 function routesFromSitemap() {
   const xml = fs.readFileSync(path.join(root, "public", "sitemap.xml"), "utf8");
   return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)]
@@ -93,8 +103,10 @@ async function main() {
   };
   globalThis.localStorage ??= memoryStorage();
   globalThis.sessionStorage ??= memoryStorage();
-  const { render } = await import(pathToFileURL(serverEntry).href);
-  const routes = routesFromSitemap();
+  const { render, PRERENDER_ROUTES } = await import(pathToFileURL(serverEntry).href);
+  // The page list comes from the app's own area/service data (src/entry-server.jsx); the old
+  // public/sitemap.xml is only a fallback for older builds.
+  const routes = PRERENDER_ROUTES?.length ? PRERENDER_ROUTES : routesFromSitemap();
   let ok = 0;
   for (const route of routes) {
     try {
@@ -109,6 +121,10 @@ async function main() {
     }
   }
   console.log(`[prerender] ${ok}/${routes.length} pages written with their own HTML`);
+  if (PRERENDER_ROUTES?.length) {
+    writeSitemap(routes);
+    console.log(`[prerender] sitemap.xml written with ${routes.length} pages`);
+  }
 }
 
 main().catch((err) => {

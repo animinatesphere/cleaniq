@@ -225,7 +225,7 @@ const PrivacyPolicy = () => {
         />
         <link
           rel="canonical"
-          href="https://www.cleaniqservices.com/privacy-policy"
+          href="https://www.cleaniqservices.com/privacy"
         />
         <meta property="og:title" content="Privacy Policy | Cleaniq Services" />
         <meta

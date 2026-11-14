@@ -1,6 +1,7 @@
 import React, { useEffect, lazy, Suspense } from "react";
 import { captureCreatorRef } from "./utils/creatorRef";
 import { Routes, Route, useLocation, Navigate, useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Navbar from "./component/Navbar";
 import TopNav from "./component/TopNav";
 import Footer from "./component/Footer";
@@ -106,12 +107,20 @@ function App() {
   const isAdminPath   = location.pathname.startsWith("/admin");
   const isAccountPath = location.pathname.startsWith("/account");
   const isDevPanel    = location.pathname.startsWith("/devpanel");
+  // Logged-in, payment and admin pages are browser-only and kept out of search results
+  // (vercel.json also sends an X-Robots-Tag header for them).
+  const isPrivatePage = /^\/(admin|account|devpanel|payment)(\/|$)/.test(location.pathname);
 
   // Creator / influencer links (?ref=CODE) are remembered for checkout and quotes.
   useEffect(() => { captureCreatorRef(location.search); }, [location.search]);
 
   return (
     <CustomerAuthProvider>
+      {isPrivatePage && (
+        <Helmet>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+      )}
       <div className="min-h-screen bg-slate-50 flex flex-col">
         <ScrollToTop />
         {!isAdminPath && !isAccountPath && !isDevPanel && <TopNav />}

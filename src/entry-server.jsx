@@ -7,6 +7,26 @@ import { StaticRouter } from "react-router";
 import { HelmetProvider } from "react-helmet-async";
 import { RegionProvider } from "./context/RegionContext";
 import App from "./App.jsx";
+import { AREAS } from "./utils/areas";
+import { SERVICE_PAGES, servicePagePath } from "./utils/servicePages";
+
+// Every public page that's rendered to static HTML at build time and listed in sitemap.xml
+// (scripts/prerender.mjs). Built from the same data the site uses, so a new area or service page
+// is included automatically. Blog pages are rendered on request by api/blog-page.js instead, and
+// logged-in, booking-payment and admin pages stay browser-only.
+export const PRERENDER_ROUTES = [
+  "/",
+  "/about",
+  "/services",
+  "/booking",
+  "/get-a-quote",
+  "/pages/contact",
+  "/recruitment",
+  ...SERVICE_PAGES.map((p) => servicePagePath(p.slug)),
+  ...AREAS.map((a) => `/locations/${a.slug}`),
+  "/privacy",
+  "/terms",
+];
 
 const streamToString = async (stream) => {
   let html = "";

@@ -151,18 +151,17 @@ const AccordionItem = ({ section }) => {
         />
       </button>
 
-      {open && (
-        <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-4 border-t border-slate-50">
-          {section.content.map((para, i) => (
-            <p
-              key={i}
-              className="text-slate-600 text-sm md:text-base leading-relaxed font-medium"
-            >
-              {para}
-            </p>
-          ))}
-        </div>
-      )}
+      {/* Always in the HTML (hidden until opened) so search engines can read the terms. */}
+      <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-4 border-t border-slate-50" hidden={!open}>
+        {section.content.map((para, i) => (
+          <p
+            key={i}
+            className="text-slate-600 text-sm md:text-base leading-relaxed font-medium"
+          >
+            {para}
+          </p>
+        ))}
+      </div>
     </motion.div>
   );
 };
