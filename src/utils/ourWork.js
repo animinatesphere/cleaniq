@@ -26,6 +26,14 @@ const CAPTIONS = {
   "oven-3.jpg": "Oven",
 };
 
+// What kind of job each photo set is from (used in the image descriptions).
+const JOB = {
+  "end-of-tenancy": "an end of tenancy clean",
+  regular: "a house clean",
+  airbnb: "an Airbnb turnover clean",
+  oven: "an oven clean",
+};
+
 // Which photo set each service page shows.
 const SET_FOR_PAGE = {
   "end-of-tenancy-cleaning-manchester": "end-of-tenancy",
@@ -39,7 +47,13 @@ const ALL = Object.entries(FILES)
   .map(([path, src]) => {
     const file = path.split("/").pop();
     const m = file.match(/^(.+)-(\d+)\.(jpe?g|png|webp)$/i);
-    return m ? { set: m[1], n: Number(m[2]), src, caption: CAPTIONS[file] || "" } : null;
+    if (!m) return null;
+    const caption = CAPTIONS[file] || "";
+    // Describes what's in the photo and how it relates to the page (Google's image guidance).
+    const alt = /cleaner at work/i.test(caption)
+      ? "Cleaniq Services cleaner in uniform and gloves cleaning inside an oven"
+      : `${caption} after ${JOB[m[1]] || "a clean"} by Cleaniq Services, photo from one of our jobs`;
+    return { set: m[1], n: Number(m[2]), src, caption, alt };
   })
   .filter(Boolean)
   .sort((a, b) => a.set.localeCompare(b.set) || a.n - b.n);

@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
   const email = clean(req.body.email, 150);
   const emailHtml = escHtml(email);
   const phone = escHtml(clean(req.body.phone, 30));
-  const rawSubject = clean(req.body.subject, 150) || (commercial ? `Commercial cleaning — ${commercial.type} (${commercial.hours}h)` : '');
+  const rawSubject = clean(req.body.subject, 150) || (commercial ? `Commercial cleaning — ${commercial.type} (${commercial.size})` : '');
   const subject = escHtml(rawSubject);
   const rawMessage = clean(req.body.message, 5000);
   const message = escHtml(rawMessage);
@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
           <tr>
             <td style="padding: 12px 16px; background: #ecfdf5; border-bottom: 1px solid #e2e8f0;">
               <p style="margin: 0; font-size: 10px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 1px;">Commercial cleaning</p>
-              <p style="margin: 4px 0 0; font-size: 15px; font-weight: 700; color: #0F172A;">${escHtml(commercial.type)} · ${commercial.hours} hour${commercial.hours === 1 ? '' : 's'}</p>
+              <p style="margin: 4px 0 0; font-size: 15px; font-weight: 700; color: #0F172A;">${escHtml(commercial.type)} · ${escHtml(commercial.size)}</p>
             </td>
           </tr>` : ''}
           <tr>
@@ -98,7 +98,7 @@ router.post('/', async (req, res) => {
       email,
       phone: clean(req.body.phone, 30),
       message: commercial
-        ? `Commercial cleaning: ${commercial.type} — ${commercial.hours} hour${commercial.hours === 1 ? '' : 's'}${rawMessage ? `\n\n${rawMessage}` : ''}`
+        ? `Commercial cleaning: ${commercial.type} — ${commercial.size}${rawMessage ? `\n\n${rawMessage}` : ''}`
         : rawMessage,
       serviceInterest: commercial ? `Commercial Cleaning — ${commercial.type}` : clean(req.body.service, 100),
       source: commercial ? 'Commercial Enquiry' : 'Contact Form',
@@ -156,11 +156,15 @@ function readCommercial(body = {}) {
   if (!body.commercialType) return { commercial: null };
   const type = clean(body.commercialType, 60);
   if (!COMMERCIAL_TYPES.includes(type)) return { error: "Please choose the type of commercial cleaning." };
-  const hours = Number(body.hours);
-  if (!Number.isFinite(hours) || hours < 1 || hours > 200 || Math.round(hours * 2) !== hours * 2) {
-    return { error: "Please enter how many hours you need (1 to 200)." };
+  // Size of the space in square metres (older versions of the form sent hours instead).
+  if (body.squareMetres !== undefined && body.squareMetres !== "") {
+    const sqm = Number(body.squareMetres);
+    if (!Number.isFinite(sqm) || sqm < 1 || sqm > 100000) return { error: "Please enter the size of the space in square metres." };
+    return { commercial: { type, squareMetres: Math.round(sqm), size: `${Math.round(sqm).toLocaleString("en-GB")} m²` } };
   }
-  return { commercial: { type, hours } };
+  const hours = Number(body.hours);
+  if (!Number.isFinite(hours) || hours < 1 || hours > 200) return { error: "Please enter the size of the space in square metres." };
+  return { commercial: { type, hours, size: `${hours} hour${hours === 1 ? "" : "s"}` } };
 }
 
 // Checks the form; returns { quote } or { error }.

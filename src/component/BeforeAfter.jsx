@@ -9,7 +9,7 @@ function SideBySide({ pair }) {
       <div className="grid grid-cols-2 gap-0.5 bg-white">
         {[["before", "Before", "bg-black/60"], ["after", "After", "bg-primary"]].map(([k, text, tone]) => (
           <div key={k} className="relative aspect-[2/3] overflow-hidden bg-slate-100">
-            <img src={pair[k]} alt={`${pair.label}: ${k} our clean`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={pair[k]} alt={k === "after" ? `After: ${pair.label} (real photo from a Cleaniq Services job)` : `Before: ${pair.label}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
             <span className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-white text-[10px] font-black uppercase tracking-widest ${tone}`}>{text}</span>
           </div>
         ))}
@@ -25,9 +25,9 @@ function Compare({ pair }) {
   return (
     <figure className="rounded-[28px] overflow-hidden bg-white border border-slate-100 shadow-sm">
       <div className="relative aspect-4/3 select-none overflow-hidden bg-slate-100">
-        <img src={pair.after} alt={`${pair.label}: after our clean`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={pair.after} alt={`After: ${pair.label} (real photo from a Cleaniq Services job)`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-          <img src={pair.before} alt={`${pair.label}: before our clean`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={pair.before} alt={`Before: ${pair.label}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
         </div>
         <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 text-white text-[10px] font-black uppercase tracking-widest">Before</span>
         <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">After</span>

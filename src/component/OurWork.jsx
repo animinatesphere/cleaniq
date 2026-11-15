@@ -11,7 +11,7 @@ export default function OurWork({ slug, title = "Photos from our recent jobs" })
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         {photos.map((p) => (
           <figure key={`${p.set}-${p.n}`} className="rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
-            <img src={p.src} alt={`${p.caption} cleaned by Cleaniq Services`} loading="lazy" width="1000" height="750" className="w-full aspect-4/3 object-cover" />
+            <img src={p.src} alt={p.alt} loading="lazy" width="1000" height="750" className="w-full aspect-4/3 object-cover" />
             {p.caption && <figcaption className="px-3 py-2 text-xs font-semibold text-slate-600">{p.caption}</figcaption>}
           </figure>
         ))}

@@ -57,7 +57,7 @@ const makeBadges = (g) => [
       </svg>
     ),
     title: `${g.rating}★ on Google`,
-    subtitle: `Rated ${g.rating} stars from ${g.count} Google reviews`,
+    subtitle: `Rated ${g.rating} stars by our customers on Google`,
   },
   {
     icon: (

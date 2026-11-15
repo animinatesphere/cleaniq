@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   Calendar,
@@ -13,10 +13,11 @@ import {
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
 import { BlogContent } from "../utils/blogContent";
-import { generateBlogSlug } from "../utils/slugGenerator";
+import { blogPath } from "../utils/slugGenerator";
 
 const BlogDetail = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
@@ -32,20 +33,10 @@ const BlogDetail = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const BASE_URL = API_URL.endsWith("/api") ? API_URL.slice(0, -4) : API_URL;
 
-  // Extract ID from slug (format: id-title-slug)
-  const extractIdFromSlug = (slug) => {
-    if (!slug) return null;
-    // If slug is just an ID (MongoDB format), use it directly
-    if (slug.match(/^[0-9a-f]{24}$/i)) return slug;
-    // If slug contains ID at the beginning (id-title-format), extract it
-    const parts = slug.split("-");
-    if (parts[0] && parts[0].match(/^[0-9a-f]{24}$/i)) {
-      return parts[0];
-    }
-    return slug; // Fallback to slug as-is
-  };
-
-  const postId = extractIdFromSlug(slug);
+  // Old addresses start with the post's database id (/blog/<id>-title); new ones are just the
+  // readable slug (/blog/kitchen-deep-cleaning).
+  const legacyId = (slug || "").match(/^([0-9a-f]{24})(?:-|$)/i)?.[1] || null;
+  const postId = post?._id || legacyId; // comments are stored against the post's id
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
@@ -57,7 +48,7 @@ const BlogDetail = () => {
   const fetchPost = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/blog/${postId}`);
+      const response = await fetch(legacyId ? `${API_URL}/blog/${legacyId}` : `${API_URL}/blog/slug/${encodeURIComponent(slug)}`);
       if (!response.ok) {
         throw new Error("Post not found");
       }
@@ -68,7 +59,13 @@ const BlogDetail = () => {
     } finally {
       setLoading(false);
     }
-  }, [postId, API_URL]);
+  }, [legacyId, slug, API_URL]);
+
+  // Old id-style address: show the post's readable address instead (Vercel already redirects
+  // these with a 301 for visitors arriving from outside the site).
+  useEffect(() => {
+    if (post?.slug && slug !== post.slug) navigate(`/blog/${post.slug}`, { replace: true });
+  }, [post, slug, navigate]);
 
   const fetchComments = useCallback(async () => {
     try {
@@ -86,12 +83,12 @@ const BlogDetail = () => {
   }, [postId, API_URL]);
 
   useEffect(() => {
-    if (postId) {
+    if (slug) {
       // This pattern is acceptable: fetchPost is useCallback-wrapped and memoized
       // eslint-disable-next-line
       fetchPost();
     }
-  }, [postId, fetchPost]);
+  }, [slug, fetchPost]);
 
   useEffect(() => {
     if (postId) {
@@ -179,7 +176,7 @@ const BlogDetail = () => {
     );
   }
 
-  const postUrl = `https://www.cleaniqservices.com/blog/${generateBlogSlug(post._id, post.title)}`;
+  const postUrl = `https://www.cleaniqservices.com${blogPath(post)}`;
 
   return (
     <>

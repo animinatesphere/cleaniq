@@ -1535,7 +1535,7 @@ const ServiceDetail = () => {
           }
         >
           {/* Breadcrumb */}
-          <nav className="flex items-center flex-wrap gap-x-2 gap-y-1  mt-2 text-xs text-slate-400 mb-8 tracking-wide">
+          <nav aria-label="Breadcrumb" className="flex items-center flex-wrap gap-x-2 gap-y-1  mt-2 text-xs text-slate-400 mb-8 tracking-wide">
             <Link
               to="/"
               className="hover:text-white transition-colors flex items-center gap-1"
@@ -1547,8 +1547,8 @@ const ServiceDetail = () => {
               Services
             </Link>
             <span>/</span>
-            <span className="text-slate-300">
-              {serviceSlug.replace(/-/g, " ")}
+            <span className="text-slate-300" aria-current="page">
+              {service.heading}
             </span>
           </nav>
 
@@ -1578,7 +1578,7 @@ const ServiceDetail = () => {
                   <span className="text-sm text-slate-300">
                     {g.rating} ·{" "}
                     <span className="text-white font-semibold">
-                      {g.count} Google reviews
+                      on Google
                     </span>
                   </span>
                 </div>
@@ -1647,7 +1647,7 @@ const ServiceDetail = () => {
         <div className="bg-[#0A1520] text-white">
           <div className="px-4 sm:px-6 lg:px-10 xl:px-16 py-4 flex flex-wrap gap-6 sm:gap-10 items-center">
             {[
-              { value: `${g.rating}★`, label: `Google rating (${g.count} reviews)` },
+              { value: `${g.rating}★`, label: "Google rating" },
               { value: "48hr", label: "Re-clean guarantee" },
               { value: "100%", label: "Deposit protection goal" },
             ].map(({ value, label }) => (
@@ -1856,7 +1856,7 @@ const ServiceDetail = () => {
                       What Our Customers Say
                     </h2>
                     <p className="text-sm text-slate-500 mb-6">
-                      {g.rating}★ on Google from {g.count} reviews ·{" "}
+                      {g.rating}★ on Google ·{" "}
                       <a href={g.url} target="_blank" rel="noopener noreferrer" className="text-teal-700 font-semibold hover:underline">
                         Read all reviews on Google
                       </a>
@@ -1982,7 +1982,7 @@ const ServiceDetail = () => {
                         },
                         {
                           icon: <Star size={15} />,
-                          text: `${g.rating}★ from ${g.count} Google reviews`,
+                          text: `${g.rating}★ rated on Google`,
                         },
                       ].map(({ icon, text }) => (
                         <div

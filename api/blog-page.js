@@ -78,8 +78,9 @@ export default async function handler(req, res) {
       return send(res, 200, html);
     }
 
-    const id = slug.split("-")[0];
-    const post = posts.find((p) => String(p._id) === id);
+    // New addresses are the post's slug; old ones start with its database id (/blog/<id>-title).
+    const legacyId = slug.match(/^([0-9a-f]{24})(?:-|$)/i)?.[1];
+    const post = posts.find((p) => p.slug && p.slug === slug.toLowerCase()) || (legacyId && posts.find((p) => String(p._id) === legacyId));
     if (!post) {
       const html = fillShell(shell, { title: "Article not found | Cleaniq Services", description: BLOG_DESC, url: `${SITE}/blog`, noindex: true, body: "" });
       return send(res, 404, html, "public, max-age=0, s-maxage=60");

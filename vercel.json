@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/pages/contact",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
       "source": "/pages/:slug((?!contact$)[^/]+)",
       "destination": "/service/:slug",
       "permanent": true

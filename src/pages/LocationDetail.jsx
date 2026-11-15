@@ -365,7 +365,7 @@ const LocationDetail = () => {
             <h3 className="text-sm font-black text-primary-dark uppercase tracking-widest mb-4">Why Choose Us?</h3>
             <div className="space-y-3 text-left">
               <div className="flex items-center gap-3"><ShieldCheck size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">Vetted Local Cleaners</span></div>
-              <div className="flex items-center gap-3"><Star size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">{g.rating}★ on Google ({g.count} reviews)</span></div>
+              <div className="flex items-center gap-3"><Star size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">{g.rating}★ on Google</span></div>
               <div className="flex items-center gap-3"><CheckCircle2 size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">Eco-Friendly Products</span></div>
               <div className="flex items-center gap-3"><Sparkles size={16} className="text-emerald-500"/><span className="text-xs font-bold text-slate-600">48-Hour Re-Clean Guarantee</span></div>
             </div>
@@ -378,13 +378,13 @@ const LocationDetail = () => {
             {/* Visual Image Grid */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="col-span-2 h-64 md:h-80 rounded-[32px] overflow-hidden group">
-                <img src={deepcleanImg} alt={`Deep cleaning by Cleaniq cleaners in ${name}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src={deepcleanImg} alt={`Gloved hands deep cleaning a bathroom basin, part of our deep cleaning service in ${name}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
               <div className="h-48 md:h-64 rounded-[24px] overflow-hidden group">
-                <img src={residentialImg} alt={`House cleaning in ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src={residentialImg} alt={`Bright, tidy living room after a house clean, a service we offer across ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
               <div className="h-48 md:h-64 rounded-[24px] overflow-hidden group">
-                <img src={officeImg} alt={`Office cleaning in ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src={officeImg} alt={`Clean office desk with a laptop, ready after an office clean, available in ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
             </div>
 
@@ -403,10 +403,10 @@ const LocationDetail = () => {
 
               <div className="grid grid-cols-2 gap-4 my-8">
                 <div className="h-40 rounded-2xl overflow-hidden group">
-                  <img src={bento1Img} alt={`Cleaniq cleaners at work in ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img src={bento1Img} alt="Bright living room with a grey sofa and cushions after a regular clean" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="h-40 rounded-2xl overflow-hidden group">
-                  <img src={grid1Img} alt="Spotless results after a professional clean" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img src={grid1Img} alt="Hands cleaning a shiny kitchen pan lid, the detail a deep clean covers" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
               </div>
 

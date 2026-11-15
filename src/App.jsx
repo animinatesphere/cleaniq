@@ -140,7 +140,10 @@ function App() {
             <Route path="/blog/:slug" element={<BlogDetail />} />
             <Route path="/cleaning/:city" element={<CityLanding />} />
             <Route path="/get-a-quote" element={<GetQuote />} />
-            <Route path="/pages/contact" element={<Contact />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/commercial-cleaning" element={<Contact commercialOnly />} />
+            {/* Old address (Vercel also 301-redirects it); keeps ?type=commercial etc. */}
+            <Route path="/pages/contact" element={<Navigate to={{ pathname: "/contact", search: location.search }} replace />} />
             <Route path="/service/:serviceSlug" element={<ServiceDetail />} />
             {/* Old address: /pages/<service> → /service/<service> */}
             <Route path="/pages/:serviceSlug" element={<OldServicePath />} />

@@ -21,7 +21,8 @@ export async function getPosts() {
   return cache.posts;
 }
 
-export const postPath = (p) => `/blog/${generateBlogSlug(p._id, p.title)}`;
+// Readable permanent address when the post has a slug; older data falls back to id-title.
+export const postPath = (p) => (p.slug ? `/blog/${p.slug}` : `/blog/${generateBlogSlug(p._id, p.title)}`);
 export const postUrl = (p) => SITE + postPath(p);
 
 export function imageUrl(path) {

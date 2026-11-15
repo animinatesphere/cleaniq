@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Star, BookOpen } from "lucide-react";
-import { generateBlogSlug } from "../utils/slugGenerator";
+import { blogPath } from "../utils/slugGenerator";
 import { uploadUrl } from "../utils/uploads";
 
 const CITIES = {
@@ -443,7 +443,7 @@ const CityLanding = () => {
                         {calculateReadTime(post.content)} min read
                       </span>
                       <Link
-                        to={`/blog/${generateBlogSlug(post._id, post.title)}`}
+                        to={blogPath(post)}
                         className="text-xs font-black text-primary hover:text-primary-dark transition-colors"
                       >
                         Read →

@@ -132,6 +132,7 @@ router.get("/", async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    await ensureSlugs();
     // Newest first by go-live time (older posts without one use their created date).
     const posts = await BlogPost.aggregate([
       { $match: liveFilter() },
@@ -149,6 +150,33 @@ router.get("/", async (req, res) => {
       pages: Math.ceil(total / limit),
       currentPage: page,
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Older posts get their readable address the first time the blog is loaded after this update.
+let slugsReady = null;
+const ensureSlugs = () => {
+  if (!slugsReady) {
+    slugsReady = BlogPost.ensureSlugs()
+      .then((n) => n && console.log(`[blog] gave ${n} older post(s) a readable address`))
+      .catch((e) => { slugsReady = null; console.error("[blog] slug backfill:", e.message); });
+  }
+  return slugsReady;
+};
+
+// GET single blog post by its readable address (/blog/<slug>)
+router.get("/slug/:slug", async (req, res) => {
+  try {
+    await ensureSlugs();
+    const post = await BlogPost.findOneAndUpdate(
+      { slug: String(req.params.slug).toLowerCase(), ...liveFilter() },
+      { $inc: { views: 1 } },
+      { new: true },
+    );
+    if (!post) return res.status(404).json({ error: "Blog post not found" });
+    res.json(post);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

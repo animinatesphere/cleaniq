@@ -11,7 +11,7 @@ const COMMERCIAL_TYPES = [
   "Commercial Cleaning",
   "Gym Cleaning",
 ];
-const COMMERCIAL_CONTACT = "/pages/contact?type=commercial";
+const COMMERCIAL_CONTACT = "/commercial-cleaning";
 // Where the whole card links to: commercial goes to the quote form, others to their service page.
 const cardPath = (service) => (service.quoteOnly ? COMMERCIAL_CONTACT : pathForLayoutKey(service.id));
 import { motion } from "framer-motion";
@@ -107,6 +107,7 @@ const Services = () => {
 
   const layoutAssets = {
     residential: {
+      imageAlt: "Bright, spotless bathroom with a glass shower, basin and mirror after a residential clean",
       icon: <HomeIcon className="text-secondary" size={40} />,
       image:
         "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2000&auto=format&fit=crop",
@@ -125,6 +126,7 @@ const Services = () => {
       defaultRateNG: "From ₦15,000",
     },
     commercial: {
+      imageAlt: "Clean, empty open-plan office floor and kitchen area after a commercial clean",
       icon: <Briefcase className="text-secondary" size={40} />,
       image:
         "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop",
@@ -143,6 +145,7 @@ const Services = () => {
       defaultRateNG: "From ₦18,000",
     },
     move: {
+      imageAlt: "Gloved hands spraying and wiping a surface during a deep clean",
       icon: <HomeIcon className="text-secondary" size={40} />,
       image: deep,
       features: [
@@ -158,6 +161,7 @@ const Services = () => {
       defaultRateNG: "From ₦25,000",
     },
     airbnb: {
+      imageAlt: "Neatly made bed with fresh linen and cushions in a guest-ready short-let bedroom",
       icon: <Star className="text-secondary" size={40} />,
       image:
         "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000&auto=format&fit=crop",
@@ -177,6 +181,7 @@ const Services = () => {
       defaultRateNG: "From ₦20,000",
     },
     tenancy: {
+      imageAlt: "Empty living room with moving boxes and a vacuum cleaner, ready for an end of tenancy clean",
       icon: <Truck className="text-secondary" size={40} />,
       image: moveOutImg,
       features: [
@@ -195,6 +200,7 @@ const Services = () => {
       defaultRateNG: "From ₦30,000",
     },
     construction: {
+      imageAlt: "Cleaner in a dust mask and gloves wiping down a window after building work",
       icon: <ShieldCheck className="text-secondary" size={40} />,
       image:
         "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=2000&auto=format&fit=crop",
@@ -214,6 +220,7 @@ const Services = () => {
       defaultRateNG: "From ₦28,000",
     },
     carpet: {
+      imageAlt: "Commercial vacuum and cleaning trolley in a carpeted hallway",
       icon: <HomeIcon className="text-secondary" size={40} />,
       image:
         "https://images.unsplash.com/photo-1580256081112-e49377338b7f?w=800&auto=format&fit=crop&q=60",
@@ -230,6 +237,7 @@ const Services = () => {
       defaultRateNG: "From ₦20,000",
     },
     oven: {
+      imageAlt: "Cleaner in blue gloves cleaning the glass door of an oven",
       icon: <ShieldCheck className="text-secondary" size={40} />,
       image:
         "https://plus.unsplash.com/premium_photo-1679500355493-2a1ce67cb938?w=800&auto=format&fit=crop&q=60",
@@ -246,6 +254,7 @@ const Services = () => {
       defaultRateNG: "From ₦15,000",
     },
     general: {
+      imageAlt: "Gloved hand holding a spray bottle of cleaning product",
       icon: <HomeIcon className="text-secondary" size={40} />,
       image:
         "https://images.unsplash.com/photo-1563453392212-326f5e854473?q=80&w=2000&auto=format&fit=crop",
@@ -284,6 +293,7 @@ const Services = () => {
         tag: assets.tag,
         icon: assets.icon,
         image: assets.image,
+        imageAlt: assets.imageAlt,
         features: (s.bullets && s.bullets.length > 0) ? s.bullets : assets.features,
         description: s.description || assets.defaultDesc,
         pricing: s.rate ? `From ${region.symbol}${s.rate}${region.id === "UK" ? (s.type === "hourly" ? "/hr" : "") : ""}` : "",
@@ -303,6 +313,7 @@ const Services = () => {
           tag: assets.tag,
           icon: assets.icon,
           image: assets.image,
+          imageAlt: assets.imageAlt,
           features: assets.features,
           description: assets.defaultDesc,
           pricing: defaultPricing,
@@ -456,7 +467,7 @@ const Services = () => {
               <div className="lg:w-1/2 w-full aspect-video md:aspect-4/3 rounded-[32px] md:rounded-[48px] relative overflow-hidden group shadow-2xl">
                 <img
                   src={service.image}
-                  alt={service.title}
+                  alt={service.imageAlt || service.title}
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   width="1200"
                   height="675"

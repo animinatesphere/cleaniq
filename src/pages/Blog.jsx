@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import LoadingOverlay from "../component/LoadingOverlay";
-import { generateBlogSlug } from "../utils/slugGenerator";
+import { blogPath } from "../utils/slugGenerator";
 import { motion } from "framer-motion";
 
 const Blog = () => {
@@ -172,7 +172,7 @@ const Blog = () => {
                 className="mb-20"
               >
                 <Link
-                  to={`/blog/${generateBlogSlug(featuredPost._id, featuredPost.title)}`}
+                  to={blogPath(featuredPost)}
                   className="group"
                 >
                   <div className="overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 border border-slate-200">
@@ -287,7 +287,7 @@ const Blog = () => {
                     className="group h-full"
                   >
                     <Link
-                      to={`/blog/${generateBlogSlug(post._id, post.title)}`}
+                      to={blogPath(post)}
                       className="block h-full"
                     >
                       <div className="h-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:border-primary/50 hover:shadow-xl transition-all duration-300 flex flex-col group-hover:-translate-y-2">

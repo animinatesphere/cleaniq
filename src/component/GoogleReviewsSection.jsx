@@ -29,7 +29,7 @@ export default function GoogleReviewsSection({ className = "bg-slate-50/50" }) {
               ))}
             </div>
             <p className="text-sm font-bold text-primary-dark">
-              {rating} stars on Google · {count} reviews
+              {rating} stars on Google
             </p>
           </a>
         </div>
@@ -79,7 +79,7 @@ export default function GoogleReviewsSection({ className = "bg-slate-50/50" }) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 font-black text-primary hover:gap-4 transition-all"
           >
-            Read all {count} reviews on Google <ArrowRight size={18} />
+            Read all our reviews on Google <ArrowRight size={18} />
           </a>
         </div> */}
       </div>

@@ -46,7 +46,7 @@ const REAL_SERVICE_PHOTOS = {
 };
 
 const trustStats = (g) => [
-  { value: `${g.rating}★`, label: `Google rating from ${g.count} reviews` },
+  { value: `${g.rating}★`, label: "Google rating from our customers" },
   { value: "48hr", label: "Re-clean guarantee" },
   { value: String(AREAS.length), label: "Areas across Greater Manchester" },
   { value: String(SERVICE_PAGES.length), label: "Cleaning services" },
@@ -197,7 +197,7 @@ const About = () => {
                 ))}
               </span>
               <span className="text-sm font-bold text-primary-dark group-hover:underline">
-                {g.rating} on Google · {g.count} reviews
+                {g.rating} on Google
               </span>
             </a>
 

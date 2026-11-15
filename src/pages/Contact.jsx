@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
-import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Loader2, Building2, Clock } from "lucide-react";
+import { useSearchParams, useNavigate, Navigate } from "react-router-dom";
+import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Loader2, Building2, Ruler } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
 
-// Commercial cleaning has no online booking: the customer picks the type and the hours here and
+// Commercial cleaning has no online booking: the customer picks the type and the size of the space
+// on its own page (/commercial-cleaning) and
 // the team sends a quote. Same list as server/routes/contact.js (COMMERCIAL_TYPES).
 const COMMERCIAL = "Commercial Cleaning";
 const COMMERCIAL_TYPES = [
@@ -17,11 +18,13 @@ const COMMERCIAL_TYPES = [
   "Commercial Cleaning",
   "Gym Cleaning",
 ];
-const EMPTY = { name: "", email: "", phone: "", service: "", subject: "", message: "", commercialType: "", hours: "" };
+const EMPTY = { name: "", email: "", phone: "", service: "", subject: "", message: "", commercialType: "", squareMetres: "" };
 
-const Contact = () => {
+// commercialOnly: the /commercial-cleaning page — the same form, fixed to commercial cleaning.
+const Contact = ({ commercialOnly = false }) => {
   const [searchParams] = useSearchParams();
-  const fromCommercial = searchParams.get("type") === "commercial";
+  const navigate = useNavigate();
+  const fromCommercial = commercialOnly;
   const [formData, setFormData] = useState({ ...EMPTY, service: fromCommercial ? COMMERCIAL : "" });
   const isCommercial = formData.service === COMMERCIAL;
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
@@ -38,8 +41,11 @@ const Contact = () => {
       .catch(() => {});
   }, []);
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
+    // Commercial cleaning has its own page and address.
+    if (e.target.name === "service" && e.target.value === COMMERCIAL) return navigate("/commercial-cleaning");
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,9 +57,9 @@ const Contact = () => {
     setStatus("loading");
     setErrorMsg("");
 
-    // Type and hours are only sent for a commercial enquiry.
-    const { commercialType, hours, ...rest } = formData;
-    const body = isCommercial ? { ...rest, commercialType, hours } : rest;
+    // Type and size are only sent for a commercial enquiry.
+    const { commercialType, squareMetres, ...rest } = formData;
+    const body = isCommercial ? { ...rest, commercialType, squareMetres } : rest;
 
     try {
       const res = await fetch(`${API}/contact`, {
@@ -76,17 +82,32 @@ const Contact = () => {
     }
   };
 
+  // Old link (/contact?type=commercial) → the commercial cleaning page.
+  if (!commercialOnly && searchParams.get("type") === "commercial") return <Navigate to="/commercial-cleaning" replace />;
+
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24 bg-[#F8FAFC] min-h-screen">
+      {commercialOnly ? (
+        <Helmet>
+          <title>Commercial Cleaning Quote Manchester | Cleaniq Services</title>
+          <meta
+            name="description"
+            content="Request a commercial cleaning quote in Manchester: event, restaurant, gym, communal area, contract and office cleaning. Tell us the type and size of the space and we'll send you a quote."
+          />
+          <link rel="canonical" href="https://www.cleaniqservices.com/commercial-cleaning" />
+          <meta property="og:title" content="Commercial Cleaning Quote Manchester | Cleaniq Services" />
+        </Helmet>
+      ) : (
       <Helmet>
         <title>Contact Us | Cleaniq Services Manchester</title>
         <meta
           name="description"
           content="Contact Cleaniq Services in Manchester for a free cleaning quote. We offer end of tenancy, deep cleaning, Airbnb, and office cleaning. Call +44 7846 726428 or email us today."
         />
-        <link rel="canonical" href="https://www.cleaniqservices.com/pages/contact" />
+        <link rel="canonical" href="https://www.cleaniqservices.com/contact" />
         <meta property="og:title" content="Contact Us | Cleaniq Services Manchester" />
       </Helmet>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
 
@@ -104,7 +125,7 @@ const Contact = () => {
           </h1>
           <p className="text-slate-500 font-bold text-base md:text-lg max-w-xl mx-auto leading-relaxed">
             {fromCommercial
-              ? "Events, restaurants, gyms, communal areas and contract cleaning. Tell us what you need and how many hours, and we'll send you a quote."
+              ? "Events, restaurants, gyms, communal areas and contract cleaning. Tell us what you need and the size of the space, and we'll send you a quote."
               : "Have questions or need a custom quote? Fill in the form and we'll get back to you within a few hours."}
           </p>
         </motion.div>
@@ -258,7 +279,7 @@ const Contact = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className={`grid grid-cols-1 gap-4 ${commercialOnly ? "" : "sm:grid-cols-2"}`}>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-widest">Phone (optional)</label>
                   <input
@@ -270,6 +291,7 @@ const Contact = () => {
                     className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold focus:outline-none focus:border-primary text-slate-700 text-sm transition-colors"
                   />
                 </div>
+                {!commercialOnly && (
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-widest">Service</label>
                   <select
@@ -286,6 +308,7 @@ const Contact = () => {
                     <option value="Other Cleaning Services">Other Cleaning Services</option>
                   </select>
                 </div>
+                )}
               </div>
 
               {isCommercial && (
@@ -311,24 +334,24 @@ const Contact = () => {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label htmlFor="contact-hours" className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-widest flex items-center gap-1">
-                      <Clock size={12} /> How many hours do you need? *
+                    <label htmlFor="contact-sqm" className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-widest flex items-center gap-1">
+                      <Ruler size={12} /> Size of the space (square metres) *
                     </label>
                     <input
-                      id="contact-hours"
+                      id="contact-sqm"
                       type="number"
-                      name="hours"
+                      name="squareMetres"
                       min="1"
-                      max="200"
-                      step="0.5"
-                      inputMode="decimal"
-                      placeholder="e.g. 4"
-                      value={formData.hours}
+                      max="100000"
+                      step="1"
+                      inputMode="numeric"
+                      placeholder="e.g. 120"
+                      value={formData.squareMetres}
                       onChange={handleChange}
                       className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold focus:outline-none focus:border-primary text-slate-700 text-sm transition-colors"
                       required
                     />
-                    <p className="text-xs text-slate-500 font-semibold ml-1">Not sure? Give your best guess and we'll confirm it with you.</p>
+                    <p className="text-xs text-slate-500 font-semibold ml-1">Not sure? Give your best guess (a small office is about 50 m², a restaurant 100–300 m²) and we'll confirm it with you.</p>
                   </div>
                 </div>
               )}
@@ -338,7 +361,7 @@ const Contact = () => {
                 <input
                   type="text"
                   name="subject"
-                  placeholder="e.g. Quote for deep clean"
+                  placeholder={commercialOnly ? "e.g. Weekly restaurant clean" : "e.g. Quote for deep clean"}
                   value={formData.subject}
                   onChange={handleChange}
                   className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold focus:outline-none focus:border-primary text-slate-700 text-sm transition-colors"

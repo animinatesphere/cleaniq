@@ -23,7 +23,7 @@ import {
   Zap,
   Plus,
 } from "lucide-react";
-import { generateBlogSlug } from "../utils/slugGenerator";
+import { blogPath } from "../utils/slugGenerator";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import BeforeAfter from "../component/BeforeAfter";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
@@ -92,11 +92,11 @@ const Home = () => {
   const [blogLoading, setBlogLoading] = useState(true);
 
   const slides = [
-    { src: strip1, label: "Living Room" },
-    { src: strip2, label: "Kitchen" },
-    { src: strip3, label: "Bathroom" },
-    { src: strip4, label: "Office" },
-    { src: strip5, label: "Bedroom" },
+    { src: strip1, label: "Living Room", alt: "Bright living room with sofas and plants after a home clean" },
+    { src: strip2, label: "Kitchen", alt: "Clean white kitchen with a gleaming range cooker and worktops" },
+    { src: strip3, label: "Bathroom", alt: "Spotless bathroom with a clean basin, shower and towel rail" },
+    { src: strip4, label: "Office", alt: "Tidy office reception desk after a commercial clean" },
+    { src: strip5, label: "Bedroom", alt: "Freshly made bed with clean white linen in a tidy bedroom" },
   ];
 
   useEffect(() => {
@@ -310,7 +310,7 @@ const Home = () => {
             <div className="relative z-10 rounded-[40px] lg:rounded-[60px] overflow-hidden shadow-2xl border-4 lg:border-8 border-white bg-slate-100">
               <img
                 src={air1}
-                alt="Professional cleaning service"
+                alt="House cleaner carrying a caddy of cleaning supplies upstairs, ready for a home clean in Manchester"
                 className="w-full h-[360px] lg:h-[600px] object-cover"
                 fetchpriority="high"
                 width="1200"
@@ -368,7 +368,8 @@ const Home = () => {
                 desc: "Comprehensive move-out cleaning to ensure you get your deposit back.",
                 icon: <HomeIcon size={32} />,
                 keyword: "Move-out specialists",
-                image: residentialImg, // 👈 add this
+                image: residentialImg,
+                imageAlt: "Empty, spotless living room and kitchen ready for the next tenants after an end of tenancy clean"
               },
               {
                 title: "Office Cleaning",
@@ -376,7 +377,8 @@ const Home = () => {
                 desc: "Professional janitorial services for your workspace.",
                 icon: <Briefcase size={32} />,
                 keyword: "Expert office cleaning",
-                image: officeImg, // 👈 add this
+                image: officeImg,
+                imageAlt: "Clean office desk with a laptop and chair, ready for the working day"
               },
               {
                 title: "Deep Clean",
@@ -384,7 +386,8 @@ const Home = () => {
                 desc: "Specialized deep cleaning services for a total refresh.",
                 icon: <Zap size={32} />,
                 keyword: "Deep cleaning",
-                image: deepcleanImg, // 👈 add this
+                image: deepcleanImg,
+                imageAlt: "Gloved hands deep cleaning a bathroom basin and tap"
               },
               {
                 title: "Airbnb Cleaning",
@@ -392,7 +395,8 @@ const Home = () => {
                 desc: "Professional turnover services for your short-let rental.",
                 icon: <Star size={32} />,
                 keyword: "Short-let specialist",
-                image: airbnbImg, // 👈 add this
+                image: airbnbImg,
+                imageAlt: "Bright, guest-ready short-let apartment living room after an Airbnb turnover clean"
               },
             ].map((service, idx) => (
               <motion.div
@@ -404,7 +408,7 @@ const Home = () => {
                 <div className="h-56 bg-primary/5 overflow-hidden relative">
                   <img
                     src={service.image}
-                    alt={service.title}
+                    alt={service.imageAlt || service.title}
                     className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
                     loading="lazy"
                     decoding="async"
@@ -467,7 +471,7 @@ const Home = () => {
               <div className="relative z-10 rounded-[48px] overflow-hidden shadow-2xl">
                 <img
                   src={air2}
-                  alt="Our Team"
+                  alt="Cleaner in yellow gloves mopping a bright living room floor"
                   className="w-full h-[500px] object-cover"
                   loading="lazy"
                   decoding="async"
@@ -497,7 +501,7 @@ const Home = () => {
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
                   <p className="text-3xl font-black text-primary mb-1">{g.rating}★</p>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    Google rating · {g.count} reviews
+                    Google rating
                   </p>
                 </div>
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
@@ -578,19 +582,19 @@ const Home = () => {
       {/* <div className="grid grid-cols-2 md:grid-cols-3 grid-rows-2 gap-4 h-[600px]"> */}
       {/* Big left image */}
       {/* <div className="col-span-1 row-span-2 rounded-[32px] overflow-hidden">
-        <img src={bento1} alt="clean home" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
+        <img src={bento1} alt="Bright living room with a grey sofa and cushions after a regular clean" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
       </div> */}
       {/* Top middle */}
       {/* <div className="rounded-[32px] overflow-hidden">
-        <img src={bento2} alt="clean kitchen" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
+        <img src={bento2} alt="Spotless grey kitchen with a white island after a deep clean" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
       </div> */}
       {/* Top right */}
       {/* <div className="rounded-[32px] overflow-hidden">
-        <img src={bento3} alt="clean bathroom" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
+        <img src={bento3} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
       </div> */}
       {/* Bottom middle + right spanning */}
       {/* <div className="col-span-2 rounded-[32px] overflow-hidden">
-        <img src={bento4} alt="clean office" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
+        <img src={bento4} alt="Open-plan office with desks and meeting areas, the kind of workspace we clean" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
       </div> */}
       {/* </div> */}
       {/* </div> */}
@@ -712,7 +716,7 @@ const Home = () => {
               >
                 <img
                   src={item.src}
-                  alt={item.label}
+                  alt={item.alt || item.label}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
@@ -903,7 +907,7 @@ const Home = () => {
                       {post.description}
                     </p>
                     <Link
-                      to={`/blog/${generateBlogSlug(post._id, post.title)}`}
+                      to={blogPath(post)}
                       className="inline-flex items-center gap-2 font-black text-primary hover:gap-3 transition-all text-sm"
                     >
                       Read Article

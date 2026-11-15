@@ -29,3 +29,8 @@ export const extractBlogId = (slug) => {
   }
   return slug; // Fallback to slug as-is
 };
+
+// Web address of a blog post. Posts have a permanent readable slug (/blog/kitchen-deep-cleaning);
+// older data without one falls back to the previous id-title form, which still works and redirects.
+export const blogPath = (post) =>
+  post?.slug ? `/blog/${post.slug}` : `/blog/${generateBlogSlug(post?._id, post?.title)}`;
