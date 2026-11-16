@@ -30,7 +30,7 @@ import realBedroom from "../assets/our-work/airbnb-1.jpg";
 import realLivingRoom from "../assets/our-work/regular-2.jpg";
 import realEotKitchen from "../assets/our-work/end-of-tenancy-1.jpg";
 import realRegularLiving from "../assets/our-work/regular-4.jpg";
-import realGeneralKitchen from "../assets/our-work/regular-6.jpg";
+import realGeneralKitchen from "../assets/service-general-photo-1200.webp";
 import realAirbnbRoom from "../assets/our-work/airbnb-4.jpg";
 import realOven from "../assets/our-work/oven-2.jpg";
 import realFridge from "../assets/our-work/deep-card.jpg";

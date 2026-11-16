@@ -13,6 +13,79 @@ import roomBathroom from "../assets/our-work/end-of-tenancy-2.jpg";
 import roomKitchen from "../assets/our-work/regular-1.jpg";
 import roomLiving from "../assets/our-work/regular-2.jpg";
 import roomStairs from "../assets/cleaning.jpg";
+import eotBedroom from "../assets/our-work/airbnb-2.jpg";
+import eotBathroom from "../assets/our-work/end-of-tenancy-2.jpg";
+import eotKitchen from "../assets/our-work/end-of-tenancy-4.jpg";
+import eotLiving from "../assets/our-work/end-of-tenancy-3.jpg";
+
+// End of tenancy page: inventory-standard checklist (owner-supplied text, word for word).
+const EOT_ROOMS = [
+  { room: "Bedroom", image: eotBedroom, alt: "Bedroom with a freshly made bed after an end of tenancy clean by Cleaniq Services", tasks: ["Vacuum and Mop hard floors.", "Vacuum Carpeted floors.", "Dusting and wiping of accessible bedroom surfaces.", "Cleaning of skirting boards, doors, door frames and handles.", "Internal cleaning of wardrobes, cupboards and drawers where empty.", "Removal of cobwebs and dust from reachable corners and ceiling edges.", "Cleaning of mirrors, glass panels and internal window sills.", "Internal window cleaning where safely reachable.", "Dusting of light fittings, lampshades and fixtures where safely accessible.", "Vacuuming of floors, corners, edges and under movable furniture where possible.", "Mopping of hard floors where suitable.", "Bed frames and headboards wiped where accessible.", "Carpets vacuumed as standard.", "Professional carpet steam cleaning available as an optional add-on.", "Final visual check of the bedroom area before completion."] },
+  { room: "Bathroom", image: eotBathroom, alt: "Clean bathroom with bath, basin and tiled floor after an end of tenancy clean by Cleaniq Services", tasks: ["Clean Bathtub and WC", "Clean Shower and Shower Screen", "Clean and polish Bathroom Tiles. Clean and Polish the sink.", "Cleaning and descaling of sinks, taps and surrounding surfaces where possible.", "Cleaning and descaling of toilets, toilet seats, bases and surrounding areas.", "Cleaning of baths, shower trays, shower screens and shower fittings.", "Removal of soap marks, water marks and general bathroom residue where possible.", "Cleaning of bathroom tiles, splashbacks and reachable wall surfaces.", "Cleaning of mirrors, glass panels and internal window sills.", "Internal window cleaning where safely reachable.", "Cleaning of bathroom cupboards, cabinets and drawers where empty.", "Dusting and wiping of doors, door frames, handles and skirting boards.", "Cleaning of light switches, plug sockets, extractor fan covers and reachable fittings.", "Removal of cobwebs and dust."] },
+  { room: "Kitchen", image: eotKitchen, alt: "Empty, clean kitchen with spotless worktops and oven after an end of tenancy clean by Cleaniq Services", tasks: ["Cleaning of kitchen worktops, counters and accessible preparation surfaces.", "Cleaning of kitchen cupboards, drawers and shelves internally where empty.", "Cleaning of cupboard fronts, handles and external cabinet surfaces.", "Cleaning of sinks, taps, draining boards and surrounding areas.", "Cleaning and degreasing of kitchen tiles, splashbacks and reachable wall surfaces.", "Oven cleaning included as standard with our end of tenancy cleaning service.", "Cleaning of hob, extractor hood and external appliance surfaces.", "Internal cleaning of fridge and freezer where empty, defrosted and switched off.", "Cleaning of microwave, washing machine and dishwasher exteriors where applicable.", "Cleaning of doors, door frames, handles, skirting boards and reachable ledges.", "Cleaning of light switches, plug sockets and reachable kitchen fittings.", "Internal window cleaning."] },
+  { room: "Living Room", image: eotLiving, alt: "Empty living room with sofa and coffee table after an end of tenancy clean by Cleaniq Services", tasks: ["Vacuum all carpeted floors. Vacuum and mop hard floors.", "Remove the cobwebs. Wipe and dust wooden surfaces and fixtures.", "Clean the skirting boards. Clean light sockets, switches, and plugs.", "Dusting and wiping of accessible living room surfaces.", "Cleaning of skirting boards, doors, door frames and handles.", "Cleaning of light switches, plug sockets and reachable ledges.", "Removal of cobwebs and dust from reachable corners and ceiling edges.", "Cleaning of mirrors, glass panels and internal window sills.", "Internal window cleaning where safely reachable.", "Dusting of light fittings, lampshades and fixtures where safely accessible.", "Cleaning of fireplace surrounds, mantelpieces and reachable shelving where applicable.", "Wiping of radiators, accessible pipework and visible marks where possible.", "Cleaning around furniture and under movable items where access allows.", "Vacuuming of floors, corners, edges and accessible areas."] },
+  { room: "Hallways/Staircases", image: roomStairs, alt: "Cleaner carrying cleaning supplies up a staircase to clean the hallway and stairs", tasks: ["Dusting and wiping of accessible hallway, staircase and landing surfaces.", "Cleaning of skirting boards, doors, door frames and handles.", "Cleaning of light switches, plug sockets and reachable ledges.", "Removal of cobwebs and dust from reachable corners and ceiling edges.", "Cleaning of bannisters, handrails, spindles and stair edges where accessible.", "Cleaning of mirrors, glass panels and internal window sills.", "Internal window cleaning where safely reachable.", "Dusting of light fittings, lampshades and fixtures where safely accessible.", "Cleaning of radiators, visible pipework and reachable wall marks where possible.", "Cleaning of entrance areas, internal doors and high-touch contact points.", "Vacuuming of hallway floors, stairs, landings, corners and edges.", "Mopping of hard floors where suitable.", "Carpets vacuumed as standard.", "Professional carpet steam cleaning available as an optional add-on."] },
+];
+
+// One room of the end of tenancy checklist: first 5 tasks, "View full checklist" shows the rest.
+// All tasks are always in the HTML (hidden until opened) so search engines can read them.
+function EotRoomCard({ room, bookingLink }) {
+  const [open, setOpen] = React.useState(false);
+  const first = room.tasks.slice(0, 5);
+  const rest = room.tasks.slice(5);
+  const item = (task) => (
+    <li key={task} className="flex gap-2.5 items-start">
+      <Check size={14} className="text-teal-500 shrink-0 mt-0.5 stroke-[2.5]" />
+      <span className="text-slate-600 text-sm leading-snug">{task}</span>
+    </li>
+  );
+  return (
+    <article className="flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm">
+      <img src={room.image} alt={room.alt} loading="lazy" width="1000" height="750" className="w-full aspect-[16/9] object-cover" />
+      <div className="flex flex-col grow p-5">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <p className="text-[11px] font-bold tracking-widest uppercase text-teal-600">End of Tenancy Cleaning</p>
+            <h3 className="text-lg font-bold text-slate-900 leading-tight">{room.room}</h3>
+          </div>
+          <Link to={bookingLink} className="shrink-0 px-3.5 py-2 rounded-lg bg-[#00B5A4] text-white text-xs font-bold hover:bg-teal-600 transition-colors">
+            Book now
+          </Link>
+        </div>
+        <ul className="space-y-2.5">{first.map(item)}</ul>
+        {rest.length > 0 && (
+          <>
+            <ul className="space-y-2.5 mt-2.5" hidden={!open}>{rest.map(item)}</ul>
+            <button
+              type="button"
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              className="mt-4 self-start inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline"
+            >
+              {open ? "Show less" : "View full checklist"}
+              <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+            </button>
+          </>
+        )}
+      </div>
+    </article>
+  );
+}
+
+// End of tenancy page FAQs (owner-supplied; another company name replaced with Cleaniq Services).
+const EOT_FAQS = [
+  { q: "Does your end of tenancy cleaning guarantee my deposit back?", a: "While we cannot control the landlord's legal decisions, our service is specifically designed to pass the most rigorous inventory checks. We provide a 48-hour satisfaction guarantee and a professional invoice that acts as evidence for the Tenancy Deposit Scheme (TDS). If your inventory clerk identifies any cleaning issues, we return free of charge to rectify them." },
+  { q: "Is professional oven cleaning included in the price?", a: "Yes. Unlike many Manchester cleaning companies that charge extra, a full professional oven clean is included as standard in our end of tenancy package. We degrease the interior, clean the racks, and polish the glass to ensure it meets the \"showroom\" standard required by agencies like Jordan Fishwick and Philip James." },
+  { q: "Do I need to be at the property during the clean?", a: "No. We are experts in remote logistics. We can coordinate key collection and return from your estate agent's office or a concierge desk in developments like Deansgate Square or MediaCityUK. This allows you to focus on your move while we handle the heavy lifting." },
+  { q: "How long does a professional move-out clean take?", a: "The duration depends on the size and condition of the property. A studio in the Northern Quarter might take 3-4 hours, while a 4-bedroom family home in Didsbury or Altrincham could take 6-8 hours. We send teams of 2 or 3 cleaners to ensure the job is completed efficiently in a single day." },
+  { q: "Are your cleaners employees or contractors?", a: "Every cleaner at Cleaniq Services is a direct employee. We do not use unvetted gig-economy contractors. Our staff are fully background-checked, insured, and trained in our specific \"Inventory-Standard\" checklist to ensure consistent quality across all Manchester postcodes." },
+  { q: "Do you provide your own cleaning supplies and equipment?", a: "Yes. Our mobile teams arrive in fully equipped vehicles carrying industrial-grade supplies. This includes HEPA-filtered vacuums, professional steam cleaners for \"wet zones,\" and a full range of eco-friendly, non-toxic detergents. You do not need to provide a single item." },
+  { q: "Do you clean the windows and frames?", a: "We clean all windows internally as part of the standard EOT service, including the frames, ledges, and sills. If you require external window cleaning or reach-and-wash services for high-rise apartments, this can be added as an optional extra." },
+  { q: "Do you cover areas outside of the Manchester City Centre?", a: "Yes. We cover a 600-square-mile radius across the North West. Our daily routes include Salford, Stockport, Bolton, Oldham, Wigan, Warrington, and Altrincham. If you have a postcode starting with M, SK, WA, WN, or OL, we have a team ready to assist." },
+  { q: "What happens if the landlord isn't happy with the clean?", a: "This is where our 48-hour guarantee comes in. If the landlord or agent provides an inventory report showing a cleaning failure, simply send it to us. We will dispatch a team to the property to perform a free re-clean of the disputed areas immediately." },
+  { q: "Is carpet cleaning included in the end of tenancy service?", a: "We hoover all carpets as part of the standard clean. However, for properties with deep stains or pet odors, we recommend adding our Professional Carpet Steam Cleaning (Hot Water Extraction). You receive a discount when you bundle this with your move-out clean." },
+  { q: "Can you perform an EOT clean if the power or water is turned off?", a: "No. For our teams to achieve an \"Inventory Standard\" finish, we require access to running water and electricity. Please ensure your utilities remain active until the cleaning service is completed." },
+];
 
 // Deep cleaning page FAQs (owner-supplied text). Shown in the FAQ section and the FAQPage schema.
 const DEEP_FAQS = [
@@ -1468,7 +1541,7 @@ const ServiceDetail = () => {
   const isEOT = serviceSlug === "end-of-tenancy-cleaning-manchester";
   const ext = service?.extended ? EXTENDED_MAP[service.extended] : null;
   const isDeep = serviceSlug === "deep-cleaning-manchester";
-  const pageFaqs = isDeep ? DEEP_FAQS : ext?.faqs || [];
+  const pageFaqs = isDeep ? DEEP_FAQS : isEOT ? EOT_FAQS : ext?.faqs || [];
   const [liveServices, setLiveServices] = React.useState([]);
   const liveMatch = matchServiceForSlug(serviceSlug, liveServices);
   const servicePrice = fromPriceForPage(serviceSlug, liveServices);
@@ -1701,6 +1774,70 @@ const ServiceDetail = () => {
           </div>
         </div>
 
+        {/* End of tenancy only: intro banner (owner-supplied text, word for word) */}
+        {isEOT && (
+          <section className="px-4 sm:px-6 lg:px-10 xl:px-16 pt-10 sm:pt-14">
+            <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10 grid lg:grid-cols-5 gap-8 items-center">
+              <div className="lg:col-span-3 space-y-4">
+                <p className="text-xs font-bold tracking-widest uppercase text-teal-600">Cleaniq Services</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                  Manchester End of Tenancy Cleaning
+                </h2>
+                <p className="text-slate-600 leading-relaxed">
+                  Our End of Tenancy Cleaning Service in Manchester will be provided up to the highest possible standards.
+                </p>
+                <p className="text-slate-700 font-semibold leading-relaxed">
+                  Make sure your deposit is safely returned in full and schedule our End of Tenancy Cleaning in Manchester today.
+                </p>
+              </div>
+              <div className="lg:col-span-2 space-y-4">
+                <div className="rounded-xl bg-white border border-slate-200 p-5">
+                  <p className="text-sm font-semibold text-slate-500 mb-3">This is a service for:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Domestic Clients", "Commercial Clients"].map((who) => (
+                      <span key={who} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold">
+                        <Check size={14} className="stroke-[3]" /> {who}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-xl bg-[#0A1520] text-white p-5">
+                  <Phone size={18} className="text-teal-400 shrink-0 mt-0.5" />
+                  <p className="text-sm leading-relaxed">
+                    We are always available for any questions you may have! Our phone lines are open 24/7
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Full move-out clean (owner-supplied text; another company's name replaced with
+                Cleaniq Services, guarantee set to our 48 hours) */}
+            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 sm:p-10">
+              <p className="text-xs font-bold tracking-widest uppercase text-teal-600 mb-2">Full Move-Out Clean</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-5">End of tenancy cleaning across Manchester</h2>
+              <div className="space-y-4 text-slate-600 leading-relaxed">
+                <p>
+                  Cleaniq Services offers our End of Tenancy Cleaning on all postcodes in Manchester and the surrounding area. Are you moving out, if so our End of Tenancy Cleaning in Manchester will ensure that the move-out process is as stress-free and as easy for you as possible. No matter if you are a tenant, estate agent, or landlord, our End of Tenancy Cleaning is designed to completely transform a property and our expert cleaners will make sure that every inch is cleaned and polished.
+                </p>
+                <p>
+                  The End of Tenancy Cleaning in Manchester offered by Cleaniq Services will meet even the most specific cleaning requirements, no matter who contact us, if you are ending your tenancy and cleaning service you can rely on you can put your trust in Cleaniq Services. We offer a comprehensive move-out clean with affordable prices, expert cleaners, and a 100% satisfaction guarantee on completion of the cleaning service. If you want your deposit back book our End of Tenancy Cleaning Service in Manchester now.
+                </p>
+                <p>
+                  You will receive a list of comprehensive benefits from our End of Tenancy Cleaning Service, we offer a full internal clean of your property and a 48-hour guarantee upon completion of the service. Our quality of cleaning along with the guarantee period means that you will receive an exceptional cleaning service, which will meet even the most strict requirements, and that you can rest assured that all requests after a final inspection after you move out of your property take place, will be met. If you are a tenant you can be sure that your deposit will be successfully returned, if you are a landlord you can be sure that your property will be professionally cleaned and ready for the next tenants to move into.
+                </p>
+                <p>
+                  If you would like to receive a perfectly FREE Quote for our End of Tenancy Cleaning Service in Manchester you can contact us today on{" "}
+                  <a href="tel:+447846726428" className="text-teal-700 font-semibold hover:underline">07846 726428</a> or simply fill out the corresponding{" "}
+                  <Link to="/get-a-quote" className="text-teal-700 font-semibold hover:underline">End of Tenancy Cleaning request form</Link> listed below.
+                </p>
+                <p className="text-slate-800 font-semibold">
+                  Is it time to move out and are you looking for an End of Tenancy Cleaning in Manchester, if yes call Cleaniq Services today! Cleaniq Services will provide you with the best end of tenancy cleaning in Manchester at the best possible price. You will receive many benefits from our Manchester End of Tenancy Cleaning.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ══ PAGE BODY ══════════════════════════════════════════════ */}
         <div className="px-4 sm:px-6 lg:px-10 xl:px-16 py-10 sm:py-14">
           <div className="grid md:grid-cols-3 gap-10 md:gap-14 items-start">
@@ -1736,6 +1873,63 @@ const ServiceDetail = () => {
                   ))}
                 </div>
               </section>
+
+              {/* End of tenancy only: benefits (owner-supplied text, word for word) */}
+              {isEOT && (
+                <>
+                  <Divider />
+                  <section>
+                    <SectionLabel>Benefits</SectionLabel>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">
+                      Benefits of our Manchester End of Tenancy Cleaning
+                    </h2>
+                    <ul className="grid sm:grid-cols-2 gap-3 mb-6">
+                      {[
+                        "48-Hour Guarantee - Free Re-Clean if necessary",
+                        "Competitive Prices",
+                        "Fully trained and experienced cleaners",
+                        "Professional Detergents and Equipment",
+                        "We follow specific End of Tenancy Cleaning Checklists provided by estate agencies",
+                        "Non-hazardous and eco-friendly cleaning detergents",
+                        "Our End of Tenancy Cleaning Services comes with a 100% satisfaction guarantee.",
+                      ].map((benefit) => (
+                        <li key={benefit} className="flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                          <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <Check size={11} className="stroke-[3]" />
+                          </div>
+                          <span className="text-slate-700 text-sm font-medium leading-snug">{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-slate-600 leading-relaxed">
+                      We will provide you with exceptional quality end-of-tenancy cleaning at just the right cost. Our End of Tenancy Cleaning Service is specifically designed to make sure that the move-out process is as stress-free and as easy for you as possible. If you are for whatever reason not completely satisfied with any part of the end of tenancy cleaning provided by Cleaniq Services or if after an inspection any areas have to be covered by our cleaners again, we will come back and provide you with a completely free of charge re-clean as long as you make us aware of this in the period of the guarantee. Our fully trained professional cleaners have years of experience in providing End of Tenancy Cleaning Services. You can contact us 24/7 at any point convenient for you.
+                    </p>
+                  </section>
+
+                  {/* How it works (owner-supplied text, word for word) */}
+                  <Divider />
+                  <section>
+                    <SectionLabel>How it Works</SectionLabel>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">Manchester End of Tenancy Cleaning</h2>
+                    <ol className="grid sm:grid-cols-2 gap-4">
+                      {[
+                        { title: "Schedule", body: "Contact us over the phone with your original end of tenancy cleaning service inquiry. Provide some basic information about your property, and personal requirements for the service and receive a perfectly free quote for your end of tenancy cleaning over the phone in a single 5 minute conversation and choose to accept it." },
+                        { title: "Service", body: "All you have to do after is grant access to our cleaners, our experienced end of tenancy cleaning service providers will take care of the hard work, leaving your property clean, sparkling, and ready for the inventory inspection. It is a simple as that, our cleaners have years of experience in providing end of tenancy cleaning services in Manchester." },
+                        { title: "Inspection", body: "After your end of tenancy cleaning service has concluded our Manchester cleaners will ask you to inspect your property and make sure that you are happy with the results of your end of tenancy cleaning service. Please note that our cleaners are instructed to cover any area of your property until it is cleaned up to your satisfaction." },
+                        { title: "Result", body: "Sit back and enjoy the results of your end of tenancy cleaning services in Manchester. Our end of tenancy cleaning is a complete and comprehensive internal cleaning of the entirety of your property. Our end of tenancy cleaning services will leave your property sparkling clean and we will make sure that your deposit is safely returned in full." },
+                      ].map((step, n) => (
+                        <li key={step.title} className="relative p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm">
+                          <div className="flex items-center gap-3 mb-3">
+                            <span className="w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0" aria-hidden="true">{n + 1}</span>
+                            <h3 className="font-bold text-slate-900">{step.title}</h3>
+                          </div>
+                          <p className="text-slate-600 text-sm leading-relaxed">{step.body}</p>
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                </>
+              )}
 
               {/* Deep cleaning only: tailored service (owner-supplied text, word for word) */}
               {serviceSlug === "deep-cleaning-manchester" && (
@@ -1773,7 +1967,35 @@ const ServiceDetail = () => {
               {ext && (
                 <>
                   <Divider />
-                  {serviceSlug === "deep-cleaning-manchester" ? (
+                  {isEOT ? (
+                  <section>
+                    {/* End of tenancy: owner-supplied "why choose us" (72-hour set to our 48 hours) */}
+                    <SectionLabel>Why Choose Us</SectionLabel>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">
+                      Why Choose Us For Your End Of Tenancy Cleaning Service
+                    </h2>
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      {[
+                        { icon: <BadgeCheck size={18} />, title: "Dedicated Professional Cleaning Staff", body: "Our cleaning technicians are fully trained, vetted, instructed, insured, and experienced professionals." },
+                        { icon: <Sparkles size={18} />, title: "Professional Cleaning Detergents and Equipment", body: "We will provide all necessary cleaning supplies as part of the End of Tenancy Cleaning." },
+                        { icon: <ShieldCheck size={18} />, title: "48-Hour Guarantee", body: "Our End of Tenancy Cleaning in Manchester comes with a 48-hour guarantee on completion, you can be sure that you will get your deposit back in full!" },
+                        { icon: <Star size={18} />, title: "Great End of Tenancy Cleaning At Just The Right Cost", body: "We will provide you with the best possible End Of Tenancy cleaning at the best possible price." },
+                        { icon: <Calendar size={18} />, title: "7 Day Availability", body: "We are available for the End of Tenancy Cleaning 7 days a week on all postcodes in Greater Manchester at a time convenient for you." },
+                        { icon: <Check size={18} />, title: "Attention To Detail", body: "Our End of Tenancy Cleaners will focus on even the smallest details in your property, for example, light switches, or the biggest challenges, for example, full professional oven cleaning." },
+                      ].map((pt) => (
+                        <div key={pt.title} className="flex gap-4 items-start">
+                          <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                            {pt.icon}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 text-sm mb-1">{pt.title}</p>
+                            <p className="text-slate-500 text-sm leading-relaxed">{pt.body}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                  ) : serviceSlug === "deep-cleaning-manchester" ? (
                   <section>
                     {/* Deep cleaning: owner-supplied "why choose us" text, word for word */}
                     <SectionLabel>Why Cleaniq Services</SectionLabel>
@@ -1941,6 +2163,16 @@ const ServiceDetail = () => {
                       </div>
                     )}
 
+                    {isEOT ? (
+                      <>
+                        <h2 id="full-checklist" className="scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-1">End of Tenancy Cleaning Checklist</h2>
+                        <p className="text-sm font-semibold text-teal-700 mb-6">Inventory Standard</p>
+                        <div className="grid sm:grid-cols-2 gap-5 items-start">
+                          {EOT_ROOMS.map((r) => <EotRoomCard key={r.room} room={r} bookingLink={bookingLink} />)}
+                        </div>
+                      </>
+                    ) : (
+                    <>
                     <h2 id="full-checklist" className="scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-2">
                       {ext.checklist.heading}
                     </h2>
@@ -1972,6 +2204,8 @@ const ServiceDetail = () => {
                         </div>
                       ))}
                     </div>
+                    </>
+                    )}
                   </section>
 
                   {/* Deep cleaning only: benefits and customising (owner-supplied text, word for word) */}
@@ -2109,11 +2343,13 @@ const ServiceDetail = () => {
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
                       {areaNoun} Near You
                     </h2>
-                    {isDeep ? (
+                    {isDeep || isEOT ? (
                       <>
                         <h3 className="text-base font-semibold text-slate-800 mb-1">Areas We Cover</h3>
                         <p className="text-sm text-slate-500 mb-4">
-                          You can schedule our Deep Cleaning Services on all postcodes in: Bolton, Bury, Oldham, Rochdale, Stockport, Tameside, Trafford, Wigan, and the cities of Salford and Manchester
+                          {isEOT
+                            ? "You can schedule our End of Tenancy Cleaning Services on all postcodes in: Bolton, Bury, Oldham, Rochdale, Stockport, Tameside, Trafford, Wigan, Salford and Manchester"
+                            : "You can schedule our Deep Cleaning Services on all postcodes in: Bolton, Bury, Oldham, Rochdale, Stockport, Tameside, Trafford, Wigan, and the cities of Salford and Manchester"}
                         </p>
                       </>
                     ) : (
@@ -2133,6 +2369,160 @@ const ServiceDetail = () => {
                       ))}
                     </div>
                   </section>
+
+                  {/* End of tenancy only: convenience + personalised discount (owner-supplied text; another
+                      company's name and phone number replaced with ours) */}
+                  {isEOT && (
+                    <>
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Delivered With Convenience</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          End of Tenancy Cleaning - Delivered With Your Convenience in Mind
+                        </h2>
+                        <p className="text-sm font-bold uppercase tracking-wide text-teal-700">
+                          Ensure a stress and hassle-free move out process by scheduling our end of tenancy cleaning services
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Cleaniq Services provides bespoke end of tenancy cleaning services based on your personal specifications and cleaning requirements to every client of every background on all postcodes in Greater Manchester. Our end of tenancy cleaning service in Manchester will be delivered on time, on budget, and up to your specific cleaning requirements. Simply provide a few basic details about your property, your requested date and time for your end of tenancy cleaning, receive a free quote, choose to accept it and enjoy the many benefits that come with scheduling our end of tenancy cleaning in Manchester. You can schedule our end of tenancy cleaning services 7 days a week at a time suitable for you, even on Bank Holidays or weekends.
+                        </p>
+                        <div className="grid grid-cols-3 gap-3">
+                          {[["Easy", "Scheduling."], ["Free", "Bespoke quotes."], ["Fast", "Short-notice availability"]].map(([big, small]) => (
+                            <div key={big} className="rounded-xl bg-teal-50 border border-teal-100 p-4 text-center">
+                              <p className="text-2xl font-bold text-teal-700">{big}</p>
+                              <p className="text-xs sm:text-sm text-slate-600 font-medium">{small}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="rounded-2xl bg-[#0A1520] text-white p-6 sm:p-8">
+                          <p className="text-xs font-bold tracking-widest uppercase text-teal-400 mb-1">Save your time save your effort choose Cleaniq Services!</p>
+                          <h3 className="text-lg sm:text-xl font-bold mb-4 uppercase">Choose Cleaniq Services for your end of tenancy cleaning in Manchester</h3>
+                          <ul className="space-y-2.5 mb-6">
+                            {[
+                              "Available 7 days a week at a time convenient to you, even on Bank Holidays and weekends.",
+                              "Book entirely online or within a 5 minute phone call.",
+                              "Remote payment options are available.",
+                              "Keys can be collected and returned upon request.",
+                              "A final inspection is always conducted.",
+                            ].map((pt) => (
+                              <li key={pt} className="flex gap-2.5 items-start text-sm text-slate-200">
+                                <Check size={15} className="text-teal-400 shrink-0 mt-0.5 stroke-[3]" /> {pt}
+                              </li>
+                            ))}
+                          </ul>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <Link to="/get-a-quote" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors">
+                              Get a Free Quote <ArrowRight size={16} />
+                            </Link>
+                            <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/60 text-white font-bold text-sm hover:bg-white/10 transition-colors">
+                              <Phone size={16} /> Call Now
+                            </a>
+                          </div>
+                        </div>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Personalized Discount</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          Combine our End of Tenancy Cleaning in Manchester with any one of our additional services for a personalized discount
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          You can combine our End of Tenancy Cleaning in Manchester with any one of our additional cleaning services, by doing so we will be able to offer you a personalized discount on the final combined price of your requested cleaning services. You can choose to add Carpet Cleaning, Upholstery Cleaning, External Window Cleaning, or even Pressure Washing for any external areas of your home, to your End of Tenancy Cleaning Services in Manchester. As part of our End of Tenancy Cleaning services all carpeted areas of your home will be vacuumed, however, you can add professional carpet cleaning to your service, as well as all windows in your home will be cleaned internally, however, we are able to provide external window cleaning as a separate add-on to your End of Tenancy Cleaning in Manchester.
+                        </p>
+                        <p className="text-slate-700 font-semibold">You can combine our End of Tenancy Cleaning Service with the following services:</p>
+                        <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {[
+                            { name: "Carpet Cleaning", link: "/service/carpet-cleaning-manchester" },
+                            { name: "Upholstery Cleaning" },
+                            { name: "Window Cleaning" },
+                            { name: "Antiviral Disinfection" },
+                          ].map((extra) => (
+                            <li key={extra.name} className="flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                              <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center">
+                                <Sparkles size={18} />
+                              </div>
+                              {extra.link ? (
+                                <Link to={extra.link} className="text-slate-800 text-sm font-semibold hover:text-teal-700 hover:underline">{extra.name}</Link>
+                              ) : (
+                                <span className="text-slate-800 text-sm font-semibold">{extra.name}</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-slate-600 leading-relaxed">
+                          If you would like to schedule our Manchester End of Tenancy Cleaning Services you can contact us on{" "}
+                          <a href="tel:+447846726428" className="text-teal-700 font-semibold hover:underline">07846 726428</a>, Monday to Sunday at a time convenient for you. Our customer service representatives will assist you with any questions related to our End of Tenancy Cleaning you may have. Alternatively, you can fill out our corresponding{" "}
+                          <Link to="/get-a-quote" className="text-teal-700 font-semibold hover:underline">End of Tenancy Cleaning request form</Link> linked below. Upholstery cleaning and Carpet Cleaning can also be added to our end of tenancy cleaning Manchester service for tenants, landlords and letting agents preparing furnished properties for check-out.
+                        </p>
+                      </section>
+                    </>
+                  )}
+
+                  {/* End of tenancy only: guarantee + free quote (owner-supplied text; re-clean set to our
+                      48 hours, the empty "including:" list left out) */}
+                  {isEOT && (
+                    <>
+                      <Divider />
+                      <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+                        <SectionLabel>Get Your Deposit Back in Full</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-5">
+                          Guaranteed end of tenancy cleaning in Manchester
+                        </h2>
+                        <ul className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            { icon: <Clock size={16} />, text: "Free re-clean within 48 hours if needed." },
+                            { icon: <Sparkles size={16} />, text: "Includes all cleaning materials and equipment." },
+                            { icon: <ShieldCheck size={16} />, text: "You can extend your guarantee if needed." },
+                            { icon: <BadgeCheck size={16} />, text: "Professional, qualified, experienced cleaning teams." },
+                            { icon: <ShieldCheck size={16} />, text: "We are fully insured." },
+                            { icon: <Check size={16} />, text: "Add any additional services" },
+                          ].map((pt) => (
+                            <li key={pt.text} className="flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                              <span className="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">{pt.icon}</span>
+                              <span className="text-slate-700 text-sm font-medium leading-snug">{pt.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+
+                      <Divider />
+                      <section className="rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9">
+                        <p className="text-xs font-bold tracking-widest uppercase text-teal-100 mb-2">Contact Us For a Free Quote</p>
+                        <h2 className="text-xl sm:text-2xl font-bold mb-3">Contact us for a free quote today!</h2>
+                        <p className="text-teal-50 leading-relaxed mb-6">
+                          We provide our customers with bespoke end of tenancy cleaning services personalized based on your specific cleaning requirements. Contact us for a free quote today.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Link to="/get-a-quote" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors">
+                            Get a Free Quote <ArrowRight size={16} />
+                          </Link>
+                          <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors">
+                            <Phone size={16} /> Call Now
+                          </a>
+                        </div>
+                      </section>
+
+                      {/* One exceptional service (owner-supplied text; another company's name replaced) */}
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>One Exceptional Service</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          End of Tenancy Cleaning in Manchester - one exceptional service for all Clients
+                        </h2>
+                        <h3 className="text-lg font-semibold text-teal-700">Our End of Tenancy Cleaning in Manchester</h3>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our Manchester End of Tenancy Cleaning will transform your property. Cleaniq Services will provide you with a complete internal clean as part of the End of Tenancy Cleaning, the only exceptions to the End of Tenancy Cleaning are the painted walls and ceilings as those areas are easily prone to damage. Apart from them everything else in your house or flat will be cleaned. The tenancy cleaners will begin their task by delegating into specific areas of your property. Some of our cleaning experts will cover the bedrooms, living rooms, and common spaces, while specifically trained cleaners will focus on the bathrooms and kitchen.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          All of the cupboards, cabinets, drawers, shelves will be cleaned as part of our End of Tenancy Cleaning in Manchester. All of the kitchen appliances will be cleaned, including the oven. Effectively free Oven Cleaning is part of our Manchester End of Tenancy Cleaning Service. The cleaners will cover all windows, frames, ledges, and sills internally as part of the cleaning service and will even focus on small details such as light sockets, light switches, and plugs.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          The entirety of your property will be fully and professionally cleaned, this is why we are certain that you will receive an exceptional End of Tenancy Cleaning if you schedule our cleaning services. Our End of Tenancy Cleaning comes with a specific estate agency regulated checklist, in this way we make sure that you successfully get your deposit back, as we follow specific requirements for cleaning services when a final inspection of your property will be conducted.
+                        </p>
+                      </section>
+                    </>
+                  )}
 
                   {/* Deep cleaning only: our deep cleaners (owner-supplied text, word for word) */}
                   {serviceSlug === "deep-cleaning-manchester" && (
@@ -2241,6 +2631,39 @@ const ServiceDetail = () => {
                     </>
                   )}
 
+                  {/* End of tenancy only: insured cleaners, under the photos (owner-supplied text) */}
+                  {isEOT && (
+                    <>
+                      <section>
+                        <SectionLabel>Trained, Vetted, Instructed and Insured</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">
+                          Fully insured End of Tenancy Cleaners in Manchester
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed mb-6">
+                          We will always send out a team of fully insured cleaners for your end of tenancy cleaning service in Manchester. All of our Manchester cleaners have years of experience in providing end of tenancy cleaning services in Manchester, they have worked on thousands of properties and have successfully won back deposits for many of our clients in the past.
+                        </p>
+                        <ul className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            "Verified, trained, instructed, and insured end of tenancy cleaning specialists.",
+                            "Public liability insurance up to 1 million.",
+                            "Professional cleaning approach, using specific cleaning techniques and detergents based on specific surfaces.",
+                            "Equipped with professional cleaning detergents and supplies.",
+                            "Trusted by thousands of clients in Manchester for their end of tenancy cleaning services.",
+                            "Dedicated to providing exceptional cleaning services.",
+                          ].map((pt) => (
+                            <li key={pt} className="flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                              <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5">
+                              <Check size={11} className="stroke-[3]" />
+                            </div>
+                              <span className="text-slate-700 text-sm font-medium leading-snug">{pt}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                      <Divider />
+                    </>
+                  )}
+
                   {/* Testimonials */}
                   <section>
                     <SectionLabel>Customer reviews</SectionLabel>
@@ -2344,13 +2767,26 @@ const ServiceDetail = () => {
                   <section>
                     <SectionLabel>Frequently asked questions</SectionLabel>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
-                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : `${service.heading} — FAQs`}
+                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : isEOT ? "Frequently Asked Questions: End of Tenancy Cleaning Manchester" : `${service.heading} — FAQs`}
                     </h2>
                     <div className="mt-4">
                       {pageFaqs.map((faq, i) => (
-                        <FAQItem key={i} q={isDeep ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
+                        <FAQItem key={i} q={isDeep || isEOT ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
                       ))}
                     </div>
+                    {isEOT && (
+                      <div className="mt-8 p-6 rounded-2xl bg-teal-50 border border-teal-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <p className="font-bold text-slate-900">Book your end of tenancy clean</p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Link to="/get-a-quote" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white border border-teal-200 text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors">
+                            Get a Free Quote <ArrowRight size={16} />
+                          </Link>
+                          <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors">
+                            <Phone size={16} /> Call 07846 726428
+                          </a>
+                        </div>
+                      </div>
+                    )}
                     {isDeep && (
                       <div className="mt-8 p-6 rounded-2xl bg-teal-50 border border-teal-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>

@@ -1,12 +1,19 @@
 // The service pages (src/pages/ServiceDetail.jsx) and which Services-page cards they belong to.
 // Photos are from Unsplash (free to use under the Unsplash License) or our own assets.
-import ovenSmall from "../assets/service-oven-600.webp";
-import ovenLarge from "../assets/service-oven-1200.webp";
 import regularSmall from "../assets/service-regular-600.webp";
 import regularLarge from "../assets/service-regular-1200.webp";
 // Our own photo from a real job (original: src/images/IMG_6025.DNG, converted for the web).
 import deepSmall from "../assets/service-deep-600.webp";
 import deepLarge from "../assets/service-deep-1200.webp";
+// Our own photos from real jobs (originals in src/images: IMG_6012, IMG_6028, IMG_6097).
+import ovenPhotoSmall from "../assets/service-oven-photo-600.webp";
+import ovenPhotoLarge from "../assets/service-oven-photo-1200.webp";
+import generalPhotoSmall from "../assets/service-general-photo-600.webp";
+import generalPhotoLarge from "../assets/service-general-photo-1200.webp";
+import carpetPhotoSmall from "../assets/service-carpet-photo-600.webp";
+import carpetPhotoLarge from "../assets/service-carpet-photo-1200.webp";
+import eotPhotoSmall from "../assets/service-eot-photo-600.webp";
+import eotPhotoLarge from "../assets/service-eot-photo-1200.webp";
 const unsplash = (id) => (width) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${width}&q=70`;
 const local = (small, large) => (width) => (width > 600 ? large : small);
@@ -14,8 +21,8 @@ const local = (small, large) => (width) => (width > 600 ? large : small);
 export const SERVICE_PAGES = [
   {
     slug: "end-of-tenancy-cleaning-manchester",
-    image: unsplash("1586023492125-27b2c045efd7"),
-    imageAlt: "A bright, freshly cleaned living room",
+    image: local(eotPhotoSmall, eotPhotoLarge),
+    imageAlt: "Clean kitchen with spotless worktops, oven, washing machine and gleaming tiled floor after an end of tenancy clean by Cleaniq Services",
     name: "End of Tenancy Cleaning",
     blurb: "Move-out and move-in cleans to hand the property back spotless.",
     layoutKeys: ["tenancy"],
@@ -62,24 +69,24 @@ export const SERVICE_PAGES = [
   },
   {
     slug: "general-cleaning-manchester",
-    image: unsplash("1628177142898-93e36e4e3a50"),
-    imageAlt: "Cleaner in gloves spraying a surface",
+    image: local(generalPhotoSmall, generalPhotoLarge),
+    imageAlt: "Cleaniq Services cleaner in uniform and yellow gloves cleaning a kitchen appliance",
     name: "General Cleaning",
     blurb: "A one-off whole-home clean whenever you need it.",
     layoutKeys: ["general"],
   },
   {
     slug: "oven-cleaning-manchester",
-    image: local(ovenSmall, ovenLarge),
-    imageAlt: "Spotless range oven in a clean kitchen",
+    image: local(ovenPhotoSmall, ovenPhotoLarge),
+    imageAlt: "Oven with clean glass door and racks after an oven clean by Cleaniq Services",
     name: "Oven Cleaning",
     blurb: "Single, double and range ovens cleaned inside and out.",
     layoutKeys: ["oven"],
   },
   {
     slug: "carpet-cleaning-manchester",
-    image: unsplash("1527515637462-cff94eecc1ac"),
-    imageAlt: "Carpet being cleaned with a vacuum",
+    image: local(carpetPhotoSmall, carpetPhotoLarge),
+    imageAlt: "Grey carpeted bedroom in a Manchester flat, ready for a professional carpet clean by Cleaniq Services",
     name: "Carpet Cleaning",
     blurb: "Deep carpet, rug and stair cleaning to lift dirt and stains.",
     layoutKeys: ["carpet"],

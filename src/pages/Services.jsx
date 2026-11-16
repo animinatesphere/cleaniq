@@ -2,6 +2,10 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { pathForLayoutKey } from "../utils/servicePages";
+import ovenPhoto from "../assets/service-oven-photo-1200.webp";
+import generalPhoto from "../assets/service-general-photo-1200.webp";
+import carpetPhoto from "../assets/service-carpet-photo-1200.webp";
+import eotPhoto from "../assets/service-eot-photo-1200.webp";
 
 const COMMERCIAL_TYPES = [
   "Event Cleaning",
@@ -32,7 +36,6 @@ import me2 from "../assets/image1.jpeg";
 
 import me3 from "../assets/Cleaniq services/4th Post.jpg";
 import airbnbImg from "../assets/airbnb_cleaning_service.png";
-import moveOutImg from "../assets/end_of_tenancy.png";
 import deep from "../assets/deep-clean.jpg";
 const cleanKey = (str) =>
   (str || "")
@@ -181,9 +184,9 @@ const Services = () => {
       defaultRateNG: "From ₦20,000",
     },
     tenancy: {
-      imageAlt: "Empty living room with moving boxes and a vacuum cleaner, ready for an end of tenancy clean",
+      imageAlt: "Clean kitchen with spotless worktops, oven, washing machine and gleaming tiled floor after an end of tenancy clean by Cleaniq Services",
       icon: <Truck className="text-secondary" size={40} />,
-      image: moveOutImg,
+      image: eotPhoto,
       features: [
         "Full property deep clean.",
         "Inside all appliances.",
@@ -220,10 +223,9 @@ const Services = () => {
       defaultRateNG: "From ₦28,000",
     },
     carpet: {
-      imageAlt: "Commercial vacuum and cleaning trolley in a carpeted hallway",
+      imageAlt: "Grey carpeted bedroom in a Manchester flat, ready for a professional carpet clean by Cleaniq Services",
       icon: <HomeIcon className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1580256081112-e49377338b7f?w=800&auto=format&fit=crop&q=60",
+      image: carpetPhoto,
       features: [
         "Hot water extraction deep clean.",
         "Stain & odour treatment.",
@@ -237,10 +239,9 @@ const Services = () => {
       defaultRateNG: "From ₦20,000",
     },
     oven: {
-      imageAlt: "Cleaner in blue gloves cleaning the glass door of an oven",
+      imageAlt: "Oven with clean glass door and racks after an oven clean by Cleaniq Services",
       icon: <ShieldCheck className="text-secondary" size={40} />,
-      image:
-        "https://plus.unsplash.com/premium_photo-1679500355493-2a1ce67cb938?w=800&auto=format&fit=crop&q=60",
+      image: ovenPhoto,
       features: [
         "Full oven interior degrease.",
         "Racks, trays & door glass.",
@@ -254,10 +255,9 @@ const Services = () => {
       defaultRateNG: "From ₦15,000",
     },
     general: {
-      imageAlt: "Gloved hand holding a spray bottle of cleaning product",
+      imageAlt: "Cleaniq Services cleaner in uniform and yellow gloves cleaning a kitchen appliance",
       icon: <HomeIcon className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1563453392212-326f5e854473?q=80&w=2000&auto=format&fit=crop",
+      image: generalPhoto,
       features: [
         "Full room clean — kitchen, bathrooms, living areas.",
         "Vacuuming & mopping.",
