@@ -7,6 +7,44 @@ import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import BeforeAfter from "../component/BeforeAfter";
 import { beforeAfterFor } from "../utils/beforeAfter";
+// Real job photos for the deep cleaning room cards
+import roomBedroom from "../assets/our-work/airbnb-1.jpg";
+import roomBathroom from "../assets/our-work/end-of-tenancy-2.jpg";
+import roomKitchen from "../assets/our-work/regular-1.jpg";
+import roomLiving from "../assets/our-work/regular-2.jpg";
+import roomStairs from "../assets/cleaning.jpg";
+
+// Deep cleaning page FAQs (owner-supplied text). Shown in the FAQ section and the FAQPage schema.
+const DEEP_FAQS = [
+  { q: "What is the difference between the deep cleaning service and your One-Off Cleaning?", a: "Our Deep Cleaning Services in Manchester will cover the entirety of your home leaving no inch untouched. Our One-Off Cleaning Service is a lighter, more general cleaning that offers some of the benefits of a deep clean, but it is intended to be a much lighter surface clean." },
+  { q: "Do you provide all the cleaning supplies as I don't have any of those in my home?", a: "Yes. All necessary cleaning detergents and equipment will be provided by us when you schedule our Deep Cleaning Services in Manchester." },
+  { q: "Which areas do you cover?", a: "We can provide our Deep Cleaning Services on all postcodes in Greater Manchester." },
+  { q: "Do you clean the oven?", a: "Yes. All kitchen appliances will be deeply cleaned as part of our Deep Cleaning Service. The oven will be fully deep cleaned and degreased completely free of charge." },
+  { q: "Do I need to provide parking?", a: "Parking expenses can come on top of the price for your deep cleaning if only metered parking is available. If there is no free parking available, we do request that clients cover potential parking expenses for our cleaning teams or provide a permit." },
+  { q: "I have already booked your deep cleaning service, can I reschedule?", a: "Yes. You can reschedule or amend your deep cleaning booking 24 hours prior to the service taking place." },
+  { q: "Will you clean the windows as part of the Deep Cleaning?", a: "Yes. All windows, along with the panes, ledges, sills, and frames, will be cleaned internally as part of the service. You can always schedule external window cleaning in addition to your Deep Cleaning Services in Manchester." },
+  { q: "There is mould build-up in some parts of the property, will that be removed?", a: "Our cleaners are expertly trained and experienced professionals. They will attempt to fully eliminate areas of heavy limescale and mould build-up. However, our cleaners are instructed to stop before potentially risking damage to the affected surface. If complete elimination would depend on damaging the area, the cleaners will stop." },
+  { q: "What areas are not cleaned as part of the deep cleaning?", a: "The only areas that are exceptions to our Deep Cleaning Services in Manchester are painted walls and ceilings." },
+];
+
+// Deep cleaning page: what we tackle (owner-supplied text).
+const DEEP_TACKLE = [
+  { title: "Deep-Seated Limescale & Mineral Removal:", body: "We don't just spray and wipe; we use professional-grade descaling agents to safely dissolve heavy buildup from showerheads, taps, and glass screens, restoring their original brilliance." },
+  { title: "Encrusted Kitchen Grease & Carbon:", body: "We tackle the \"burnt-on\" grease on hobs and splashbacks, and deep-clean extractor fan filters to ensure your cooking area is hygienic and touch-dry." },
+  { title: "Bacteria & Allergen Elimination:", body: "Our teams focus on high-traffic touchpoints and hidden nooks—like behind radiators and under heavy furniture—to remove the dust and pathogens that regular vacuums miss." },
+  { title: "Sanitization of Wet Zones:", body: "We perform an intensive scrub of bathroom tiles and grout lines to eliminate soap scum and prevent the onset of mold in high-moisture environments." },
+  { title: "Appliance Exterior Restoration:", body: "We remove fingerprints, watermarks, and ingrained dirt from the exteriors of all major appliances, leaving them with a streak-free, professional finish." },
+  { title: "Dust & Cobweb Extraction:", body: "We target high-level areas including curtain rails, light fixtures, and the tops of wardrobes where \"invisible\" dust creates an unhealthy environment." },
+];
+
+// Deep cleaning page: what's included, room by room (owner-supplied text, word for word).
+const DEEP_ROOMS = [
+  { room: "Bedroom", image: roomBedroom, alt: "Bedroom with a freshly made bed after a deep clean by Cleaniq Services", tasks: ["Carpeted floors will be vacuumed. Hard Floors will be mopped.", "Skirting boards, light sockets, light switches, and plugs will be cleaned.", "Upholstery and furniture will be vacuumed - underneath and behind cushions as well."] },
+  { room: "Bathroom", image: roomBathroom, alt: "Clean bathroom with a bath, basin and tiled floor after a deep clean by Cleaniq Services", tasks: ["The bathtub will be cleaned.", "The showerhead, the shower screen, and the shower will be cleaned.", "The skirting boards, light sockets, light switches, and plugs will be cleaned."] },
+  { room: "Kitchen", image: roomKitchen, alt: "Clean kitchen with sink, hob, oven and washing machine after a deep clean by Cleaniq Services", tasks: ["All kitchen appliances will be cleaned from the inside and the outside.", "Oven, cooker, hob along with the burners, extractor will be cleaned.", "The cobwebs will be removed."] },
+  { room: "Living Room/ Dining Room", image: roomLiving, alt: "Living and dining room with sofas and a dining table after a deep clean by Cleaniq Services", tasks: ["The cobwebs will be removed.", "The skirting boards, light sockets, light switches, and plugs will be cleaned.", "All windows will be cleaned from the inside."] },
+  { room: "Hallway/Staircases", image: roomStairs, alt: "Cleaner carrying cleaning supplies up a staircase to deep clean the hallway and stairs", tasks: ["Skirting boards, light sockets, light switches, and plugs will be cleaned.", "Hard floors will be vacuumed and mopped.", "Carpeted floors will be vacuumed."] },
+];
 import OurWork from "../component/OurWork";
 import { ourWorkFor } from "../utils/ourWork";
 import {
@@ -159,7 +197,7 @@ const EOT_EXTENDED = {
 };
 
 const DEEP_EXTENDED = {
-  intro: `Whether your home needs a post-party refresh, a seasonal spring clean, or a thorough reset after months of regular use — Cleaniq Services' deep cleaning service in Manchester goes further than any standard domestic clean. We reach the places your regular cleaner doesn't.`,
+  // intro: `Whether your home needs a post-party refresh, a seasonal spring clean, or a thorough reset after months of regular use — Cleaniq Services' deep cleaning service in Manchester goes further than any standard domestic clean. We reach the places your regular cleaner doesn't.`,
 
   whyChoosePoints: [
     {
@@ -871,7 +909,7 @@ const SERVICES_MAP = {
     heading: "Deep Cleaning Services in Manchester",
     tagline: "Thorough, Eco-Friendly, Meticulous Refresh Cleans.",
     description:
-      "Give your home or office a fresh start. Our expert deep cleaning service goes beyond regular housekeeping to reach hidden dirt, dust, and stubborn spots behind furniture, inside appliances, and deep within grout lines.",
+      "Our deep cleaning service in Manchester is designed as a complete full and thorough cleaning of the entirety of your property. Every inch of your home will be cleaned, polished, and scrubbed up to the highest professional standards, and following specifically designed checklists. We guarantee that by scheduling our deep cleaning in Manchester your home will be cleaned to exceptional standards. Our experienced cleaners in Manchester will follow our checklists, which we have designed to make sure that every inch of your home is cleaned and left spotless. However, make sure you advise us on any specific requirements you have for your deep cleaning service and we will make sure those are listed as priorities. Our deep cleaning service is ideal for one-off property resets, while our end of tenancy cleaning Manchester is designed for tenants, landlords and letting agents before check-out.",
     points: [
       "Complete sanitization of all high-contact surfaces",
       "Eco-friendly, chemical-free premium cleaning solutions",
@@ -1429,6 +1467,8 @@ const ServiceDetail = () => {
   const service = SERVICES_MAP[serviceSlug];
   const isEOT = serviceSlug === "end-of-tenancy-cleaning-manchester";
   const ext = service?.extended ? EXTENDED_MAP[service.extended] : null;
+  const isDeep = serviceSlug === "deep-cleaning-manchester";
+  const pageFaqs = isDeep ? DEEP_FAQS : ext?.faqs || [];
   const [liveServices, setLiveServices] = React.useState([]);
   const liveMatch = matchServiceForSlug(serviceSlug, liveServices);
   const servicePrice = fromPriceForPage(serviceSlug, liveServices);
@@ -1508,12 +1548,12 @@ const ServiceDetail = () => {
               ],
             })}
           </script>
-          {ext?.faqs?.length > 0 && (
+          {pageFaqs.length > 0 && (
             <script type="application/ld+json">
               {JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "FAQPage",
-                mainEntity: ext.faqs.map((f) => ({
+                mainEntity: pageFaqs.map((f) => ({
                   "@type": "Question",
                   name: f.q,
                   acceptedAnswer: { "@type": "Answer", text: typeof f.a === "string" ? f.a : String(f.a) },
@@ -1697,10 +1737,77 @@ const ServiceDetail = () => {
                 </div>
               </section>
 
+              {/* Deep cleaning only: tailored service (owner-supplied text, word for word) */}
+              {serviceSlug === "deep-cleaning-manchester" && (
+                <>
+                  <Divider />
+                  <section>
+                    <SectionLabel>Choose Cleaniq Services for your next deep cleaning</SectionLabel>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">
+                      Deep Cleaning - A Cleaning Service Tailored To Your Needs
+                    </h2>
+                    <p className="text-slate-600 leading-relaxed mb-5">
+                      Our Manchester deep cleaning service follows specific checklists that have been designed by us to make sure that every inch of your property is cleaned and polished up to the highest possible standards. As such our Manchester cleaners will follow this checklist, however, if you have any individual requirements for your deep cleaning services you can always let us know.
+                    </p>
+                    <p className="text-slate-600 leading-relaxed mb-5">
+                      You can configure your deep cleaning up to your exact specifications. Choose which areas of your property you would like our cleaners to focus on, choose the day and time for your deep cleaning service, and if you are interested you can always add several additional services to your deep cleaning and make sure that you will receive a personalized, tailored to your requirements cleaning service in a matter of hours.
+                    </p>
+                    <p className="text-slate-700 font-semibold mb-3">
+                      Additional Services you can add to your deep cleaning in Manchester include:
+                    </p>
+                    <ul className="grid sm:grid-cols-3 gap-3">
+                      {["Carpet Cleaning", "Upholstery Cleaning", "External Window Cleaning"].map((extra) => (
+                        <li key={extra} className="flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                          <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <Check size={11} className="stroke-[3]" />
+                          </div>
+                          <span className="text-slate-700 text-sm font-medium leading-snug">{extra}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                </>
+              )}
+
               {/* Why Choose section */}
               {ext && (
                 <>
                   <Divider />
+                  {serviceSlug === "deep-cleaning-manchester" ? (
+                  <section>
+                    {/* Deep cleaning: owner-supplied "why choose us" text, word for word */}
+                    <SectionLabel>Why Cleaniq Services</SectionLabel>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">
+                      Why Choose Our Deep Cleaning Services?
+                    </h2>
+                    <p className="text-slate-600 leading-relaxed mb-8">
+                      Our Deep Cleaning in Manchester will transform your property. Our Deep Cleaning is intended to be a complete internal cleaning of your home, therefore it is not necessary to schedule our Deep Cleaning on a shorter frequency. To maintain the cleaning results we recommended that you schedule our Deep Cleaning Service once every 2-3 months. The price for our Deep Cleaning includes all professional cleaning detergents and equipment and you can combine our Deep Clean with any one of your additional services. If you combine our Deep Cleaning with any additional services offered by Cleaniq Services you will receive a personalized discount on the final price.
+                    </p>
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      {[
+                        { icon: <ShieldCheck size={18} />, title: "Reliable Services delivered by professional and insured cleaners." },
+                        { icon: <Phone size={18} />, title: "24/7 customer service." },
+                        { icon: <Calendar size={18} />, title: "7-day-a-week availability." },
+                        { icon: <Clock size={18} />, title: "Flexible Schedule." },
+                        { icon: <BadgeCheck size={18} />, title: "Obligation-free quotes." },
+                        { icon: <Sparkles size={18} />, title: "Professional cleaning detergents and equipment will be provided by us as part of the Deep Cleaning Services in Manchester." },
+                        { icon: <Check size={18} />, title: "Easy to follow the booking process." },
+                        { icon: <Star size={18} />, title: "The Deep Cleaning Services can easily be personalized to fit your specific cleaning requirements." },
+                        { icon: <Sparkles size={18} />, title: "Extra cleaning services.", body: "Feel free to combine our deep cleaning in Manchester with any one of our additional services and you will receive a personalized discount on the final price" },
+                      ].map((pt) => (
+                        <div key={pt.title} className="flex gap-4 items-start">
+                          <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                            {pt.icon}
+                          </div>
+                          <div className="pt-2">
+                            <p className="font-bold text-slate-900 text-sm mb-1">{pt.title}</p>
+                            {pt.body && <p className="text-slate-500 text-sm leading-relaxed">{pt.body}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                  ) : (
                   <section>
                     <SectionLabel>Why Cleaniq Services</SectionLabel>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">
@@ -1724,6 +1831,35 @@ const ServiceDetail = () => {
                       ))}
                     </div>
                   </section>
+                  )}
+
+                  {/* Deep cleaning only: about our deep cleaning (owner-supplied text, word for word) */}
+                  {serviceSlug === "deep-cleaning-manchester" && (
+                    <>
+                      <Divider />
+                      <section className="space-y-5">
+                        <p className="text-slate-600 leading-relaxed">
+                          The Deep Cleaning Services offered by Cleaniq Services are designed to transform your home. If you require Deep Cleaning in Manchester, Cleaniq Services can help you. Our Manchester Deep Cleaning Service is our most popular cleaning service among clients that are not moving out of their homes, and simply want to have their property freshened up and transformed.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          If you are moving out of your house or flat we would recommend that you schedule our{" "}
+                          <Link to="/service/end-of-tenancy-cleaning-manchester" className="text-teal-700 font-semibold hover:underline">End of Tenancy Cleaning Service</Link>, if you have had your property refurbished we would recommend that you schedule our{" "}
+                          <Link to="/service/post-construction-cleaning-manchester" className="text-teal-700 font-semibold hover:underline">After Builders Cleaning</Link>, however, if you want to completely transform the condition of your property or if you have just moved in then our Deep Cleaning is the service for you.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          As part of our Deep Clean in Manchester, our cleaners will cover your property inch-by-inch, cleaning even the hardest-to-reach places, they will leave no corner untouched and will make sure that they transform the condition of your house or flat. The condition of your home will be utterly transformed, your property will be neat, tidy, and perfectly cleaned.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          If you would like to schedule our Deep Cleaning Services on all postcodes in Greater Manchester you can contact us at{" "}
+                          <a href="tel:+447846726428" className="text-teal-700 font-semibold hover:underline">07846 726428</a> 24 hours a day 7 days a week for a perfectly FREE quote for your Deep Clean, or alternatively, simply fill out the corresponding{" "}
+                          <Link to="/get-a-quote" className="text-teal-700 font-semibold hover:underline">cleaning service request form</Link> linked below.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Take advantage of the many benefits you will receive from our Deep Cleaning Services in Manchester.
+                        </p>
+                      </section>
+                    </>
+                  )}
 
                   <Divider />
 
@@ -1754,7 +1890,58 @@ const ServiceDetail = () => {
                   {/* Checklist */}
                   <section>
                     <SectionLabel>Room-by-room checklist</SectionLabel>
-                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+
+                    {serviceSlug === "deep-cleaning-manchester" && (
+                      <div className="mb-12">
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">Deep Cleaning Checklist</h2>
+                        <h3 className="text-base sm:text-lg font-semibold text-teal-700 mb-4">
+                          What is included in our Deep Cleaning Service in Manchester
+                        </h3>
+                        <p className="text-slate-600 leading-relaxed mb-8">
+                          Cleaniq Services is able to help with all of your domestic deep cleaning needs. No matter the size and scope of the job our Manchester deep cleaning technicians are always able to offer a helping hand. Our deep cleaning services follow a specific checklist, which all of our cleaners in Manchester are instructed to follow. However, the deep cleaning service can also be tailored to meet your specific cleaning requirements. See some of the basics that are included in our deep cleaning services in Manchester below, when you contact us with your deep cleaning inquiry make sure to advise us on any personal specifications you may have and we will make sure that those are listed as priorities every time you schedule our deep cleaning.
+                        </p>
+                        <div className="grid sm:grid-cols-2 gap-5">
+                          {DEEP_ROOMS.map((r) => (
+                            <article key={r.room} className="flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm">
+                              {r.image ? (
+                                <img src={r.image} alt={r.alt} loading="lazy" width="1000" height="750" className="w-full aspect-[16/9] object-cover" />
+                              ) : (
+                                <div className="w-full aspect-[16/9] bg-gradient-to-br from-teal-50 to-teal-100 flex items-center justify-center" aria-hidden="true">
+                                  <Sparkles size={40} className="text-teal-500" />
+                                </div>
+                              )}
+                              <div className="flex flex-col grow p-5">
+                                <div className="flex items-start justify-between gap-3 mb-4">
+                                  <div>
+                                    <p className="text-[11px] font-bold tracking-widest uppercase text-teal-600">Deep Cleaning</p>
+                                    <h4 className="text-lg font-bold text-slate-900 leading-tight">{r.room}</h4>
+                                  </div>
+                                  <Link
+                                    to={bookingLink}
+                                    className="shrink-0 px-3.5 py-2 rounded-lg bg-[#00B5A4] text-white text-xs font-bold hover:bg-teal-600 transition-colors"
+                                  >
+                                    Book now
+                                  </Link>
+                                </div>
+                                <ul className="space-y-2.5 grow">
+                                  {r.tasks.map((task) => (
+                                    <li key={task} className="flex gap-2.5 items-start">
+                                      <Check size={14} className="text-teal-500 shrink-0 mt-0.5 stroke-[2.5]" />
+                                      <span className="text-slate-600 text-sm leading-snug">{task}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                                <a href="#full-checklist" className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline">
+                                  View full checklist <ArrowRight size={14} />
+                                </a>
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <h2 id="full-checklist" className="scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-2">
                       {ext.checklist.heading}
                     </h2>
                     <p className="text-slate-500 text-sm mb-8 leading-relaxed">
@@ -1787,6 +1974,133 @@ const ServiceDetail = () => {
                     </div>
                   </section>
 
+                  {/* Deep cleaning only: benefits and customising (owner-supplied text, word for word) */}
+                  {serviceSlug === "deep-cleaning-manchester" && (
+                    <>
+                      <Divider />
+                      <section>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">
+                          Benefits of our Manchester Deep Cleaning Service
+                        </h2>
+                        <ul className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            "Outstanding Cleaning Service results delivered by professional and experienced cleaners.",
+                            "Our Deep Cleaning can easily be customized to fit your specific requirements.",
+                            "No need to vacate, rearrange, or prepare your property in any way prior to our Deep Cleaning taking place.",
+                            "FREE quotes and 7 days a week availability.",
+                            "Effective, hassle-free service.",
+                            "Easy and straightforward booking process.",
+                            "Your home will be left sparkling.",
+                          ].map((benefit) => (
+                            <li key={benefit} className="flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                              <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5">
+                              <Check size={11} className="stroke-[3]" />
+                            </div>
+                              <span className="text-slate-700 text-sm font-medium leading-snug">{benefit}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          Customize your Deep Cleaning Service
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          You can schedule our Deep Cleaning Services in Manchester at any time convenient for you, you can book your next Deep Cleaning simply and easily over the phone within a matter of minutes. You will be given an obligation-free quote which you can quite easily proceed with all in the same phone call. If you want to receive the best deep clean in Manchester you can call us today on{" "}
+                          <a href="tel:+447846726428" className="text-teal-700 font-semibold hover:underline">07846 726428</a>.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our Deep Cleaning Services in Manchester will leave your home sparkling and shining. Kitchen, Bathroom, Bedrooms, and every area of your house or flat will be deep cleaned and left in pristine condition. Our Deep Cleaning Services in Manchester come with many benefits! Take advantage of those today!
+                        </p>
+                        <ul className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            "Flexible booking slots are available.",
+                            "7 Day a week availability",
+                            "Non-hazardous eco-friendly cleaning solutions",
+                            "Fully insured and vetted cleaning professionals.",
+                          ].map((point) => (
+                            <li key={point} className="flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                              <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5">
+                              <Check size={11} className="stroke-[3]" />
+                            </div>
+                              <span className="text-slate-700 text-sm font-medium leading-snug">{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-slate-600 leading-relaxed">
+                          You can freely customize our deep cleaning service to meet the requirements of your apartment or your house cleaning needs. You can freely choose the day and time you schedule your deep cleaning service in Manchester, you can advise us on what areas our Manchester cleaners should focus on and what furniture, areas, decor, or additional services you would like to have included.{" "}
+                          <Link to="/contact" className="text-teal-700 font-semibold hover:underline">Contact us today</Link> for a perfectly free quote!
+                        </p>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Intensive grime restoration</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          What We Tackle: Intensive Grime Restoration &amp; Sanitization
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Standard domestic cleaning often skims the surface. Our deep cleaning protocol is engineered to penetrate the layers of built-up dirt and mineral deposits that accumulate in every home over time.
+                        </p>
+                        <p className="text-slate-700 font-semibold">
+                          We focus on the &quot;stubborn&quot; areas that haven&apos;t been professionally addressed in months:
+                        </p>
+                        <ul className="grid sm:grid-cols-2 gap-4">
+                          {DEEP_TACKLE.map((t) => (
+                            <li key={t.title} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                              <p className="font-bold text-slate-900 text-sm mb-1">{t.title}</p>
+                              <p className="text-slate-600 text-sm leading-relaxed">{t.body}</p>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-slate-600 leading-relaxed">
+                          A true deep clean is more than just an aesthetic upgrade; it is a vital reset for your home’s hygiene and longevity. Over time, environmental pollutants and biological contaminants like pet dander and skin cells settle into the fabric of your property, often in areas a standard weekly clean simply cannot reach. At Cleaniq Services, we utilize industrial-strength, eco-friendly chelating agents that bond with and lift stubborn mineral deposits without abrasive scrubbing that could damage your fixtures.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Beyond the visible shine, our intensive process significantly improves indoor air quality by extracting allergens that have become embedded in soft furnishings and hidden behind heavy appliances. According to the EPA, indoor air can be two to five times more polluted than outdoor air; our use of HEPA-filtration and steam-sanitization targets these unseen triggers at their source. By investing in a specialist deep clean, you aren&apos;t just getting a &apos;tidy&apos; house—you are disinfecting your living space, reducing the bacterial load in high-moisture &apos;wet zones,&apos; and preserving the integrity of your home&apos;s surfaces for years to come.
+                        </p>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Add-on services</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          Combine our Deep Cleaning in Manchester with any one of our additional services for a personalized discount
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          You can combine our Deep Cleaning in Manchester with any one of our additional cleaning services, by doing so we will be able to offer you a personalized discount on the final combined price of your requested cleaning services. You can choose to add Carpet Cleaning, Upholstery Cleaning, External Window Cleaning, or even Pressure Washing for any external areas of your home, to your Deep Cleaning Services in Manchester. As part of our deep cleaning services all carpeted areas of your home will be vacuumed, however, you can add professional carpet cleaning to your service, as well as all windows in your home will be cleaned internally, however, we are able to provide external window cleaning as a separate add-on to your deep cleaning in Manchester.
+                        </p>
+                        <p className="text-slate-700 font-semibold">You can combine our Deep Cleaning Service with the following services:</p>
+                        <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {[
+                            { name: "Carpet Cleaning", link: "/service/carpet-cleaning-manchester" },
+                            { name: "Upholstery Cleaning" },
+                            { name: "Window Cleaning" },
+                            { name: "Antiviral Disinfection" },
+                          ].map((extra) => (
+                            <li key={extra.name} className="flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                              <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center">
+                                <Sparkles size={18} />
+                              </div>
+                              {extra.link ? (
+                                <Link to={extra.link} className="text-slate-800 text-sm font-semibold hover:text-teal-700 hover:underline">{extra.name}</Link>
+                              ) : (
+                                <span className="text-slate-800 text-sm font-semibold">{extra.name}</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-slate-600 leading-relaxed">
+                          If you would like to schedule our Manchester Deep Cleaning Services you can contact us on{" "}
+                          <a href="tel:+447846726428" className="text-teal-700 font-semibold hover:underline">07846 726428</a>, Monday to Sunday at a time convenient for you. Our customer service representatives will assist you with any questions related to our Deep Cleaning you may have. Alternatively, you can fill out our corresponding{" "}
+                          <Link to="/get-a-quote" className="text-teal-700 font-semibold hover:underline">Deep Cleaning request form</Link> linked below.
+                        </p>
+                      </section>
+                    </>
+                  )}
+
                   <Divider />
 
                   {/* Areas */}
@@ -1795,9 +2109,18 @@ const ServiceDetail = () => {
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
                       {areaNoun} Near You
                     </h2>
-                    <p className="text-sm text-slate-500 mb-4">
-                      Our {areaNoun.toLowerCase()} work across Manchester and Greater Manchester, including:
-                    </p>
+                    {isDeep ? (
+                      <>
+                        <h3 className="text-base font-semibold text-slate-800 mb-1">Areas We Cover</h3>
+                        <p className="text-sm text-slate-500 mb-4">
+                          You can schedule our Deep Cleaning Services on all postcodes in: Bolton, Bury, Oldham, Rochdale, Stockport, Tameside, Trafford, Wigan, and the cities of Salford and Manchester
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-slate-500 mb-4">
+                        Our {areaNoun.toLowerCase()} work across Manchester and Greater Manchester, including:
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       {AREAS.map((area) => (
                         <Link
@@ -1810,6 +2133,75 @@ const ServiceDetail = () => {
                       ))}
                     </div>
                   </section>
+
+                  {/* Deep cleaning only: our deep cleaners (owner-supplied text, word for word) */}
+                  {serviceSlug === "deep-cleaning-manchester" && (
+                    <>
+                      <Divider />
+                      <section className="space-y-5">
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          Deep Cleaning Services Provided by Expert Cleaners in Manchester
+                        </h2>
+                        <SectionLabel>You can rely on us for your deep cleaning needs.</SectionLabel>
+                        <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wide">
+                          Trust us with your deep cleaning needs
+                        </h3>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our experienced cleaning technicians will follow a specific Deep Cleaning Checklist, thus making sure that every inch and corner, even the hardest-to-reach places that you may not pay attention to during your usual cleaning schedule, is fully and thoroughly cleaned. Our Deep Cleaning checklist is designed to ensure exceptional cleaning results. However, that checklist can also be amended to fit your specific cleaning requirements.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          If you want to have only parts of your property cleaned you can inform us in advance and we will make sure that our Manchester cleaning teams cover only the areas you have specified. If you want to add additional services to your Deep Cleaning Services you have the opportunity to do so. Feel free to model our Deep Cleaning in any way that you believe will produce the best cleaning outcome for your home! If you have any special requirements for your next Deep Cleaning Service let our office staff know and those requirements will be included as priorities.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our deep cleaning services are provided by local, professionally trained, fully vetted experienced, and employed cleaners. Our cleaning service providers in Manchester are our biggest asset and we are fully confident in their ability to provide you with the best possible deep cleaning service every time you schedule our one-off deep cleaning in Manchester. Our cleaning staff are available 7 days a week in one of our flexible time slots.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          All of our cleaning technicians travel fully equipped with the latest cleaning equipment and professional-grade certified safe, cleaning detergents. Our cleaning technicians will work hard to make sure that every inch of your property is cleaned up to the highest professional standards and that your deep house cleaning service is provided exactly up to your personal requirements and that all of your cleaning needs are met.
+                        </p>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Exceptional deep cleaning services</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          Deep cleaning services provided by expert cleaners in Manchester
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Your deep cleaning services will be provided by expertly trained, professional cleaners, employed by our cleaning company in Manchester, who have years of experience in providing deep cleaning services to all clients of every background in the greater Manchester area. Our local Manchester cleaners are professionally trained and in addition, follow a specific deep cleaning checklist. This is why we are certain that we offer the absolute best deep cleaning service throughout the entire Greater Manchester service area.
+                        </p>
+                        <ul className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            "Professionally trained, fully vetted, insured, and experienced cleaners.",
+                            "Will arrive fully equipped with the latest cleaning technology and professionally certified cleaning detergents.",
+                            "Available 7 days a week.",
+                            "Certified and experienced in the lasted cleaning methods.",
+                            "Following a professionally designed checklist and applying the latest cleaning methods.",
+                          ].map((point) => (
+                            <li key={point} className="flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                              <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5">
+                              <Check size={11} className="stroke-[3]" />
+                            </div>
+                              <span className="text-slate-700 text-sm font-medium leading-snug">{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                          <Link
+                            to={bookingLink}
+                            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors"
+                          >
+                            <Calendar size={16} /> Book now
+                          </Link>
+                          <a
+                            href="tel:+447846726428"
+                            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors"
+                          >
+                            <Phone size={16} /> Call now
+                          </a>
+                        </div>
+                      </section>
+                    </>
+                  )}
 
                   <Divider />
 
@@ -1928,16 +2320,48 @@ const ServiceDetail = () => {
                   <Divider />
 
                   {/* FAQs */}
+                  {isDeep && (
+                    <>
+                      <section className="rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9">
+                        <p className="text-xs font-bold tracking-widest uppercase text-teal-100 mb-2">Contact Us For a Free Quote</p>
+                        <h2 className="text-xl sm:text-2xl font-bold mb-3">Contact us for a free quote today!</h2>
+                        <p className="text-teal-50 leading-relaxed mb-6">
+                          We provide our customers with bespoke deep cleaning services personalized based on your specific cleaning requirements. Contact us for a free quote today.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Link to="/get-a-quote" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors">
+                            Get a free quote <ArrowRight size={16} />
+                          </Link>
+                          <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors">
+                            <Phone size={16} /> 07846 726428
+                          </a>
+                        </div>
+                      </section>
+                      <Divider />
+                    </>
+                  )}
+
                   <section>
                     <SectionLabel>Frequently asked questions</SectionLabel>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
-                      {service.heading} — FAQs
+                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : `${service.heading} — FAQs`}
                     </h2>
                     <div className="mt-4">
-                      {ext.faqs.map((faq, i) => (
-                        <FAQItem key={i} q={faq.q} a={faq.a} />
+                      {pageFaqs.map((faq, i) => (
+                        <FAQItem key={i} q={isDeep ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
                       ))}
                     </div>
+                    {isDeep && (
+                      <div className="mt-8 p-6 rounded-2xl bg-teal-50 border border-teal-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                          <p className="font-bold text-slate-900">Need help booking your deep clean?</p>
+                          <p className="text-slate-600 text-sm">Call Cleaniq Services today for a fast quote.</p>
+                        </div>
+                        <a href="tel:+447846726428" className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors">
+                          <Phone size={16} /> Call 07846 726428
+                        </a>
+                      </div>
+                    )}
                   </section>
 
                   <Divider />

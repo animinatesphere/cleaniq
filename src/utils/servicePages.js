@@ -4,7 +4,9 @@ import ovenSmall from "../assets/service-oven-600.webp";
 import ovenLarge from "../assets/service-oven-1200.webp";
 import regularSmall from "../assets/service-regular-600.webp";
 import regularLarge from "../assets/service-regular-1200.webp";
-
+// Our own photo from a real job (original: src/images/IMG_6025.DNG, converted for the web).
+import deepSmall from "../assets/service-deep-600.webp";
+import deepLarge from "../assets/service-deep-1200.webp";
 const unsplash = (id) => (width) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${width}&q=70`;
 const local = (small, large) => (width) => (width > 600 ? large : small);
@@ -20,8 +22,8 @@ export const SERVICE_PAGES = [
   },
   {
     slug: "deep-cleaning-manchester",
-    image: unsplash("1581578731548-c64695cc6952"),
-    imageAlt: "Cleaner in gloves wiping down a window",
+    image: local(deepSmall, deepLarge),
+    imageAlt: "Bright city-centre apartment living room with sofas and big windows after a deep clean by Cleaniq Services",
     name: "Deep Cleaning",
     blurb: "A thorough top-to-bottom refresh for your home.",
     layoutKeys: ["move"],
