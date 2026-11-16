@@ -251,6 +251,39 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Google Map of our office (UK site only). Loads lazily, so it doesn't slow the page down. */}
+        {region?.id === "UK" && (
+          <div className="mb-10">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+              <div>
+                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-secondary mb-1">Find us</h4>
+                <p className="text-sm font-semibold text-slate-400">{region.contact.address}</p>
+              </div>
+              <a
+                href="https://maps.app.goo.gl/UHcabzmFuj11wuLo9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-bold text-secondary hover:text-white transition-colors"
+              >
+                Open in Google Maps →
+              </a>
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2374.0477976039106!2d-2.235963222743174!3d53.48547577233045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xa69b9607397932af%3A0x92dced591d2d8931!2sCleaniq%20Services!5e0!3m2!1sen!2suk!4v1794867158722!5m2!1sen!2suk"
+                title="Map showing Cleaniq Services, 20 Swan St, Manchester M4 5JW"
+                width="600"
+                height="450"
+                className="block w-full h-64 md:h-80"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Trust Badges Strip */}
         <div className="mb-10 py-5 border-t border-b border-white/10">
           <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-3 text-center md:text-left">
