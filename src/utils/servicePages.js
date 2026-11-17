@@ -1,7 +1,8 @@
 // The service pages (src/pages/ServiceDetail.jsx) and which Services-page cards they belong to.
-// Photos are from Unsplash (free to use under the Unsplash License) or our own assets.
-import regularSmall from "../assets/service-regular-600.webp";
-import regularLarge from "../assets/service-regular-1200.webp";
+// Photos are our own from real jobs, except office and post-construction (Unsplash, free under the Unsplash License) until we have our own.
+// Our own photos from real jobs.
+import regularPhoto from "../assets/our-work/regular-4.jpg";
+import airbnbPhoto from "../assets/our-work/airbnb-5.jpg";
 // Our own photo from a real job (original: src/images/IMG_6025.DNG, converted for the web).
 import deepSmall from "../assets/service-deep-600.webp";
 import deepLarge from "../assets/service-deep-1200.webp";
@@ -37,8 +38,8 @@ export const SERVICE_PAGES = [
   },
   {
     slug: "airbnb-cleaning-manchester",
-    image: unsplash("1522708323590-d24dbb6b0267"),
-    imageAlt: "A tidy, guest-ready apartment living room",
+    image: local(airbnbPhoto, airbnbPhoto),
+    imageAlt: "Guest-ready living room with sofa and TV after an Airbnb turnover clean by Cleaniq Services",
     name: "Airbnb Cleaning",
     blurb: "Guest-ready turnovers for short-let properties.",
     layoutKeys: ["airbnb"],
@@ -61,8 +62,8 @@ export const SERVICE_PAGES = [
   },
   {
     slug: "regular-house-cleaning-manchester",
-    image: local(regularSmall, regularLarge),
-    imageAlt: "House cleaner mopping a bright living room floor",
+    image: local(regularPhoto, regularPhoto),
+    imageAlt: "Living room with big windows and city views after a regular house clean by Cleaniq Services",
     name: "Regular House Cleaning",
     blurb: "Weekly, fortnightly or monthly visits from local house cleaners.",
     layoutKeys: ["residential"],

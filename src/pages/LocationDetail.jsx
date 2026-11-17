@@ -18,11 +18,12 @@ import {
   MessageCircle,
 } from "lucide-react";
 
-import deepcleanImg from "../assets/deepclean.jpg";
-import residentialImg from "../assets/residential.jpg";
+// Our own photos from real jobs (only the office one is still a stock photo: we have no office job photos yet).
+import deepcleanImg from "../assets/our-work/deep-card.jpg";
+import residentialImg from "../assets/our-work/regular-2.jpg";
 import officeImg from "../assets/office.jpg";
-import bento1Img from "../assets/bento1.jpg";
-import grid1Img from "../assets/grid1.jpg";
+import bento1Img from "../assets/our-work/regular-4.jpg";
+import grid1Img from "../assets/our-work/oven-3.jpg";
 
 const LOCATIONS_MAP = {
   "didsbury": {
@@ -378,10 +379,10 @@ const LocationDetail = () => {
             {/* Visual Image Grid */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="col-span-2 h-64 md:h-80 rounded-[32px] overflow-hidden group">
-                <img src={deepcleanImg} alt={`Gloved hands deep cleaning a bathroom basin, part of our deep cleaning service in ${name}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src={deepcleanImg} alt={`Fridge cleaned inside after a deep clean by Cleaniq Services, a service we offer in ${name}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
               <div className="h-48 md:h-64 rounded-[24px] overflow-hidden group">
-                <img src={residentialImg} alt={`Bright, tidy living room after a house clean, a service we offer across ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src={residentialImg} alt={`Living room after a house clean by Cleaniq Services, a service we offer across ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
               <div className="h-48 md:h-64 rounded-[24px] overflow-hidden group">
                 <img src={officeImg} alt={`Clean office desk with a laptop, ready after an office clean, available in ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
@@ -403,10 +404,10 @@ const LocationDetail = () => {
 
               <div className="grid grid-cols-2 gap-4 my-8">
                 <div className="h-40 rounded-2xl overflow-hidden group">
-                  <img src={bento1Img} alt="Bright living room with a grey sofa and cushions after a regular clean" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img src={bento1Img} alt="Living room with big windows after a regular clean by Cleaniq Services" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="h-40 rounded-2xl overflow-hidden group">
-                  <img src={grid1Img} alt="Hands cleaning a shiny kitchen pan lid, the detail a deep clean covers" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img src={grid1Img} alt="Oven cleaned inside by Cleaniq Services, the detail a deep clean covers" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
               </div>
 

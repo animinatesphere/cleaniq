@@ -25,11 +25,16 @@ import {
   Clock,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import sprayPhoto from "../assets/join-cleaner-spray.webp";
-import roomPhoto from "../assets/room-cleaning.jpg";
-import bathroomPhoto from "../assets/toilet-cleaning.jpg";
+// Our own photos from real jobs (only the office one is still a stock photo: we have no office job photos yet).
+import sprayPhoto from "../assets/our-work/about-cleaner.jpg";
+import bedroomPhoto from "../assets/our-work/regular-5.jpg";
+import gloveWorkPhoto from "../assets/our-work/oven-1.jpg";
+import roomPhoto from "../assets/our-work/regular-2.jpg";
+import bathroomPhoto from "../assets/our-work/end-of-tenancy-2.jpg";
 import officePhoto from "../assets/office-clean.jpg";
-import ovenPhoto from "../assets/oven-cleaning.jpg";
+import ovenPhoto from "../assets/our-work/end-of-tenancy-5.jpg";
+import airbnbPhoto from "../assets/our-work/airbnb-1.jpg";
+import eotPhoto from "../assets/our-work/end-of-tenancy-1.jpg";
 import { SERVICE_PAGES } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 
@@ -39,21 +44,17 @@ const WEEKS_PER_MONTH = 52 / 12;
 const MIN_HOURS = 5;
 const MAX_HOURS = 40;
 
-// Unsplash photo (free to use under the Unsplash License).
-const WINDOW_PHOTO =
-  "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=640&h=760&q=70";
-
-const unsplash = (id, w, h) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=70`;
-const GLOVES_PHOTO = unsplash("1585421514738-01798e348b17", 800, 600);
+const WINDOW_PHOTO = bedroomPhoto;
+const GLOVES_PHOTO = gloveWorkPhoto;
 
 // "A day on the job" gallery.
 const WORK_PHOTOS = [
-  { src: roomPhoto, label: "Homes", alt: "Cleaner tidying and cleaning a bedroom" },
-  { src: ovenPhoto, label: "Kitchens & ovens", alt: "Cleaner cleaning an oven" },
-  { src: bathroomPhoto, label: "Bathrooms", alt: "Cleaner cleaning a bathroom" },
+  { src: roomPhoto, label: "Homes", alt: "Living room after a house clean by Cleaniq Services" },
+  { src: ovenPhoto, label: "Kitchens & ovens", alt: "Oven cleaned inside by Cleaniq Services" },
+  { src: bathroomPhoto, label: "Bathrooms", alt: "Clean bathroom with bath, basin and tiled floor after a clean by Cleaniq Services" },
   { src: officePhoto, label: "Offices", alt: "Cleaner cleaning an office" },
-  { src: unsplash("1502672260266-1c1ef2d93688", 600, 450), label: "Rentals & Airbnbs", alt: "A bright, tidy rental flat living room" },
-  { src: unsplash("1631889993959-41b4e9c6e3c5", 600, 450), label: "End of tenancy", alt: "A spotless bathroom ready for new tenants" },
+  { src: airbnbPhoto, label: "Rentals & Airbnbs", alt: "Guest-ready Airbnb bedroom after a turnover clean by Cleaniq Services" },
+  { src: eotPhoto, label: "End of tenancy", alt: "Clean kitchen ready for new tenants after an end of tenancy clean by Cleaniq Services" },
 ];
 
 // Who the cleaner job suits.
@@ -368,7 +369,7 @@ const Recruitment = () => {
             <div className="grid grid-cols-2 gap-4 max-w-lg">
               <img
                 src={sprayPhoto}
-                alt="Cleaner spraying and wiping a surface"
+                alt="Cleaniq Services cleaner in uniform and gloves cleaning an oven"
                 className="w-full aspect-[5/6] object-cover rounded-3xl border border-white shadow-lg"
                 width="640"
                 height="760"
@@ -475,7 +476,7 @@ const Recruitment = () => {
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <img
               src={GLOVES_PHOTO}
-              alt="Cleaner's gloved hands making a heart shape"
+              alt="Cleaniq Services cleaner in yellow gloves cleaning an oven door"
               loading="lazy"
               decoding="async"
               className="w-full aspect-[4/3] object-cover rounded-[40px] shadow-xl"

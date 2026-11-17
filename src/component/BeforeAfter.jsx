@@ -25,12 +25,13 @@ function Compare({ pair }) {
   return (
     <figure className="rounded-[28px] overflow-hidden bg-white border border-slate-100 shadow-sm">
       <div className="relative aspect-4/3 select-none overflow-hidden bg-slate-100">
+        {/* Each label sits on its own photo, so it slides away with it: drag to "before" and the "After" label is covered too. */}
         <img src={pair.after} alt={`After: ${pair.label} (real photo from a Cleaniq Services job)`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">After</span>
         <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
           <img src={pair.before} alt={`Before: ${pair.label}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 text-white text-[10px] font-black uppercase tracking-widest">Before</span>
         </div>
-        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 text-white text-[10px] font-black uppercase tracking-widest">Before</span>
-        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">After</span>
         <div className="absolute inset-y-0 w-0.5 bg-white shadow pointer-events-none" style={{ left: `${pos}%` }}>
           <span className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-primary">
             <MoveHorizontal size={18} />

@@ -6,6 +6,17 @@ import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Star, BookOpen } from "lucide-react";
 import { blogPath } from "../utils/slugGenerator";
 import { uploadUrl } from "../utils/uploads";
+// Our own photos from real jobs, shown on each city page.
+import cityPhoto1 from "../assets/our-work/regular-2.jpg";
+import cityPhoto2 from "../assets/our-work/regular-4.jpg";
+import cityPhoto3 from "../assets/our-work/airbnb-5.jpg";
+import cityPhoto4 from "../assets/our-work/regular-1.jpg";
+import cityPhoto5 from "../assets/our-work/airbnb-1.jpg";
+import cityPhoto6 from "../assets/our-work/end-of-tenancy-3.jpg";
+import cityPhoto7 from "../assets/our-work/regular-5.jpg";
+import cityPhoto8 from "../assets/our-work/airbnb-4.jpg";
+import cityPhoto9 from "../assets/our-work/end-of-tenancy-1.jpg";
+import cityPhoto10 from "../assets/our-work/regular-6.jpg";
 
 const CITIES = {
   london: {
@@ -15,7 +26,7 @@ const CITIES = {
       "Professional cleaning services across London's diverse neighborhoods",
     keywords:
       "London cleaning, domestic cleaning London, professional cleaners London",
-    img: "https://images.unsplash.com/photo-1778942673046-f10e20d2872d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8TG9uZG9uJTIwdG93bmhvdXNlJTIwaW50ZXJpb3IlMjBjbGVhbiUyMiUyMG9yJTIwJTIyTG9uZG9uJTIwbW9kZXJuJTIwYXBhcnRtZW50JTIwY2xlYW58ZW58MHx8MHx8fDA%3D",
+    img: cityPhoto1,
   },
   bristol: {
     name: "Bristol",
@@ -23,28 +34,28 @@ const CITIES = {
     description: "Trusted cleaning services for Bristol's growing community",
     keywords:
       "Bristol cleaning, home cleaning Bristol, professional cleaners Bristol",
-    img: "https://images.unsplash.com/photo-1770631070169-98cade3a5f99?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TGl2ZXJwb29sJTIwaG9tZSUyMGNsZWFuaW5nJTIwc2VydmljZXxlbnwwfHwwfHx8MA%3D%3D",
+    img: cityPhoto2,
   },
   birmingham: {
     name: "Birmingham",
     region: "West Midlands",
     description: "Expert cleaning solutions for Birmingham homes and offices",
     keywords: "Birmingham cleaning, domestic cleaning Birmingham",
-    img: "https://images.unsplash.com/photo-1616864192312-9bea98cabef6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8QmlybWluZ2hhbSUyMHJlc2lkZW50aWFsJTIwaG9tZSUyMGNsZWFufGVufDB8fDB8fHww",
+    img: cityPhoto3,
   },
   manchester: {
     name: "Manchester",
     region: "Greater Manchester",
     description: "Premier cleaning services across Manchester and surroundings",
     keywords: "Manchester cleaning, professional cleaners Manchester",
-    img: "https://images.unsplash.com/photo-1662660689402-6fbfdf16b257?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8TWFuY2hlc3RlciUyMGFwYXJ0bWVudCUyMHByb2Zlc3Npb25hbCUyMGNsZWFuaW5nfGVufDB8fDB8fHww",
+    img: cityPhoto4,
   },
   leeds: {
     name: "Leeds",
     region: "West Yorkshire",
     description: "Professional cleaning services throughout Leeds",
     keywords: "Leeds cleaning, domestic cleaning Leeds",
-    img: "https://images.unsplash.com/photo-1679395608154-eb03a384274a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8WW9ya3NoaXJlJTIwbW9kZXJuJTIwaG9tZSUyMGNsZWFufGVufDB8fDB8fHww",
+    img: cityPhoto5,
   },
   slough: {
     name: "Slough",
@@ -52,7 +63,7 @@ const CITIES = {
     description:
       "Quality cleaning services for Slough residents and businesses",
     keywords: "Slough cleaning, professional cleaners Slough",
-    img: "https://images.unsplash.com/photo-1616864192312-9bea98cabef6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8QmlybWluZ2hhbSUyMHJlc2lkZW50aWFsJTIwaG9tZSUyMGNsZWFufGVufDB8fDB8fHww",
+    img: cityPhoto6,
   },
   chelmsford: {
     name: "Chelmsford",
@@ -65,35 +76,35 @@ const CITIES = {
     region: "Bedfordshire",
     description: "Professional cleaning for Luton and surrounding areas",
     keywords: "Luton cleaning, professional cleaners Luton",
-    img: "https://images.unsplash.com/photo-1770631070169-98cade3a5f99?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TGl2ZXJwb29sJTIwaG9tZSUyMGNsZWFuaW5nJTIwc2VydmljZXxlbnwwfHwwfHx8MA%3D%3D",
+    img: cityPhoto7,
   },
   "milton-keynes": {
     name: "Milton Keynes",
     region: "Buckinghamshire",
     description: "Expert cleaning services for Milton Keynes",
     keywords: "Milton Keynes cleaning, domestic cleaning Milton Keynes",
-    img: "https://images.unsplash.com/photo-1770631070169-98cade3a5f99?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TGl2ZXJwb29sJTIwaG9tZSUyMGNsZWFuaW5nJTIwc2VydmljZXxlbnwwfHwwfHx8MA%3D%3D",
+    img: cityPhoto8,
   },
   liverpool: {
     name: "Liverpool",
     region: "Merseyside",
     description: "Quality cleaning services across Liverpool",
     keywords: "Liverpool cleaning, professional cleaners Liverpool",
-    img: "https://images.unsplash.com/photo-1770631070169-98cade3a5f99?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TGl2ZXJwb29sJTIwaG9tZSUyMGNsZWFuaW5nJTIwc2VydmljZXxlbnwwfHwwfHx8MA%3D%3D",
+    img: cityPhoto9,
   },
   coventry: {
     name: "Coventry",
     region: "West Midlands",
     description: "Trusted cleaning solutions for Coventry homes",
     keywords: "Coventry cleaning, domestic cleaning Coventry",
-    img: "https://images.unsplash.com/photo-1770631070169-98cade3a5f99?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TGl2ZXJwb29sJTIwaG9tZSUyMGNsZWFuaW5nJTIwc2VydmljZXxlbnwwfHwwfHx8MA%3D%3D",
+    img: cityPhoto10,
   },
   croydon: {
     name: "Croydon",
     region: "Greater London",
     description: "Professional cleaning services for Croydon area",
     keywords: "Croydon cleaning, professional cleaners Croydon",
-    img: "https://images.unsplash.com/photo-1770631070169-98cade3a5f99?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TGl2ZXJwb29sJTIwaG9tZSUyMGNsZWFuaW5nJTIwc2VydmljZXxlbnwwfHwwfHx8MA%3D%3D",
+    img: cityPhoto1,
   },
 };
 
@@ -238,7 +249,7 @@ const CityLanding = () => {
                   <div>
                     <img
                       src={cityInfo.img}
-                      alt={`${cityInfo.name} cleaning services`}
+                      alt={`Clean home after a clean by Cleaniq Services, ${cityInfo.name} cleaning services`}
                       className=" object-cover"
                     />
                   </div>

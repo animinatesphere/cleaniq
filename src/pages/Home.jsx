@@ -3,17 +3,18 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useRegion } from "../context/RegionContext";
 import { Helmet } from "react-helmet-async";
-import air1 from "../assets/cleaning.jpg";
-import air2 from "../assets/deep-cleaning.jpg";
-import residentialImg from "../assets/residential.jpg";
+// Real photos from our own jobs (only the office card still uses a stock photo: we have no office job photos yet).
+import air1 from "../assets/service-deep-1200.webp";
+import air2 from "../assets/our-work/about-cleaner.jpg";
+import residentialImg from "../assets/service-eot-photo-600.webp";
 import officeImg from "../assets/office.jpg";
-import deepcleanImg from "../assets/deep-clean.jpg";
-import airbnbImg from "../assets/airbnb.jpg";
-import strip1 from "../assets/cleaning-sitting.jpg";
-import strip2 from "../assets/oven-cleaning.jpg";
-import strip3 from "../assets/toilet-cleaning.jpg";
-import strip4 from "../assets/office-clean.jpg";
-import strip5 from "../assets/room-cleaning.jpg";
+import deepcleanImg from "../assets/our-work/deep-card.jpg";
+import airbnbImg from "../assets/our-work/airbnb-1.jpg";
+import strip1 from "../assets/our-work/regular-2.jpg";
+import strip2 from "../assets/our-work/regular-1.jpg";
+import strip3 from "../assets/our-work/regular-3.jpg";
+import strip4 from "../assets/our-work/airbnb-4.jpg";
+import strip5 from "../assets/our-work/regular-5.jpg";
 import {
   Star,
   ShieldCheck,
@@ -92,11 +93,11 @@ const Home = () => {
   const [blogLoading, setBlogLoading] = useState(true);
 
   const slides = [
-    { src: strip1, label: "Living Room", alt: "Bright living room with sofas and plants after a home clean" },
-    { src: strip2, label: "Kitchen", alt: "Clean white kitchen with a gleaming range cooker and worktops" },
-    { src: strip3, label: "Bathroom", alt: "Spotless bathroom with a clean basin, shower and towel rail" },
-    { src: strip4, label: "Office", alt: "Tidy office reception desk after a commercial clean" },
-    { src: strip5, label: "Bedroom", alt: "Freshly made bed with clean white linen in a tidy bedroom" },
+    { src: strip1, label: "Living Room", alt: "Living room with sofas and city views after a house clean by Cleaniq Services" },
+    { src: strip2, label: "Kitchen", alt: "Clean kitchen worktops, sink and hob after a house clean by Cleaniq Services" },
+    { src: strip3, label: "Bathroom", alt: "Clean bathroom with bath, basin and tiled floor after a house clean by Cleaniq Services" },
+    { src: strip4, label: "Kitchen & Dining", alt: "Kitchen and dining area after an Airbnb turnover clean by Cleaniq Services" },
+    { src: strip5, label: "Bedroom", alt: "Tidy bedroom with a made bed and floor-to-ceiling windows after a clean by Cleaniq Services" },
   ];
 
   useEffect(() => {
@@ -310,7 +311,7 @@ const Home = () => {
             <div className="relative z-10 rounded-[40px] lg:rounded-[60px] overflow-hidden shadow-2xl border-4 lg:border-8 border-white bg-slate-100">
               <img
                 src={air1}
-                alt="House cleaner carrying a caddy of cleaning supplies upstairs, ready for a home clean in Manchester"
+                alt="Bright Manchester apartment living room after a deep clean by Cleaniq Services"
                 className="w-full h-[360px] lg:h-[600px] object-cover"
                 fetchpriority="high"
                 width="1200"
@@ -369,7 +370,7 @@ const Home = () => {
                 icon: <HomeIcon size={32} />,
                 keyword: "Move-out specialists",
                 image: residentialImg,
-                imageAlt: "Empty, spotless living room and kitchen ready for the next tenants after an end of tenancy clean"
+                imageAlt: "Clean kitchen with oven and washing machine after an end of tenancy clean by Cleaniq Services"
               },
               {
                 title: "Office Cleaning",
@@ -387,7 +388,7 @@ const Home = () => {
                 icon: <Zap size={32} />,
                 keyword: "Deep cleaning",
                 image: deepcleanImg,
-                imageAlt: "Gloved hands deep cleaning a bathroom basin and tap"
+                imageAlt: "Fridge cleaned inside, shelves and drawers spotless, after a deep clean by Cleaniq Services"
               },
               {
                 title: "Airbnb Cleaning",
@@ -396,7 +397,7 @@ const Home = () => {
                 icon: <Star size={32} />,
                 keyword: "Short-let specialist",
                 image: airbnbImg,
-                imageAlt: "Bright, guest-ready short-let apartment living room after an Airbnb turnover clean"
+                imageAlt: "Guest-ready bedroom with fresh towels after an Airbnb turnover clean by Cleaniq Services"
               },
             ].map((service, idx) => (
               <motion.div
@@ -471,7 +472,7 @@ const Home = () => {
               <div className="relative z-10 rounded-[48px] overflow-hidden shadow-2xl">
                 <img
                   src={air2}
-                  alt="Cleaner in yellow gloves mopping a bright living room floor"
+                  alt="Cleaniq Services cleaner in uniform and gloves cleaning an oven"
                   className="w-full h-[500px] object-cover"
                   loading="lazy"
                   decoding="async"

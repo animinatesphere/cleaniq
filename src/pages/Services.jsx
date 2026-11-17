@@ -6,6 +6,10 @@ import ovenPhoto from "../assets/service-oven-photo-1200.webp";
 import generalPhoto from "../assets/service-general-photo-1200.webp";
 import carpetPhoto from "../assets/service-carpet-photo-1200.webp";
 import eotPhoto from "../assets/service-eot-photo-1200.webp";
+// More of our own job photos.
+import bathroomPhoto from "../assets/our-work/regular-3.jpg";
+import airbnbBedroomPhoto from "../assets/our-work/airbnb-2.jpg";
+import fridgePhoto from "../assets/our-work/deep-card.jpg";
 
 const COMMERCIAL_TYPES = [
   "Event Cleaning",
@@ -110,10 +114,9 @@ const Services = () => {
 
   const layoutAssets = {
     residential: {
-      imageAlt: "Bright, spotless bathroom with a glass shower, basin and mirror after a residential clean",
+      imageAlt: "Clean bathroom with bath, basin and tiled floor after a house clean by Cleaniq Services",
       icon: <HomeIcon className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2000&auto=format&fit=crop",
+      image: bathroomPhoto,
       features: [
         "Dusting of all surfaces.",
         "Vacuuming & Mopping.",
@@ -148,9 +151,9 @@ const Services = () => {
       defaultRateNG: "From ₦18,000",
     },
     move: {
-      imageAlt: "Gloved hands spraying and wiping a surface during a deep clean",
+      imageAlt: "Fridge cleaned inside, shelves and drawers spotless, after a deep clean by Cleaniq Services",
       icon: <HomeIcon className="text-secondary" size={40} />,
-      image: deep,
+      image: fridgePhoto,
       features: [
         "Door frame cleaning.",
         "Wall spot cleaning.",
@@ -164,10 +167,9 @@ const Services = () => {
       defaultRateNG: "From ₦25,000",
     },
     airbnb: {
-      imageAlt: "Neatly made bed with fresh linen and cushions in a guest-ready short-let bedroom",
+      imageAlt: "Guest-ready bedroom with fresh towels on the bed after an Airbnb turnover clean by Cleaniq Services",
       icon: <Star className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000&auto=format&fit=crop",
+      image: airbnbBedroomPhoto,
       features: [
         "Turnover Specialist",
 
