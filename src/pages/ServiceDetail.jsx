@@ -943,7 +943,7 @@ const SERVICES_MAP = {
     extended: "OVEN",
   },
   "carpet-cleaning-manchester": {
-    title: "Carpet Cleaning Manchester | Carpet Cleaners Near You",
+    title: "Carpet Cleaning Manchester | Cleaniq Services",
     areaNoun: "Carpet cleaners",
     meta: "Professional carpet cleaning in Manchester for rooms, rugs, stairs and upholstery. Local carpet cleaners near you with live prices. Book online with Cleaniq Services.",
     heading: "Carpet Cleaning in Manchester",
@@ -1478,6 +1478,30 @@ const CARPET_EXTENDED = {
       q: "Do you have carpet cleaners near me?",
       a: "Our carpet cleaners cover Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan.",
     },
+    {
+      q: "Is your Carpet Cleaning method safe?",
+      a: "All of our carpet cleaning detergents and equipment are completely safe for children, pets and adults and are also non-toxic and non-hazardous.",
+    },
+    {
+      q: "Can I book on a weekend?",
+      a: "Yes, you can schedule our Carpet Cleaning Service 7 days a week at a time convenient for you, we also work Saturdays and Sundays.",
+    },
+    {
+      q: "I am not sure what the exact fabric of my carpet?",
+      a: "If you are not sure what the exact fabric of your carpet is when you are finalizing your carpet cleaning appointment you can always email us a photo of the carpet or our carpet cleaning technicians will advise you when they are on-site.",
+    },
+    {
+      q: "What carpet cleaning method do you use in Manchester?",
+      a: "Cleaniq Services uses hot water extraction. Marks and high-traffic areas are pre-treated first, then hot water extraction lifts the dirt that everyday vacuuming leaves behind.",
+    },
+    {
+      q: "Do you clean stairs, landings and upholstery as well as carpets?",
+      a: "Yes. Our carpet cleaners clean carpets, stairs, landings and upholstery. Each has a fixed price, shown live on this page from our booking system.",
+    },
+    {
+      q: "How do I book carpet cleaning in Manchester?",
+      a: "Book your carpet clean online in a few minutes, or call Cleaniq Services on 07846 726428 and we'll help you choose the right service.",
+    },
   ],
 
   manchesterAreas: AREAS.map((a) => a.name),
@@ -1541,6 +1565,7 @@ const ServiceDetail = () => {
   const isEOT = serviceSlug === "end-of-tenancy-cleaning-manchester";
   const ext = service?.extended ? EXTENDED_MAP[service.extended] : null;
   const isDeep = serviceSlug === "deep-cleaning-manchester";
+  const isCarpet = serviceSlug === "carpet-cleaning-manchester";
   const pageFaqs = isDeep ? DEEP_FAQS : isEOT ? EOT_FAQS : ext?.faqs || [];
   const [liveServices, setLiveServices] = React.useState([]);
   const liveMatch = matchServiceForSlug(serviceSlug, liveServices);
@@ -1838,6 +1863,128 @@ const ServiceDetail = () => {
           </section>
         )}
 
+        {/* Carpet cleaning only: intro (owner-supplied text; another company's phone number replaced with ours) */}
+        {isCarpet && (
+          <section className="px-4 sm:px-6 lg:px-10 xl:px-16 pt-10 sm:pt-14 space-y-8">
+            <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10 grid lg:grid-cols-5 gap-8 items-center">
+              <div className="lg:col-span-3 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Carpet and Rug Cleaning in Manchester!</h2>
+                <ul className="space-y-2.5">
+                  {["Thoroughly deep clean your carpet", "Sanitize and disinfect your carpet removing bacteria", "Eliminate stains, marks, and odors"].map((pt) => (
+                    <li key={pt} className="flex gap-3 items-center text-slate-700 font-medium">
+                      <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+                        <Check size={13} className="stroke-[3]" />
+                      </span>
+                      {pt}
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Link to={bookingLink} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors">
+                    <Calendar size={16} /> Book now
+                  </Link>
+                  <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors">
+                    <Phone size={16} /> Call now
+                  </a>
+                </div>
+              </div>
+              <div className="lg:col-span-2 space-y-4">
+                <div className="rounded-xl bg-[#0A1520] text-white p-5">
+                  <p className="text-sm text-slate-300 mb-2">We are always available for any questions you may have!</p>
+                  <a href="tel:+447846726428" className="flex items-center gap-2 text-2xl font-bold text-teal-400 hover:text-teal-300">
+                    <Phone size={20} /> 07846 726428
+                  </a>
+                  <p className="text-xs text-slate-400 mt-2">Our phone lines are open 24/7</p>
+                </div>
+                <div className="rounded-xl bg-white border border-slate-200 p-5">
+                  <p className="text-sm font-semibold text-slate-500 mb-3">This is a service for:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Domestic Clients", "Commercial Clients"].map((who) => (
+                      <span key={who} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold">
+                        <Check size={14} className="stroke-[3]" /> {who}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-10">
+              <p className="text-xs font-bold tracking-widest uppercase text-teal-600 mb-2">Manchester Carpet Cleaning</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">Exceptional carpet cleaning in Ancoats, Manchester</h2>
+              <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-sm font-semibold mb-5">
+                <Clock size={15} /> We now offer same-day and next-day booking slots for Carpet Cleaning
+              </p>
+              <div className="space-y-4 text-slate-600 leading-relaxed">
+                <p>
+                  Cleaniq Services offers our Carpet Cleaning Service on all postcodes in Manchester and the surrounding Greater Manchester Area. Our Carpet Cleaning Service is carried out by local, professional, and experienced carpet cleaning technicians. Our Carpet Cleaning Service will leave your carpets and floor coverings looking, smelling, and feeling brand new.
+                </p>
+                <p>
+                  Our Carpet Cleaning method not only cleans your carpet but also disinfects and sanitizes them, with that carpet cleaning method your floor coverings are not only professionally cleaned, but stains will be eliminated and 99.9% of viruses, bugs, bacteria, that are lurking deep inside the carpet fibers, will be eliminated. The carpet cleaning method we use is universally recognized as the strongest method available on the market today. Our experienced carpet cleaning technicians will provide you with outstanding services, coupled with our affordable carpet cleaning rates meaning that you will receive an excellent Carpet Cleaning Service for the best possible price.
+                </p>
+                <p>
+                  If you are looking to schedule Carpet Cleaning in Manchester and the surrounding areas look no further than Cleaniq Services. If you would like to receive a FREE quote for your next Carpet Cleaning Service you can contact us on{" "}
+                  <a href="tel:+447846726428" className="text-teal-700 font-semibold hover:underline">07846 726428</a> 24/7 or simply fill out our{" "}
+                  <Link to="/get-a-quote" className="text-teal-700 font-semibold hover:underline">Carpet Cleaning Service request form</Link> attached below. Our Carpet Cleaning service in Manchester will preserve and restore your floor coverings! Carpet cleaning can also be added to our{" "}
+                  <Link to="/service/end-of-tenancy-cleaning-manchester" className="text-teal-700 font-semibold hover:underline">end of tenancy cleaning Manchester</Link> service for tenants, landlords and letting agents preparing a property for check-out.
+                </p>
+              </div>
+            </div>
+
+            {/* Our carpet cleaning service (owner-supplied text; the empty "Combine … with:" list left out) */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-10">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-5">Our Carpet Cleaning Service in Manchester</h2>
+              <div className="space-y-4 text-slate-600 leading-relaxed">
+                <p>
+                  Cleaniq Services uses the best carpet-cleaning detergents and equipment. Our local carpet cleaning specialists have years of experience and can determine the best way to clean your carpet. Carpet Cleaning is a specific cleaning task that is best left to professionals. If you are looking for the best Carpet Cleaning Service in Manchester, our Carpet Cleaning service is the answer. Our Carpet Cleaning service will refresh and rejuvenate your floor coverings. Our Carpet Cleaning method not only removes dirt and grime from your carpet but also removes, mites, mold, bacteria, and viruses, you will receive free antiviral disinfection if you book your Carpet Cleaning Service in Manchester.
+                </p>
+                <p>
+                  No matter where you are based in the Greater Manchester area we have an experienced and dedicated carpet cleaning technician that can attend and restore the condition of your carpets. Our Carpet Cleaning method does not only deeply and thoroughly clean your carpet, it does not only disinfect and sanitize your carpet but also our Carpet Cleaning Service can tackle even the most stubborn stains. We can clean all types of carpet, our Carpet Cleaning method is safe and efficient, produces the best results, and is the most affordable option.
+                </p>
+              </div>
+            </div>
+
+            {/* Refresh, sanitize and clean (owner-supplied text) */}
+            <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                Refresh, sanitize, and thoroughly clean your carpets with our Carpet Cleaning in Manchester.
+              </h2>
+              <h3 className="text-base sm:text-lg font-semibold text-teal-700 mb-1">Local carpet cleaning services in Greater Manchester</h3>
+              <p className="text-sm text-slate-500 mb-5">
+                carpet cleaning services using certified carpet cleaning detergents and professional carpet cleaning technology.
+              </p>
+              <p className="text-slate-600 leading-relaxed mb-6">
+                Our exceptional carpet cleaning services will be carried out on-site, effectively and efficiently, up to the highest professional standards, using the latest carpet cleaning equipment and professional carpet cleaning detergents. Our exceptional carpet cleaning professionals have years of experience in providing carpet cleaning services in Manchester. Thoroughly clean your carpets, rugs, mattresses or upholstery at the comfort of your own home.
+              </p>
+              <p className="text-slate-800 font-semibold mb-3">Our carpet cleaning in Manchester is a thorough comprehensive service.</p>
+              <ul className="grid sm:grid-cols-2 gap-3 mb-6">
+                {[
+                  "Professional, eco-friendly, certified safe cleaning detergents.",
+                  "Non-toxic, non-hazardous, pet and child-safe carpet cleaning products.",
+                  "Cleaning and sanitizing your carpets, up to 99.99% of bacteria removed.",
+                  "Short-notice booking slots are available.",
+                  "Stain removal (as much as possible).",
+                ].map((pt) => (
+                  <li key={pt} className="flex gap-3 items-start p-3.5 bg-white rounded-lg border border-slate-100 text-slate-700 text-sm font-medium">
+                    <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+                          <Check size={13} className="stroke-[3]" />
+                        </span>
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link to={bookingLink} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors">
+                  <Calendar size={16} /> Book now
+                </Link>
+                <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors">
+                  <Phone size={16} /> Call now
+                </a>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ══ PAGE BODY ══════════════════════════════════════════════ */}
         <div className="px-4 sm:px-6 lg:px-10 xl:px-16 py-10 sm:py-14">
           <div className="grid md:grid-cols-3 gap-10 md:gap-14 items-start">
@@ -1967,7 +2114,52 @@ const ServiceDetail = () => {
               {ext && (
                 <>
                   <Divider />
-                  {isEOT ? (
+                  {isCarpet ? (
+                  <section>
+                    {/* Carpet cleaning: owner-supplied "why choose us" ("Clean Services" corrected to our name) */}
+                    <SectionLabel>Why Cleaniq Services</SectionLabel>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">
+                      Why Choose Us for your carpet cleaning service?
+                    </h2>
+                    <p className="text-slate-600 leading-relaxed mb-8">
+                      Cleaniq Services offers Carpet Cleaning on all postcodes in the Greater Manchester Area. Our expert carpet cleaning specialists have years of experience in providing Carpet Cleaning services. No job is too big or small for them. We will provide you with an outstanding cleaning Carpet Cleaning service for the best possible price. Our high-quality cleaning services and our affordable rates mean that you will receive an exceptional cleaning service without overpaying. We offer obligation-free quotes, 7-day-a-week availability, 24/7 customer support. We at Cleaniq Services do not only be another cleaning company, but we want to be the best at what we do! Why you should choose Cleaniq Services for your next Carpet Cleaning.
+                    </p>
+                    <div className="grid sm:grid-cols-2 gap-x-5 gap-y-4">
+                      {[
+                        { icon: <Calendar size={18} />, title: "Monday to Sunday availability." },
+                        { icon: <Clock size={18} />, title: "Flexible booking options." },
+                        { icon: <BadgeCheck size={18} />, title: "Free estimates." },
+                        { icon: <Phone size={18} />, title: "24/7 customer support." },
+                        { icon: <MapPin size={18} />, title: "We cover all postcodes in Greater Manchester." },
+                        { icon: <ShieldCheck size={18} />, title: "No hidden surcharges." },
+                        { icon: <Check size={18} />, title: "Obligation-free quotes." },
+                        { icon: <Sparkles size={18} />, title: "Professional Detergents and Equipment." },
+                        { icon: <Star size={18} />, title: "Trained, vetted, instructed, and experienced cleaners." },
+                      ].map((pt) => (
+                        <div key={pt.title} className="flex gap-4 items-center">
+                          <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                            {pt.icon}
+                          </div>
+                          <p className="font-bold text-slate-900 text-sm">{pt.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 mt-8">
+                      <a
+                        href="tel:+447846726428"
+                        className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors"
+                      >
+                        <Phone size={16} /> Call us
+                      </a>
+                      <Link
+                        to={bookingLink}
+                        className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors"
+                      >
+                        <Calendar size={16} /> Book now
+                      </Link>
+                    </div>
+                  </section>
+                  ) : isEOT ? (
                   <section>
                     {/* End of tenancy: owner-supplied "why choose us" (72-hour set to our 48 hours) */}
                     <SectionLabel>Why Choose Us</SectionLabel>
@@ -2053,6 +2245,95 @@ const ServiceDetail = () => {
                       ))}
                     </div>
                   </section>
+                  )}
+
+                  {/* Carpet cleaning only: how it works (owner-supplied text, word for word) */}
+                  {isCarpet && (
+                    <>
+                      <Divider />
+                      <section>
+                        <SectionLabel>Manchester Carpet Cleaning</SectionLabel>
+                        <p className="text-slate-600 leading-relaxed mb-1">
+                          Our Carpet Cleaning Service in Manchester will be provided up to the highest possible standards.
+                        </p>
+                        <p className="text-slate-800 font-semibold leading-relaxed mb-5">
+                          Refresh, sanitize, clean, and disinfect your carpets by scheduling our carpet cleaning in Manchester.
+                        </p>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">How does our carpet cleaning in Manchester work?</h2>
+                        <ol className="grid sm:grid-cols-2 gap-4">
+                          {[
+                            { title: "Schedule", body: "contact us over the phone or online with your original carpet cleaning inquiry. Receive a perfectly free quote for your carpet cleaning service in Manchester and choose to accept it. Provide some basic booking information and finalize your carpet cleaning appointment." },
+                            { title: "Service", body: "a fully equipped carpet cleaning professional will arrive on-site, and begin our carpet cleaning services by inspecting your carpet. Your carpet will next be cleaned using the strongest and most thorough carpet cleaning method called hot-water extraction." },
+                            { title: "Inspection", body: "on completion of our carpet cleaning services our carpet cleaning professionals will ask you to inspect your carpet and make sure that you are completely satisfied with the results of our carpet cleaning services. Your carpet will be cleaned up to the highest standards." },
+                            { title: "Results", body: "all you have to do after your carpet cleaning service has been provided is sit back and enjoy your perfectly clean and sanitized carpets. Our carpet cleaning will be provided on-site in your own home in a matter of a few hours, using our professional carpet cleaning supplies." },
+                          ].map((step, n) => (
+                            <li key={step.title} className="p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm">
+                              <div className="flex items-center gap-3 mb-3">
+                                <span className="w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0" aria-hidden="true">{n + 1}</span>
+                                <h3 className="font-bold text-slate-900">{step.title}</h3>
+                              </div>
+                              <p className="text-slate-600 text-sm leading-relaxed">
+                                <span className="capitalize">{step.body.charAt(0)}</span>{step.body.slice(1)}
+                              </p>
+                            </li>
+                          ))}
+                        </ol>
+                      </section>
+
+                      {/* How we clean your carpet, step by step (owner-supplied text, word for word) */}
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Our carpet cleaning process</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">How will we clean your carpet?</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our carpet cleaning process is conducted in several steps. Our cleaners will take every necessary measure to make sure that not only your carpet is completely cleaned but also that the carpet cleaning itself is conducted in a safe, effective and efficient manner. The hot water extraction method is best applicable to standard/synthetic fabrics, however, we can also clean more delicate fabrics and even wool. Our cleaners will begin by assessing the nature and exact specificities of your carpet fibres. If there is any potential risk involved in the carpet cleaning or the cleaning itself is jeopardized our carpet cleaning specialist will let you know prior to the cleaning commencing.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our carpet cleaning service will be carried out in several steps. The first step is assessing the carpet, removing any small and easily movable items and furniture from the room and making space for the cleaning to take place and the actual carpet cleaning process.
+                        </p>
+                        <ol className="space-y-3">
+                          {[
+                            "Our carpet cleaning specialists will begin their task by assessing the fabric of your carpet, making sure that it is applicable to our Carpet Cleaning process without any risk of damage to your floor covering. Our carpet cleaning professionals will advise you if they determine that your carpet cannot be cleaned, which is extremely rare. If you are not sure about the specific material of your carpets, don't worry, our carpet cleaning technicians will always examine the carpet before they begin their task.",
+                            "Our carpet cleaners will then remove any easily movable furniture from the room so that they can make extra needed space. All easily movable items will be taken out and our carpet cleaners will maximize the space they can clean.",
+                            "Our carpet cleaning specialists will then provide carpet cleaning services using our specialized detergents and equipment.",
+                          ].map((step, n) => (
+                            <li key={n} className="flex gap-4 items-start p-4 bg-slate-50 rounded-xl border border-slate-100">
+                              <span className="w-8 h-8 rounded-full bg-[#00B5A4] text-white text-sm font-bold flex items-center justify-center shrink-0" aria-hidden="true">{n + 1}</span>
+                              <p className="text-slate-600 text-sm leading-relaxed">{step}</p>
+                            </li>
+                          ))}
+                        </ol>
+                      </section>
+
+                      {/* Hot water extraction, step by step (owner-supplied text, word for word) */}
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Cleaning carpets up to the highest professional standards</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Hot Water Extraction - Carpet Cleaning</h2>
+                        <h3 className="text-base sm:text-lg font-semibold text-teal-700">How is your carpet treated using the hot water extraction cleaning method?</h3>
+                        <ol className="grid sm:grid-cols-2 gap-4">
+                          {[
+                            { title: "Fibre Identification", body: "the process will begin with the carpet cleaning technician analyzing the fabric type and determining the correct cleaning techniques." },
+                            { title: "Preparing", body: "the cleaning system continues with the carpet cleaning preparing their equipment and detergents, usually very hot water will be mixed with the correct carpet cleaning detergents in the solution tank of the machine." },
+                            { title: "Vaccum", body: "the first step in the process is thoroughly hoovering your carpet, making sure that any larger debirs or dust is completely removed." },
+                            { title: "Treatment", body: "cleaning the carpet, the carpet cleaning process will continue with the actual carpet cleaning, the cleaning solution will be sprayed on top of your carpets, any stains, soiling, and dirt is dislodged by the cleaning detergents and water, and subsequently extracted with the suction attachment of the machine." },
+                            { title: "Drying", body: "due to the nature of the carpet cleaning equipment used, it utilizes a few sets of very powerful vacuums your carpet will simultaneously be partially dried during the cleaning process, and on completion, your carpet will be slightly damp and perfectly safe to walk on." },
+                            { title: "Stain Removal", body: "during the cleaning process the majority of common stains will be removed, for tougher and older spills and marks an additional step using detergents which are only designed for stain removal will be undertaken." },
+                            { title: "Inspection", body: "the carpet cleaning will thoroughly inspect the carpet and make sure it is cleaned up to the highest professional standards." },
+                          ].map((step, n) => (
+                            <li key={step.title} className="p-5 rounded-xl bg-white border border-slate-200 shadow-sm">
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className="w-8 h-8 rounded-full bg-[#00B5A4] text-white text-sm font-bold flex items-center justify-center shrink-0" aria-hidden="true">{n + 1}</span>
+                                <h4 className="font-bold text-slate-900">{step.title}</h4>
+                              </div>
+                              <p className="text-slate-600 text-sm leading-relaxed">
+                                <span className="capitalize">{step.body.charAt(0)}</span>{step.body.slice(1)}
+                              </p>
+                            </li>
+                          ))}
+                        </ol>
+                      </section>
+                    </>
                   )}
 
                   {/* Deep cleaning only: about our deep cleaning (owner-supplied text, word for word) */}
@@ -2369,6 +2650,124 @@ const ServiceDetail = () => {
                       ))}
                     </div>
                   </section>
+
+                  {/* Carpet cleaning only: our carpet cleaners (owner-supplied text, word for word) */}
+                  {isCarpet && (
+                    <>
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Carpet Cleaners Manchester</SectionLabel>
+                        <p className="text-sm font-bold uppercase tracking-wide text-teal-700">
+                          Carpet cleaning in Manchester delivered by professional cleaners
+                        </p>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          Expert Carpet Cleaners in Manchester you can trust
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our local, professional, insured, expert carpet cleaners in Manchester have years of experience in providing carpet cleaning services. Our expert cleaners in Manchester will observe your carpet and determine the best treatment possible. Our carpet cleaning services are applicable to all types of synthetic fabrics - nylon, polyester, polypropylene, and latex can be safely cleaned. Wool blends can be treated usually, however, 100% wool is not applicable to the hot water extraction method we use for our carpet cleaning services.
+                        </p>
+                        <p className="text-slate-800 font-semibold">Our Carpet Cleaning technicians in Manchester are:</p>
+                        <ul className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            { icon: <BadgeCheck size={16} />, text: "Certified professional carpet cleaners." },
+                            { icon: <ShieldCheck size={16} />, text: "Fully insured carpet cleaning technicians." },
+                            { icon: <Star size={16} />, text: "Thoroughly experienced in providing carpet cleaning services." },
+                            { icon: <Sparkles size={16} />, text: "Supplied with the latest carpet cleaning equipment and professional carpet cleaning detergents." },
+                          ].map((pt) => (
+                            <li key={pt.text} className="flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                              <span className="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">{pt.icon}</span>
+                              <span className="text-slate-700 text-sm font-medium leading-snug">{pt.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+
+                      {/* Carpet cleaners that care (owner-supplied text, word for word) */}
+                      <Divider />
+                      <section className="space-y-4">
+                        <SectionLabel>Carpet Cleaners That Care</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          Choose the best carpet cleaning professionals in Manchester
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our carpet cleaners in Manchester are always available for all of our carpet cleaning needs, as a customer-focused company and a leading provider of carpet cleaning solutions client satisfaction is our number one priority. Choosing our professional carpet cleaners in Manchester means that you are choosing expertly trained professionals, with years of experience and choosing Cleaniq Services for your next carpet cleaning service means you are choosing Manchester&apos;s absolute best carpet cleaning company. We only use certified cleaning detergents, the correct cleaning chemicals for your specific fabric type, that will not dry or damage your carpet in any way.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our professional carpet cleaners in Manchester will make sure your carpet is cleaned, sanitized and disinfected up to the highest professional standards. Our professional carpet cleaners in Manchester use the best carpet cleaning equipment and will make sure that dirt, grime, and bacteria are flushed and removed from your carpets, we take cleaning your carpets seriously and will make sure you receive the best professional carpet cleaning services in Manchester.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          All of our professional carpet cleaners are fully insured, you can have the peace of mind that scheduling our services means that you are putting your faith in expertly trained carpet cleaning professionals with years of experience. Cleaniq Services can deliver both commercial carpet cleaning solutions and domestic carpet cleaning, to every client of every background in the entire Greater Manchester Service area.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                          <Link
+                            to={bookingLink}
+                            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors"
+                          >
+                            <Calendar size={16} /> Book now
+                          </Link>
+                          <a
+                            href="tel:+447846726428"
+                            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors"
+                          >
+                            <Phone size={16} /> Call now
+                          </a>
+                        </div>
+                      </section>
+
+                      {/* Our carpet cleaning method (owner-supplied text; "Clean Services" typo corrected to our name) */}
+                      <Divider />
+                      <section className="space-y-4">
+                        <SectionLabel>Our Carpet Cleaning Method</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                          Our Carpet Cleaning Method is called Hot-Water Extraction.
+                        </h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our Carpet Cleaning method is called hot-water extraction, the method is universally recognized as the strongest method available on the market today. Our carpet cleaning specialists will come equipped with the latest up to date equipment and certified carpet cleaning detergents to produce outstanding cleaning service.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our Carpet Cleaning Method is called hot-water extraction. The method uses specialized detergents and equipment to produce exceptional carpet cleaning results. Our carpet cleaning technicians are specially trained professionals with many years of experience in providing carpet cleaning services. Our carpet cleaning technicians have the needed knowledge and expertise to provide you with an exceptional carpet cleaning service. If you are looking for the best carpet cleaning service in Manchester look no further than Cleaniq Services and our Manchester Carpet Cleaning services. Our experienced carpet cleaners will work hard to make sure your carpets are refreshed, clean, disinfected, and look as good as new!
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our Carpet Cleaning method will use specialized detergents and equipment to make sure your carpets are completely clean, disinfected and sanitized. We will provide all necessary cleaning solutions and equipment to provide you with our Manchester Carpet Cleaning service. The technicians will mix hot water along with certified carpet cleaning detergents in the solution tank of the carpet cleaning machine. This solution will be sprayed on top of your carpet and will dissolve and dislodge and dirt, soiling or stains from deep inside the fibres of your carpets. This method is recognized as the strongest one available today. The carpet cleaning solution along with any dirt will be sucked out by the powerful suction attachment of our machines.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          The hot water extraction method not only cleans your carpet but also disinfects and sanitized them as well. Because the cleaning solution permeates deep in the carpet fibres and is removed b the suction attachment of the machine our Carpet Cleaning service will not only clean but also disinfect your carpets. A lot of bacteria, mites and viruses lurk deep inside your carpet fibres. Our Carpet Cleaning service will eliminate up to 99.9% of bacteria and viruses inside your carpet fibres. Our Carpet Cleaning service rejuvenates your carpets but on top of that, you also get essentially free disinfection if you book our Carpet Cleaning Service in Manchester today. Our Carpet Cleaning service will remove any potentially harmful pathogens, viruses and bacteria.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our Carpet Cleaning method is the best one available for removing stains. If there are any pesky, stubborn stains on your carpet Our Carpet Cleaning service is the answer. Because the method uses certified and powerful carpet cleaning detergents and stains will be dissolved and will be removed. Common stains can be easily eliminated by our carpet cleaning specialists. If the stain has not sat too long in the carpet and is treated as soon as possible it is very easy for our carpet cleaning technicians to eliminate it. Older stains and stains of a chemical nature can still be treaded and will be less visible, however, complete elimination of such stains can never be guaranteed. The condition of your carpets will be greatly improved by our Carpet Cleaning.
+                        </p>
+                        <p className="text-slate-800 font-semibold">
+                          Choose our Carpet Cleaning services in Manchester today and take advantage of a great number of benefits.
+                        </p>
+                        <div className="grid grid-cols-3 gap-3">
+                          {[
+                            { icon: <Calendar size={18} />, text: "Easy Scheduling." },
+                            { icon: <BadgeCheck size={18} />, text: "Bespoke quotes." },
+                            { icon: <Clock size={18} />, text: "Short-notice availability" },
+                          ].map((b) => (
+                            <div key={b.text} className="flex flex-col items-center text-center gap-2 rounded-xl bg-teal-50 border border-teal-100 p-4">
+                              <span className="w-10 h-10 rounded-full bg-white text-teal-600 flex items-center justify-center">{b.icon}</span>
+                              <span className="text-sm font-semibold text-slate-800">{b.text}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                          <a
+                            href="tel:+447846726428"
+                            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors"
+                          >
+                            <Phone size={16} /> Call now
+                          </a>
+                          <Link
+                            to={bookingLink}
+                            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors"
+                          >
+                            <Calendar size={16} /> Book now
+                          </Link>
+                        </div>
+                      </section>
+                    </>
+                  )}
 
                   {/* End of tenancy only: convenience + personalised discount (owner-supplied text; another
                       company's name and phone number replaced with ours) */}
@@ -2767,13 +3166,34 @@ const ServiceDetail = () => {
                   <section>
                     <SectionLabel>Frequently asked questions</SectionLabel>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
-                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : isEOT ? "Frequently Asked Questions: End of Tenancy Cleaning Manchester" : `${service.heading} — FAQs`}
+                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : isEOT ? "Frequently Asked Questions: End of Tenancy Cleaning Manchester" : isCarpet ? "Frequently Asked Questions: Carpet Cleaning Manchester" : `${service.heading} — FAQs`}
                     </h2>
                     <div className="mt-4">
                       {pageFaqs.map((faq, i) => (
-                        <FAQItem key={i} q={isDeep || isEOT ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
+                        <FAQItem key={i} q={isDeep || isEOT || isCarpet ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
                       ))}
                     </div>
+                    {isCarpet && (
+                      <div className="mt-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white">
+                        {/* Owner-supplied text; another company's phone number replaced with ours */}
+                        <h3 className="text-lg sm:text-xl font-bold mb-3">
+                          Combine our Carpet Cleaning in Manchester with any one of our additional services for a personalized discount
+                        </h3>
+                        <p className="text-teal-50 leading-relaxed mb-6">
+                          If you would like to schedule our Carpet Cleaning you can contact us on{" "}
+                          <a href="tel:+447846726428" className="font-bold underline underline-offset-2 hover:text-white">07846 726428</a>, Monday to Sunday at a time convenient for you. Our customer service representatives will assist you with any questions related to our Carpet Cleaning you may have. Alternatively, you can fill out our corresponding{" "}
+                          <Link to="/get-a-quote" className="font-bold underline underline-offset-2 hover:text-white">Carpet Cleaning request form</Link> linked below.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Link to={bookingLink} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors">
+                            <Calendar size={16} /> Book now
+                          </Link>
+                          <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors">
+                            <Phone size={16} /> Call now
+                          </a>
+                        </div>
+                      </div>
+                    )}
                     {isEOT && (
                       <div className="mt-8 p-6 rounded-2xl bg-teal-50 border border-teal-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <p className="font-bold text-slate-900">Book your end of tenancy clean</p>
