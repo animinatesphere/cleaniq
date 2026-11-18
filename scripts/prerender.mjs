@@ -104,6 +104,23 @@ async function latestPosts() {
   }
 }
 
+// The real UK services and prices from the booking system, for the /services page HTML.
+// If the API can't be reached, the page shows placeholder cards until it loads in the browser.
+async function liveServices() {
+  const api = (process.env.VITE_API_URL || "https://api.cleaniqservices.com/api").replace(/\/+$/, "");
+  try {
+    const res = await fetch(`${api}/services?region=UK&booking=1`, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`services API ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error("unexpected response");
+    console.log(`[prerender] services page: ${data.length} live services built in`);
+    return data;
+  } catch (err) {
+    console.warn(`[prerender] services not built in: ${err.message}`);
+    return null;
+  }
+}
+
 async function main() {
   const templatePath = path.join(dist, "index.html");
   const serverEntry = path.join(root, "dist-ssr", "entry-server.js");
@@ -124,6 +141,8 @@ async function main() {
   globalThis.sessionStorage ??= memoryStorage();
   const homeBlog = await latestPosts();
   globalThis.__HOME_BLOG__ = homeBlog;
+  const services = await liveServices();
+  globalThis.__SERVICES__ = services;
   const { render, PRERENDER_ROUTES } = await import(pathToFileURL(serverEntry).href);
   // The page list comes from the app's own area/service data (src/entry-server.jsx); the old
   // public/sitemap.xml is only a fallback for older builds.
@@ -139,6 +158,10 @@ async function main() {
       if (route === "/" && homeBlog?.length) {
         const json = JSON.stringify(homeBlog).replace(/</g, "\\u003c");
         page = page.replace("</head>", `<script>window.__HOME_BLOG__=${json}</script>\n</head>`);
+      }
+      if (route === "/services" && services?.length) {
+        const json = JSON.stringify(services).replace(/</g, "\\u003c");
+        page = page.replace("</head>", `<script>window.__SERVICES__=${json}</script>\n</head>`);
       }
       fs.writeFileSync(out, page);
       ok++;

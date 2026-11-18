@@ -49,18 +49,34 @@ const cleanKey = (str) =>
 
 const Services = () => {
   const { region } = useRegion();
-  const [dbServices, setDbServices] = React.useState([]);
+  // UK services built into the page HTML at build time (scripts/prerender.mjs), so the page shows real
+  // services straight away and search engines see them. Refreshed live from the API below.
+  const builtIn =
+    region.id === "UK"
+      ? (typeof window !== "undefined" && window.__SERVICES__) || globalThis.__SERVICES__ || null
+      : null;
+  const [dbServices, setDbServices] = React.useState(builtIn || []);
+  // Until real services arrive we show empty placeholder cards, never made-up names or prices.
+  const [servicesLoaded, setServicesLoaded] = React.useState(!!builtIn?.length);
+  const firstRegion = React.useRef(region.id);
 
   React.useEffect(() => {
+    if (region.id !== firstRegion.current) {
+      firstRegion.current = region.id;
+      setDbServices([]);
+      setServicesLoaded(false);
+    }
     const fetchServices = async () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/services?region=${region.id}&booking=1&t=${Date.now()}`,
         );
         const data = await response.json();
-        setDbServices(data || []);
+        if (Array.isArray(data)) setDbServices(data);
       } catch (error) {
         console.error("Error fetching services:", error);
+      } finally {
+        setServicesLoaded(true);
       }
     };
     fetchServices();
@@ -128,8 +144,6 @@ const Services = () => {
       tag: "Reliable domestic Cleaners",
       defaultName: "Residential Cleaning",
       defaultDesc: "Reliable, weekly or bi-weekly cleaning for your home.",
-      defaultRateUK: "From £17.90/hr",
-      defaultRateNG: "From ₦15,000",
     },
     commercial: {
       imageAlt: "Clean, empty open-plan office floor and kitchen area after a commercial clean",
@@ -147,8 +161,6 @@ const Services = () => {
       tag: "Expert office cleaning",
       defaultName: "Office Cleaning",
       defaultDesc: "Professional janitorial services for your workspace.",
-      defaultRateUK: "From £19.90/hr",
-      defaultRateNG: "From ₦18,000",
     },
     move: {
       imageAlt: "Fridge cleaned inside, shelves and drawers spotless, after a deep clean by Cleaniq Services",
@@ -163,8 +175,6 @@ const Services = () => {
       tag: "Specialist deep cleaning",
       defaultName: "Deep Clean",
       defaultDesc: "Specialized deep cleaning services for a total refresh.",
-      defaultRateUK: "From £24.90/hr",
-      defaultRateNG: "From ₦25,000",
     },
     airbnb: {
       imageAlt: "Guest-ready bedroom with fresh towels on the bed after an Airbnb turnover clean by Cleaniq Services",
@@ -182,8 +192,6 @@ const Services = () => {
       tag: "Short-let specialist",
       defaultName: "Airbnb Cleaning",
       defaultDesc: "Professional turnover services for your short-let rental.",
-      defaultRateUK: "From £21.90/hr",
-      defaultRateNG: "From ₦20,000",
     },
     tenancy: {
       imageAlt: "Clean kitchen with spotless worktops, oven, washing machine and gleaming tiled floor after an end of tenancy clean by Cleaniq Services",
@@ -201,8 +209,6 @@ const Services = () => {
       defaultName: "End of Tenancy",
       defaultDesc:
         "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
-      defaultRateUK: "From £29.90/hr",
-      defaultRateNG: "From ₦30,000",
     },
     construction: {
       imageAlt: "Cleaner in a dust mask and gloves wiping down a window after building work",
@@ -221,8 +227,6 @@ const Services = () => {
       defaultName: "Post Construction Cleaning",
       defaultDesc:
         "Specialist post-construction and renovation cleaning to clear dust, debris and residue, leaving your property spotless and ready to use.",
-      defaultRateUK: "From £26.90/hr",
-      defaultRateNG: "From ₦28,000",
     },
     carpet: {
       imageAlt: "Grey carpeted bedroom in a Manchester flat, ready for a professional carpet clean by Cleaniq Services",
@@ -237,8 +241,6 @@ const Services = () => {
       tag: "Carpet & rug specialist",
       defaultName: "Carpet Cleaning",
       defaultDesc: "Professional carpet cleaning to remove stains, odours, and allergens.",
-      defaultRateUK: "From £80 flat rate",
-      defaultRateNG: "From ₦20,000",
     },
     oven: {
       imageAlt: "Oven with clean glass door and racks after an oven clean by Cleaniq Services",
@@ -253,8 +255,6 @@ const Services = () => {
       tag: "Oven cleaning specialist",
       defaultName: "Oven Cleaning",
       defaultDesc: "Professional oven cleaning — grease-free, sparkling results.",
-      defaultRateUK: "From £60 flat rate",
-      defaultRateNG: "From ₦15,000",
     },
     general: {
       imageAlt: "Cleaniq Services cleaner in uniform and yellow gloves cleaning a kitchen appliance",
@@ -269,21 +269,11 @@ const Services = () => {
       tag: "Regular home cleaning",
       defaultName: "General Cleaning",
       defaultDesc: "Reliable regular cleaning for a consistently spotless home.",
-      defaultRateUK: "From £17.90/hr",
-      defaultRateNG: "From ₦15,000",
     },
   };
 
   const serviceDetails = React.useMemo(() => {
     const bases = dbServices.filter((s) => s.category === "Base");
-    const keys = [
-      "tenancy",
-      "residential",
-      "commercial",
-      "move",
-      "airbnb",
-      "construction",
-    ];
 
     const mapped = bases.map((s) => {
       const key = getLayoutKey(s.name);
@@ -303,26 +293,24 @@ const Services = () => {
       };
     });
 
-    // Fallback if layout key is missing
-    keys.forEach((k) => {
-      if (!mapped.some((m) => m.id === k)) {
-        const assets = layoutAssets[k];
-        const defaultPricing = region.id === "UK" ? assets.defaultRateUK : assets.defaultRateNG;
-        mapped.push({
-          id: k,
-          title: assets.defaultName,
-          dbName: assets.defaultName,
-          tag: assets.tag,
-          icon: assets.icon,
-          image: assets.image,
-          imageAlt: assets.imageAlt,
-          features: assets.features,
-          description: assets.defaultDesc,
-          pricing: defaultPricing,
-          rawRate: parseFloat(defaultPricing.replace(/[^0-9.]/g, "")) || Infinity,
-        });
-      }
-    });
+    // Commercial cleaning is quote-only, so its card is always shown even if it isn't a bookable
+    // service. No other card is invented: only services that really exist in the booking system appear.
+    if (!mapped.some((m) => m.id === "commercial")) {
+      const assets = layoutAssets.commercial;
+      mapped.push({
+        id: "commercial",
+        title: assets.defaultName,
+        dbName: assets.defaultName,
+        tag: assets.tag,
+        icon: assets.icon,
+        image: assets.image,
+        imageAlt: assets.imageAlt,
+        features: assets.features,
+        description: assets.defaultDesc,
+        pricing: "",
+        rawRate: Infinity,
+      });
+    }
 
     // Commercial cleaning isn't booked online: the card asks for a quote on the contact page.
     const withCommercial = mapped.map((m) =>
@@ -449,7 +437,25 @@ const Services = () => {
 
         {/* Detailed Services */}
         <div className="space-y-12 lg:space-y-24">
-          {serviceDetails.map((service, i) => (
+          {/* While services load: plain placeholder cards, no names or prices */}
+          {!servicesLoaded &&
+            [0, 1, 2].map((i) => (
+              <div
+                key={`placeholder-${i}`}
+                aria-hidden="true"
+                className={`flex flex-col lg:flex-row gap-8 lg:gap-16 items-center p-5 md:p-12 rounded-[32px] md:rounded-[60px] glass animate-pulse ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}
+              >
+                <div className="lg:w-1/2 w-full aspect-video md:aspect-4/3 rounded-[32px] md:rounded-[48px] bg-slate-200/70" />
+                <div className="lg:w-1/2 w-full space-y-4">
+                  <div className="h-4 w-1/3 rounded-full bg-slate-200/70" />
+                  <div className="h-10 w-2/3 rounded-2xl bg-slate-200/70" />
+                  <div className="h-4 w-full rounded-full bg-slate-200/70" />
+                  <div className="h-4 w-5/6 rounded-full bg-slate-200/70" />
+                  <div className="h-12 w-40 rounded-full bg-slate-200/70" />
+                </div>
+              </div>
+            ))}
+          {servicesLoaded && serviceDetails.map((service, i) => (
             <motion.div
               key={service.id}
               initial={{ opacity: 0, y: 50 }}
