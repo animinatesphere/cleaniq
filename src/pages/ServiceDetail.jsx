@@ -513,6 +513,54 @@ const AIRBNB_EXTENDED = {
       q: "Do you cover all Manchester Airbnb areas?",
       a: "Yes. We cover all Greater Manchester postcodes including City Centre, Salford, Didsbury, Chorlton, Fallowfield, Stretford, and surrounding areas.",
     },
+    {
+      q: "What is included in an Airbnb turnover clean?",
+      a: "Every turnover covers the kitchen, bedrooms, bathrooms, living areas and hallways: surfaces wiped, floors vacuumed and mopped, bathrooms cleaned, beds made with fresh linen, towels folded and bins emptied. The full Airbnb turnover cleaning checklist is on this page.",
+    },
+    {
+      q: "How much does Airbnb cleaning cost in Manchester?",
+      a: "The price depends on the size of your property and what it needs. Book online to see your price before you pay, or contact us for a free quote if you manage several properties.",
+    },
+    {
+      q: "Do I need to be at the property during the clean?",
+      a: "No. Just tell us how our cleaner can get in, for example a key safe or smart lock code, when you book.",
+    },
+    {
+      q: "Are your Airbnb cleaners vetted?",
+      a: "Yes. Every Cleaniq Services cleaner is vetted and background checked before their first job.",
+    },
+    {
+      q: "What if I'm not happy with the clean?",
+      a: "Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge.",
+    },
+    {
+      q: "Do you clean holiday lets and serviced apartments too?",
+      a: "Yes. Our short-let cleaning covers Airbnb, Booking.com and Vrbo listings, holiday lets and serviced apartments across Greater Manchester.",
+    },
+    {
+      q: "Can I add a deep clean or carpet cleaning to my Airbnb clean?",
+      a: "Yes. Add a deep clean, oven cleaning or carpet cleaning when your property needs more than a turnover. Book online or ask us when you call.",
+    },
+    {
+      q: "Can you clean on the same day as check-out and check-in?",
+      a: "Yes. Tell us your guests' check-out and check-in times when you book and we'll plan the clean to fit between them. Book early for busy weekends and event days in Manchester.",
+    },
+    {
+      q: "How often should I deep clean my Airbnb?",
+      a: "Most hosts book a deep clean every few months, depending on how busy the property is. A deep clean reaches the areas a turnover clean can't cover between guests, such as inside appliances and cupboards and behind furniture.",
+    },
+    {
+      q: "Can you clean my property before I list it on Airbnb?",
+      a: "Yes. Book a deep clean before your first guest arrives, so your property starts spotless and your listing photos show it at its best.",
+    },
+    {
+      q: "Can my Airbnb co-host or property manager book the cleaning?",
+      a: "Yes. Anyone who looks after your Airbnb can book Airbnb cleaning with us online or by phone. Just make sure they share the check-out time, check-in time and access details for the property.",
+    },
+    {
+      q: "Do you clean Airbnb properties after a long stay?",
+      a: "Yes. After a long Airbnb stay, a standard turnover may not be enough. Book a deep clean to reset the property before your next Airbnb guest arrives.",
+    },
   ],
 
 
@@ -1566,6 +1614,7 @@ const ServiceDetail = () => {
   const ext = service?.extended ? EXTENDED_MAP[service.extended] : null;
   const isDeep = serviceSlug === "deep-cleaning-manchester";
   const isCarpet = serviceSlug === "carpet-cleaning-manchester";
+  const isAirbnb = serviceSlug === "airbnb-cleaning-manchester";
   const pageFaqs = isDeep ? DEEP_FAQS : isEOT ? EOT_FAQS : ext?.faqs || [];
   const [liveServices, setLiveServices] = React.useState([]);
   const liveMatch = matchServiceForSlug(serviceSlug, liveServices);
@@ -1985,6 +2034,77 @@ const ServiceDetail = () => {
           </section>
         )}
 
+        {/* Airbnb cleaning only: intro. Written from facts already on the site (vetted cleaners, 48-hour re-clean,
+            turnover checklist, damage reporting); no prices or opening times beyond what we publish. */}
+        {isAirbnb && (
+          <section className="px-4 sm:px-6 lg:px-10 xl:px-16 pt-10 sm:pt-14 space-y-8">
+            <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10 grid lg:grid-cols-5 gap-8 items-center">
+              <div className="lg:col-span-3 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Airbnb Cleaning in Manchester</h2>
+                <ul className="space-y-2.5">
+                  {["Fast turnovers between check-out and check-in", "Fresh linen, made beds and folded towels", "A clean, guest-ready property for every new arrival"].map((pt) => (
+                    <li key={pt} className="flex gap-3 items-center text-slate-700 font-medium">
+                      <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+                        <Check size={13} className="stroke-[3]" />
+                      </span>
+                      {pt}
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-2">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to={bookingLink} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors">
+                    <Calendar size={16} /> Book now
+                  </Link>
+                  <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors">
+                    <Phone size={16} /> Call now
+                  </a>
+                </div>
+                </div>
+              </div>
+              <div className="lg:col-span-2 space-y-4">
+                <div className="rounded-xl bg-[#0A1520] text-white p-5">
+                  <p className="text-sm text-slate-300 mb-2">Questions about cleaning your Airbnb? Call us:</p>
+                  <a href="tel:+447846726428" className="flex items-center gap-2 text-2xl font-bold text-teal-400 hover:text-teal-300">
+                    <Phone size={20} /> 07846 726428
+                  </a>
+                  <p className="text-xs text-slate-400 mt-2">Mon–Fri 8am–6pm, Sat 9am–4pm</p>
+                </div>
+                <div className="rounded-xl bg-white border border-slate-200 p-5">
+                  <p className="text-sm font-semibold text-slate-500 mb-3">This is a service for:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Airbnb Hosts", "Short-Let Landlords", "Property Managers"].map((who) => (
+                      <span key={who} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold">
+                        <Check size={14} className="stroke-[3]" /> {who}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-10">
+              <p className="text-xs font-bold tracking-widest uppercase text-teal-600 mb-2">Manchester Airbnb Cleaning</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">Short-let and Airbnb cleaners in Manchester you can rely on</h2>
+              <div className="space-y-4 text-slate-600 leading-relaxed">
+                <p>
+                  Cleaniq Services provides Airbnb cleaning in Manchester and across Greater Manchester for hosts, short-let landlords and property managers. Our local Airbnb cleaners turn your property around between guests, so every new arrival walks into a clean, fresh and fully prepared home.
+                </p>
+                <p>
+                  Guests judge a short-let in the first few minutes. Dust on a shelf, a hair in the shower or a crumpled towel can be enough to cost you a star. Our Airbnb turnover cleans follow the same checklist on every visit, so the standard does not drop when your calendar gets busy.
+                </p>
+                <p>
+                  Whether you have one apartment in Manchester City Centre or several properties across Salford, Trafford and Stockport, you can book your Airbnb cleaning online in a few minutes or call us on{" "}
+                  <a href="tel:+447846726428" className="text-teal-700 font-semibold hover:underline">07846 726428</a> for a free quote. Need more than a turnover? Add a{" "}
+                  <Link to="/service/deep-cleaning-manchester" className="text-teal-700 font-semibold hover:underline">deep clean</Link>,{" "}
+                  <Link to="/service/oven-cleaning-manchester" className="text-teal-700 font-semibold hover:underline">oven cleaning</Link> or{" "}
+                  <Link to="/service/carpet-cleaning-manchester" className="text-teal-700 font-semibold hover:underline">carpet cleaning</Link> when your property needs a bigger refresh.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ══ PAGE BODY ══════════════════════════════════════════════ */}
         <div className="px-4 sm:px-6 lg:px-10 xl:px-16 py-10 sm:py-14">
           <div className="grid md:grid-cols-3 gap-10 md:gap-14 items-start">
@@ -2336,6 +2456,104 @@ const ServiceDetail = () => {
                     </>
                   )}
 
+                  {/* Airbnb cleaning only: how it works and benefits */}
+                  {isAirbnb && (
+                    <>
+                      <Divider />
+                      <section>
+                        <SectionLabel>How It Works</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">How does our Airbnb cleaning in Manchester work?</h2>
+                        <p className="text-slate-600 leading-relaxed mb-6">
+                          Booking Airbnb cleaning in Manchester with Cleaniq Services is simple. We know that short-let hosts work to tight schedules, with one guest checking out in the morning and the next arriving in the afternoon. That is why our Airbnb cleaning service is planned around your check-out and check-in times, not ours. Whether you need a one-off turnover after a busy weekend or a cleaner you can rely on after every stay, the process is the same: you tell us what the property needs, our vetted cleaner carries out the turnover using our checklist, and you get back a clean, guest-ready property that is ready for your next booking.
+                        </p>
+                        <ol className="grid sm:grid-cols-2 gap-4">
+                          {[
+                            { title: "Book", body: "Book your Airbnb clean online or call us. Tell us your guests' check-out and check-in times, the size of the property and how our cleaner can get in." },
+                            { title: "Turnover clean", body: "A vetted Cleaniq Services cleaner arrives after your guests leave and works through our Airbnb turnover checklist, room by room." },
+                            { title: "Check", body: "Before leaving, the cleaner checks the property. If anything is damaged or missing, we let you know so you can deal with it before the next guest arrives." },
+                            { title: "Guest-ready", body: "Your property is clean, the beds are made and fresh towels are out, ready for your next guest to check in." },
+                          ].map((step, n) => (
+                            <li key={step.title} className="p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm">
+                              <div className="flex items-center gap-3 mb-3">
+                                <span className="w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0" aria-hidden="true">{n + 1}</span>
+                                <h3 className="font-bold text-slate-900">{step.title}</h3>
+                              </div>
+                              <p className="text-slate-600 text-sm leading-relaxed">{step.body}</p>
+                            </li>
+                          ))}
+                        </ol>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Benefits</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Benefits of professional Airbnb cleaning in Manchester</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Cleaning is one of the biggest jobs in running an Airbnb, and one of the most important. On Airbnb, Booking.com and Vrbo, guests leave a review after every stay, and cleanliness is one of the first things they comment on. A single bad review about hair in the shower or dust on the shelves can put future guests off booking. Professional Airbnb cleaning in Manchester takes that worry away. Our cleaners work to the same standard on every visit, so you can accept bookings with confidence, keep your ratings high and spend your time on the parts of hosting you enjoy, rather than cleaning between guests.
+                        </p>
+                        <ul className="grid sm:grid-cols-2 gap-4">
+                          {[
+                            { icon: <Star size={18} />, title: "Better cleanliness reviews", body: "Cleanliness is one of the things guests rate after every stay. A consistent, professional clean helps protect your rating and your place in search results." },
+                            { icon: <BadgeCheck size={18} />, title: "The same standard every time", body: "Our cleaners follow a set turnover checklist, so your hundredth guest gets the same welcome as your first." },
+                            { icon: <Clock size={18} />, title: "More time for you", body: "No more rushing across Manchester between check-out and check-in. We handle the cleaning so you can focus on your guests and your bookings." },
+                            { icon: <ShieldCheck size={18} />, title: "Problems spotted early", body: "Damage, missing items or maintenance issues are reported to you, not discovered by your next guest." },
+                            { icon: <Calendar size={18} />, title: "Fits around your bookings", body: "We plan each clean around your guests' check-out and check-in times." },
+                            { icon: <Sparkles size={18} />, title: "48-hour re-clean guarantee", body: "If something isn't right, tell us within 48 hours and we'll send a cleaner back to put it right, free of charge." },
+                          ].map((b) => (
+                            <li key={b.title} className="p-5 rounded-xl bg-slate-50 border border-slate-100">
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className="w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">{b.icon}</span>
+                                <h3 className="font-bold text-slate-900">{b.title}</h3>
+                              </div>
+                              <p className="text-slate-600 text-sm leading-relaxed">{b.body}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Every Type of Short-Let</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Airbnb cleaning for every type of short-let in Manchester</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our Airbnb cleaning service in Manchester is designed for all kinds of short-term rental. Every property is different, so tell us about yours when you book: the number of bedrooms and bathrooms, how many guests it sleeps, and anything your guests should find on arrival. Our cleaners follow your house standards as well as our own turnover checklist, so your listing photos and the real property always match. If you are new to hosting, you can also book a{" "}
+                          <Link to="/service/deep-cleaning-manchester" className="text-teal-700 font-semibold hover:underline">deep clean</Link> before your first guest arrives, so your listing starts with a spotless home and great first reviews.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {["Apartments & studios", "Houses", "Serviced apartments", "Holiday lets", "Rooms in shared homes", "Booking.com & Vrbo listings"].map((t) => (
+                            <span key={t} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold">
+                              <Check size={14} className="stroke-[3]" /> {t}
+                            </span>
+                          ))}
+                        </div>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Turnover or Deep Clean?</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Airbnb turnover clean or deep clean: what's the difference?</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Most Manchester hosts need both. A turnover clean keeps the property guest-ready between stays, and a deep clean every so often stops dirt building up in the places a quick turnover can't reach.
+                        </p>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-sm">
+                            <h3 className="font-bold text-slate-900 mb-2">Airbnb turnover clean</h3>
+                            <p className="text-slate-600 text-sm leading-relaxed">
+                              A turnover clean happens between every guest. It gets the property ready quickly: the kitchen and bathrooms are cleaned, floors are vacuumed and mopped, beds are made with fresh linen, towels are put out and the rubbish is taken away. It follows our Airbnb turnover checklist and is planned around your check-out and check-in times.
+                            </p>
+                          </div>
+                          <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-sm">
+                            <h3 className="font-bold text-slate-900 mb-2">Deep clean</h3>
+                            <p className="text-slate-600 text-sm leading-relaxed">
+                              A deep clean goes further and is best booked every few months, or before you list a property for the first time. It reaches the areas a turnover can't cover in the time between guests: inside appliances and cupboards, behind furniture, skirting boards, limescale and built-up grime. Read more about our{" "}
+                              <Link to="/service/deep-cleaning-manchester" className="text-teal-700 font-semibold hover:underline">deep cleaning in Manchester</Link>.
+                            </p>
+                          </div>
+                        </div>
+                      </section>
+                    </>
+                  )}
+
                   {/* Deep cleaning only: about our deep cleaning (owner-supplied text, word for word) */}
                   {serviceSlug === "deep-cleaning-manchester" && (
                     <>
@@ -2650,6 +2868,131 @@ const ServiceDetail = () => {
                       ))}
                     </div>
                   </section>
+
+                  {/* Airbnb cleaning only: our Airbnb cleaners and extra services */}
+                  {isAirbnb && (
+                    <>
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Airbnb Cleaners Manchester</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Expert Airbnb cleaners in Manchester you can trust</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Every Airbnb cleaner who works with Cleaniq Services is vetted and background checked before their first job. They know what hosts and guests expect from an Airbnb and pay attention to the small details guests notice: fresh towels, made beds, clean mirrors, empty bins and a kitchen that's ready to use.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          Our Airbnb cleaners in Manchester understand that an Airbnb is your guests' home for a few nights and a business for you. They work carefully, respect your property and its contents, and leave everything where your guests expect to find it. If they notice anything that needs your attention, such as a broken item, a missing piece of inventory or a maintenance problem, we let you know straight away so you can sort it out before your next guest arrives.
+                        </p>
+                        <p className="text-slate-800 font-semibold">Our Airbnb cleaners in Manchester are:</p>
+                        <ul className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            { icon: <ShieldCheck size={16} />, text: "Vetted and background checked." },
+                            { icon: <BadgeCheck size={16} />, text: "Trained to follow our Airbnb turnover checklist." },
+                            { icon: <MapPin size={16} />, text: "Local to Manchester and Greater Manchester." },
+                            { icon: <Star size={16} />, text: "Backed by our 48-hour re-clean guarantee." },
+                          ].map((pt) => (
+                            <li key={pt.text} className="flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100">
+                              <span className="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">{pt.icon}</span>
+                              <span className="text-slate-700 text-sm font-medium leading-snug">{pt.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Extra Services</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Combine your Airbnb cleaning with our other services</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          An Airbnb gets far more use than a normal home. Guests come and go every few days, cook in the kitchen, use the bathroom and walk across the carpets, and over time dirt builds up in places a regular turnover clean does not reach. Every few months, give your property a bigger refresh by adding one of our other cleaning services in Manchester. A deep clean, oven clean or carpet clean keeps your Airbnb looking its best in photos and in person, helps your furniture and fittings last longer, and gives your guests one more reason to leave a five-star review. Choose from:
+                        </p>
+                        <ul className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            { to: "/service/deep-cleaning-manchester", name: "Deep Cleaning", body: "A top-to-bottom clean of the areas a turnover doesn't reach." },
+                            { to: "/service/oven-cleaning-manchester", name: "Oven Cleaning", body: "Burnt-on grease removed so guests can cook in a clean oven." },
+                            { to: "/service/carpet-cleaning-manchester", name: "Carpet Cleaning", body: "Fresh carpets, stairs and upholstery after a busy season." },
+                            { to: "/service/end-of-tenancy-cleaning-manchester", name: "End of Tenancy Cleaning", body: "For when a property moves from short-let to long-term tenants, or the other way round." },
+                          ].map((x) => (
+                            <li key={x.to}>
+                              <Link to={x.to} className="block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors">
+                                <span className="flex items-center gap-2 font-bold text-teal-700 mb-1">{x.name} <ArrowRight size={14} /></span>
+                                <span className="text-slate-600 text-sm leading-relaxed">{x.body}</span>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to={bookingLink} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors">
+                    <Calendar size={16} /> Book now
+                  </Link>
+                  <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors">
+                    <Phone size={16} /> Call now
+                  </a>
+                </div>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Short-Let Cleaning Across Manchester</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Airbnb cleaning in Manchester's busiest short-let areas</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Manchester welcomes visitors all year round for football, concerts, conferences, graduations and city breaks, which keeps Airbnb properties busy and turnovers tight. Our Airbnb cleaners cover popular short-let areas including Manchester City Centre, Ancoats and the Northern Quarter, Deansgate, Castlefield and Spinningfields, Salford Quays and MediaCityUK, as well as Didsbury, Chorlton, Stockport, Trafford and the rest of Greater Manchester. Our office is at 20 Swan St in Ancoats, so we are never far from your property.
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          When big events fill the city, check-outs and check-ins often fall on the same day across many properties. Book your Airbnb cleaning early around busy weekends and event days, so we can plan your turnover around your guests and make sure your property is ready on time.
+                        </p>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>Hosting Tips</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Tips for keeping your Manchester Airbnb guest-ready</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          A great clean is easier when your property is set up for it. These simple habits help our cleaners turn your property around quickly and help you get more five-star reviews from your guests:
+                        </p>
+                        <ul className="space-y-3">
+                          {[
+                              "Keep at least two full sets of linen and towels for every bed, so one set can be washed while the other is in use.",
+                              "Use a key safe or smart lock, so your cleaner and your guests can get in without you being there.",
+                              "Set a check-out time that leaves enough time for a full clean before the next guest checks in.",
+                              "Keep spare toiletries, toilet rolls and bin bags in a locked cupboard, so they can be topped up between stays.",
+                              "Leave a short note asking guests to put rubbish in the bins and load the dishwasher before they leave.",
+                              "Read your reviews for comments about cleanliness and tell us, so we can pay extra attention to those areas.",
+                              "Book a deep clean every few months to deal with the build-up a turnover clean can't reach.",
+                          ].map((tip) => (
+                            <li key={tip} className="flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed">
+                              <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+                                <Check size={13} className="stroke-[3]" />
+                              </span>
+                              {tip}
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+
+                      <Divider />
+                      <section className="space-y-5">
+                        <SectionLabel>What Airbnb Guests Notice</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">What Airbnb guests notice first, and how our Airbnb cleaning covers it</h2>
+                        <p className="text-slate-600 leading-relaxed">
+                          Airbnb guests make up their minds about a property within minutes of arriving, and that first impression often decides their Airbnb review. Our Airbnb cleaning in Manchester focuses on the five things guests notice first:
+                        </p>
+                        <ul className="space-y-3">
+                          {[
+                              { title: "The bathroom", body: "Airbnb guests check the shower, toilet and sink first. Hair, limescale or a dirty plughole is the most common reason for a low Airbnb cleanliness rating, so our Airbnb cleaners give the bathroom extra attention on every turnover." },
+                              { title: "The bed", body: "Fresh, crease-free linen and plumped pillows tell Airbnb guests the property has been properly prepared. We change the linen and make every bed to the same neat standard." },
+                              { title: "The kitchen", body: "Airbnb guests want to cook without cleaning first. Worktops, hob, microwave, sink and fridge are wiped, and crockery and cutlery are checked and put back in place." },
+                              { title: "Floors and surfaces", body: "Crumbs, dust and marks stand out in listing-style rooms. Floors are vacuumed and mopped, and surfaces, shelves and TV units are dusted." },
+                              { title: "The smell", body: "A fresh-smelling property makes a great first impression. Bins are emptied, rubbish is taken away and the property is aired where possible, so your Airbnb feels fresh when guests walk in." },
+                          ].map((x) => (
+                            <li key={x.title} className="p-4 rounded-xl bg-white border border-slate-200">
+                              <h3 className="font-bold text-slate-900 mb-1">{x.title}</h3>
+                              <p className="text-slate-600 text-sm leading-relaxed">{x.body}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    </>
+                  )}
 
                   {/* Carpet cleaning only: our carpet cleaners (owner-supplied text, word for word) */}
                   {isCarpet && (
@@ -3142,6 +3485,26 @@ const ServiceDetail = () => {
                   <Divider />
 
                   {/* FAQs */}
+                  {isAirbnb && (
+                    <>
+                      <section className="rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9">
+                        <p className="text-xs font-bold tracking-widest uppercase text-teal-100 mb-2">Contact Us For a Free Quote</p>
+                        <h2 className="text-xl sm:text-2xl font-bold mb-3">Get a free quote for your Airbnb cleaning</h2>
+                        <p className="text-teal-50 leading-relaxed mb-6">
+                          Manage more than one Airbnb in Manchester, or have a property with special requirements? Contact Cleaniq Services for a free Airbnb cleaning quote. Tell us how many properties you have, how many bedrooms and bathrooms each one has, and how often your guests change over, and we will recommend the right cleaning for your Airbnb. Call us on 07846 726428, or fill out our quick quote form and we will get back to you. There is no obligation, and our team is happy to answer any questions you have about Airbnb cleaning in Manchester. We clean Airbnb properties across Manchester City Centre, Salford, Trafford, Stockport and the rest of Greater Manchester.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Link to="/get-a-quote" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors">
+                            Get a free quote <ArrowRight size={16} />
+                          </Link>
+                          <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors">
+                            <Phone size={16} /> 07846 726428
+                          </a>
+                        </div>
+                      </section>
+                      <Divider />
+                    </>
+                  )}
                   {isDeep && (
                     <>
                       <section className="rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9">
@@ -3166,11 +3529,11 @@ const ServiceDetail = () => {
                   <section>
                     <SectionLabel>Frequently asked questions</SectionLabel>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
-                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : isEOT ? "Frequently Asked Questions: End of Tenancy Cleaning Manchester" : isCarpet ? "Frequently Asked Questions: Carpet Cleaning Manchester" : `${service.heading} — FAQs`}
+                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : isEOT ? "Frequently Asked Questions: End of Tenancy Cleaning Manchester" : isCarpet ? "Frequently Asked Questions: Carpet Cleaning Manchester" : isAirbnb ? "Frequently Asked Questions: Airbnb Cleaning Manchester" : `${service.heading} — FAQs`}
                     </h2>
                     <div className="mt-4">
                       {pageFaqs.map((faq, i) => (
-                        <FAQItem key={i} q={isDeep || isEOT || isCarpet ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
+                        <FAQItem key={i} q={isDeep || isEOT || isCarpet || isAirbnb ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
                       ))}
                     </div>
                     {isCarpet && (
@@ -3183,6 +3546,23 @@ const ServiceDetail = () => {
                           If you would like to schedule our Carpet Cleaning you can contact us on{" "}
                           <a href="tel:+447846726428" className="font-bold underline underline-offset-2 hover:text-white">07846 726428</a>, Monday to Sunday at a time convenient for you. Our customer service representatives will assist you with any questions related to our Carpet Cleaning you may have. Alternatively, you can fill out our corresponding{" "}
                           <Link to="/get-a-quote" className="font-bold underline underline-offset-2 hover:text-white">Carpet Cleaning request form</Link> linked below.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Link to={bookingLink} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors">
+                            <Calendar size={16} /> Book now
+                          </Link>
+                          <a href="tel:+447846726428" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors">
+                            <Phone size={16} /> Call now
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    {isAirbnb && (
+                      <div className="mt-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white">
+                        <h3 className="text-lg sm:text-xl font-bold mb-3">Book your Airbnb cleaning in Manchester</h3>
+                        <p className="text-teal-50 leading-relaxed mb-6">
+                          Book your next turnover online in a few minutes, or call Cleaniq Services on{" "}
+                          <a href="tel:+447846726428" className="font-bold underline underline-offset-2 hover:text-white">07846 726428</a> and we'll help you plan the cleaning around your guests.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3">
                           <Link to={bookingLink} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors">
