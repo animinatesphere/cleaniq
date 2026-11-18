@@ -85,6 +85,25 @@ function buildPage(template, route, rendered) {
   return page;
 }
 
+// The 3 newest blog posts for the homepage "latest articles" section, so its links are in the HTML.
+// Only the fields the homepage shows. If the API can't be reached, the section loads in the browser as before.
+async function latestPosts() {
+  const api = (process.env.VITE_API_URL || "https://api.cleaniqservices.com/api").replace(/\/+$/, "");
+  try {
+    const res = await fetch(`${api}/blog?limit=3&page=1`, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`blog API ${res.status}`);
+    const { posts = [] } = await res.json();
+    console.log(`[prerender] homepage: ${posts.length} latest blog posts built in`);
+    return posts.map((p) => ({
+      _id: p._id, slug: p.slug, title: p.title, description: p.description, image: p.image,
+      readTime: Math.max(5, Math.ceil(String(p.content || "").trim().split(/\s+/).length / 200)),
+    }));
+  } catch (err) {
+    console.warn(`[prerender] homepage blog posts not built in: ${err.message}`);
+    return null;
+  }
+}
+
 async function main() {
   const templatePath = path.join(dist, "index.html");
   const serverEntry = path.join(root, "dist-ssr", "entry-server.js");
@@ -103,6 +122,8 @@ async function main() {
   };
   globalThis.localStorage ??= memoryStorage();
   globalThis.sessionStorage ??= memoryStorage();
+  const homeBlog = await latestPosts();
+  globalThis.__HOME_BLOG__ = homeBlog;
   const { render, PRERENDER_ROUTES } = await import(pathToFileURL(serverEntry).href);
   // The page list comes from the app's own area/service data (src/entry-server.jsx); the old
   // public/sitemap.xml is only a fallback for older builds.
@@ -114,7 +135,12 @@ async function main() {
       if (!result.html || result.html.length < 500) throw new Error("page rendered almost nothing");
       const out = route === "/" ? templatePath : path.join(dist, route, "index.html");
       fs.mkdirSync(path.dirname(out), { recursive: true });
-      fs.writeFileSync(out, buildPage(template, route, result));
+      let page = buildPage(template, route, result);
+      if (route === "/" && homeBlog?.length) {
+        const json = JSON.stringify(homeBlog).replace(/</g, "\\u003c");
+        page = page.replace("</head>", `<script>window.__HOME_BLOG__=${json}</script>\n</head>`);
+      }
+      fs.writeFileSync(out, page);
       ok++;
     } catch (err) {
       console.warn(`[prerender] ${route} kept as SPA: ${err.message.split("\n")[0]}`);

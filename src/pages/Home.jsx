@@ -89,8 +89,12 @@ const Home = () => {
   const { region } = useRegion();
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeCategory, setActiveCategory] = useState("OfficeCleaning");
-  const [blogPosts, setBlogPosts] = useState([]);
-  const [blogLoading, setBlogLoading] = useState(true);
+  // Latest posts built into the homepage HTML (scripts/prerender.mjs), so search engines and AI tools
+  // see real article links without running JavaScript. Refreshed from the API below.
+  const builtInPosts =
+    (typeof window !== "undefined" && window.__HOME_BLOG__) || globalThis.__HOME_BLOG__ || null;
+  const [blogPosts, setBlogPosts] = useState(builtInPosts || []);
+  const [blogLoading, setBlogLoading] = useState(!builtInPosts?.length);
 
   const slides = [
     { src: strip1, label: "Living Room", alt: "Living room with sofas and city views after a house clean by Cleaniq Services" },
@@ -110,15 +114,15 @@ const Home = () => {
   useEffect(() => {
     const fetchBlogPosts = async () => {
       try {
-        setBlogLoading(true);
+        if (!builtInPosts?.length) setBlogLoading(true);
         const apiUrl =
           import.meta.env.VITE_API_URL || "http://localhost:5000/api";
         const response = await fetch(`${apiUrl}/blog?limit=3&page=1`);
         const data = await response.json();
-        setBlogPosts(data.posts || []);
+        if (data.posts?.length || !builtInPosts?.length) setBlogPosts(data.posts || []);
       } catch (error) {
         console.error("Failed to fetch blog posts:", error);
-        setBlogPosts([]);
+        if (!builtInPosts?.length) setBlogPosts([]);
       } finally {
         setBlogLoading(false);
       }
@@ -899,7 +903,7 @@ const Home = () => {
                       <span className="inline-block px-2 py-1 bg-primary/10 text-primary rounded-full">
                         Cleaning Tips
                       </span>
-                      <span>{calculateReadTime(post.content)} min read</span>
+                      <span>{post.readTime || calculateReadTime(post.content)} min read</span>
                     </div>
                     <h4 className="text-xl font-black text-primary-dark mb-3 line-clamp-2">
                       {post.title}
