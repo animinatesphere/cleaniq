@@ -892,7 +892,8 @@ const QUOTE_TYPES = [
   { id: "multi", label: "Multi-property quote", desc: "Several properties, price per size, discount" },
 ];
 const CommercialQuote = () => {
-  const [type, setType] = useState("standard");
+  // Quote History's "Edit" on a multi-property quote links here with ?quote=multi.
+  const [type, setType] = useState(() => (new URLSearchParams(window.location.search).get("quote") === "multi" ? "multi" : "standard"));
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="tablist" aria-label="Quote type">
@@ -926,7 +927,7 @@ const TABS = [
 ];
 
 const CommercialHub = () => {
-  const [tab, setTab] = useState("report");
+  const [tab, setTab] = useState(() => (new URLSearchParams(window.location.search).get("quote") ? "quote" : "report"));
 
   return (
     <div className="space-y-6 pb-24">

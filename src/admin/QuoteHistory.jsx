@@ -6,10 +6,15 @@ import {
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { FREQUENCY_OPTIONS } from "./QuoteBuilder";
+import { printSavedMultiQuote, rooms, MULTI_QUOTE_EDIT_KEY } from "../utils/multiQuotePdf";
 
 const API = import.meta.env.VITE_API_URL;
 export const QUOTE_EDIT_DRAFT_KEY = "cleaniq_quote_edit_draft";
 const PAGE_SIZE = 20;
+const isMultiQuote = (q) => q?.quoteType === "multi";
+const MultiBadge = () => (
+  <span className="inline-block ml-2 px-1.5 py-0.5 rounded-md bg-sky-500/15 border border-sky-500/25 text-sky-300 text-[9px] font-bold uppercase tracking-wider align-middle">Multi-property</span>
+);
 
 const QUOTE_EXPORT_HEADERS = [
   "Quote Ref", "Company", "Contact", "Email", "Phone",
@@ -95,10 +100,18 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
         <div className="flex items-start justify-between px-6 py-5 border-b border-white/[0.07] shrink-0">
           <div className="min-w-0 pr-4">
             <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Quote</p>
-            <h2 className="text-base font-bold text-white">{quote.companyName}</h2>
+            <h2 className="text-base font-bold text-white">{quote.companyName}{isMultiQuote(quote) && <MultiBadge />}</h2>
             <p className="text-xs text-white/40 mt-0.5">{quote.quoteRef} · {quote.email}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {isMultiQuote(quote) && (
+              <button
+                onClick={() => printSavedMultiQuote(quote)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 transition-all font-semibold text-xs"
+              >
+                <Download size={12} /> PDF
+              </button>
+            )}
             <button
               onClick={() => { onResend(quote); }}
               disabled={resending}
@@ -159,8 +172,26 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
             </div>
           </div>
 
+          {/* Multi-property quote: each property and, once accepted, the cleaning date chosen for it */}
+          {isMultiQuote(quote) && (
+            <div>
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">{quote.multi?.title || "Properties"}</p>
+              <div className="bg-white/[0.03] rounded-xl border border-white/[0.05] divide-y divide-white/[0.04]">
+                {(quote.multi?.properties || []).map((x, i) => (
+                  <div key={i} className="flex justify-between gap-3 px-4 py-2 text-xs">
+                    <span className="text-white/80 font-medium">{x.name}{rooms(x) ? <span className="text-white/40"> · {rooms(x)}</span> : null}</span>
+                    <span className="shrink-0 tabular-nums">
+                      {x.date && <span className="text-emerald-400 font-semibold mr-3">{new Date(x.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>}
+                      <span className="text-white font-bold">£{Number(x.price || 0).toFixed(2)}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Line items */}
-          {quote.items?.length > 0 && (
+          {quote.items?.length > 0 && !isMultiQuote(quote) && (
             <div>
               <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Line Items</p>
               <div className="bg-white/[0.03] rounded-xl border border-white/[0.05] overflow-hidden">
@@ -176,10 +207,13 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
                   <tbody className="divide-y divide-white/[0.04]">
                     {quote.items.map((item, i) => (
                       <tr key={i}>
-                        <td className="px-4 py-2 text-white/80 font-medium">{item.description}</td>
-                        <td className="px-3 py-2 text-white/40 text-right tabular-nums">{item.quantity}</td>
+                        <td className="px-4 py-2 text-white/80 font-medium">
+                          {item.service || item.customService}
+                          {item.description && <span className="block text-white/40 font-normal">{item.description}</span>}
+                        </td>
+                        <td className="px-3 py-2 text-white/40 text-right tabular-nums">{item.qty ?? item.quantity}{item.billingType === "hourly" ? " hrs" : ""}</td>
                         <td className="px-3 py-2 text-white/40 text-right tabular-nums">{fmtCcy(item.unitPrice)}</td>
-                        <td className="px-4 py-2 font-bold text-white text-right tabular-nums">{fmtCcy(item.total)}</td>
+                        <td className="px-4 py-2 font-bold text-white text-right tabular-nums">{fmtCcy(item.subtotal ?? item.total ?? Number(item.unitPrice || 0) * Number(item.qty || 1))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -192,7 +226,8 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
           <div className="bg-[#071D16] rounded-xl p-4 border border-white/[0.05] space-y-2">
             {[
               { label: "Subtotal", value: fmtCcy(quote.subtotal) },
-              { label: `VAT (${quote.vatRate ?? 20}%)`, value: fmtCcy(quote.vat) },
+              ...(Number(quote.discountAmount) > 0 ? [{ label: `Discount (${quote.discount}%)`, value: `−${fmtCcy(quote.discountAmount)}` }] : []),
+              ...(quote.includeVat === false && !(Number(quote.vat) > 0) ? [] : [{ label: `VAT (${quote.vatRate ?? 20}%)`, value: fmtCcy(quote.vat) }]),
             ].map(r => (
               <div key={r.label} className="flex justify-between text-xs">
                 <span className="text-white/40">{r.label}</span>
@@ -321,6 +356,11 @@ const QuoteHistory = () => {
 
   // Actions
   const handleEdit = (quote) => {
+    if (isMultiQuote(quote)) {
+      sessionStorage.setItem(MULTI_QUOTE_EDIT_KEY, JSON.stringify(quote));
+      navigate("/admin/commercial?quote=multi");
+      return;
+    }
     sessionStorage.setItem(QUOTE_EDIT_DRAFT_KEY, JSON.stringify(quote));
     navigate("/admin/quotes");
   };
@@ -572,7 +612,7 @@ const QuoteHistory = () => {
                         />
                       </td>
                       <td className="px-4 py-4">
-                        <p className="font-semibold text-white text-sm leading-tight">{q.companyName}</p>
+                        <p className="font-semibold text-white text-sm leading-tight">{q.companyName}{isMultiQuote(q) && <MultiBadge />}</p>
                         <p className="text-[11px] text-white/40 font-medium mt-0.5">{q.email}</p>
                       </td>
                       <td className="px-4 py-4 text-sm font-medium text-white/60">{q.quoteRef}</td>

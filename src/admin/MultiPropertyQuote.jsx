@@ -3,16 +3,14 @@
 // property size, each property's price, a multi-property discount, what's included and optional
 // extras. Sent through the normal quote system (same email, history and follow-ups); when the
 // customer accepts, they pick a date per property and each property becomes its own booking.
-import { useMemo, useState } from "react";
-import { Plus, Trash2, Download, Send, X, Building2, Home, Tag, ListChecks, PackagePlus, User } from "lucide-react";
-import logo from "../assets/logo DP.jpg";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Plus, Trash2, Download, Send, X, Building2, Home, Tag, ListChecks, PackagePlus, User, History, Pencil, RefreshCw } from "lucide-react";
+import { Link } from "react-router-dom";
+import { printMultiQuote, printSavedMultiQuote, money, rooms, MULTI_QUOTE_EDIT_KEY } from "../utils/multiQuotePdf";
 
 const API = import.meta.env.VITE_API_URL;
 
 const newRef = () => `CLQ-${Date.now().toString().slice(-6)}`;
-const money = (n) => `£${(Number(n) || 0).toFixed(2)}`;
-const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-const rooms = (x) => [x.bedrooms ? `${x.bedrooms} bed` : "", x.bathrooms ? `${x.bathrooms} bath` : ""].filter(Boolean).join(" · ");
 const sizeKey = (x) => `${Number(x.bedrooms) || 0}-${Number(x.bathrooms) || 0}`;
 
 // Starting text for an end of tenancy quote; everything can be edited before sending.
@@ -50,29 +48,138 @@ const Section = ({ title, icon: Icon, children, right }) => (
 
 const emptyProperty = () => ({ name: "", bedrooms: "", bathrooms: "" });
 
-export default function MultiPropertyQuote() {
-  const [ref, setRef] = useState(newRef);
-  const [client, setClient] = useState({ companyName: "", contactName: "", email: "", phone: "", address: "" });
-  const [title, setTitle] = useState("End of Tenancy Clean");
-  const [subtitle, setSubtitle] = useState("");
-  const [properties, setProperties] = useState([emptyProperty()]);
-  const [sizePrices, setSizePrices] = useState({}); // "5-2" -> price
-  const [discount, setDiscount] = useState("");
-  const [discountCondition, setDiscountCondition] = useState("");
-  const [includeVat, setIncludeVat] = useState(false);
-  const [vatRate, setVatRate] = useState(20);
-  const [included, setIncluded] = useState(EOT_INCLUDED);
-  const [extras, setExtras] = useState([
+const DEFAULT_FORM = {
+  client: { companyName: "", contactName: "", email: "", phone: "", address: "" },
+  title: "End of Tenancy Clean",
+  subtitle: "",
+  properties: [emptyProperty()],
+  sizePrices: {},
+  discount: "",
+  discountCondition: "",
+  includeVat: false,
+  vatRate: 20,
+  included: EOT_INCLUDED,
+  extras: [
     { name: "Carpet steam cleaning", unit: "per room", price: "40" },
     { name: "Mattress cleaning", unit: "per mattress", price: "35" },
     { name: "Rubbish/item removal", unit: "", price: "" },
-  ]);
-  const [paymentTerms, setPaymentTerms] = useState("Due on completion");
-  const [validDays, setValidDays] = useState(30);
-  const [notes, setNotes] = useState("");
+  ],
+  paymentTerms: "Due on completion",
+  validDays: 30,
+  notes: "",
+};
+
+// Form values from a saved quote ("Edit & duplicate").
+const formFromQuote = (q) => {
+  const m = q.multi || {};
+  return {
+    client: { companyName: q.companyName || "", contactName: q.contactName || "", email: q.email || "", phone: q.phone || "", address: q.address || "" },
+    title: m.title || DEFAULT_FORM.title,
+    subtitle: m.subtitle || "",
+    properties: (m.properties || []).length
+      ? m.properties.map((x) => ({ name: x.name || "", bedrooms: String(x.bedrooms || ""), bathrooms: String(x.bathrooms || "") }))
+      : [emptyProperty()],
+    sizePrices: Object.fromEntries((m.sizes || []).map((x) => [sizeKey(x), String(x.price ?? "")])),
+    discount: q.discount ? String(q.discount) : "",
+    discountCondition: m.discountCondition || "",
+    includeVat: !!q.includeVat,
+    vatRate: q.vatRate ?? 20,
+    included: (m.included || []).join("\n"),
+    extras: (m.optionalExtras || []).map((x) => ({ name: x.name || "", unit: x.unit || "", price: x.price == null ? "" : String(x.price) })),
+    paymentTerms: q.paymentTerms || "",
+    validDays: q.validDays || 30,
+    notes: q.notes || "",
+  };
+};
+
+// A quote sent here from Quote History's "Edit" button, if any (read once).
+const takeDraft = () => {
+  try {
+    const raw = sessionStorage.getItem(MULTI_QUOTE_EDIT_KEY);
+    if (!raw) return DEFAULT_FORM;
+    sessionStorage.removeItem(MULTI_QUOTE_EDIT_KEY);
+    return formFromQuote(JSON.parse(raw));
+  } catch {
+    return DEFAULT_FORM;
+  }
+};
+
+export default function MultiPropertyQuote() {
+  const [initial] = useState(takeDraft);
+  const [ref, setRef] = useState(newRef);
+  const [client, setClient] = useState(initial.client);
+  const [title, setTitle] = useState(initial.title);
+  const [subtitle, setSubtitle] = useState(initial.subtitle);
+  const [properties, setProperties] = useState(initial.properties);
+  const [sizePrices, setSizePrices] = useState(initial.sizePrices); // "5-2" -> price
+  const [discount, setDiscount] = useState(initial.discount);
+  const [discountCondition, setDiscountCondition] = useState(initial.discountCondition);
+  const [includeVat, setIncludeVat] = useState(initial.includeVat);
+  const [vatRate, setVatRate] = useState(initial.vatRate);
+  const [included, setIncluded] = useState(initial.included);
+  const [extras, setExtras] = useState(initial.extras);
+  const [paymentTerms, setPaymentTerms] = useState(initial.paymentTerms);
+  const [validDays, setValidDays] = useState(initial.validDays);
+  const [notes, setNotes] = useState(initial.notes);
   const [sendCopy, setSendCopy] = useState(true);
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // History of multi-property quotes (they're also in the main Quote History).
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [resending, setResending] = useState(null);
+  const fetchHistory = useCallback(
+    () =>
+      fetch(`${API}/quotes?limit=200`)
+        .then((r) => r.json())
+        .then((d) => setHistory((d.data || []).filter((q) => q.quoteType === "multi")))
+        .catch(() => {})
+        .finally(() => setHistoryLoading(false)),
+    [],
+  );
+  const loadHistory = () => {
+    setHistoryLoading(true);
+    fetchHistory();
+  };
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
+
+  // "Edit & duplicate": fill the form from a saved quote; it's sent as a new quote with a new reference.
+  const loadQuote = (q) => {
+    const f = formFromQuote(q);
+    setRef(newRef());
+    setClient(f.client);
+    setTitle(f.title);
+    setSubtitle(f.subtitle);
+    setProperties(f.properties);
+    setSizePrices(f.sizePrices);
+    setDiscount(f.discount);
+    setDiscountCondition(f.discountCondition);
+    setIncludeVat(f.includeVat);
+    setVatRate(f.vatRate);
+    setIncluded(f.included);
+    setExtras(f.extras);
+    setPaymentTerms(f.paymentTerms);
+    setValidDays(f.validDays);
+    setNotes(f.notes);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const resend = async (q) => {
+    if (!window.confirm(`Resend quote ${q.quoteRef} to ${q.email}?`)) return;
+    setResending(q.quoteRef);
+    try {
+      const r = await fetch(`${API}/quotes/resend/${q.quoteRef}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      if (!r.ok) throw new Error();
+      setToast({ msg: `Quote ${q.quoteRef} resent to ${q.email}`, type: "success" });
+    } catch {
+      setToast({ msg: "Failed to resend the quote.", type: "error" });
+    } finally {
+      setResending(null);
+    }
+  };
 
   const setC = (k) => (e) => setClient((c) => ({ ...c, [k]: e.target.value }));
   const setProp = (i, k, v) => setProperties((ps) => ps.map((p, j) => (j === i ? { ...p, [k]: v } : p)));
@@ -112,103 +219,9 @@ export default function MultiPropertyQuote() {
     return null;
   };
 
-  // Same layout and styles as the Quote Builder's PDF.
-  const downloadPDF = () => {
-    const logoUrl = `${window.location.origin}${logo}`;
-    const sizeRows = sizes.map((s) => `<tr><td>${esc(rooms(s))}</td><td style="text-align:right;font-weight:700;">${money(s.price)}</td></tr>`).join("");
-    const propRows = filled
-      .map((p) => `<tr><td><strong>${esc(p.name)}</strong></td><td style="text-align:center;">${esc(rooms(p))}</td><td style="text-align:right;font-weight:700;">${money(p.price)}</td></tr>`)
-      .join("");
-    const extraHtml = extraRows
-      .map((x) => `<tr><td>${esc(x.name)}</td><td style="text-align:center;">${esc(x.unit) || "—"}</td><td style="text-align:right;font-weight:700;">${x.price === "" ? "Quoted on request" : money(x.price)}</td></tr>`)
-      .join("");
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
-<title>Quote — ${esc(client.companyName || "Client")} — ${ref}</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:Arial,sans-serif;color:#1e293b;background:#fff;font-size:14px;}
-@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;}@page{margin:20mm;}}
-.hdr{background:#0f172a;padding:28px 48px;display:flex;justify-content:space-between;align-items:center;}
-.hdr-logo{height:60px;border-radius:8px;}
-.hdr-right{text-align:right;}
-.hdr-right .ref{color:#6ee7b7;font-size:15px;font-weight:900;}
-.hdr-right .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:4px;}
-.hdr-right .date{color:rgba(255,255,255,.55);font-size:11px;margin-top:4px;}
-.body{padding:40px 48px;}
-.label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:8px;}
-.val{font-size:16px;font-weight:800;color:#0f172a;}
-.sub{font-size:13px;color:#64748b;margin-top:3px;}
-.info-block{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px 24px;display:flex;justify-content:space-between;margin-bottom:28px;}
-.title{font-size:20px;font-weight:900;color:#0f172a;}
-.subtitle{font-size:13px;color:#475569;margin-top:4px;margin-bottom:24px;}
-h3{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin:0 0 8px;}
-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
-thead tr{background:#0f172a;}
-thead th{padding:12px 16px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#6ee7b7;text-align:left;}
-td{padding:11px 16px;border-bottom:1px solid #e2e8f0;}
-tbody tr:nth-child(even){background:#f8fafc;}
-.totals{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px 24px;margin-bottom:24px;}
-.trow{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;color:#475569;}
-.trow.discount{color:#16a34a;}
-.trow .cond{display:block;font-size:11px;color:#64748b;}
-.grand{font-size:17px;font-weight:900;color:#0f172a;border-top:2px solid #e2e8f0;padding-top:12px;margin-top:8px;}
-ul{list-style:none;margin-bottom:24px;}
-li{font-size:13px;color:#334155;line-height:1.5;padding:4px 0 4px 20px;position:relative;}
-li:before{content:"✓";position:absolute;left:0;color:#16a34a;font-weight:900;}
-.terms{font-size:12px;color:#475569;margin-bottom:6px;}
-.notes{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px 20px;margin-top:20px;}
-.notes-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#d97706;margin-bottom:6px;}
-.notes-body{font-size:13px;color:#92400e;line-height:1.6;white-space:pre-line;}
-.footer{margin-top:48px;padding-top:20px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;}
-.avoid{page-break-inside:avoid;}
-</style></head><body>
-<div class="hdr">
-  <img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" />
-  <div class="hdr-right">
-    <div class="lbl">Service Quote</div>
-    <div class="ref">${ref}</div>
-    <div class="date">${dateLabel}</div>
-    ${validDays ? `<div class="date">Valid for ${Number(validDays)} days</div>` : ""}
-  </div>
-</div>
-<div class="body">
-  <div class="info-block">
-    <div>
-      <div class="label">Prepared For</div>
-      <div class="val">${esc(client.companyName) || "—"}</div>
-      ${client.contactName ? `<div class="sub">Attn: ${esc(client.contactName)}</div>` : ""}
-      ${client.email ? `<div class="sub">${esc(client.email)}</div>` : ""}
-      ${client.phone ? `<div class="sub">${esc(client.phone)}</div>` : ""}
-      ${client.address ? `<div class="sub">${esc(client.address)}</div>` : ""}
-    </div>
-    <div style="text-align:right">
-      <div class="label">Payment Terms</div>
-      <div class="val" style="font-size:14px;">${esc(paymentTerms) || "—"}</div>
-    </div>
-  </div>
-  <div class="title">${esc(title)}</div>
-  ${subtitle ? `<div class="subtitle">${esc(subtitle)}</div>` : `<div class="subtitle"></div>`}
-  <div class="avoid"><h3>Price per property size</h3>
-  <table><thead><tr><th>Property size</th><th style="text-align:right;">Price per property</th></tr></thead><tbody>${sizeRows}</tbody></table></div>
-  <div class="avoid"><h3>Your properties</h3>
-  <table><thead><tr><th>Property</th><th style="text-align:center;">Size</th><th style="text-align:right;">Price</th></tr></thead><tbody>${propRows}</tbody></table></div>
-  <div class="totals avoid">
-    <div class="trow"><span>Total for ${filled.length} propert${filled.length === 1 ? "y" : "ies"}</span><span>${money(subtotal)}</span></div>
-    ${discountAmount > 0 ? `<div class="trow discount"><span>Multi-property discount (${pct}%)${condition ? `<span class="cond">${esc(condition)}</span>` : ""}</span><span>−${money(discountAmount)}</span></div>` : ""}
-    ${vat > 0 ? `<div class="trow"><span>VAT (${Number(vatRate)}%)</span><span>${money(vat)}</span></div>` : ""}
-    <div class="trow grand"><span>TOTAL${discountAmount > 0 ? " AFTER DISCOUNT" : ""}</span><span>${money(grandTotal)}</span></div>
-  </div>
-  ${includedLines.length ? `<div class="avoid"><h3>What's included</h3><ul>${includedLines.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>` : ""}
-  ${extraRows.length ? `<div class="avoid"><h3>Optional extras</h3>
-  <table><thead><tr><th>Extra</th><th style="text-align:center;">Unit</th><th style="text-align:right;">Price</th></tr></thead><tbody>${extraHtml}</tbody></table></div>` : ""}
-  ${notes ? `<div class="notes avoid"><div class="notes-label">Notes &amp; Terms</div><div class="notes-body">${esc(notes)}</div></div>` : ""}
-  <div class="footer"><span>© ${new Date().getFullYear()} Cleaniq Services Limited · 20 Swan St, Manchester M4 5JW</span><span>info@cleaniqservices.com · cleaniqservices.com · +44 7846 726428</span></div>
-</div>
-<script>window.onload=function(){window.print();}</script>
-</body></html>`;
-    const w = window.open("", "_blank");
-    if (w) { w.document.write(html); w.document.close(); }
-  };
+  const downloadPDF = () =>
+    printMultiQuote({ ref, dateLabel, validDays, client, paymentTerms, title, subtitle, sizes, filled, subtotal, pct,
+      discountAmount, condition, vat, vatRate, grandTotal, includedLines, extraRows, notes });
 
   const send = async () => {
     const problem = problems();
@@ -253,6 +266,7 @@ li:before{content:"✓";position:absolute;left:0;color:#16a34a;font-weight:900;}
       if (!res.ok) throw new Error(data.message || "Server error");
       setToast({ msg: `Quote ${ref} sent to ${client.email}!`, type: "success" });
       setRef(newRef());
+      loadHistory();
     } catch (e) {
       setToast({ msg: `Failed to send quote: ${e.message}`, type: "error" });
     } finally {
@@ -399,6 +413,67 @@ li:before{content:"✓";position:absolute;left:0;color:#16a34a;font-weight:900;}
           When the customer accepts, they choose a cleaning date for each property and every property is added to Bookings straight away. No card payment link is sent, so send them an invoice.
         </p>
       </div>
+      {/* History */}
+      <Section
+        title="Multi-property quote history"
+        icon={History}
+        right={
+          <div className="flex items-center gap-3">
+            <button onClick={loadHistory} className="text-white/40 hover:text-white/80" aria-label="Refresh history">
+              <RefreshCw size={14} className={historyLoading ? "animate-spin" : ""} />
+            </button>
+            <Link to="/admin/quotes/history" className="text-xs font-bold text-emerald-400 hover:text-emerald-300">All quotes →</Link>
+          </div>
+        }
+      >
+        {history.length === 0 ? (
+          <p className="text-sm text-white/40">{historyLoading ? "Loading…" : "No multi-property quotes sent yet."}</p>
+        ) : (
+          <div className="space-y-3">
+            {history.map((q) => {
+              const props = q.multi?.properties || [];
+              const tone = q.status === "accepted" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/25" : q.status === "declined" ? "text-rose-400 bg-rose-500/10 border-rose-500/25" : "text-sky-300 bg-sky-500/10 border-sky-500/25";
+              return (
+                <div key={q.quoteRef} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-white">{q.companyName} <span className="text-white/40 font-semibold">· {q.quoteRef}</span></p>
+                      <p className="text-xs text-white/40 mt-0.5">
+                        {q.multi?.title} · {props.length} propert{props.length === 1 ? "y" : "ies"} · sent {new Date(q.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`px-2.5 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${tone}`}>{q.status || "sent"}</span>
+                      <span className="text-base font-black text-white tabular-nums">{money(q.grandTotal)}</span>
+                    </div>
+                  </div>
+                  {q.status === "accepted" && props.some((x) => x.date) && (
+                    <ul className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-1">
+                      {props.map((x, i) => (
+                        <li key={i} className="flex justify-between gap-3 text-xs">
+                          <span className="text-white/70 truncate">{x.name}{rooms(x) ? ` · ${rooms(x)}` : ""}</span>
+                          <span className="text-emerald-400 font-semibold shrink-0">{x.date ? new Date(x.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—"}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <button onClick={() => printSavedMultiQuote(q)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 text-xs font-semibold">
+                      <Download size={12} /> Download PDF
+                    </button>
+                    <button onClick={() => resend(q)} disabled={resending === q.quoteRef} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/25 text-xs font-semibold disabled:opacity-50">
+                      {resending === q.quoteRef ? <RefreshCw size={12} className="animate-spin" /> : <Send size={12} />} Resend
+                    </button>
+                    <button onClick={() => loadQuote(q)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 text-xs font-semibold">
+                      <Pencil size={12} /> Edit &amp; duplicate
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Section>
     </div>
   );
 }
