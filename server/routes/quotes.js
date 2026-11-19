@@ -30,6 +30,26 @@ function propertyLines(q) {
   ].filter(Boolean);
 }
 
+// Multi-property quote (Commercial Hub): keep only the fields the quote uses, as clean values.
+const str = (v, max = 300) => String(v ?? "").trim().slice(0, max);
+function cleanMulti(m) {
+  if (!m || typeof m !== "object") return null;
+  const list = (a, max = 100) => (Array.isArray(a) ? a.slice(0, max) : []);
+  return {
+    title: str(m.title, 120) || "Cleaning",
+    subtitle: str(m.subtitle, 200),
+    sizes: list(m.sizes).map((x) => ({ bedrooms: num(x.bedrooms), bathrooms: num(x.bathrooms), price: num(x.price) })),
+    properties: list(m.properties).map((x) => ({ name: str(x.name, 200), bedrooms: num(x.bedrooms), bathrooms: num(x.bathrooms), price: num(x.price) })),
+    discountCondition: str(m.discountCondition, 200),
+    included: list(m.included, 50).map((t) => str(t, 400)).filter(Boolean),
+    optionalExtras: list(m.optionalExtras, 30)
+      .map((x) => ({ name: str(x.name, 120), unit: str(x.unit, 60), price: x.price === "" || x.price == null ? null : num(x.price) }))
+      .filter((x) => x.name),
+  };
+}
+const isMulti = (q) => q?.quoteType === "multi" && q?.multi?.properties?.length > 0;
+const roomsLabel = (x) => [x.bedrooms ? `${x.bedrooms} bed` : "", x.bathrooms ? `${x.bathrooms} bath` : ""].filter(Boolean).join(" · ");
+
 const FREQUENCY_LABELS = {
   once: "One-time",
   weekly: "Weekly",
@@ -81,6 +101,8 @@ async function sendQuote(body) {
     hasPet,
     specialInstructions,
     creatorCode,
+    quoteType,
+    multi,
   } = body;
 
   // Validation
@@ -122,7 +144,12 @@ async function sendQuote(body) {
     hasPet,
     specialInstructions,
     creatorCode: creatorCode || "",
+    quoteType: quoteType === "multi" ? "multi" : "standard",
+    multi: quoteType === "multi" ? cleanMulti(multi) : null,
   };
+  if (quoteData.quoteType === "multi" && !quoteData.multi?.properties?.length) {
+    throw Object.assign(new Error("Add at least one property to the quote."), { status: 400 });
+  }
 
   // Generate quote email HTML
   const quoteHtml = generateQuoteEmail(quoteData);
@@ -189,7 +216,9 @@ async function sendQuote(body) {
     };
     await scheduleTask("quote_followup_24h", new Date(now.getTime() + 24 * 60 * 60 * 1000), payload);
     await scheduleTask("quote_followup_3d",  new Date(now.getTime() + 3  * 24 * 60 * 60 * 1000), payload);
-    await scheduleTask("lost_lead_7d",       new Date(now.getTime() + 7  * 24 * 60 * 60 * 1000), payload);
+    if (quoteData.quoteType !== "multi") {
+      await scheduleTask("lost_lead_7d", new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), payload);
+    }
   } catch (schedErr) {
     console.error("⚠️ Failed to schedule quote automations:", schedErr.message);
   }
@@ -417,6 +446,20 @@ async function acceptQuote(quote) {
   if (reAccepted) quote.declinedAt = null;
   await require("../utils/automationEngine").cancelQuoteFollowups(quote.email).catch(() => {});
   await quote.save();
+  if (isMulti(quote)) {
+    const count = await generateMultiPropertyBookings(quote);
+    await sendEmail({
+      to: process.env.EMAIL_USER || "info@cleaniqservices.com",
+      subject: `✅ Quote Accepted${reAccepted ? " (after declining)" : ""} - ${quote.companyName} | ${quote.quoteRef}`,
+      html: generateQuoteResponseAlert(
+        quote,
+        "accepted",
+        count,
+        `${count} booking${count === 1 ? "" : "s"} created, one for each property, on the dates the customer chose. No card payment link was sent: please send the customer an invoice.`,
+      ),
+    });
+    return { paymentLink: null };
+  }
   // Weekly / fortnightly / monthly / every 3 months: a regular clean like any other booking —
   // first payment saves the card, each following visit is charged 24h before and confirmed then,
   // one regular cleaner. Other quotes: their booking(s) and a payment link as before.
@@ -469,7 +512,7 @@ router.get("/:quoteRef/accept", async (req, res) => {
     const quote = await Quote.findOne({ quoteRef: req.params.quoteRef });
     if (!quote) return res.status(404).send(generateOutcomePage({ type: "notfound" }));
     if (quote.status === "accepted") return res.send(generateOutcomePage({ type: "accept", quote }));
-    res.send(generateSchedulePage(quote));
+    res.send(isMulti(quote) ? generateMultiSchedulePage(quote) : generateSchedulePage(quote));
   } catch (error) {
     console.error("Quote accept page error:", error);
     res.status(500).send(generateOutcomePage({ type: "error" }));
@@ -508,6 +551,23 @@ router.post("/:quoteRef/accept", async (req, res) => {
     const quote = await Quote.findOne({ quoteRef: req.params.quoteRef });
     if (!quote) return res.status(404).send(generateOutcomePage({ type: "notfound" }));
     if (quote.status === "accepted") return res.send(generateOutcomePage({ type: "accept", quote }));
+
+    if (isMulti(quote)) {
+      // One date per property (date_0, date_1, …), each from tomorrow up to 120 days ahead.
+      const props = quote.multi.properties;
+      const dates = props.map((_, i) => String(req.body?.[`date_${i}`] || ""));
+      const bad = dates.findIndex((d) => !/^\d{4}-\d{2}-\d{2}$/.test(d) || d < londonDate(1) || d > londonDate(120));
+      if (bad !== -1) {
+        return res.status(400).send(generateMultiSchedulePage(quote, {
+          error: `Please choose a date (from tomorrow) for ${props[bad].name || `property ${bad + 1}`}.`,
+          dates,
+        }));
+      }
+      quote.multi = { ...quote.multi, properties: props.map((pr, i) => ({ ...pr, date: dates[i] })) };
+      quote.markModified("multi");
+      await acceptQuote(quote);
+      return res.send(generateOutcomePage({ type: "accept", quote }));
+    }
 
     const date = String(req.body?.date || "");
     const { getAvailability, normaliseTime } = require("../utils/aiTools");
@@ -766,6 +826,46 @@ function generateQuoteEmail(quote) {
     address,
     phone,
   } = quote;
+  const multi = isMulti(quote) ? quote.multi : null;
+  const H = "font-family: Arial, Helvetica, sans-serif;";
+  const sectionLabel = (t) => `<p style="margin: 0 0 12px; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; ${H}">${t}</p>`;
+  const th = (t, right) => `<td style="padding: 10px 16px; font-size: 11px; font-weight: bold; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; ${right ? "text-align: right;" : ""} ${H}">${t}</td>`;
+  const td = (t, right, bold) => `<td style="padding: 10px 16px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #0f172a; ${right ? "text-align: right;" : ""} ${bold ? "font-weight: bold;" : ""} ${H}">${t}</td>`;
+  const multiTitleHtml = multi ? `
+            <tr>
+              <td style="padding: 20px 40px 0;">
+                <p style="margin: 0; font-size: 18px; font-weight: bold; color: #0f172a; ${H}">${escHtml(multi.title)}</p>
+                ${multi.subtitle ? `<p style="margin: 6px 0 0; font-size: 13px; color: #475569; ${H}">${escHtml(multi.subtitle)}</p>` : ""}
+              </td>
+            </tr>` : "";
+  const multiSizesHtml = multi && multi.sizes?.length ? `
+            <tr>
+              <td style="padding: 28px 40px 0;">
+                ${sectionLabel("Price per property size")}
+                <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 6px;">
+                  <tr style="background-color: #0f172a;">${th("Property size")}${th("Price per property", true)}</tr>
+                  ${multi.sizes.map((x) => `<tr>${td(escHtml(roomsLabel(x)) || "—")}${td(`£${num(x.price).toFixed(2)}`, true, true)}</tr>`).join("")}
+                </table>
+              </td>
+            </tr>` : "";
+  const multiExtraHtml = multi ? `
+            ${multi.included?.length ? `
+            <tr>
+              <td style="padding: 28px 40px 0;">
+                ${sectionLabel("What's included")}
+                ${multi.included.map((t) => `<p style="margin: 0 0 6px; font-size: 13px; color: #334155; line-height: 1.5; ${H}">✓ ${escHtml(t)}</p>`).join("")}
+              </td>
+            </tr>` : ""}
+            ${multi.optionalExtras?.length ? `
+            <tr>
+              <td style="padding: 28px 40px 0;">
+                ${sectionLabel("Optional extras")}
+                <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 6px;">
+                  <tr style="background-color: #0f172a;">${th("Extra")}${th("Unit")}${th("Price", true)}</tr>
+                  ${multi.optionalExtras.map((x) => `<tr>${td(escHtml(x.name))}${td(escHtml(x.unit) || "—")}${td(x.price == null ? "Quoted on request" : `£${num(x.price).toFixed(2)}`, true, true)}</tr>`).join("")}
+                </table>
+              </td>
+            </tr>` : ""}` : "";
 
   const frequencyLabel = FREQUENCY_LABELS[frequency] || "One-time";
 
@@ -849,6 +949,8 @@ function generateQuoteEmail(quote) {
                 <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #334155; font-family: Arial, Helvetica, sans-serif;">Thank you for the opportunity to quote for your cleaning requirements. Please find the full breakdown of services and pricing below.</p>
               </td>
             </tr>
+            ${multiTitleHtml}
+            ${multiSizesHtml}
 
             ${propertyLines(quote).length ? `
             <!-- PROPERTY & ACCESS -->
@@ -862,7 +964,7 @@ function generateQuoteEmail(quote) {
             <!-- SERVICES TABLE -->
             <tr>
               <td style="padding: 28px 40px 0;">
-                <p style="margin: 0 0 12px; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif;">Services & Scope of Work</p>
+                <p style="margin: 0 0 12px; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif;">${multi ? "Your Properties" : "Services & Scope of Work"}</p>
                 <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 6px;">
                   <tr style="background-color: #0f172a;">
                     <td style="padding: 12px 16px; font-size: 11px; font-weight: bold; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif;">Service</td>
@@ -882,7 +984,7 @@ function generateQuoteEmail(quote) {
                     <td width="45%">
                       <table width="100%" cellpadding="0" cellspacing="0">
                         ${summaryRow("Subtotal", `£${subtotal.toFixed(2)}`)}
-                        ${discountAmount > 0 ? summaryRow(`Discount (${discount}%)`, `-£${discountAmount.toFixed(2)}`, { color: "#059669" }) : ""}
+                        ${discountAmount > 0 ? summaryRow(`Discount (${discount}%)${multi?.discountCondition ? ` <span style="font-weight: normal; color: #64748b; font-size: 11px;"><br/>${escHtml(multi.discountCondition)}</span>` : ""}`, `-£${discountAmount.toFixed(2)}`, { color: "#059669" }) : ""}
                         ${discountAmount > 0 ? summaryRow("Subtotal after discount", `£${subtotalAfterDiscount.toFixed(2)}`) : ""}
                         ${includeVat && vat > 0 ? summaryRow(`VAT (${vatRate}%)`, `£${vat.toFixed(2)}`) : ""}
                       </table>
@@ -915,6 +1017,8 @@ function generateQuoteEmail(quote) {
             </tr>`
                 : ""
             }
+
+            ${multiExtraHtml}
 
             <!-- PAYMENT TERMS / RECURRING / VALIDITY -->
             <tr>
@@ -1135,6 +1239,58 @@ function generateSchedulePage(quote, { error = "", date = "" } = {}) {
   if(dateEl.value) load();
 })();
 </script>
+</body>
+</html>`;
+}
+
+// Accept page for a multi-property quote: the customer picks a cleaning date for each property.
+function generateMultiSchedulePage(quote, { error = "", dates = [] } = {}) {
+  const ref = escHtml(quote.quoteRef);
+  const name = escHtml(quote.contactName || quote.companyName || "there");
+  const props = quote.multi?.properties || [];
+  const rows = props.map((pr, i) => `
+      <div class="prop">
+        <label for="d${i}">${escHtml(pr.name || `Property ${i + 1}`)}${roomsLabel(pr) ? ` <span>${escHtml(roomsLabel(pr))}</span>` : ""}</label>
+        <input type="date" id="d${i}" name="date_${i}" min="${londonDate(1)}" max="${londonDate(120)}" value="${escHtml(dates[i] || pr.date || "")}" required />
+      </div>`).join("");
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Choose your cleaning dates | Cleaniq Services</title>
+<style>
+  *{box-sizing:border-box} body{margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a}
+  .wrap{max-width:560px;margin:0 auto;padding:32px 16px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden}
+  .top{background:#0f172a;padding:24px;text-align:center} .top img{height:40px}
+  .body{padding:28px 24px}
+  h1{font-size:22px;margin:0 0 8px} p{font-size:14px;line-height:1.6;color:#475569;margin:0 0 16px}
+  .total{display:flex;justify-content:space-between;background:#f8fafc;border-radius:10px;padding:14px 16px;font-size:14px;margin-bottom:20px}
+  .total b{font-size:18px;color:#036847}
+  .prop{margin-bottom:16px}
+  label{display:block;font-size:13px;font-weight:bold;color:#0f172a;margin:0 0 6px} label span{font-weight:normal;color:#64748b}
+  input[type=date]{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;background:#fff;color:#0f172a;min-height:48px}
+  .err{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:12px 14px;font-size:13px;font-weight:bold;margin-bottom:16px}
+  button{width:100%;margin-top:10px;padding:16px;border:0;border-radius:10px;background:#036847;color:#fff;font-size:15px;font-weight:bold;cursor:pointer}
+  .decline{display:block;text-align:center;margin-top:16px;font-size:13px;color:#64748b}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="top"><img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" /></div>
+  <div class="body">
+    <h1>When should we clean each property?</h1>
+    <p>Hi ${name}, choose a cleaning date for each property, then confirm to accept your quote. We'll be in touch to confirm arrival times.</p>
+    <div class="total"><span>Quote ${ref} · ${props.length} propert${props.length === 1 ? "y" : "ies"}</span><b>£${Number(quote.grandTotal || 0).toFixed(2)}</b></div>
+    ${error ? `<div class="err">${escHtml(error)}</div>` : ""}
+    <form method="post" action="/api/quotes/${encodeURIComponent(quote.quoteRef)}/accept" id="f">
+      ${rows}
+      <button type="submit" id="go">Confirm &amp; accept quote</button>
+    </form>
+    <a class="decline" href="/api/quotes/${encodeURIComponent(quote.quoteRef)}/decline">Not for me — decline this quote</a>
+  </div>
+</div></div>
+<script>document.getElementById("f").addEventListener("submit",function(){var b=document.getElementById("go");b.disabled=true;b.textContent="Booking…";});</script>
 </body>
 </html>`;
 }
@@ -1436,6 +1592,67 @@ async function generateBookingsFromQuote(quote, { onlyFirst = false } = {}) {
   return { count: bookings.length, dateNote };
 }
 
+// Multi-property quote accepted: one booking per property, on the date the customer chose for it,
+// at that property's price (after the quote's discount, plus VAT if the quote includes it).
+async function generateMultiPropertyBookings(quote) {
+  const existing = await Booking.countDocuments({ bookingId: { $regex: `^Q-${quote.quoteRef}-` } });
+  if (existing > 0) return existing;
+  const m = quote.multi || {};
+  const discount = Math.min(Math.max(num(quote.discount), 0), 100);
+  const vatRate = quote.includeVat ? num(quote.vatRate) : 0;
+  const service = m.title || "Cleaning";
+  const { workerRateFor } = require("../utils/workerRate");
+  const workerRate = await workerRateFor(service);
+  const [firstName, ...rest] = (quote.contactName || quote.companyName || "Customer").split(" ");
+  const tomorrow = new Date();
+  tomorrow.setHours(0, 0, 0, 0);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const bookings = (m.properties || []).map((pr, i) => {
+    const net = Math.round(num(pr.price) * (1 - discount / 100) * 100) / 100;
+    const tax = Math.round(net * (vatRate / 100) * 100) / 100;
+    const date = pr.date ? new Date(pr.date) : null;
+    const goodDate = date && !Number.isNaN(date.getTime());
+    return {
+      bookingId: `Q-${quote.quoteRef}-${i + 1}`,
+      customer: { firstName: firstName || quote.companyName, lastName: rest.join(" ") || quote.companyName, email: quote.email, phone: quote.phone || "" },
+      service,
+      details: {
+        address: pr.name || quote.address || "",
+        frequency: "Once",
+        duration: 2,
+        extras: [
+          ...(pr.bedrooms ? [`Bedroom (x${pr.bedrooms})`] : []),
+          ...(pr.bathrooms ? [`Bathroom (x${pr.bathrooms})`] : []),
+        ],
+        notes: [
+          `Generated from accepted multi-property quote ${quote.quoteRef} (${quote.companyName}), property ${i + 1} of ${m.properties.length}`,
+          goodDate ? null : "No date was chosen for this property — please agree the date with the customer.",
+        ].filter(Boolean).join(". "),
+      },
+      property: { bedrooms: num(pr.bedrooms), bathrooms: num(pr.bathrooms) },
+      schedule: { date: goodDate ? date : tomorrow, timeSlot: "Morning (8am-12pm)", preferredTime: "" },
+      payment: {
+        amount: Math.round((net + tax) * 100) / 100,
+        ...(tax > 0 ? { taxAmount: tax, taxRate: vatRate } : {}),
+        currency: "GBP",
+        status: "Pending",
+        billingType: "flat",
+      },
+      workerRate,
+      region: "UK",
+      leadSource: "Quote Accepted",
+      status: "Pending",
+      meta: { recurringGroup: `Q-${quote.quoteRef}` },
+    };
+  });
+  try {
+    await Booking.insertMany(bookings, { ordered: false });
+  } catch (err) {
+    console.error("⚠️ generateMultiPropertyBookings insertMany error:", err.message);
+  }
+  return bookings.length;
+}
+
 function calculateNextSendDate(frequency) {
   const today = new Date();
   const next = new Date(today);
@@ -1466,4 +1683,5 @@ function calculateNextSendDate(frequency) {
 module.exports = router;
 module.exports.sendQuote = sendQuote;
 module.exports.generateBookingsFromQuote = generateBookingsFromQuote;
+module.exports.generateMultiPropertyBookings = generateMultiPropertyBookings;
 module.exports.setStripeForTests = (fake) => { stripeClient = fake; };

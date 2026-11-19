@@ -59,6 +59,12 @@ const quoteSchema = new mongoose.Schema({
   depositAmount: { type: Number, default: 0 },
   balanceDue: { type: Number, default: 0 },
   notes: String,
+  // "multi": a multi-property quote from Commercial Hub (e.g. end of tenancy for several houses).
+  // Its items are the properties; `multi` holds what the quote shows on top of a normal quote:
+  // { title, subtitle, sizes: [{ bedrooms, bathrooms, price }], properties: [{ name, bedrooms,
+  //   bathrooms, price, date }], discountCondition, included: [text], optionalExtras: [{ name, unit, price }] }
+  quoteType: { type: String, enum: ["standard", "multi"], default: "standard" },
+  multi: { type: mongoose.Schema.Types.Mixed, default: null },
   status: { type: String, default: "sent" }, // sent | accepted | declined
   creatorCode: { type: String, default: "" }, // creator / influencer code the customer came with
   acceptedAt: { type: Date, default: null },

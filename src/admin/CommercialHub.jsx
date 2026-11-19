@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import QuoteBuilderComponent from "./QuoteBuilder";
 import InvoiceBuilderComponent from "./InvoiceBuilder";
+import MultiPropertyQuote from "./MultiPropertyQuote";
 import logoSrc from "../assets/lOGO.png";
 
 const API = import.meta.env.VITE_API_URL;
@@ -885,7 +886,33 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
 // Tab 3 — Commercial Invoice  (full InvoiceBuilder)
 // ══════════════════════════════════════════════════════════════════════════════
 
-const CommercialQuote = () => <QuoteBuilderComponent />;
+// Two ways to quote: the normal Quote Builder, or one quote covering several properties.
+const QUOTE_TYPES = [
+  { id: "standard", label: "Standard quote", desc: "One job — same as the Quote Builder" },
+  { id: "multi", label: "Multi-property quote", desc: "Several properties, price per size, discount" },
+];
+const CommercialQuote = () => {
+  const [type, setType] = useState("standard");
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="tablist" aria-label="Quote type">
+        {QUOTE_TYPES.map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            aria-selected={type === t.id}
+            onClick={() => setType(t.id)}
+            className={`p-4 rounded-2xl border-2 text-left transition-all ${type === t.id ? "bg-primary/5 border-primary" : "bg-white/5 border-white/10 hover:border-white/20"}`}
+          >
+            <p className={`text-sm font-bold ${type === t.id ? "text-primary" : "text-white/60"}`}>{t.label}</p>
+            <p className="text-[11px] text-white/40 mt-0.5">{t.desc}</p>
+          </button>
+        ))}
+      </div>
+      {type === "standard" ? <QuoteBuilderComponent /> : <MultiPropertyQuote />}
+    </div>
+  );
+};
 const CommercialInvoice = () => <InvoiceBuilderComponent />;
 
 // ══════════════════════════════════════════════════════════════════════════════
