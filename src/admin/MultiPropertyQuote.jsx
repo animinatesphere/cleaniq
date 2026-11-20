@@ -46,10 +46,27 @@ const Section = ({ title, icon: Icon, children, right }) => (
   </div>
 );
 
-const emptyProperty = () => ({ name: "", bedrooms: "", bathrooms: "" });
+const emptyProperty = () => ({ name: "", bedrooms: "", bathrooms: "", sqm: "", price: "" });
+
+// Types of cleaning, as on the website's commercial enquiry form, plus end of tenancy and "Other".
+// Picking one fills in the service name and how the properties are measured.
+const CLEANING_TYPES = [
+  { label: "End of Tenancy", title: "End of Tenancy Clean", sizeMode: "rooms" },
+  { label: "Event Cleaning", title: "Event Cleaning", sizeMode: "sqm" },
+  { label: "Restaurant Cleaning", title: "Restaurant Cleaning", sizeMode: "sqm" },
+  { label: "Contract Cleaning", title: "Contract Cleaning", sizeMode: "sqm" },
+  { label: "Communal Area Cleaning", title: "Communal Area Cleaning", sizeMode: "sqm" },
+  { label: "Commercial Cleaning", title: "Commercial Cleaning", sizeMode: "sqm" },
+  { label: "Gym Cleaning", title: "Gym Cleaning", sizeMode: "sqm" },
+  { label: "Other", title: "", sizeMode: null },
+];
 
 const DEFAULT_FORM = {
   client: { companyName: "", contactName: "", email: "", phone: "", address: "" },
+  cleaningType: "End of Tenancy",
+  otherType: "",
+  sizeMode: "rooms", // "rooms" (bedrooms & bathrooms) or "sqm" (square metres)
+  ratePerSqm: "",
   title: "End of Tenancy Clean",
   subtitle: "",
   properties: [emptyProperty()],
@@ -74,10 +91,21 @@ const formFromQuote = (q) => {
   const m = q.multi || {};
   return {
     client: { companyName: q.companyName || "", contactName: q.contactName || "", email: q.email || "", phone: q.phone || "", address: q.address || "" },
+    cleaningType: CLEANING_TYPES.some((t) => t.label === m.cleaningType) ? m.cleaningType : m.cleaningType ? "Other" : "End of Tenancy",
+    otherType: m.cleaningType && !CLEANING_TYPES.some((t) => t.label === m.cleaningType) ? m.cleaningType : "",
+    sizeMode: m.sizeMode === "sqm" ? "sqm" : "rooms",
+    ratePerSqm: m.ratePerSqm ? String(m.ratePerSqm) : "",
     title: m.title || DEFAULT_FORM.title,
     subtitle: m.subtitle || "",
     properties: (m.properties || []).length
-      ? m.properties.map((x) => ({ name: x.name || "", bedrooms: String(x.bedrooms || ""), bathrooms: String(x.bathrooms || "") }))
+      ? m.properties.map((x) => ({
+          name: x.name || "",
+          bedrooms: String(x.bedrooms || ""),
+          bathrooms: String(x.bathrooms || ""),
+          sqm: String(x.sqm || ""),
+          // In square-metre quotes a site's price is kept as typed (it may differ from m² × rate).
+          price: m.sizeMode === "sqm" ? String(x.price ?? "") : "",
+        }))
       : [emptyProperty()],
     sizePrices: Object.fromEntries((m.sizes || []).map((x) => [sizeKey(x), String(x.price ?? "")])),
     discount: q.discount ? String(q.discount) : "",
@@ -108,6 +136,10 @@ export default function MultiPropertyQuote() {
   const [initial] = useState(takeDraft);
   const [ref, setRef] = useState(newRef);
   const [client, setClient] = useState(initial.client);
+  const [cleaningType, setCleaningType] = useState(initial.cleaningType);
+  const [otherType, setOtherType] = useState(initial.otherType);
+  const [sizeMode, setSizeMode] = useState(initial.sizeMode);
+  const [ratePerSqm, setRatePerSqm] = useState(initial.ratePerSqm);
   const [title, setTitle] = useState(initial.title);
   const [subtitle, setSubtitle] = useState(initial.subtitle);
   const [properties, setProperties] = useState(initial.properties);
@@ -151,6 +183,10 @@ export default function MultiPropertyQuote() {
     const f = formFromQuote(q);
     setRef(newRef());
     setClient(f.client);
+    setCleaningType(f.cleaningType);
+    setOtherType(f.otherType);
+    setSizeMode(f.sizeMode);
+    setRatePerSqm(f.ratePerSqm);
     setTitle(f.title);
     setSubtitle(f.subtitle);
     setProperties(f.properties);
@@ -182,6 +218,24 @@ export default function MultiPropertyQuote() {
   };
 
   const setC = (k) => (e) => setClient((c) => ({ ...c, [k]: e.target.value }));
+  const chooseType = (t) => {
+    setCleaningType(t.label);
+    if (t.label === "Other") {
+      setTitle(otherType.trim());
+    } else {
+      setTitle(t.title);
+      setSizeMode(t.sizeMode);
+      // The end of tenancy list doesn't fit other jobs: clear it if it hasn't been edited.
+      if (t.label !== "End of Tenancy" && included === EOT_INCLUDED) setIncluded("");
+      if (t.label === "End of Tenancy" && !included.trim()) setIncluded(EOT_INCLUDED);
+    }
+  };
+  const isSqm = sizeMode === "sqm";
+  const unit = isSqm ? "site" : "property";
+  const units = isSqm ? "sites" : "properties";
+  const rate = Number(ratePerSqm) || 0;
+  // A site's price: what was typed for it, otherwise its m² × the rate.
+  const sqmPrice = (p) => (p.price !== "" && p.price != null ? Number(p.price) || 0 : Math.round((Number(p.sqm) || 0) * rate * 100) / 100);
   const setProp = (i, k, v) => setProperties((ps) => ps.map((p, j) => (j === i ? { ...p, [k]: v } : p)));
   const setExtra = (i, k, v) => setExtras((xs) => xs.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
 
@@ -196,9 +250,14 @@ export default function MultiPropertyQuote() {
       .sort((a, b) => a.bedrooms - b.bedrooms || a.bathrooms - b.bathrooms);
   }, [properties, sizePrices]);
 
-  const filled = properties
-    .filter((p) => p.name.trim() || Number(p.bedrooms) > 0)
-    .map((p) => ({ name: p.name.trim(), bedrooms: Number(p.bedrooms) || 0, bathrooms: Number(p.bathrooms) || 0, price: Number(sizePrices[sizeKey(p)]) || 0 }));
+  const filled = isSqm
+    ? properties
+        .filter((p) => p.name.trim() || Number(p.sqm) > 0)
+        .map((p) => ({ name: p.name.trim(), sqm: Number(p.sqm) || 0, price: sqmPrice(p) }))
+    : properties
+        .filter((p) => p.name.trim() || Number(p.bedrooms) > 0)
+        .map((p) => ({ name: p.name.trim(), bedrooms: Number(p.bedrooms) || 0, bathrooms: Number(p.bathrooms) || 0, price: Number(sizePrices[sizeKey(p)]) || 0 }));
+  const shownSizes = isSqm ? [] : sizes;
   const subtotal = filled.reduce((s, p) => s + p.price, 0);
   const pct = Math.min(Math.max(Number(discount) || 0, 0), 100);
   const discountAmount = Math.round(subtotal * pct) / 100;
@@ -207,21 +266,23 @@ export default function MultiPropertyQuote() {
   const grandTotal = afterDiscount + vat;
   const includedLines = included.split("\n").map((t) => t.trim()).filter(Boolean);
   const extraRows = extras.filter((x) => x.name.trim());
-  const condition = discountCondition.trim() || (filled.length > 1 ? `If all ${filled.length} properties are booked` : "");
+  const condition = discountCondition.trim() || (filled.length > 1 ? `If all ${filled.length} ${units} are booked` : "");
   const dateLabel = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   const problems = () => {
     if (!client.companyName.trim()) return "Please enter the customer or company name.";
     if (!client.email.trim()) return "Please enter an email address.";
-    if (!filled.length) return "Please add at least one property.";
-    if (filled.some((p) => !p.name)) return "Please give every property a name or address.";
-    if (sizes.some((s) => !(s.price > 0))) return "Please enter a price for every property size.";
+    if (cleaningType === "Other" && !title.trim()) return "Please type the kind of cleaning.";
+    if (!filled.length) return `Please add at least one ${unit}.`;
+    if (filled.some((p) => !p.name)) return `Please give every ${unit} a name or address.`;
+    if (isSqm && filled.some((p) => !(p.price > 0))) return "Please enter the square metres and a price per m², or a price, for every site.";
+    if (!isSqm && sizes.some((s) => !(s.price > 0))) return "Please enter a price for every property size.";
     return null;
   };
 
   const downloadPDF = () =>
-    printMultiQuote({ ref, dateLabel, validDays, client, paymentTerms, title, subtitle, sizes, filled, subtotal, pct,
-      discountAmount, condition, vat, vatRate, grandTotal, includedLines, extraRows, notes });
+    printMultiQuote({ ref, dateLabel, validDays, client, paymentTerms, title, subtitle, sizes: shownSizes, filled, subtotal, pct,
+      discountAmount, condition, vat, vatRate, grandTotal, includedLines, extraRows, notes, ratePerSqm: isSqm ? rate : 0 });
 
   const send = async () => {
     const problem = problems();
@@ -240,7 +301,10 @@ export default function MultiPropertyQuote() {
           multi: {
             title,
             subtitle,
-            sizes: sizes.map(({ bedrooms, bathrooms, price }) => ({ bedrooms, bathrooms, price })),
+            cleaningType: cleaningType === "Other" ? otherType.trim() || title : cleaningType,
+            sizeMode,
+            ratePerSqm: isSqm ? rate : 0,
+            sizes: shownSizes.map(({ bedrooms, bathrooms, price }) => ({ bedrooms, bathrooms, price })),
             properties: filled,
             discountCondition: discountAmount > 0 ? condition : "",
             included: includedLines,
@@ -293,33 +357,87 @@ export default function MultiPropertyQuote() {
         </div>
       </Section>
 
-      <Section title="Service" icon={Building2}>
+      <Section title="Type of cleaning" icon={Building2}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4" role="radiogroup" aria-label="Type of cleaning">
+          {CLEANING_TYPES.map((t) => (
+            <button
+              key={t.label}
+              type="button"
+              role="radio"
+              aria-checked={cleaningType === t.label}
+              onClick={() => chooseType(t)}
+              className={`px-3 py-2.5 rounded-xl border text-left text-sm font-semibold transition-all ${cleaningType === t.label ? "bg-emerald-500/15 border-emerald-500/50 text-emerald-300" : "bg-white/5 border-white/10 text-white/70 hover:border-white/25"}`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {cleaningType === "Other" && (
+          <Field label="What kind of cleaning? *" className="mb-4">
+            <Input
+              value={otherType}
+              onChange={(e) => { setOtherType(e.target.value); setTitle(e.target.value); }}
+              placeholder="e.g. School cleaning, Warehouse cleaning, Church hall cleaning"
+              autoFocus
+            />
+          </Field>
+        )}
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Service"><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="End of Tenancy Clean" /></Field>
+          <Field label="Service name on the quote"><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Restaurant Cleaning" /></Field>
           <Field label="Line under the title (optional)"><Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="e.g. Salford properties · all have 2 bathrooms" /></Field>
+        </div>
+        <div className="mt-4">
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5">Measure each {unit} by</p>
+          <div className="inline-flex rounded-xl border border-white/10 bg-white/5 p-1" role="radiogroup" aria-label="Measure by">
+            {[["rooms", "Bedrooms & bathrooms"], ["sqm", "Square metres (m²)"]].map(([v, l]) => (
+              <button
+                key={v}
+                type="button"
+                role="radio"
+                aria-checked={sizeMode === v}
+                onClick={() => setSizeMode(v)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${sizeMode === v ? "bg-emerald-600 text-white" : "text-white/50 hover:text-white/80"}`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
         </div>
       </Section>
 
       <Section
-        title="Properties"
+        title={isSqm ? "Sites" : "Properties"}
         icon={Home}
         right={
           <button onClick={() => setProperties((ps) => [...ps, emptyProperty()])} className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300">
-            <Plus size={14} /> Add property
+            <Plus size={14} /> Add {unit}
           </button>
         }
       >
         <div className="space-y-3">
           {properties.map((p, i) => (
-            <div key={i} className="grid grid-cols-[1fr_80px_80px_90px_32px] gap-2 items-end">
-              <Field label={i === 0 ? "Property name / address" : ""}><Input value={p.name} onChange={(e) => setProp(i, "name", e.target.value)} placeholder="e.g. Carlton Road" /></Field>
-              <Field label={i === 0 ? "Bedrooms" : ""}><Input type="number" min="0" value={p.bedrooms} onChange={(e) => setProp(i, "bedrooms", e.target.value)} /></Field>
-              <Field label={i === 0 ? "Bathrooms" : ""}><Input type="number" min="0" value={p.bathrooms} onChange={(e) => setProp(i, "bathrooms", e.target.value)} /></Field>
-              <div className="pb-2.5 text-right text-sm font-bold text-white/80">{Number(sizePrices[sizeKey(p)]) > 0 ? money(sizePrices[sizeKey(p)]) : "—"}</div>
+            <div key={i} className={`grid gap-2 items-end ${isSqm ? "grid-cols-[1fr_90px_110px_32px]" : "grid-cols-[1fr_80px_80px_90px_32px]"}`}>
+              <Field label={i === 0 ? `${isSqm ? "Site" : "Property"} name / address` : ""}>
+                <Input value={p.name} onChange={(e) => setProp(i, "name", e.target.value)} placeholder={isSqm ? "e.g. The Kitchen, Deansgate" : "e.g. Carlton Road"} />
+              </Field>
+              {isSqm ? (
+                <>
+                  <Field label={i === 0 ? "Size (m²)" : ""}><Input type="number" min="0" value={p.sqm} onChange={(e) => setProp(i, "sqm", e.target.value)} placeholder="e.g. 120" /></Field>
+                  <Field label={i === 0 ? "Price £" : ""}>
+                    <Input type="number" min="0" step="0.01" value={p.price} onChange={(e) => setProp(i, "price", e.target.value)} placeholder={rate && Number(p.sqm) ? sqmPrice({ ...p, price: "" }).toFixed(2) : "£"} />
+                  </Field>
+                </>
+              ) : (
+                <>
+                  <Field label={i === 0 ? "Bedrooms" : ""}><Input type="number" min="0" value={p.bedrooms} onChange={(e) => setProp(i, "bedrooms", e.target.value)} /></Field>
+                  <Field label={i === 0 ? "Bathrooms" : ""}><Input type="number" min="0" value={p.bathrooms} onChange={(e) => setProp(i, "bathrooms", e.target.value)} /></Field>
+                  <div className="pb-2.5 text-right text-sm font-bold text-white/80">{Number(sizePrices[sizeKey(p)]) > 0 ? money(sizePrices[sizeKey(p)]) : "—"}</div>
+                </>
+              )}
               <button
                 onClick={() => setProperties((ps) => (ps.length > 1 ? ps.filter((_, j) => j !== i) : [emptyProperty()]))}
                 className="mb-1.5 w-8 h-8 rounded-lg flex items-center justify-center text-white/30 hover:text-rose-400 hover:bg-rose-500/10"
-                aria-label="Remove property"
+                aria-label={`Remove ${unit}`}
               >
                 <Trash2 size={15} />
               </button>
@@ -328,27 +446,38 @@ export default function MultiPropertyQuote() {
         </div>
       </Section>
 
-      <Section title="Price per property size" icon={Tag}>
-        {sizes.length === 0 ? (
-          <p className="text-sm text-white/40">Add properties with their bedrooms and bathrooms, and each size will appear here for you to price.</p>
-        ) : (
-          <div className="space-y-2">
-            {sizes.map((s) => (
-              <div key={s.key} className="grid grid-cols-[1fr_140px] gap-3 items-center">
-                <span className="text-sm font-semibold text-white/80">
-                  {rooms(s)} <span className="text-white/40 font-normal">· {filled.filter((p) => sizeKey(p) === s.key).length} propert{filled.filter((p) => sizeKey(p) === s.key).length === 1 ? "y" : "ies"}</span>
-                </span>
-                <Input type="number" min="0" step="0.01" value={sizePrices[s.key] ?? ""} onChange={(e) => setSizePrices((m) => ({ ...m, [s.key]: e.target.value }))} placeholder="Price £" />
-              </div>
-            ))}
+      {isSqm ? (
+        <Section title="Price per square metre" icon={Tag}>
+          <div className="grid sm:grid-cols-[200px_1fr] gap-4 items-center">
+            <Input type="number" min="0" step="0.01" value={ratePerSqm} onChange={(e) => setRatePerSqm(e.target.value)} placeholder="£ per m²" />
+            <p className="text-xs text-white/40">
+              Each site's price is its size × this rate (shown greyed in the Price box). Type a price for a site to use that instead, or leave the rate empty and price every site yourself.
+            </p>
           </div>
-        )}
-      </Section>
+        </Section>
+      ) : (
+        <Section title="Price per property size" icon={Tag}>
+          {sizes.length === 0 ? (
+            <p className="text-sm text-white/40">Add properties with their bedrooms and bathrooms, and each size will appear here for you to price.</p>
+          ) : (
+            <div className="space-y-2">
+              {sizes.map((sz) => (
+                <div key={sz.key} className="grid grid-cols-[1fr_140px] gap-3 items-center">
+                  <span className="text-sm font-semibold text-white/80">
+                    {rooms(sz)} <span className="text-white/40 font-normal">· {filled.filter((p) => sizeKey(p) === sz.key).length} propert{filled.filter((p) => sizeKey(p) === sz.key).length === 1 ? "y" : "ies"}</span>
+                  </span>
+                  <Input type="number" min="0" step="0.01" value={sizePrices[sz.key] ?? ""} onChange={(e) => setSizePrices((m) => ({ ...m, [sz.key]: e.target.value }))} placeholder="Price £" />
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+      )}
 
       <Section title="Discount, VAT & terms" icon={Tag}>
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Multi-property discount %"><Input type="number" min="0" max="100" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="e.g. 10" /></Field>
-          <Field label="Discount condition"><Input value={discountCondition} onChange={(e) => setDiscountCondition(e.target.value)} placeholder={filled.length > 1 ? `If all ${filled.length} properties are booked` : "e.g. If all properties are booked"} /></Field>
+          <Field label="Discount %"><Input type="number" min="0" max="100" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="e.g. 10" /></Field>
+          <Field label="Discount condition"><Input value={discountCondition} onChange={(e) => setDiscountCondition(e.target.value)} placeholder={filled.length > 1 ? `If all ${filled.length} ${units} are booked` : `e.g. If all ${units} are booked`} /></Field>
           <Field label="Payment terms"><Input value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} /></Field>
           <Field label="Valid for (days)"><Input type="number" min="1" value={validDays} onChange={(e) => setValidDays(e.target.value)} /></Field>
           <label className="flex items-center gap-2 text-sm font-semibold text-white/70">
@@ -392,7 +521,7 @@ export default function MultiPropertyQuote() {
 
       {/* Totals + actions */}
       <div className="bg-[#0B2D22] rounded-2xl border border-white/7 p-5 space-y-2">
-        <div className="flex justify-between text-sm font-semibold text-white/60"><span>Total for {filled.length} propert{filled.length === 1 ? "y" : "ies"}</span><span>{money(subtotal)}</span></div>
+        <div className="flex justify-between text-sm font-semibold text-white/60"><span>Total for {filled.length} {filled.length === 1 ? unit : units}</span><span>{money(subtotal)}</span></div>
         {discountAmount > 0 && (
           <div className="flex justify-between text-sm font-semibold text-emerald-400"><span>Discount ({pct}%){condition ? ` · ${condition}` : ""}</span><span>−{money(discountAmount)}</span></div>
         )}
@@ -410,7 +539,7 @@ export default function MultiPropertyQuote() {
           </button>
         </div>
         <p className="text-[11px] text-white/40 pt-1">
-          When the customer accepts, they choose a cleaning date for each property and every property is added to Bookings straight away. No card payment link is sent, so send them an invoice.
+          When the customer accepts, they choose a cleaning date for each {unit} and every {unit} is added to Bookings straight away. No card payment link is sent, so send them an invoice.
         </p>
       </div>
       {/* History */}

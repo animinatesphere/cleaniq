@@ -162,3 +162,37 @@ test("normal quotes still use the single date-and-time page", async () => {
   const html = await (await fetch(`${base}/CLQ-S1/accept`)).text();
   assert.ok(html.includes("When should we come?"));
 });
+
+test("a square-metre quote with an 'Other' type: rate shown, sites booked with their size", async () => {
+  emails.length = 0;
+  const sites = [{ name: "St Mary's Hall", sqm: 120, price: 300 }, { name: "Ancoats Studio", sqm: 80, price: 250 }];
+  const r = await sendMulti({
+    quoteRef: "CLQ-SQM",
+    multi: {
+      title: "Church hall cleaning", cleaningType: "Church hall cleaning", sizeMode: "sqm", ratePerSqm: 2.5,
+      sizes: [], properties: sites, included: [], optionalExtras: [],
+    },
+    items: sites.map((x) => ({ service: "Church hall cleaning", description: `${x.name} · ${x.sqm} m²`, qty: 1, unitPrice: x.price })),
+    subtotal: 550, discount: 0, discountAmount: 0, subtotalAfterDiscount: 550, grandTotal: 550,
+  });
+  assert.equal(r.status, 200);
+  const q = await Quote.findOne({ quoteRef: "CLQ-SQM" }).lean();
+  assert.equal(q.multi.sizeMode, "sqm");
+  assert.equal(q.multi.cleaningType, "Church hall cleaning");
+  assert.deepEqual(q.multi.properties.map((x) => x.sqm), [120, 80]);
+  const html = emails.find((e) => e.to === "bell@test.com").html;
+  for (const t of ["Church hall cleaning", "£2.50 per m²", "Your Sites", "120 m²"]) assert.ok(html.includes(t), `email should include "${t}"`);
+  assert.ok(!html.includes("Price per property size"));
+  const page = await (await fetch(`${base}/CLQ-SQM/accept`)).text();
+  assert.ok(page.includes("When should we clean each site?") && page.includes("80 m²"));
+  const a = await fetch(`${base}/CLQ-SQM/accept`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ date_0: day(7), date_1: day(8) }).toString(),
+  });
+  assert.equal(a.status, 200);
+  const b = await Booking.findOne({ bookingId: "Q-CLQ-SQM-1" }).lean();
+  assert.equal(b.service, "Church hall cleaning");
+  assert.equal(b.payment.amount, 300);
+  assert.ok(b.details.extras.includes("Size: 120 m²"));
+});

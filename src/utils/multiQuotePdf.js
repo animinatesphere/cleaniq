@@ -7,13 +7,17 @@ export const MULTI_QUOTE_EDIT_KEY = "cleaniq_multi_quote_edit_draft";
 
 export const money = (n) => `£${(Number(n) || 0).toFixed(2)}`;
 const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-export const rooms = (x) => [x.bedrooms ? `${x.bedrooms} bed` : "", x.bathrooms ? `${x.bathrooms} bath` : ""].filter(Boolean).join(" · ");
+export const rooms = (x) =>
+  [x.bedrooms ? `${x.bedrooms} bed` : "", x.bathrooms ? `${x.bathrooms} bath` : "", x.sqm ? `${x.sqm} m²` : ""].filter(Boolean).join(" · ");
 
 // The quote PDF (same layout and styles as the Quote Builder's), opened in a new tab to print or
 // save as PDF. `d` is a plain description of the quote, so saved quotes from history print too.
 export function printMultiQuote(d) {
   const { ref, dateLabel, validDays, client, paymentTerms, title, subtitle, sizes, filled, subtotal, pct,
-  discountAmount, condition, vat, vatRate, grandTotal, includedLines, extraRows, notes } = d;
+  discountAmount, condition, vat, vatRate, grandTotal, includedLines, extraRows, notes, ratePerSqm = 0 } = d;
+  // Measured in square metres: "sites" and a £ per m² rate instead of a price per size.
+  const bySqm = filled.some((p) => p.sqm) && !sizes.length;
+  const things = bySqm ? ["site", "sites"] : ["property", "properties"];
   const logoUrl = `${window.location.origin}${logo}`;
   const sizeRows = sizes.map((s) => `<tr><td>${esc(rooms(s))}</td><td style="text-align:right;font-weight:700;">${money(s.price)}</td></tr>`).join("");
   const propRows = filled
@@ -88,13 +92,14 @@ li:before{content:"✓";position:absolute;left:0;color:#16a34a;font-weight:900;}
   </div>
   <div class="title">${esc(title)}</div>
   ${subtitle ? `<div class="subtitle">${esc(subtitle)}</div>` : `<div class="subtitle"></div>`}
-  <div class="avoid"><h3>Price per property size</h3>
-  <table><thead><tr><th>Property size</th><th style="text-align:right;">Price per property</th></tr></thead><tbody>${sizeRows}</tbody></table></div>
-  <div class="avoid"><h3>Your properties</h3>
-  <table><thead><tr><th>Property</th><th style="text-align:center;">Size</th><th style="text-align:right;">Price</th></tr></thead><tbody>${propRows}</tbody></table></div>
+  ${sizes.length ? `<div class="avoid"><h3>Price per property size</h3>
+  <table><thead><tr><th>Property size</th><th style="text-align:right;">Price per property</th></tr></thead><tbody>${sizeRows}</tbody></table></div>` : ""}
+  ${ratePerSqm > 0 ? `<div class="avoid"><h3>Rate</h3><p style="font-size:14px;margin-bottom:24px;"><strong>${money(ratePerSqm)} per m²</strong></p></div>` : ""}
+  <div class="avoid"><h3>Your ${things[1]}</h3>
+  <table><thead><tr><th>${bySqm ? "Site" : "Property"}</th><th style="text-align:center;">Size</th><th style="text-align:right;">Price</th></tr></thead><tbody>${propRows}</tbody></table></div>
   <div class="totals avoid">
-  <div class="trow"><span>Total for ${filled.length} propert${filled.length === 1 ? "y" : "ies"}</span><span>${money(subtotal)}</span></div>
-  ${discountAmount > 0 ? `<div class="trow discount"><span>Multi-property discount (${pct}%)${condition ? `<span class="cond">${esc(condition)}</span>` : ""}</span><span>−${money(discountAmount)}</span></div>` : ""}
+  <div class="trow"><span>Total for ${filled.length} ${filled.length === 1 ? things[0] : things[1]}</span><span>${money(subtotal)}</span></div>
+  ${discountAmount > 0 ? `<div class="trow discount"><span>${filled.length > 1 ? `Multi-${things[0]} discount` : "Discount"} (${pct}%)${condition ? `<span class="cond">${esc(condition)}</span>` : ""}</span><span>−${money(discountAmount)}</span></div>` : ""}
   ${vat > 0 ? `<div class="trow"><span>VAT (${Number(vatRate)}%)</span><span>${money(vat)}</span></div>` : ""}
   <div class="trow grand"><span>TOTAL${discountAmount > 0 ? " AFTER DISCOUNT" : ""}</span><span>${money(grandTotal)}</span></div>
   </div>
@@ -133,6 +138,7 @@ export function printSavedMultiQuote(q) {
   includedLines: m.included || [],
   extraRows: (m.optionalExtras || []).map((x) => ({ name: x.name, unit: x.unit || "", price: x.price == null ? "" : x.price })),
   notes: q.notes || "",
+  ratePerSqm: Number(m.ratePerSqm) || 0,
   });
 }
 
