@@ -3,6 +3,8 @@ import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
 import { useGoogleReviews } from "../utils/googleReviews";
 import { whatsappLink } from "../utils/contact";
+import { SeoTop, SeoMiddle, SeoLower, SeoQuote, SeoClosing } from "../component/ServiceSeoSections";
+import { SERVICE_SEO } from "../utils/serviceSeoContent";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import BeforeAfter from "../component/BeforeAfter";
@@ -1615,7 +1617,9 @@ const ServiceDetail = () => {
   const isDeep = serviceSlug === "deep-cleaning-manchester";
   const isCarpet = serviceSlug === "carpet-cleaning-manchester";
   const isAirbnb = serviceSlug === "airbnb-cleaning-manchester";
-  const pageFaqs = isDeep ? DEEP_FAQS : isEOT ? EOT_FAQS : ext?.faqs || [];
+  // Extra SEO sections (src/utils/serviceSeoContent.js) for the pages that have them.
+  const seo = SERVICE_SEO[serviceSlug] || null;
+  const pageFaqs = isDeep ? DEEP_FAQS : isEOT ? EOT_FAQS : [...(ext?.faqs || []), ...(seo?.faqs || [])];
   const [liveServices, setLiveServices] = React.useState([]);
   const liveMatch = matchServiceForSlug(serviceSlug, liveServices);
   const servicePrice = fromPriceForPage(serviceSlug, liveServices);
@@ -2105,6 +2109,8 @@ const ServiceDetail = () => {
           </section>
         )}
 
+        {seo && <SeoTop c={seo} bookingLink={bookingLink} />}
+
         {/* ══ PAGE BODY ══════════════════════════════════════════════ */}
         <div className="px-4 sm:px-6 lg:px-10 xl:px-16 py-10 sm:py-14">
           <div className="grid md:grid-cols-3 gap-10 md:gap-14 items-start">
@@ -2554,6 +2560,8 @@ const ServiceDetail = () => {
                     </>
                   )}
 
+                  {seo && <SeoMiddle c={seo} />}
+
                   {/* Deep cleaning only: about our deep cleaning (owner-supplied text, word for word) */}
                   {serviceSlug === "deep-cleaning-manchester" && (
                     <>
@@ -2993,6 +3001,8 @@ const ServiceDetail = () => {
                       </section>
                     </>
                   )}
+
+                  {seo && <SeoLower c={seo} bookingLink={bookingLink} />}
 
                   {/* Carpet cleaning only: our carpet cleaners (owner-supplied text, word for word) */}
                   {isCarpet && (
@@ -3485,6 +3495,7 @@ const ServiceDetail = () => {
                   <Divider />
 
                   {/* FAQs */}
+                  {seo && <SeoQuote c={seo} />}
                   {isAirbnb && (
                     <>
                       <section className="rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9">
@@ -3529,11 +3540,11 @@ const ServiceDetail = () => {
                   <section>
                     <SectionLabel>Frequently asked questions</SectionLabel>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
-                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : isEOT ? "Frequently Asked Questions: End of Tenancy Cleaning Manchester" : isCarpet ? "Frequently Asked Questions: Carpet Cleaning Manchester" : isAirbnb ? "Frequently Asked Questions: Airbnb Cleaning Manchester" : `${service.heading} — FAQs`}
+                      {isDeep ? "Frequently Asked Questions: Deep Cleaning Manchester" : isEOT ? "Frequently Asked Questions: End of Tenancy Cleaning Manchester" : isCarpet ? "Frequently Asked Questions: Carpet Cleaning Manchester" : isAirbnb ? "Frequently Asked Questions: Airbnb Cleaning Manchester" : seo ? `Frequently Asked Questions: ${seo.faqTitle}` : `${service.heading} — FAQs`}
                     </h2>
                     <div className="mt-4">
                       {pageFaqs.map((faq, i) => (
-                        <FAQItem key={i} q={isDeep || isEOT || isCarpet || isAirbnb ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
+                        <FAQItem key={i} q={isDeep || isEOT || isCarpet || isAirbnb || seo ? `${i + 1}. ${faq.q}` : faq.q} a={faq.a} />
                       ))}
                     </div>
                     {isCarpet && (
@@ -3557,6 +3568,7 @@ const ServiceDetail = () => {
                         </div>
                       </div>
                     )}
+                    {seo && <SeoClosing c={seo} bookingLink={bookingLink} />}
                     {isAirbnb && (
                       <div className="mt-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white">
                         <h3 className="text-lg sm:text-xl font-bold mb-3">Book your Airbnb cleaning in Manchester</h3>

@@ -268,7 +268,7 @@ export const PropertyReport = () => {
   // All selectors scoped to #pdf-root so they don't bleed into the main page
   // when the div is temporarily mounted for html2canvas rendering.
   const CSS = `#pdf-root *{margin:0;padding:0;box-sizing:border-box}
-#pdf-root{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1e293b;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:794px}
+#pdf-root{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1e293b;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:100%;max-width:794px}
 #pdf-root .hdr{background:#0A5C43;display:flex;align-items:stretch;min-height:88px}
 #pdf-root .hdr-brand{display:flex;flex-direction:column;justify-content:center;padding:20px 24px;border-right:1px solid rgba(255,255,255,.15);min-width:176px}
 #pdf-root .hdr-logo{height:46px;width:auto;display:block;margin-bottom:4px}
@@ -445,7 +445,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
         position: "absolute",
         top: "-99999px",
         left: "0",
-        width: "794px",
+        width: "733px", // A4 width minus the PDF's 8mm margins (194mm at 96dpi)
         background: "#fff",
       });
       host.appendChild(root);          // moves the node (with its <style> child) into host
@@ -937,7 +937,7 @@ const CommercialHub = () => {
           <Building2 size={240} className="absolute -right-10 -bottom-10 text-white" />
         </div>
         <div className="relative flex items-center gap-5">
-          <img src={logoSrc} alt="Cleaniq Services" className="h-14 rounded-2xl shadow-lg shadow-black/30 flex-shrink-0" />
+          <img src={logoSrc} alt="Cleaniq Services" className="h-14 w-auto object-contain flex-shrink-0" />
           <div>
             <h1 className="text-2xl font-black text-white tracking-tight">Commercial Hub</h1>
             <p className="text-sm text-white/55 mt-1">Airbnb & commercial client tools — reports, quotes, and invoices</p>
