@@ -171,6 +171,8 @@ const TermsAndConditions = () => {
     <div className="pt-32 pb-24 bg-[#F8FAFC] min-h-screen">
       <Helmet>
         <title>Terms & Conditions — Cleaniq Services</title>
+        {/* Legal page: kept out of Google so search results show our services instead. */}
+        <meta name="robots" content="noindex, follow" />
         <meta
           name="description"
           content="Read the Terms and Conditions for Cleaniq Services. Understand our booking, payment, cancellation, and liability policies before using our professional cleaning services."

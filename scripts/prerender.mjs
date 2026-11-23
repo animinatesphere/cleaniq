@@ -171,8 +171,10 @@ async function main() {
   }
   console.log(`[prerender] ${ok}/${routes.length} pages written with their own HTML`);
   if (PRERENDER_ROUTES?.length) {
-    writeSitemap(routes);
-    console.log(`[prerender] sitemap.xml written with ${routes.length} pages`);
+    // Legal pages are noindex, so they're left out of the sitemap.
+    const inSitemap = routes.filter((r) => !["/privacy", "/terms"].includes(r));
+    writeSitemap(inSitemap);
+    console.log(`[prerender] sitemap.xml written with ${inSitemap.length} pages`);
   }
 }
 

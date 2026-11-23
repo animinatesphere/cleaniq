@@ -220,6 +220,8 @@ const PrivacyPolicy = () => {
     <div className="overflow-x-hidden bg-white">
       <Helmet>
         <title>Privacy Policy | Cleaniq Services</title>
+        {/* Legal page: kept out of Google so search results show our services instead. */}
+        <meta name="robots" content="noindex, follow" />
         <meta
           name="description"
           content="Read our comprehensive privacy policy to understand how Cleaniq Services collects, uses, and protects your personal data."

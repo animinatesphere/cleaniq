@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useRegion } from "../context/RegionContext";
+import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import logo2 from "../assets/lOGO.png";
 
 const Footer = () => {
@@ -286,6 +287,31 @@ const Footer = () => {
             </div>
           </div>
         </div>
+
+        {/* Our services: a link to every service page from every page, so Google treats them as
+            our most important pages (UK site only). */}
+        {region?.id === "UK" && (
+          <nav aria-label="Our cleaning services" className="mb-10 pt-8 border-t border-white/10">
+            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-secondary mb-5">Our Services</h4>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3">
+              {SERVICE_PAGES.map((s) => (
+                <li key={s.slug}>
+                  <Link
+                    to={servicePagePath(s.slug)}
+                    className="text-slate-400 hover:text-white transition-colors text-sm font-semibold"
+                  >
+                    {s.name} Manchester
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link to="/commercial-cleaning" className="text-slate-400 hover:text-white transition-colors text-sm font-semibold">
+                  Commercial Cleaning Manchester
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        )}
 
         {/* Trust Badges Strip */}
         <div className="mb-10 py-5 border-t border-b border-white/10">
