@@ -5,6 +5,7 @@ import { useGoogleReviews } from "../utils/googleReviews";
 import { whatsappLink } from "../utils/contact";
 import { SeoTop, SeoMiddle, SeoLower, SeoQuote, SeoClosing } from "../component/ServiceSeoSections";
 import { SERVICE_SEO } from "../utils/serviceSeoContent";
+import { priceNote } from "../utils/serviceRules";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import BeforeAfter from "../component/BeforeAfter";
@@ -1506,7 +1507,7 @@ const CARPET_EXTENDED = {
   faqs: [
     {
       q: "How much does carpet cleaning cost in Manchester?",
-      a: "Carpets, stairs and upholstery each have a fixed price. The price list on this page comes straight from our booking system, so it always shows today's prices.",
+      a: "Carpets, stairs and upholstery each have a fixed price. The price list on this page comes straight from our booking system, so it always shows today's prices. The per-carpet price is for a minimum of 2 carpets.",
     },
     {
       q: "How long do carpets take to dry?",
@@ -1596,12 +1597,12 @@ const priceListFor = (keywords, services) => {
     .sort((a, b) => Number(a.rate) - Number(b.rate));
 };
 // "From" price for a service page: the cheapest of its main service and its price-list options.
-const fromPriceForPage = (slug, services) => {
+const cheapestForPage = (slug, services) => {
   const main = matchServiceForSlug(slug, services);
   const options = priceListFor(SERVICES_MAP[slug]?.priceKeywords, services.filter((s) => s !== main));
-  const cheapest = [main, ...options].filter((s) => s && s.rate != null).sort((a, b) => Number(a.rate) - Number(b.rate))[0];
-  return formatFromPrice(cheapest);
+  return [main, ...options].filter((s) => s && s.rate != null).sort((a, b) => Number(a.rate) - Number(b.rate))[0];
 };
+const fromPriceForPage = (slug, services) => formatFromPrice(cheapestForPage(slug, services));
 const formatFromPrice = (s) =>
   s && s.rate != null
     ? `From £${Number(s.rate).toFixed(2)}${s.type === "hourly" ? "/hr" : ""}`
@@ -1620,9 +1621,15 @@ const ServiceDetail = () => {
   // Extra SEO sections (src/utils/serviceSeoContent.js) for the pages that have them.
   const seo = SERVICE_SEO[serviceSlug] || null;
   const pageFaqs = isDeep ? DEEP_FAQS : isEOT ? EOT_FAQS : [...(ext?.faqs || []), ...(seo?.faqs || [])];
-  const [liveServices, setLiveServices] = React.useState([]);
+  // Prices built into the page at build time (scripts/prerender.mjs) show straight away and are
+  // readable by Google; the live list below replaces them with the latest prices.
+  const [liveServices, setLiveServices] = React.useState(() =>
+    (typeof window !== "undefined" && window.__SERVICES__) || globalThis.__SERVICES__ || [],
+  );
   const liveMatch = matchServiceForSlug(serviceSlug, liveServices);
   const servicePrice = fromPriceForPage(serviceSlug, liveServices);
+  // e.g. the £40 carpet price is per carpet, minimum 2 carpets (src/utils/serviceRules.js)
+  const servicePriceNote = priceNote(cheapestForPage(serviceSlug, liveServices)?.name);
   const serviceName = liveMatch?.name || "";
   const pageInfo = SERVICE_PAGES.find((p) => p.slug === serviceSlug);
   const bookingLink = serviceName ? `/booking?service=${encodeURIComponent(serviceName)}` : "/booking";
@@ -1792,6 +1799,7 @@ const ServiceDetail = () => {
                     {servicePrice}
                   </p>
                 )}
+                {servicePriceNote && <p className="text-xs font-semibold text-teal-700 mb-1">{servicePriceNote}</p>}
                 <p className="text-xs text-slate-400 mb-5">
                   No hidden fees · Insured cleaners
                 </p>
@@ -2606,7 +2614,10 @@ const ServiceDetail = () => {
                           {priceList.map((p) => (
                             <div key={p._id || p.name} className="flex items-center justify-between gap-4 px-5 py-3.5 bg-white">
                               <span className="text-sm font-semibold text-slate-800">{p.name}</span>
-                              <span className="text-sm font-bold text-teal-700 whitespace-nowrap">{formatPrice(p)}</span>
+                              <span className="text-right">
+                                <span className="block text-sm font-bold text-teal-700 whitespace-nowrap">{formatPrice(p)}</span>
+                                {priceNote(p.name) && <span className="block text-[11px] font-semibold text-slate-500">{priceNote(p.name)}</span>}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -3637,6 +3648,7 @@ const ServiceDetail = () => {
                         {servicePrice}
                       </p>
                     )}
+                    {servicePriceNote && <p className="text-xs font-semibold text-teal-300">{servicePriceNote}</p>}
                     <p className="text-slate-400 text-xs mt-1">
                       No hidden fees · Fully insured
                     </p>

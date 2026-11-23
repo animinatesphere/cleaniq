@@ -4,6 +4,7 @@ import LoadingOverlay from "../component/LoadingOverlay";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRegion } from "../context/RegionContext";
 import { Link, useSearchParams } from "react-router-dom";
+import { minQuantity, priceNote } from "../utils/serviceRules";
 import {
   ChevronRight,
   ChevronLeft,
@@ -798,7 +799,11 @@ const Booking = () => {
   const updateExtra = (name, delta) => {
     setFormData((prev) => {
       const current = prev.extras[name] || 0;
-      const next = Math.max(0, current + delta);
+      let next = Math.max(0, current + delta);
+      // Some extras have a minimum (e.g. the per-carpet price needs at least 2 carpets):
+      // adding one goes straight to the minimum, and going below it removes the extra.
+      const min = minQuantity(name);
+      if (min > 1 && next > 0 && next < min) next = delta > 0 ? min : 0;
       return { ...prev, extras: { ...prev.extras, [name]: next } };
     });
   };
@@ -1656,6 +1661,9 @@ const Booking = () => {
                                           {region.symbol}
                                           {extra.rate}
                                         </p>
+                                        {priceNote(extra.name) && (
+                                          <p className="text-[9px] font-bold text-[#10B981]">{priceNote(extra.name)}</p>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-4">

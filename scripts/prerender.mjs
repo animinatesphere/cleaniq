@@ -159,7 +159,8 @@ async function main() {
         const json = JSON.stringify(homeBlog).replace(/</g, "\\u003c");
         page = page.replace("</head>", `<script>window.__HOME_BLOG__=${json}</script>\n</head>`);
       }
-      if (route === "/services" && services?.length) {
+      // Live services and prices built into the Services page and every service page.
+      if ((route === "/services" || route.startsWith("/service/")) && services?.length) {
         const json = JSON.stringify(services).replace(/</g, "\\u003c");
         page = page.replace("</head>", `<script>window.__SERVICES__=${json}</script>\n</head>`);
       }
