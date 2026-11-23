@@ -7,7 +7,7 @@ import { Helmet } from "react-helmet-async";
 import air1 from "../assets/service-deep-1200.webp";
 import air2 from "../assets/our-work/about-cleaner.jpg";
 import residentialImg from "../assets/service-eot-photo-600.webp";
-import officeImg from "../assets/office.jpg";
+import officeImg from "../assets/office-800.webp";
 import deepcleanImg from "../assets/our-work/deep-card.jpg";
 import airbnbImg from "../assets/our-work/airbnb-1.jpg";
 import strip1 from "../assets/our-work/regular-2.jpg";
@@ -154,7 +154,7 @@ const Home = () => {
           property="og:image"
           content="https://www.cleaniqservices.com/preview.jpg"
         />
-        <link rel="preload" as="image" href={air1} fetchpriority="high" />
+        <link rel="preload" as="image" href={air1} fetchpriority="high" media="(min-width: 768px)" />
         <meta name="twitter:card" content="summary_large_image" />
         {/* Business details (address, hours, geo) live in one LocalBusiness block in index.html. */}
       </Helmet>
@@ -175,10 +175,11 @@ const Home = () => {
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-secondary/10 rounded-full blur-[100px]" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-10">
+          {/* Shown straight away (no fade-in): this heading is the first thing visitors and Google
+              see, and a fade-in kept it invisible until all the JavaScript had loaded on phones. */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={false}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
           >
             <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white shadow-xl shadow-primary/5 text-primary font-black text-[10px] md:text-sm mb-4 md:mb-8 border border-primary/5 mt-10">
               <span className="relative flex h-2 w-2">
@@ -307,20 +308,23 @@ const Home = () => {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={false}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1 }}
             className="hidden md:relative md:block"
           >
             <div className="relative z-10 rounded-[40px] lg:rounded-[60px] overflow-hidden shadow-2xl border-4 lg:border-8 border-white bg-slate-100">
-              <img
-                src={air1}
-                alt="Bright Manchester apartment living room after a deep clean by Cleaniq Services"
-                className="w-full h-[360px] lg:h-[600px] object-cover"
-                fetchpriority="high"
-                width="1200"
-                height="800"
-              />
+              {/* Hidden on phones, so phones get a 1-pixel placeholder instead of downloading the photo. */}
+              <picture>
+                <source media="(max-width: 767px)" srcSet="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
+                <img
+                  src={air1}
+                  alt="Bright Manchester apartment living room after a deep clean by Cleaniq Services"
+                  className="w-full h-[360px] lg:h-[600px] object-cover"
+                  fetchpriority="high"
+                  width="1200"
+                  height="800"
+                />
+              </picture>
             </div>
             <div className="absolute -bottom-10 -left-10 bg-white p-8 rounded-[32px] shadow-2xl shadow-primary/10 z-20 border border-slate-50 hidden md:block">
               <div className="flex items-center gap-4 mb-4">

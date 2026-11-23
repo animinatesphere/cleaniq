@@ -21,7 +21,7 @@ import {
 // Our own photos from real jobs (only the office one is still a stock photo: we have no office job photos yet).
 import deepcleanImg from "../assets/our-work/deep-card.jpg";
 import residentialImg from "../assets/our-work/regular-2.jpg";
-import officeImg from "../assets/office.jpg";
+import officeImg from "../assets/office-800.webp";
 import bento1Img from "../assets/our-work/regular-4.jpg";
 import grid1Img from "../assets/our-work/oven-3.jpg";
 

@@ -6,8 +6,9 @@
     <!-- TikTok Pixel Code Start -->
     <!-- TikTok Pixel Code Start -->
     <!-- TikTok Pixel Code Start -->
-     <script>function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"b5007dc8e9ffb183934dd0d533032450"})});</script>
+    <script>(window.__lateTags = window.__lateTags || []).push(function () { function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"b5007dc8e9ffb183934dd0d533032450"})}); });</script>
     <script>
+      (window.__lateTags = window.__lateTags || []).push(function () {
       !(function (w, d, t) {
         w.TiktokAnalyticsObject = t;
         var ttq = (w[t] = w[t] || []);
@@ -62,6 +63,7 @@
         ttq.load("DA1L2VBC77U575JECDLG");
         ttq.page();
       })(window, document, "ttq");
+      });
     </script>
     <!-- TikTok Pixel Code End -->
     <!-- TikTok Pixel Code End -->
@@ -77,6 +79,7 @@
     </script>
     <!-- Google Tag Manager -->
     <script>
+      (window.__lateTags = window.__lateTags || []).push(function () {
       (function (w, d, s, l, i) {
         w[l] = w[l] || [];
         w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
@@ -87,6 +90,7 @@
         j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
         f.parentNode.insertBefore(j, f);
       })(window, document, "script", "dataLayer", "GTM-WT7TPVFR");
+      });
     </script>
     <!-- End Google Tag Manager -->
     <!-- Smart App Banner (iOS Safari) -->
@@ -96,11 +100,6 @@
     />
     <!-- Google tag (gtag.js) -->
     <link rel="preconnect" href="https://www.googletagmanager.com" />
-    <link rel="preconnect" href="https://js.stripe.com" crossorigin />
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-J2ERQRM2YX"
-    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
@@ -110,10 +109,6 @@
       gtag("config", "G-J2ERQRM2YX");
     </script>
     <!-- Google Ads Conversion Tracking -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=AW-17946013594"
-    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
@@ -121,9 +116,17 @@
       }
       gtag("js", new Date());
       gtag("config", "AW-17946013594");
+      // One gtag.js handles both config IDs above; it loads with the other tags below.
+      (window.__lateTags = window.__lateTags || []).push(function () {
+        var g = document.createElement("script");
+        g.async = true;
+        g.src = "https://www.googletagmanager.com/gtag/js?id=G-J2ERQRM2YX";
+        document.head.appendChild(g);
+      });
     </script>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="./public/logo DP2.jpg" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Tags marked data-ssr are page defaults for crawlers; src/main.jsx removes them before React adds each page's own. -->
     <title data-ssr>House Cleaning Manchester | Eco-Friendly Cleaners | Cleaniq</title>
@@ -152,7 +155,6 @@
       property="og:image"
       content="https://www.cleaniqservices.com/preview.jpg"
     />
-    <link rel="preload" as="image" href="/preview.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
 
@@ -172,6 +174,7 @@
 
     <!-- TikTok Pixel Code Start -->
     <script>
+      (window.__lateTags = window.__lateTags || []).push(function () {
       !(function (w, d, t) {
         w.TiktokAnalyticsObject = t;
         var ttq = (w[t] = w[t] || []);
@@ -225,9 +228,28 @@
         ttq.load("D961F53C77U133LMJNQG");
         ttq.page();
       })(window, document, "ttq");
+      });
     </script>
     <!-- TikTok Pixel Code End -->
 
+    <!-- Analytics, ads and tracking tags (Google, TikTok, Metricool) load after the page is ready:
+         on the first scroll, tap or key press, or 4 seconds after the page has loaded. This keeps
+         them from slowing down the first view, especially on phones. Data pushed to dataLayer
+         before then is kept and sent when they load. -->
+    <script>
+      (function () {
+        var done = false;
+        function run() {
+          if (done) return;
+          done = true;
+          (window.__lateTags || []).forEach(function (f) { try { f(); } catch (e) {} });
+        }
+        ["pointerdown", "keydown", "touchstart", "scroll"].forEach(function (e) {
+          window.addEventListener(e, run, { once: true, passive: true });
+        });
+        window.addEventListener("load", function () { setTimeout(run, 4000); });
+      })();
+    </script>
     <!-- Consolidated Schema.org JSON-LD bundle (@graph) -->
     <script type="application/ld+json">
       {

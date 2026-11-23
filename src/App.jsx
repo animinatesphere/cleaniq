@@ -8,19 +8,21 @@ import Footer from "./component/Footer";
 import ScrollToTop from "./component/ScrollToTop";
 import WhatsAppButton from "./component/WhatsAppButton";
 import Home from "./pages/Home";
-import About from "./pages/About";
-import Booking from "./pages/Booking";
-import Recruitment from "./pages/Recruitment";
-import Services from "./pages/Services";
-import Contact from "./pages/Contact";
-import GetQuote from "./pages/GetQuote";
-import ServiceDetail from "./pages/ServiceDetail";
-import LocationDetail from "./pages/LocationDetail";
-import TermsAndConditions from "./pages/TermsAndConditions";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Blog from "./pages/Blog";
-import BlogDetail from "./pages/BlogDetail";
-import CityLanding from "./pages/CityLanding";
+// Public pages load when visited, so the homepage doesn't download booking/payment (Stripe),
+// quote, blog and other page code. The homepage itself stays in the main bundle so it shows at once.
+const About = lazy(() => import("./pages/About"));
+const Booking = lazy(() => import("./pages/Booking"));
+const Recruitment = lazy(() => import("./pages/Recruitment"));
+const Services = lazy(() => import("./pages/Services"));
+const Contact = lazy(() => import("./pages/Contact"));
+const GetQuote = lazy(() => import("./pages/GetQuote"));
+const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
+const LocationDetail = lazy(() => import("./pages/LocationDetail"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogDetail = lazy(() => import("./pages/BlogDetail"));
+const CityLanding = lazy(() => import("./pages/CityLanding"));
 
 // Customer Account
 const CustomerLogin = lazy(() => import("./pages/account/Login"));
