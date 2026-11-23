@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/locations/manchester-city",
+      "destination": "/locations/manchester-city-centre",
+      "permanent": true
+    },
+    {
       "source": "/pages/contact",
       "destination": "/contact",
       "permanent": true

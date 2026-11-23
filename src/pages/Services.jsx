@@ -10,6 +10,8 @@ import eotPhoto from "../assets/service-eot-photo-1200.webp";
 import bathroomPhoto from "../assets/our-work/regular-3.jpg";
 import airbnbBedroomPhoto from "../assets/our-work/airbnb-2.jpg";
 import fridgePhoto from "../assets/our-work/deep-card.jpg";
+import officeCardPhoto from "../assets/service-office-photo-1200.webp";
+import postConstructionCardPhoto from "../assets/service-postconstruction-photo-1200.webp";
 
 const COMMERCIAL_TYPES = [
   "Event Cleaning",
@@ -146,10 +148,9 @@ const Services = () => {
       defaultDesc: "Reliable, weekly or bi-weekly cleaning for your home.",
     },
     commercial: {
-      imageAlt: "Clean, empty open-plan office floor and kitchen area after a commercial clean",
+      imageAlt: "Tidy office desk with a computer, plant and chairs, ready for the working day",
       icon: <Briefcase className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop",
+      image: officeCardPhoto,
       features: [
         "Workstation sanitization.",
         "Communal area cleaning.",
@@ -211,10 +212,9 @@ const Services = () => {
         "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
     },
     construction: {
-      imageAlt: "Cleaner in a dust mask and gloves wiping down a window after building work",
+      imageAlt: "Empty flat with clean wooden floors after a clean by Cleaniq Services, ready to hand over",
       icon: <ShieldCheck className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=2000&auto=format&fit=crop",
+      image: postConstructionCardPhoto,
       features: [
         "Dust & debris removal from all surfaces.",
         "Window, frame & sill cleaning.",

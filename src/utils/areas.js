@@ -1,6 +1,6 @@
 // Areas with their own location page (src/pages/LocationDetail.jsx → /locations/:slug).
 export const AREAS = [
-  { slug: "manchester-city", name: "Manchester City Centre" },
+  { slug: "manchester-city-centre", name: "Manchester City Centre" },
   { slug: "salford", name: "Salford" },
   { slug: "trafford", name: "Trafford" },
   { slug: "stockport", name: "Stockport" },

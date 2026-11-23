@@ -5,6 +5,7 @@ import { AREAS } from "../utils/areas";
 import { whatsappLink } from "../utils/contact";
 import { useGoogleReviews } from "../utils/googleReviews";
 import { AREA_LOCAL } from "../utils/areaLocal";
+import { AREA_GUIDE } from "../utils/areaGuide";
 import BeforeAfter from "../component/BeforeAfter";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import {
@@ -21,7 +22,7 @@ import {
 // Our own photos from real jobs (only the office one is still a stock photo: we have no office job photos yet).
 import deepcleanImg from "../assets/our-work/deep-card.jpg";
 import residentialImg from "../assets/our-work/regular-2.jpg";
-import officeImg from "../assets/office-800.webp";
+import officeImg from "../assets/service-office-photo-600.webp";
 import bento1Img from "../assets/our-work/regular-4.jpg";
 import grid1Img from "../assets/our-work/oven-3.jpg";
 
@@ -65,7 +66,7 @@ const LOCATIONS_MAP = {
       "Commercial & Office Cleaning"
     ]
   },
-  "manchester-city": {
+  "manchester-city-centre": {
     name: "Manchester City Centre",
     title: "Cleaning Services Manchester City Centre | Cleaniq Services",
     meta: "Trusted cleaners for Manchester city centre apartments, offices and Airbnbs. Deep cleaning, end of tenancy and commercial cleaning. Book online today.",
@@ -208,7 +209,7 @@ const LOCATIONS_MAP = {
 
 // Neighbourhoods each area's cleaners cover (shown as "Cleaners in …").
 const NEIGHBOURHOODS = {
-  "manchester-city": ["Deansgate", "Ancoats", "Northern Quarter", "Piccadilly", "Spinningfields", "Castlefield"],
+  "manchester-city-centre": ["Deansgate", "Ancoats", "Northern Quarter", "Piccadilly", "Spinningfields", "Castlefield"],
   salford: ["Salford Quays", "MediaCityUK", "Eccles", "Swinton", "Pendleton", "Walkden"],
   trafford: ["Altrincham", "Sale", "Stretford", "Urmston", "Timperley", "Old Trafford"],
   stockport: ["Bramhall", "Cheadle", "Hazel Grove", "Marple", "Heaton Moor", "Edgeley"],
@@ -258,10 +259,11 @@ const LocationDetail = () => {
   const { name } = locationData;
   const nearby = NEIGHBOURHOODS[slug] || [];
   const local = AREA_LOCAL[slug];
+  const guide = AREA_GUIDE[slug];
   const localFaq = local
     ? [{ q: `Which ${name} postcodes do your cleaners cover?`, a: `Our cleaners cover ${local.postcodes.join(", ")}${nearby.length ? `, including ${nearby.join(", ")}` : ""}. Not sure if you're covered? Message us on WhatsApp with your postcode.` }]
     : [];
-  const faqs = [...(locationData.faqs || []), ...localFaq, ...areaFaqs(name, nearby)];
+  const faqs = [...(guide?.faqs || []), ...(locationData.faqs || []), ...localFaq, ...areaFaqs(name, nearby)];
   const otherAreas = AREAS.filter((a) => a.slug !== slug);
   const whatsapp = whatsappLink(`Hi Cleaniq! I'm looking for a cleaner in ${name}.`);
 
@@ -385,7 +387,7 @@ const LocationDetail = () => {
                 <img src={residentialImg} alt={`Living room after a house clean by Cleaniq Services, a service we offer across ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
               <div className="h-48 md:h-64 rounded-[24px] overflow-hidden group">
-                <img src={officeImg} alt={`Clean office desk with a laptop, ready after an office clean, available in ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src={officeImg} alt={`Tidy office desk with a computer and chairs: office cleaning available in ${name}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
             </div>
 
@@ -396,11 +398,9 @@ const LocationDetail = () => {
               <p className="text-slate-600 font-medium leading-relaxed">
                 {locationData.description}
               </p>
-              <p className="text-slate-600 font-medium leading-relaxed">
-                Our cleaners in {name} can come weekly or fortnightly for regular house cleaning, or once for a deep
-                clean, an end of tenancy clean before you hand back the keys, or an oven or carpet clean. Tell us how
-                many hours you need, choose whether our cleaner brings supplies, and pick a time that suits you.
-              </p>
+              {(guide?.intro || []).map((t) => (
+                <p key={t} className="text-slate-600 font-medium leading-relaxed">{t}</p>
+              ))}
 
               <div className="grid grid-cols-2 gap-4 my-8">
                 <div className="h-40 rounded-2xl overflow-hidden group">
@@ -491,6 +491,55 @@ const LocationDetail = () => {
           </div>
         </section>
 
+
+        {/* Local guide: the services that suit this area and what to know before booking (unique per area) */}
+        {guide && (
+          <section className="grid lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3 bg-white border border-slate-200 rounded-[36px] p-8 md:p-10 shadow-sm">
+              <h2 className="text-2xl md:text-3xl font-black text-primary-dark tracking-tight mb-2">
+                Popular cleaning services in {name}
+              </h2>
+              <p className="text-slate-500 font-medium mb-6">The services {name} customers book most, and why they suit homes here.</p>
+              <ul className="space-y-3">
+                {guide.popular.map((pop) => {
+                  const svc = SERVICE_PAGES.find((p) => p.slug === pop.slug);
+                  if (!svc) return null;
+                  return (
+                    <li key={pop.slug}>
+                      <Link
+                        to={servicePagePath(pop.slug)}
+                        className="group flex gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-white hover:shadow-md transition-all"
+                      >
+                        <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                          <CheckCircle2 size={18} />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="flex items-center gap-2 font-black text-primary-dark group-hover:text-primary">
+                            {svc.name} in {name}
+                            <ArrowRight size={15} className="shrink-0 group-hover:translate-x-1 transition-transform" />
+                          </span>
+                          <span className="block text-sm text-slate-500 font-medium leading-relaxed mt-1">{pop.why}</span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <div className="lg:col-span-2 bg-primary text-white rounded-[36px] p-8 md:p-10 relative overflow-hidden">
+              <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-white/5 rounded-full" />
+              <h2 className="text-2xl font-black tracking-tight mb-6 relative">Good to know in {name}</h2>
+              <ul className="space-y-4 relative">
+                {guide.goodToKnow.map((t) => (
+                  <li key={t} className="flex gap-3 text-sm text-white/85 font-medium leading-relaxed">
+                    <MapPin size={16} className="text-secondary shrink-0 mt-0.5" />
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
 
         {/* Local detail: homes in this area and what they need (unique per area) */}
         {local && (

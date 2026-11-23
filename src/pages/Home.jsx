@@ -7,7 +7,7 @@ import { Helmet } from "react-helmet-async";
 import air1 from "../assets/service-deep-1200.webp";
 import air2 from "../assets/our-work/about-cleaner.jpg";
 import residentialImg from "../assets/service-eot-photo-600.webp";
-import officeImg from "../assets/office-800.webp";
+import officeImg from "../assets/service-office-photo-600.webp";
 import deepcleanImg from "../assets/our-work/deep-card.jpg";
 import airbnbImg from "../assets/our-work/airbnb-1.jpg";
 import strip1 from "../assets/our-work/regular-2.jpg";
@@ -30,6 +30,7 @@ import BeforeAfter from "../component/BeforeAfter";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { uploadUrl } from "../utils/uploads";
 import { AREAS } from "../utils/areas";
+import { AREA_GUIDE } from "../utils/areaGuide";
 import { useGoogleReviews } from "../utils/googleReviews";
 
 const getImageUrl = uploadUrl;
@@ -387,7 +388,7 @@ const Home = () => {
                 icon: <Briefcase size={32} />,
                 keyword: "Expert office cleaning",
                 image: officeImg,
-                imageAlt: "Clean office desk with a laptop and chair, ready for the working day"
+                imageAlt: "Tidy office desk with a computer, plant and chairs, ready for the working day"
               },
               {
                 title: "Deep Clean",
@@ -652,10 +653,15 @@ const Home = () => {
               <Link
                 key={a.slug}
                 to={`/locations/${a.slug}`}
-                className="flex items-center gap-3 p-4 md:p-5 rounded-2xl bg-white border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all text-sm font-bold text-primary-dark"
+                className="group flex items-start gap-3 p-4 md:p-5 rounded-2xl bg-white border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all"
               >
-                <ShieldCheck size={18} className="text-primary shrink-0" />
-                Cleaners in {a.name}
+                <ShieldCheck size={18} className="text-primary shrink-0 mt-0.5" />
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold text-primary-dark group-hover:text-primary">{a.name} cleaners</span>
+                  {AREA_GUIDE[a.slug] && (
+                    <span className="block text-xs text-slate-500 font-medium mt-1 leading-snug">{AREA_GUIDE[a.slug].highlights.join(" · ")}</span>
+                  )}
+                </span>
               </Link>
             ))}
           </div>
@@ -827,7 +833,7 @@ const Home = () => {
                       {serviceName}
                     </p>
                     <p className="text-xs text-slate-500 font-bold mt-2 group-hover:text-slate-600 transition-colors">
-                      Cleaners in {location.city} →
+                      {AREA_GUIDE[location.slug] ? AREA_GUIDE[location.slug].highlights.join(" · ") : location.city} →
                     </p>
                   </Link>
                 </motion.div>

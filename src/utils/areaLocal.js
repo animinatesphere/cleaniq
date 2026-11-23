@@ -3,7 +3,7 @@
 // Google's ranking systems look for (near-identical town pages are treated as low quality).
 // Keep it factual: real postcodes, real places and housing, and no invented jobs or reviews.
 export const AREA_LOCAL = {
-  "manchester-city": {
+  "manchester-city-centre": {
     postcodes: ["M1", "M2", "M3", "M4", "M15"],
     homes:
       "Most homes in the city centre are apartments: new-build towers around Deansgate and Spinningfields, and converted mills and warehouses in Ancoats, the Northern Quarter and Castlefield. Large windows, exposed brick and open-plan kitchens collect city dust quickly, and many flats are rented or let on Airbnb, so end of tenancy cleans and quick turnovers between guests are a big part of the work here.",

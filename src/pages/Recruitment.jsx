@@ -31,7 +31,7 @@ import bedroomPhoto from "../assets/our-work/regular-5.jpg";
 import gloveWorkPhoto from "../assets/our-work/oven-1.jpg";
 import roomPhoto from "../assets/our-work/regular-2.jpg";
 import bathroomPhoto from "../assets/our-work/end-of-tenancy-2.jpg";
-import officePhoto from "../assets/office-clean.jpg";
+import officePhoto from "../assets/service-office-photo-600.webp";
 import ovenPhoto from "../assets/our-work/end-of-tenancy-5.jpg";
 import airbnbPhoto from "../assets/our-work/airbnb-1.jpg";
 import eotPhoto from "../assets/our-work/end-of-tenancy-1.jpg";
@@ -52,7 +52,7 @@ const WORK_PHOTOS = [
   { src: roomPhoto, label: "Homes", alt: "Living room after a house clean by Cleaniq Services" },
   { src: ovenPhoto, label: "Kitchens & ovens", alt: "Oven cleaned inside by Cleaniq Services" },
   { src: bathroomPhoto, label: "Bathrooms", alt: "Clean bathroom with bath, basin and tiled floor after a clean by Cleaniq Services" },
-  { src: officePhoto, label: "Offices", alt: "Cleaner cleaning an office" },
+  { src: officePhoto, label: "Offices", alt: "Tidy office desk with a computer, plant and chairs, ready for the working day" },
   { src: airbnbPhoto, label: "Rentals & Airbnbs", alt: "Guest-ready Airbnb bedroom after a turnover clean by Cleaniq Services" },
   { src: eotPhoto, label: "End of tenancy", alt: "Clean kitchen ready for new tenants after an end of tenancy clean by Cleaniq Services" },
 ];

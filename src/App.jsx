@@ -150,6 +150,8 @@ function App() {
             <Route path="/service/:serviceSlug" element={<ServiceDetail />} />
             {/* Old address: /pages/<service> → /service/<service> */}
             <Route path="/pages/:serviceSlug" element={<OldServicePath />} />
+            {/* Old address for the city centre page (renamed so it isn't confused with the football club) */}
+            <Route path="/locations/manchester-city" element={<Navigate to="/locations/manchester-city-centre" replace />} />
             <Route path="/locations/:area" element={<LocationDetail />} />
             <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

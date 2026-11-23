@@ -1,5 +1,5 @@
 // The service pages (src/pages/ServiceDetail.jsx) and which Services-page cards they belong to.
-// Photos are our own from real jobs, except office and post-construction (Unsplash, free under the Unsplash License) until we have our own.
+// Photos are our own from real jobs, except office (a free public-domain photo) until we have our own.
 // Our own photos from real jobs.
 import regularPhoto from "../assets/our-work/regular-4.jpg";
 import airbnbPhoto from "../assets/our-work/airbnb-5.jpg";
@@ -15,8 +15,11 @@ import carpetPhotoSmall from "../assets/service-carpet-photo-600.webp";
 import carpetPhotoLarge from "../assets/service-carpet-photo-1200.webp";
 import eotPhotoSmall from "../assets/service-eot-photo-600.webp";
 import eotPhotoLarge from "../assets/service-eot-photo-1200.webp";
-const unsplash = (id) => (width) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${width}&q=70`;
+// Office: a free public-domain photo (Wikimedia Commons, CC0). Post-construction: our own photo (src/images/IMG_6090).
+import officePhotoSmall from "../assets/service-office-photo-600.webp";
+import officePhotoLarge from "../assets/service-office-photo-1200.webp";
+import postConstructionPhotoSmall from "../assets/service-postconstruction-photo-600.webp";
+import postConstructionPhotoLarge from "../assets/service-postconstruction-photo-1200.webp";
 const local = (small, large) => (width) => (width > 600 ? large : small);
 
 export const SERVICE_PAGES = [
@@ -46,16 +49,16 @@ export const SERVICE_PAGES = [
   },
   {
     slug: "office-cleaning-manchester",
-    image: unsplash("1603712725038-e9334ae8f39f"),
-    imageAlt: "Cleaner mopping an office floor",
+    image: local(officePhotoSmall, officePhotoLarge),
+    imageAlt: "Tidy office desk with a computer, plant and chairs, ready for the working day",
     name: "Office Cleaning",
     blurb: "Clean, healthy workspaces for your team.",
     layoutKeys: ["commercial"],
   },
   {
     slug: "post-construction-cleaning-manchester",
-    image: unsplash("1504307651254-35680f356dfd"),
-    imageAlt: "Building work in progress on a construction site",
+    image: local(postConstructionPhotoSmall, postConstructionPhotoLarge),
+    imageAlt: "Empty flat with clean wooden floors after a clean by Cleaniq Services, ready to hand over",
     name: "Post-Construction Cleaning",
     blurb: "Dust and debris cleared after building work.",
     layoutKeys: ["construction"],

@@ -11,7 +11,7 @@ import {
   Phone,
   Mail,
   ArrowRight,
-  Sparkles,
+  Clock,
   Star,
   MapPin,
   MessageCircle,
@@ -71,12 +71,21 @@ const ABOUT_SERVICE_TEXT = {
     "Carpets, stairs and upholstery cleaned deep down, lifting the dirt and marks that your vacuum leaves behind.",
 };
 
-const trustStats = (g) => [
-  { value: `${g.rating}★`, label: "Google rating from our customers" },
-  { value: "48hr", label: "Re-clean guarantee" },
-  { value: String(AREAS.length), label: "Areas across Greater Manchester" },
-  { value: String(SERVICE_PAGES.length), label: "Cleaning services" },
-];
+// Short About-page descriptions for each area link (each location page has its own, fuller text).
+const ABOUT_AREA_TEXT = {
+  "manchester-city-centre": "Apartments and offices from Deansgate and Spinningfields to Ancoats and the Northern Quarter.",
+  salford: "From Salford Quays apartments to family homes across the city of Salford.",
+  trafford: "Homes and rentals in Sale, Altrincham, Stretford and Urmston.",
+  stockport: "Houses and flats across Stockport, Cheadle and Bramhall.",
+  didsbury: "Family homes and flats in East and West Didsbury.",
+  chorlton: "Terraced houses and apartments around Chorlton.",
+  bolton: "Homes and rental properties across Bolton, Horwich and Farnworth.",
+  bury: "Houses in Bury, Ramsbottom, Radcliffe and Prestwich.",
+  oldham: "Homes across Oldham, Chadderton and Saddleworth.",
+  rochdale: "Homes in Rochdale, Heywood and Middleton.",
+  tameside: "Homes in Ashton-under-Lyne, Hyde, Stalybridge and Denton.",
+  wigan: "Homes and rentals in Wigan, Leigh and Hindley.",
+};
 
 // "Why you should trust us": the promises every customer gets.
 const WHY_US = [
@@ -91,7 +100,7 @@ const WHY_US = [
     desc: "Your home, rental, Airbnb or office is treated with respect. Our fully insured cleaners work carefully around your belongings, follow your notes and tell you if they spot anything that needs your attention.",
   },
   {
-    icon: <Sparkles size={26} />,
+    icon: <Clock size={26} />,
     title: "48-hour re-clean guarantee",
     desc: "Not happy with any part of your clean? Let us know within 48 hours and we'll put it right. No chasing, no arguments.",
   },
@@ -137,6 +146,14 @@ const VALUES = [
 
 const FAQS = [
   {
+    q: "Who are Cleaniq Services?",
+    a: "We're a Manchester cleaning company based at 20 Swan St in Ancoats. Our vetted, DBS-checked and fully insured cleaners look after homes, rentals, Airbnbs and offices across Manchester and Greater Manchester.",
+  },
+  {
+    q: "What makes Cleaniq Services different from other cleaning companies?",
+    a: "Trust. Every cleaner is vetted, DBS-checked and fully insured, every clean follows a checklist, and every clean is backed by our free 48-hour re-clean guarantee. The photos on our website are from our own jobs, not stock images.",
+  },
+  {
     q: "Where are Cleaniq Services' cleaners based?",
     a: "Our cleaners are based across Manchester and Greater Manchester, so there's usually a local cleaner near you — from Manchester City Centre, Salford and Trafford to Stockport, Bolton and Wigan.",
   },
@@ -163,6 +180,22 @@ const FAQS = [
   {
     q: "What if I'm not happy with the cleaning?",
     a: "We offer a 48-hour re-clean guarantee. Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge.",
+  },
+  {
+    q: "Do I need to be home while the cleaner is there?",
+    a: "No. Many customers leave a key or an entry code. Just add the access details when you book.",
+  },
+  {
+    q: "Do your cleaners bring their own cleaning products?",
+    a: "You choose. Use your own products, or our cleaners bring eco-friendly cleaning products and equipment for £10 per visit.",
+  },
+  {
+    q: "Can I book a cleaner for my business?",
+    a: "Yes. We clean offices, restaurants, gyms, communal areas and event spaces. Tell us about your premises on our commercial cleaning form and we'll send you a quote.",
+  },
+  {
+    q: "Can I get a quote before I book?",
+    a: "Yes. Use our free quote form, message us on WhatsApp or call +44 7846 726428, and we'll help you choose the right clean.",
   },
   {
     q: "How do I book a cleaner?",
@@ -335,18 +368,6 @@ const About = () => {
               Real photos from our jobs
             </span>
           </motion.div>
-        </div>
-      </section>
-
-      {/* ── Trust strip ──────────────────────────────────────────────── */}
-      <section className="px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {trustStats(g).map((t) => (
-            <div key={t.label} className="p-6 md:p-7 rounded-[28px] bg-white border border-slate-100 shadow-lg shadow-primary/5 text-center">
-              <p className="text-3xl md:text-4xl font-black text-primary tracking-tight">{t.value}</p>
-              <p className="text-xs md:text-sm font-bold text-slate-500 mt-1.5">{t.label}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -529,25 +550,31 @@ const About = () => {
         </div>
       </section>
 
-      {/* ── Areas: cleaners in <area> ────────────────────────────────── */}
-      <section className="py-24 md:py-32 px-6">
-        <div className="max-w-6xl mx-auto">
-          <SectionHeading eyebrow="Areas we cover" title="Cleaners near you across Greater Manchester.">
-            Our local cleaners work across Manchester and the surrounding towns. Choose your area to see cleaning
-            services near you.
+      {/* ── Areas: a local team near you ─────────────────────────────── */}
+      <section className="py-24 md:py-32 px-6 bg-slate-50/70">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeading eyebrow="Local to you" title="A local cleaning team across Greater Manchester.">
+            We're based in Ancoats, and our cleaners live and work across Manchester and the surrounding towns. Find
+            your area to see the cleaners and services near you.
           </SectionHeading>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             {AREAS.map((a) => (
               <Link
                 key={a.slug}
                 to={`/locations/${a.slug}`}
-                className="group flex items-center gap-3 p-4 md:p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/30 hover:bg-white hover:shadow-md transition-all"
+                className="group flex gap-4 p-5 md:p-6 rounded-[24px] bg-white border border-slate-100 hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all"
               >
-                <span className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <MapPin size={16} />
+                <span className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                  <MapPin size={18} />
                 </span>
-                <span className="text-sm font-bold text-primary-dark leading-tight group-hover:text-primary">
-                  Cleaners in {a.name}
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2 text-base font-black text-primary-dark group-hover:text-primary">
+                    Cleaners in {a.name}
+                    <ArrowRight size={15} className="shrink-0 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  {ABOUT_AREA_TEXT[a.slug] && (
+                    <span className="block text-sm text-slate-500 font-medium leading-relaxed mt-1">{ABOUT_AREA_TEXT[a.slug]}</span>
+                  )}
                 </span>
               </Link>
             ))}
