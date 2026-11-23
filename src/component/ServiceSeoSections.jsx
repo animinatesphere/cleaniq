@@ -1,5 +1,5 @@
 // Extra SEO sections for service pages, in the same layout as the Airbnb page.
-// Text lives in src/utils/serviceSeoContent.js; ServiceDetail.jsx places each part:
+// Text lives in each service's content file (src/content/services/<slug>.json, "seo"); ServiceDetail.jsx places each part:
 //   SeoTop (after the hero) · SeoMiddle (after "Why choose") · SeoLower (after the areas)
 //   SeoQuote (before the FAQs) · SeoClosing (after the FAQ list)
 import { Link } from "react-router-dom";

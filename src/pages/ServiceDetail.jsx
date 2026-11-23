@@ -4,8 +4,9 @@ import { useParams, Link } from "react-router-dom";
 import { useGoogleReviews } from "../utils/googleReviews";
 import { whatsappLink } from "../utils/contact";
 import { SeoTop, SeoMiddle, SeoLower, SeoQuote, SeoClosing } from "../component/ServiceSeoSections";
-import { SERVICE_SEO } from "../utils/serviceSeoContent";
 import { priceNote } from "../utils/serviceRules";
+import { usePageContent, withDefaults } from "../utils/siteContent";
+import { SERVICE_CONTENT } from "../content";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import BeforeAfter from "../component/BeforeAfter";
@@ -1608,19 +1609,66 @@ const formatFromPrice = (s) =>
     ? `From £${Number(s.rate).toFixed(2)}${s.type === "hourly" ? "/hr" : ""}`
     : null;
 
+/* ─── PAGE TEXT ────────────────────────────────────────────────────
+   Each service page's text lives in src/content/services/<slug>.json (edited in /content-admin or by
+   hand). The values below are only fallbacks for fields missing from a file; icons and layout stay
+   in code. The long owner-supplied sections further down are still written into this file. */
+// eslint-disable-next-line react-refresh/only-export-components
+export function serviceContentDefaults(slug) {
+  const s = SERVICES_MAP[slug];
+  if (!s) return null;
+  const ext = s.extended ? EXTENDED_MAP[s.extended] : null;
+  return {
+    basics: { title: s.title, meta: s.meta, heading: s.heading, tagline: s.tagline, description: s.description, points: s.points },
+    ...(ext
+      ? {
+          details: {
+            intro: ext.intro || "",
+            whyChoose: (ext.whyChoosePoints || []).map((p) => ({ title: p.title, body: p.body })),
+            checklist: ext.checklist,
+            whyMatters: ext.whyMatters,
+            seoFooter: ext.seoFooter || "",
+          },
+        }
+      : {}),
+    faqs:
+      slug === "deep-cleaning-manchester"
+        ? DEEP_FAQS
+        : slug === "end-of-tenancy-cleaning-manchester"
+          ? EOT_FAQS
+          : ext?.faqs || [],
+  };
+}
+
 /* ─── MAIN PAGE ─────────────────────────────────────────────────── */
 const ServiceDetail = () => {
   const { serviceSlug } = useParams();
   const g = useGoogleReviews();
-  const service = SERVICES_MAP[serviceSlug];
+  // Page text from src/content/services/<slug>.json (or the editor's live draft in preview).
+  const content = withDefaults(usePageContent(`service:${serviceSlug}`, SERVICE_CONTENT[serviceSlug]), serviceContentDefaults(serviceSlug)) || {};
+  const service = SERVICES_MAP[serviceSlug] ? { ...SERVICES_MAP[serviceSlug], ...content.basics } : undefined;
   const isEOT = serviceSlug === "end-of-tenancy-cleaning-manchester";
-  const ext = service?.extended ? EXTENDED_MAP[service.extended] : null;
+  const baseExt = service?.extended ? EXTENDED_MAP[service.extended] : null;
+  const ext = baseExt && content.details
+    ? {
+        ...baseExt,
+        intro: content.details.intro,
+        checklist: content.details.checklist,
+        whyMatters: content.details.whyMatters,
+        seoFooter: content.details.seoFooter,
+        // edited wording, each point keeping an icon from the original list
+        whyChoosePoints: (content.details.whyChoose || []).map((p, i) => ({
+          ...p,
+          icon: baseExt.whyChoosePoints?.[i % Math.max(1, baseExt.whyChoosePoints.length)]?.icon,
+        })),
+      }
+    : baseExt;
   const isDeep = serviceSlug === "deep-cleaning-manchester";
   const isCarpet = serviceSlug === "carpet-cleaning-manchester";
   const isAirbnb = serviceSlug === "airbnb-cleaning-manchester";
-  // Extra SEO sections (src/utils/serviceSeoContent.js) for the pages that have them.
-  const seo = SERVICE_SEO[serviceSlug] || null;
-  const pageFaqs = isDeep ? DEEP_FAQS : isEOT ? EOT_FAQS : [...(ext?.faqs || []), ...(seo?.faqs || [])];
+  // Extra SEO sections ("seo" in the page's content file) for the pages that have them.
+  const seo = content.seo || null;
+  const pageFaqs = content.faqs || [];
   // Prices built into the page at build time (scripts/prerender.mjs) show straight away and are
   // readable by Google; the live list below replaces them with the latest prices.
   const [liveServices, setLiveServices] = React.useState(() =>

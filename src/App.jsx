@@ -37,6 +37,10 @@ import { CustomerAuthProvider } from "./context/CustomerAuthContext";
 // Admin, account and other rarely-visited pages are downloaded only when opened, so the public
 // website stays small and fast on phones.
 const AdminLayout = lazy(() => import("./admin/AdminLayout"));
+// Website content editor: its own sign-in, separate from the main admin (/content-admin).
+const ContentAdmin = lazy(() => import("./content-admin/ContentAdmin"));
+const ContentLogin = lazy(() => import("./content-admin/ContentLogin"));
+const ContentEditors = lazy(() => import("./admin/ContentEditors"));
 const Dashboard = lazy(() => import("./admin/Dashboard"));
 const Bookings = lazy(() => import("./admin/Bookings"));
 const AdminBookingPay = lazy(() => import("./admin/AdminBookingPay"));
@@ -109,10 +113,10 @@ function App() {
   const location = useLocation();
   const isAdminPath   = location.pathname.startsWith("/admin");
   const isAccountPath = location.pathname.startsWith("/account");
-  const isDevPanel    = location.pathname.startsWith("/devpanel");
+  const isDevPanel    = location.pathname.startsWith("/devpanel") || location.pathname.startsWith("/content-admin");
   // Logged-in, payment and admin pages are browser-only and kept out of search results
   // (vercel.json also sends an X-Robots-Tag header for them).
-  const isPrivatePage = /^\/(admin|account|devpanel|payment)(\/|$)/.test(location.pathname);
+  const isPrivatePage = /^\/(admin|account|devpanel|payment|content-admin)(\/|$)/.test(location.pathname);
 
   // Creator / influencer links (?ref=CODE) are remembered for checkout and quotes.
   useEffect(() => { captureCreatorRef(location.search); }, [location.search]);
@@ -168,7 +172,10 @@ function App() {
             <Route path="/devpanel" element={<DevPanel />} />
 
             {/* Admin Routes */}
+            <Route path="/content-admin" element={<ContentAdmin />} />
+            <Route path="/content-admin/login" element={<ContentLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
+              <Route path="content-editors" element={<ContentEditors />} />
               <Route index element={<Dashboard />} />
               <Route path="bookings" element={<Bookings />} />
               <Route path="bookings/new" element={<NewBookingPage />} />

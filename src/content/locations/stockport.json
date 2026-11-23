@@ -1,0 +1,77 @@
+{
+  "basics": {
+    "meta": "Stockport's trusted cleaning team for homes, offices and Airbnbs. Deep cleaning, end of tenancy and regular cleans. Book your local cleaner today.",
+    "tagline": "Stockport's Go-To Professional Cleaners",
+    "description": "Cleaniq Services delivers consistent, high-quality cleaning to homes and businesses throughout Stockport. From period properties near the town centre to modern offices, our vetted cleaners bring the same reliable standard to every job.",
+    "services": [
+      "End of Tenancy Cleaning in Stockport",
+      "One-Off Deep Cleaning",
+      "Airbnb & Short-Let Turnovers",
+      "Commercial & Office Cleaning"
+    ],
+    "faqs": []
+  },
+  "guide": {
+    "highlights": [
+      "Bramhall",
+      "Cheadle",
+      "Heaton Moor"
+    ],
+    "intro": [
+      "Stockport has a real mix of homes: Victorian terraces in Edgeley and Heaton Moor, family houses in Cheadle, Bramhall and Hazel Grove, and older stone properties towards Marple.",
+      "Older terraces bring their own challenges, like condensation and mould around bathrooms and windows, while larger family homes in the southern suburbs need cleaning that fits around school runs and work."
+    ],
+    "popular": [
+      {
+        "slug": "deep-cleaning-manchester",
+        "why": "Older terraces often need mould spots on silicone and window frames tackled properly."
+      },
+      {
+        "slug": "regular-house-cleaning-manchester",
+        "why": "Family homes in Bramhall and Cheadle keep on top of busy weeks with a fortnightly clean."
+      },
+      {
+        "slug": "end-of-tenancy-cleaning-manchester",
+        "why": "Getting a house ready to sell or let? A full clean makes viewings go better."
+      }
+    ],
+    "goodToKnow": [
+      "Older terraces: mention damp or mould when you book so your cleaner can focus on it.",
+      "Bramhall and Cheadle family homes often choose a fortnightly regular clean.",
+      "Selling or letting a house? Book the clean before your viewings start.",
+      "Stone cottages towards Marple can have uneven floors and tight stairs, so tell us about access."
+    ],
+    "faqs": [
+      {
+        "q": "Can you help with condensation mould in my Stockport terrace?",
+        "a": "Yes. A deep clean can include mould spots on bathroom silicone, tiles and window frames. Tell us about it when you book so your cleaner can focus on it."
+      },
+      {
+        "q": "Do you cover Bramhall, Cheadle and Hazel Grove?",
+        "a": "Yes. Our Stockport cleaners cover Bramhall, Cheadle, Hazel Grove, Marple, Heaton Moor, Edgeley and the rest of Stockport."
+      },
+      {
+        "q": "Can you clean my house before I sell it?",
+        "a": "Yes. A deep clean or end of tenancy clean gets the kitchen, bathrooms and every room ready for viewings and photos."
+      }
+    ]
+  },
+  "local": {
+    "postcodes": [
+      "SK1",
+      "SK2",
+      "SK3",
+      "SK4",
+      "SK5",
+      "SK6",
+      "SK7",
+      "SK8"
+    ],
+    "homes": "Stockport has Victorian terraces in Edgeley and Heaton Moor, family homes in Cheadle, Bramhall and Hazel Grove, and older stone houses towards Marple. Older terraces often need extra attention for damp and mould in bathrooms and around windows, while larger family homes suit a regular clean to stay on top of busy weeks.",
+    "tips": [
+      "Older terraces: a deep clean can include mould spots on bathroom silicone and window frames.",
+      "Bramhall and Cheadle family homes often choose a fortnightly regular clean.",
+      "Selling or renting out a house? An end of tenancy clean gets it ready for viewings."
+    ]
+  }
+}

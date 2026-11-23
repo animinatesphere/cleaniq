@@ -143,6 +143,7 @@ async function main() {
   globalThis.__HOME_BLOG__ = homeBlog;
   const services = await liveServices();
   globalThis.__SERVICES__ = services;
+
   const { render, PRERENDER_ROUTES } = await import(pathToFileURL(serverEntry).href);
   // The page list comes from the app's own area/service data (src/entry-server.jsx); the old
   // public/sitemap.xml is only a fallback for older builds.

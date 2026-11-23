@@ -1,0 +1,78 @@
+{
+  "basics": {
+    "meta": "Trusted cleaners serving Wigan and the surrounding boroughs. End of tenancy, deep cleaning and regular domestic cleaning. Get a free quote today.",
+    "tagline": "Wigan's Reliable Cleaning Specialists",
+    "description": "Cleaniq Services brings dependable, professional cleaning to homes and businesses across Wigan. Whether you need a thorough one-off deep clean or ongoing regular visits, our local, fully vetted cleaners deliver consistent 5-star results.",
+    "services": [
+      "End of Tenancy Cleaning in Wigan",
+      "One-Off Deep Cleaning",
+      "Regular Domestic Cleaning",
+      "Commercial & Office Cleaning"
+    ],
+    "faqs": []
+  },
+  "guide": {
+    "highlights": [
+      "Leigh",
+      "Standish",
+      "Hindley"
+    ],
+    "intro": [
+      "Wigan covers the town itself plus Leigh, Standish, Hindley, Orrell, Atherton and Ashton-in-Makerfield, from terraced streets to newer family estates.",
+      "Our Wigan cleaners look after family homes with regular cleaning, get rental properties ready between tenants, and give homes a deep clean when they need a fresh start."
+    ],
+    "popular": [
+      {
+        "slug": "regular-house-cleaning-manchester",
+        "why": "Family homes in Standish, Orrell and Leigh keep on top of busy weeks with a regular cleaner."
+      },
+      {
+        "slug": "end-of-tenancy-cleaning-manchester",
+        "why": "Rented homes need a full clean when tenants move out."
+      },
+      {
+        "slug": "deep-cleaning-manchester",
+        "why": "A top-to-bottom clean gives homes a fresh start, for example after moving in."
+      }
+    ],
+    "goodToKnow": [
+      "Newer estates usually have easy parking; town centre terraces less so, so tell us when you book.",
+      "Moving into a new home? A deep clean before you unpack is the easiest time.",
+      "Landlords: book the clean as soon as you know the tenancy end date.",
+      "Regular cleans have a regular cleaner, which suits family routines."
+    ],
+    "faqs": [
+      {
+        "q": "Do you cover Leigh, Standish and Hindley?",
+        "a": "Yes. Our Wigan cleaners cover Leigh, Standish, Hindley, Orrell, Atherton and Ashton-in-Makerfield."
+      },
+      {
+        "q": "Can you deep clean a house before I move in?",
+        "a": "Yes. A deep clean before you unpack is the easiest time to get every room, cupboard and appliance clean."
+      },
+      {
+        "q": "Do you offer regular house cleaning in Wigan?",
+        "a": "Yes. Choose weekly, fortnightly or monthly visits on the day and time that suit you."
+      }
+    ]
+  },
+  "local": {
+    "postcodes": [
+      "WN1",
+      "WN2",
+      "WN3",
+      "WN4",
+      "WN5",
+      "WN6",
+      "WN7",
+      "M29",
+      "M46"
+    ],
+    "homes": "The Wigan area takes in Wigan town, Standish, Orrell, Ashton-in-Makerfield and Hindley, plus Leigh, Atherton and Tyldesley to the east. It's mostly terraced and semi-detached housing with many new-build estates, so after-builders cleans, regular cleans and end of tenancy cleans are all common.",
+    "tips": [
+      "New-build homes often need an after-builders clean to remove dust before moving in.",
+      "Leigh, Atherton and Tyldesley are covered as part of our Wigan area.",
+      "Book a little ahead for the further-out towns so we can plan travel."
+    ]
+  }
+}

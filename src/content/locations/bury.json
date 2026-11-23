@@ -1,0 +1,75 @@
+{
+  "basics": {
+    "meta": "Professional, insured cleaners serving Bury and the surrounding areas. End of tenancy, deep cleaning and regular cleans. Book your clean today.",
+    "tagline": "Quality Cleaning You Can Rely On in Bury",
+    "description": "From family homes to local businesses, Cleaniq Services delivers thorough, reliable cleaning across Bury. Our fully vetted cleaners use eco-friendly products and a consistent checklist-based process, so every visit meets the same high standard.",
+    "services": [
+      "End of Tenancy Cleaning in Bury",
+      "One-Off Deep Cleaning",
+      "Regular Domestic Cleaning",
+      "Airbnb & Short-Let Turnovers"
+    ],
+    "faqs": []
+  },
+  "guide": {
+    "highlights": [
+      "Ramsbottom",
+      "Prestwich",
+      "Whitefield"
+    ],
+    "intro": [
+      "Bury runs from busy commuter areas like Prestwich and Whitefield to the stone cottages and hillside homes of Ramsbottom, Tottington and Summerseat.",
+      "Families here tend to want a regular cleaner they can rely on, while older stone properties further north can need deep cleans that deal with dust, damp and hard-to-reach corners."
+    ],
+    "popular": [
+      {
+        "slug": "regular-house-cleaning-manchester",
+        "why": "Commuter families in Prestwich and Whitefield get their evenings back with a regular cleaner."
+      },
+      {
+        "slug": "deep-cleaning-manchester",
+        "why": "Older stone cottages in Ramsbottom and Tottington benefit from a thorough top-to-bottom clean."
+      },
+      {
+        "slug": "general-cleaning-manchester",
+        "why": "A one-off clean before guests arrive or after a busy month keeps things manageable."
+      }
+    ],
+    "goodToKnow": [
+      "Stone cottages can have narrow stairs and low ceilings, so tell us about access.",
+      "Prestwich and Whitefield homes often suit a weekly or fortnightly regular clean.",
+      "Tell us about parking on steep or narrow roads in Ramsbottom and Summerseat.",
+      "A one-off general clean is ideal before visitors or a family occasion."
+    ],
+    "faqs": [
+      {
+        "q": "Do you clean stone cottages in Ramsbottom?",
+        "a": "Yes. Older stone properties are no problem. Tell us about access, stairs and anything delicate when you book."
+      },
+      {
+        "q": "Do you cover Prestwich and Whitefield?",
+        "a": "Yes. Our Bury cleaners cover Prestwich, Whitefield, Radcliffe, Ramsbottom, Tottington and Summerseat."
+      },
+      {
+        "q": "Can I book a one-off clean rather than regular cleaning?",
+        "a": "Yes. Book a general clean or deep clean as a one-off whenever you need it."
+      }
+    ]
+  },
+  "local": {
+    "postcodes": [
+      "BL0",
+      "BL8",
+      "BL9",
+      "M25",
+      "M26",
+      "M45"
+    ],
+    "homes": "Bury covers the town centre, stone cottages and family homes in Ramsbottom and Tottington, and busier suburbs in Prestwich, Whitefield and Radcliffe close to Manchester. Homes range from older terraces to modern family houses, and local shops, takeaways and offices also book commercial cleans.",
+    "tips": [
+      "Older stone cottages can be prone to damp; a deep clean can include mould spots in bathrooms.",
+      "Shops, takeaways and offices can ask for a commercial cleaning quote.",
+      "Prestwich and Whitefield are close to the city, so short-notice cleans are often possible."
+    ]
+  }
+}

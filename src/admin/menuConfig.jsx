@@ -351,6 +351,12 @@ export const fullMenuGroups = [
         icon: <BookOpen size={20} />,
       },
       {
+        name: "Website Content",
+        path: "/admin/content-editors",
+        key: "settings",
+        icon: <Globe size={20} />,
+      },
+      {
         name: "Chat Support",
         path: "/admin/chat",
         key: "chat",

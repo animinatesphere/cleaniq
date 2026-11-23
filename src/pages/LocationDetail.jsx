@@ -6,6 +6,8 @@ import { whatsappLink } from "../utils/contact";
 import { useGoogleReviews } from "../utils/googleReviews";
 import { AREA_LOCAL } from "../utils/areaLocal";
 import { AREA_GUIDE } from "../utils/areaGuide";
+import { usePageContent, withDefaults } from "../utils/siteContent";
+import { LOCATION_CONTENT } from "../content";
 import BeforeAfter from "../component/BeforeAfter";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import {
@@ -235,12 +237,26 @@ const areaFaqs = (name, nearby) => [
   },
 ];
 
+// Each location page's text lives in src/content/locations/<area>.json (edited in /content-admin or
+// by hand). These values are only fallbacks for fields missing from a file.
+// eslint-disable-next-line react-refresh/only-export-components
+export function locationContentDefaults(slug) {
+  const d = LOCATIONS_MAP[slug];
+  if (!d) return null;
+  return {
+    basics: { meta: d.meta, tagline: d.tagline, description: d.description, services: d.services || [], faqs: d.faqs || [] },
+    ...(AREA_GUIDE[slug] ? { guide: AREA_GUIDE[slug] } : {}),
+    ...(AREA_LOCAL[slug] ? { local: AREA_LOCAL[slug] } : {}),
+  };
+}
 
 const LocationDetail = () => {
   const { area } = useParams();
   const g = useGoogleReviews();
   const slug = area.toLowerCase();
-  const locationData = LOCATIONS_MAP[slug];
+  // Page text from src/content/locations/<area>.json (or the editor's live draft in preview).
+  const content = withDefaults(usePageContent(`location:${slug}`, LOCATION_CONTENT[slug]), locationContentDefaults(slug)) || {};
+  const locationData = LOCATIONS_MAP[slug] ? { ...LOCATIONS_MAP[slug], ...content.basics } : undefined;
 
   if (!locationData) {
     return (
@@ -258,8 +274,8 @@ const LocationDetail = () => {
 
   const { name } = locationData;
   const nearby = NEIGHBOURHOODS[slug] || [];
-  const local = AREA_LOCAL[slug];
-  const guide = AREA_GUIDE[slug];
+  const local = content.local || null;
+  const guide = content.guide || null;
   const localFaq = local
     ? [{ q: `Which ${name} postcodes do your cleaners cover?`, a: `Our cleaners cover ${local.postcodes.join(", ")}${nearby.length ? `, including ${nearby.join(", ")}` : ""}. Not sure if you're covered? Message us on WhatsApp with your postcode.` }]
     : [];

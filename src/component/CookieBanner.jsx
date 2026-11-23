@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Cookie, X } from "lucide-react";
+import { isPreview } from "../utils/siteContent";
 
 const KEY = "cleaniq_cookie_consent";
 // The footer's "Cookies" link sends this event to open the settings again.
@@ -85,7 +86,7 @@ export default function CookieBanner() {
     window.dispatchEvent(new CustomEvent("cleaniq:consent", { detail: value }));
   };
 
-  if (!mounted || !open) return null;
+  if (!mounted || !open || isPreview) return null;
 
   return (
     <div

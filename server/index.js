@@ -237,6 +237,10 @@ app.use("/api/app", require("./routes/appLinks")); // worker app download links 
 app.use("/api/auth", authRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/blog", blogRoutes);
+// Website text edited in Admin → Website Content (read by the website build).
+app.use("/api/site-content", require("./routes/siteContent"));
+// Content editor logins for /content-admin (accounts are managed by main admins).
+app.use("/api/content-editors", require("./routes/contentEditors"));
 app.use("/api/comments", commentRoutes);
 app.use("/api/properties", propertiesRoutes);
 app.use("/api/settings", settingsRoutes);

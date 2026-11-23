@@ -1,0 +1,71 @@
+{
+  "basics": {
+    "meta": "Reliable eco-friendly cleaners in Chorlton. Expert end of tenancy, Airbnb, and deep cleaning services. Get a free quote from Cleaniq Services.",
+    "tagline": "Premium House & Office Cleaning in Chorlton",
+    "description": "Cleaniq Services offers top-tier cleaning solutions for homes and offices across Chorlton. Our locally vetted and insured professionals deliver meticulous, eco-friendly cleaning, ensuring your space is pristine and healthy.",
+    "services": [
+      "End of Tenancy Cleaning in Chorlton",
+      "One-Off Deep Cleaning",
+      "Airbnb & Short-Let Turnovers",
+      "Commercial & Office Cleaning"
+    ],
+    "faqs": []
+  },
+  "guide": {
+    "highlights": [
+      "Beech Road",
+      "Whalley Range",
+      "Firswood"
+    ],
+    "intro": [
+      "Chorlton-cum-Hardy is mostly Victorian and Edwardian terraces and semis around Beech Road and Chorlton Green, with flats and newer homes nearby in Firswood and Whalley Range.",
+      "Many of these homes are family homes or rentals, so most of our work in Chorlton is regular cleaning for busy households and end of tenancy cleans when rentals change hands."
+    ],
+    "popular": [
+      {
+        "slug": "regular-house-cleaning-manchester",
+        "why": "Family homes around Beech Road and Chorlton Green suit weekly or fortnightly visits."
+      },
+      {
+        "slug": "end-of-tenancy-cleaning-manchester",
+        "why": "Rented terraces and flats need a full clean when tenants move out."
+      },
+      {
+        "slug": "oven-cleaning-manchester",
+        "why": "Busy family kitchens build up baked-on grease faster than most."
+      }
+    ],
+    "goodToKnow": [
+      "Terraced streets can be tight for parking, so tell us about permits or nearby spaces.",
+      "Victorian terraces often have original tiles and floors, so mention anything delicate.",
+      "Rentals in Firswood and Whalley Range: book your end of tenancy clean as soon as you know your date.",
+      "Add oven cleaning every few months to keep a busy family kitchen fresh."
+    ],
+    "faqs": [
+      {
+        "q": "Do you clean Victorian terraces in Chorlton?",
+        "a": "Yes. Our cleaners look after terraced and semi-detached homes across Chorlton, including those with original tiles and floors. Tell us about anything delicate when you book."
+      },
+      {
+        "q": "Do you cover Whalley Range and Firswood?",
+        "a": "Yes. Our Chorlton cleaners cover Chorlton-cum-Hardy, Whalley Range, Firswood and nearby Stretford."
+      },
+      {
+        "q": "Can I get my oven cleaned as well as a regular clean?",
+        "a": "Yes. Add oven cleaning when you book, or book it on its own whenever your oven needs it."
+      }
+    ]
+  },
+  "local": {
+    "postcodes": [
+      "M21",
+      "M16"
+    ],
+    "homes": "Chorlton-cum-Hardy is mostly Victorian and Edwardian terraced and semi-detached houses around Beech Road and Chorlton Green, with flats and newer builds nearby in Firswood and Whalley Range. Many are family homes or rentals, so regular cleans and end of tenancy cleans are the most common bookings.",
+    "tips": [
+      "Terraced houses often have narrow staircases; stairs and landings can be added to any clean.",
+      "Original wooden floors: tell us and we'll use suitable products.",
+      "Renting out a room or house? End of tenancy cleans follow the checklist letting agents use."
+    ]
+  }
+}

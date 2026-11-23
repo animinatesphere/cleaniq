@@ -1,0 +1,76 @@
+{
+  "basics": {
+    "meta": "Cleaniq Services offers expert deep cleaning, end of tenancy and regular cleaning across Oldham. Vetted, insured cleaners. Book online in minutes.",
+    "tagline": "Dependable Cleaning Across Oldham",
+    "description": "Cleaniq Services provides Oldham residents and businesses with thorough, professional cleaning they can count on. From end of tenancy cleans that satisfy strict landlord checklists to regular housekeeping, our local cleaners get the job done right every time.",
+    "services": [
+      "End of Tenancy Cleaning in Oldham",
+      "One-Off Deep Cleaning",
+      "Regular Domestic Cleaning",
+      "Commercial & Office Cleaning"
+    ],
+    "faqs": []
+  },
+  "guide": {
+    "highlights": [
+      "Chadderton",
+      "Royton",
+      "Saddleworth"
+    ],
+    "intro": [
+      "Oldham ranges from terraced streets and family homes in Chadderton, Royton, Shaw and Failsworth to the stone villages and rural homes of Saddleworth.",
+      "Our Oldham cleaners help families keep on top of busy weeks, help landlords get properties ready between tenants, and give older homes the deeper clean they need."
+    ],
+    "popular": [
+      {
+        "slug": "regular-house-cleaning-manchester",
+        "why": "Family homes in Chadderton, Royton and Shaw stay clean with weekly or fortnightly visits."
+      },
+      {
+        "slug": "end-of-tenancy-cleaning-manchester",
+        "why": "Rented homes need a full clean so they're ready for the next tenants."
+      },
+      {
+        "slug": "deep-cleaning-manchester",
+        "why": "Older stone homes in Saddleworth benefit from a thorough reset."
+      }
+    ],
+    "goodToKnow": [
+      "Saddleworth homes can be more rural, so share directions and parking details when you book.",
+      "Terraced streets in Chadderton and Failsworth can be busy for parking, so tell us about permits.",
+      "Landlords: book the clean as soon as you know the tenancy end date.",
+      "Older homes: mention damp or mould so your cleaner can focus on it."
+    ],
+    "faqs": [
+      {
+        "q": "Do you cover Saddleworth?",
+        "a": "Yes. Our Oldham cleaners cover Saddleworth as well as Chadderton, Royton, Shaw, Failsworth and Lees. Share directions and parking details when you book."
+      },
+      {
+        "q": "Can you clean a rented house in Oldham between tenants?",
+        "a": "Yes. Our end of tenancy clean covers the kitchen, oven, bathrooms and every room so the property is ready to let."
+      },
+      {
+        "q": "Do you offer regular cleaning in Chadderton and Royton?",
+        "a": "Yes. Choose weekly, fortnightly or monthly visits when you book."
+      }
+    ]
+  },
+  "local": {
+    "postcodes": [
+      "OL1",
+      "OL2",
+      "OL3",
+      "OL4",
+      "OL8",
+      "OL9",
+      "M35"
+    ],
+    "homes": "Oldham is mainly terraced and semi-detached housing in the town, Chadderton, Royton and Shaw, with stone-built homes in the Saddleworth villages. Rental properties are common, so end of tenancy cleans are frequent, along with regular cleans for family homes.",
+    "tips": [
+      "Saddleworth homes are further out; please book a little ahead so we can plan travel.",
+      "Landlords: end of tenancy cleans help get a property ready for new tenants quickly.",
+      "Terraced homes with small kitchens suit a 2 to 3 hour regular clean."
+    ]
+  }
+}
