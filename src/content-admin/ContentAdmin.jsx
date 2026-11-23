@@ -7,9 +7,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Save, UploadCloud, RotateCcw, History, ExternalLink, LogOut, Monitor, Smartphone, FileText, MapPin, Loader2, X, Search,
+  Save, UploadCloud, RotateCcw, History, ExternalLink, LogOut, Monitor, Smartphone, FileText, MapPin, Loader2, X, Search, LayoutTemplate,
 } from "lucide-react";
 import FieldEditor from "./FieldEditor";
+import PageBuilder from "./PageBuilder";
 import { api, getToken, signOut } from "./api";
 import { SERVICE_PAGES } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
@@ -17,14 +18,19 @@ import { AREAS } from "../utils/areas";
 const SERVICE_NAMES = Object.fromEntries(SERVICE_PAGES.map((p) => [p.slug, p.name]));
 const AREA_NAMES = Object.fromEntries(AREAS.map((a) => [a.slug, a.name]));
 const pretty = (slug) => slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const PAGE_NAMES = { home: "Homepage" };
 const pageName = (key) => {
   const [type, slug] = key.split(":");
+  if (type === "page") return PAGE_NAMES[slug] || pretty(slug);
   return type === "service" ? SERVICE_NAMES[slug] || pretty(slug) : `Cleaners in ${AREA_NAMES[slug] || pretty(slug)}`;
 };
 const pageUrl = (key) => {
   const [type, slug] = key.split(":");
+  if (type === "page") return slug === "home" ? "/" : `/${slug}`;
   return type === "service" ? `/service/${slug}` : `/locations/${slug}`;
 };
+// Pages built from blocks open in the drag-and-drop page builder.
+const isBlockPage = (key) => key.startsWith("page:");
 const norm = (t) => String(t || "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s+/g, " ").trim().toLowerCase();
 
 // All text values in the content, with their paths (for click-to-edit).
@@ -104,6 +110,12 @@ export default function ContentAdmin() {
   const openPage = async (k) => {
     if (dirty && !window.confirm("You have unsaved changes on this page. Leave without saving them?")) return;
     setKey(k);
+    if (isBlockPage(k)) {
+      setPage(null);
+      setContent(null);
+      setSavedContent(null);
+      return;
+    }
     setPage(null);
     setContent(null);
     setShowHistory(false);
@@ -223,6 +235,7 @@ export default function ContentAdmin() {
     const f = filter.trim().toLowerCase();
     const keep = (row) => !f || pageName(row.key).toLowerCase().includes(f);
     return [
+      { title: "Pages (drag & drop)", icon: LayoutTemplate, rows: (pages.pages || []).filter(keep) },
       { title: "Service pages", icon: FileText, rows: pages.services.filter(keep) },
       { title: "Location pages", icon: MapPin, rows: pages.locations.filter(keep) },
     ];
@@ -255,7 +268,7 @@ export default function ContentAdmin() {
         </div>
       </header>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[240px_minmax(380px,1fr)_minmax(420px,1.2fr)]">
+      <div className={`flex-1 min-h-0 grid grid-cols-1 ${key && isBlockPage(key) ? "lg:grid-cols-[240px_1fr]" : "lg:grid-cols-[240px_minmax(380px,1fr)_minmax(420px,1.2fr)]"}`}>
         {/* Pages */}
         <aside className="border-r border-slate-200 bg-white overflow-y-auto">
           <div className="p-3 sticky top-0 bg-white border-b border-slate-100">
@@ -283,6 +296,12 @@ export default function ContentAdmin() {
           ))}
         </aside>
 
+        {key && isBlockPage(key) ? (
+          <main className="min-h-0 flex flex-col">
+            <PageBuilder pageKey={key} title={pageName(key)} notify={notify} onSaved={loadPages} />
+          </main>
+        ) : (
+          <>
         {/* Editor */}
         <main className="min-h-0 flex flex-col border-r border-slate-200">
           {!key ? (
@@ -359,6 +378,8 @@ export default function ContentAdmin() {
             )}
           </div>
         </section>
+          </>
+        )}
       </div>
 
       {toast && (

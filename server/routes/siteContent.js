@@ -15,8 +15,8 @@ const contentAuth = require("../middleware/contentAuth");
 const SiteContent = require("../models/SiteContent");
 const github = require("../utils/github");
 
-const KEY = /^(service|location):([a-z0-9-]{1,80})$/;
-const FOLDERS = { service: "src/content/services", location: "src/content/locations" };
+const KEY = /^(service|location|page):([a-z0-9-]{1,80})$/;
+const FOLDERS = { service: "src/content/services", location: "src/content/locations", page: "src/content/pages" };
 const MAX_BYTES = 200 * 1024;
 const MAX_VERSIONS = 10;
 
@@ -73,13 +73,17 @@ async function saveDraft(key, data, by) {
 
 router.get("/pages", async (req, res) => {
   try {
-    const [services, locations] = await Promise.all([github.listFiles(FOLDERS.service), github.listFiles(FOLDERS.location)]);
+    const [pages, services, locations] = await Promise.all([
+      github.listFiles(FOLDERS.page).catch(() => []),
+      github.listFiles(FOLDERS.service),
+      github.listFiles(FOLDERS.location),
+    ]);
     const drafts = new Set((await SiteContent.find({ data: { $ne: null } }).select("key").lean()).map((d) => d.key));
     const row = (type) => (name) => {
       const key = `${type}:${name.replace(/\.json$/, "")}`;
       return { key, hasDraft: drafts.has(key) };
     };
-    res.json({ services: services.map(row("service")), locations: locations.map(row("location")) });
+    res.json({ pages: pages.map(row("page")), services: services.map(row("service")), locations: locations.map(row("location")) });
   } catch (err) {
     fail(res, err, "Couldn't load the list of pages");
   }

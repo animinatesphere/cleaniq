@@ -6,7 +6,7 @@ import { whatsappLink } from "../utils/contact";
 import { SeoTop, SeoMiddle, SeoLower, SeoQuote, SeoClosing } from "../component/ServiceSeoSections";
 import { priceNote } from "../utils/serviceRules";
 import { usePageContent, withDefaults } from "../utils/siteContent";
-import { SERVICE_CONTENT } from "../content";
+import { SERVICE_CONTENT } from "../content/services";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 import BeforeAfter from "../component/BeforeAfter";

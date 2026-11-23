@@ -7,7 +7,7 @@ import { useGoogleReviews } from "../utils/googleReviews";
 import { AREA_LOCAL } from "../utils/areaLocal";
 import { AREA_GUIDE } from "../utils/areaGuide";
 import { usePageContent, withDefaults } from "../utils/siteContent";
-import { LOCATION_CONTENT } from "../content";
+import { LOCATION_CONTENT } from "../content/locations";
 import BeforeAfter from "../component/BeforeAfter";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import {

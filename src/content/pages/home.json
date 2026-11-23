@@ -1,0 +1,358 @@
+{
+  "root": {
+    "props": {
+      "title": "Cleaners in Manchester | House Cleaning Near You | Cleaniq",
+      "description": "Looking for cleaners near you? Cleaniq's vetted local cleaners offer house, end of tenancy, deep, oven, carpet and office cleaning across Manchester and Greater Manchester. Rated 5.0 on Google.",
+      "shareTitle": "Cleaners in Manchester | House Cleaning Near You | Cleaniq",
+      "shareDescription": "Vetted, eco-friendly cleaners near you in Manchester. House, end of tenancy, deep, oven and carpet cleaning with a 48-hour re-clean guarantee."
+    }
+  },
+  "content": [
+    {
+      "type": "Hero",
+      "props": {
+        "badge": "TOP-RATED CLEANERS IN MANCHESTER",
+        "heading": "House Cleaning Services in",
+        "highlight": "Manchester",
+        "text": "Looking for reliable cleaners near me? Our vetted local cleaners handle regular house cleaning, end of tenancy, deep, oven and carpet cleaning across Greater Manchester.",
+        "buttons": [
+          {
+            "label": "Book in 60 Seconds",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes"
+          },
+          {
+            "label": "Get a Quote",
+            "link": "/get-a-quote",
+            "style": "outline",
+            "arrow": "yes"
+          }
+        ],
+        "showAppButtons": "yes",
+        "showGoogleBadge": "yes",
+        "image": "service-deep-1200.webp",
+        "imageAlt": "Bright Manchester apartment living room after a deep clean by Cleaniq Services",
+        "statTitle": "100% Vetted",
+        "statText": "Background checked",
+        "id": "Hero-1"
+      }
+    },
+    {
+      "type": "ServiceCards",
+      "props": {
+        "label": "Our Services",
+        "heading": "Cleaning services near you in Manchester.",
+        "text": "From regular house cleaning to end of tenancy and deep cleans, our local cleaners have the right cleaning service for your home or business.",
+        "cards": [
+          {
+            "keyword": "Move-out specialists",
+            "title": "End of Tenancy Cleaning",
+            "desc": "Comprehensive move-out cleaning to ensure you get your deposit back.",
+            "link": "/service/end-of-tenancy-cleaning-manchester",
+            "linkLabel": "View service",
+            "icon": "home",
+            "image": "service-eot-photo-600.webp",
+            "imageAlt": "Clean kitchen with oven and washing machine after an end of tenancy clean by Cleaniq Services"
+          },
+          {
+            "keyword": "Expert office cleaning",
+            "title": "Office Cleaning",
+            "desc": "Professional janitorial services for your workspace.",
+            "link": "/service/office-cleaning-manchester",
+            "linkLabel": "View service",
+            "icon": "briefcase",
+            "image": "service-office-photo-600.webp",
+            "imageAlt": "Tidy office desk with a computer, plant and chairs, ready for the working day"
+          },
+          {
+            "keyword": "Deep cleaning",
+            "title": "Deep Clean",
+            "desc": "Specialized deep cleaning services for a total refresh.",
+            "link": "/service/deep-cleaning-manchester",
+            "linkLabel": "View service",
+            "icon": "zap",
+            "image": "our-work/deep-card.jpg",
+            "imageAlt": "Fridge cleaned inside, shelves and drawers spotless, after a deep clean by Cleaniq Services"
+          },
+          {
+            "keyword": "Short-let specialist",
+            "title": "Airbnb Cleaning",
+            "desc": "Professional turnover services for your short-let rental.",
+            "link": "/service/airbnb-cleaning-manchester",
+            "linkLabel": "View service",
+            "icon": "star",
+            "image": "our-work/airbnb-1.jpg",
+            "imageAlt": "Guest-ready bedroom with fresh towels after an Airbnb turnover clean by Cleaniq Services"
+          }
+        ],
+        "hubTitle": "Our Specialized Manchester Cleaning Hubs",
+        "showHubLinks": "yes",
+        "id": "ServiceCards-2"
+      }
+    },
+    {
+      "type": "ImageText",
+      "props": {
+        "label": "Our Mission",
+        "heading": "Exceptional,",
+        "highlight": "eco-conscious",
+        "headingEnd": "cleaning.",
+        "text": "Our mission is to provide exceptional, eco-conscious cleaning services that enhance the quality of living and working environments, grounded in professionalism, integrity, and trust. Based in Manchester, we've redefined what clean means through precision and sustainability — including thorough end of tenancy cleaning that helps tenants leave on the right note and landlords prepare properties for new occupants with confidence.",
+        "image": "our-work/about-cleaner.jpg",
+        "imageAlt": "Cleaniq Services cleaner in uniform and gloves cleaning an oven",
+        "imageSide": "left",
+        "stats": [
+          {
+            "value": "{rating}★",
+            "label": "Google rating"
+          },
+          {
+            "value": "48hr",
+            "label": "Re-clean guarantee"
+          }
+        ],
+        "button": {
+          "label": "Learn More About Us",
+          "link": "/about",
+          "style": "text",
+          "arrow": "yes"
+        },
+        "background": "white",
+        "id": "ImageText-3"
+      }
+    },
+    {
+      "type": "Steps",
+      "props": {
+        "label": "The Process",
+        "heading": "Book a cleaner near you in 3 simple steps.",
+        "background": "light",
+        "steps": [
+          {
+            "number": "01",
+            "title": "Book Online",
+            "text": "Choose your service and pick a time that suits you."
+          },
+          {
+            "number": "02",
+            "title": "Your Cleaner Arrives",
+            "text": "A vetted, background-checked local cleaner arrives at your door."
+          },
+          {
+            "number": "03",
+            "title": "Sparkling Clean",
+            "text": "Relax and enjoy your perfectly cleaned living space."
+          }
+        ],
+        "id": "Steps-4"
+      }
+    },
+    {
+      "type": "LocalAreas",
+      "props": {
+        "label": "Local cleaners",
+        "heading": "Cleaners in Manchester you can trust.",
+        "paragraphs": [
+          "Searching for \"cleaners near me\" can turn up a long list, so we keep it simple: vetted local cleaners, clear prices and a 48-hour re-clean guarantee on every job.",
+          "Our cleaners live and work across Greater Manchester, from the city centre, Salford and Trafford to Stockport, Bolton and Wigan, so there's usually a cleaner near you. Book a regular house cleaner for weekly or fortnightly visits, or a one-off deep clean, end of tenancy clean, oven clean or carpet clean when you need it.",
+          "Use your own cleaning products, or our cleaners bring eco-friendly products and equipment for £10."
+        ],
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes"
+          },
+          {
+            "label": "About our cleaners",
+            "link": "/about",
+            "style": "outline",
+            "arrow": "no"
+          }
+        ],
+        "areaCount": 8,
+        "id": "LocalAreas-5"
+      }
+    },
+    {
+      "type": "BeforeAfter",
+      "props": {
+        "title": "",
+        "id": "BeforeAfter-6"
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-7"
+      }
+    },
+    {
+      "type": "Faq",
+      "props": {
+        "label": "FAQ",
+        "heading": "Questions about our cleaners.",
+        "faqs": [
+          {
+            "q": "Do you have cleaners near me?",
+            "a": "Our cleaners cover Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside, Wigan. If your area isn't listed, message us on WhatsApp and we'll check."
+          },
+          {
+            "q": "Do you offer end of tenancy cleaning in Manchester City Centre?",
+            "a": "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits."
+          },
+          {
+            "q": "How do you vet your cleaners?",
+            "a": "Every cleaner goes through a multi-stage vetting process, including a face-to-face interview, background checks and a practical skills assessment."
+          },
+          {
+            "q": "What if I'm not satisfied with the clean?",
+            "a": "We offer a 48-hour re-clean guarantee. If any part of the clean isn't up to standard, we'll send a cleaner back to re-clean it for free."
+          },
+          {
+            "q": "Do I need to provide cleaning supplies?",
+            "a": "Many clients prefer us to use their own supplies, but our cleaners can bring eco-friendly cleaning products and equipment for £10 per visit."
+          },
+          {
+            "q": "How do I book a cleaner in Manchester?",
+            "a": "Book online in a few steps, message us on WhatsApp (+44 7846 726428) or call +44 7846 726428. We confirm every booking by email."
+          },
+          {
+            "q": "Who is the best cleaning company in Manchester?",
+            "a": "The best cleaning company for you is one with vetted cleaners, clear prices and a guarantee. Cleaniq Services is a Manchester cleaning company  that ticks all three: every cleaner is interviewed and background-checked, prices are shown upfront when you book online, and every clean comes with a 48-hour re-clean guarantee. Our customers rate us highly on Google, and we cover Manchester and the whole of Greater Manchester."
+          },
+          {
+            "q": "Recommend a reliable end-of-tenancy cleaner in Manchester.",
+            "a": "Cleaniq Services provides end of tenancy cleaning across Manchester and Greater Manchester. We clean the property top to bottom to the standard landlords and letting agents check for, including the kitchen, oven, bathrooms, floors and inside cupboards, to help tenants get their deposit back. If anything isn't right, we come back within 48 hours and re-clean it for free."
+          },
+          {
+            "q": "Which cleaning companies cover Salford and Stockport?",
+            "a": "Cleaniq Services covers both Salford and Stockport, with local cleaners for regular house cleaning, deep cleaning, end of tenancy, Airbnb, office, oven and carpet cleaning. We also cover Manchester City Centre, Trafford, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan."
+          },
+          {
+            "q": "Find an insured domestic cleaning company near me.",
+            "a": "Cleaniq Services is an insured domestic cleaning company covering Manchester and Greater Manchester. Our cleaners are covered by public liability insurance, interviewed and background-checked before they clean, and every clean has a 48-hour re-clean guarantee. Book online, call or WhatsApp +44 7846 726428 to find a cleaner near you."
+          }
+        ],
+        "id": "Faq-8"
+      }
+    },
+    {
+      "type": "Slideshow",
+      "props": {
+        "label": "Our Work",
+        "heading": "Spaces we've transformed.",
+        "slides": [
+          {
+            "image": "our-work/regular-2.jpg",
+            "label": "Living Room",
+            "alt": "Living room with sofas and city views after a house clean by Cleaniq Services"
+          },
+          {
+            "image": "our-work/regular-1.jpg",
+            "label": "Kitchen",
+            "alt": "Clean kitchen worktops, sink and hob after a house clean by Cleaniq Services"
+          },
+          {
+            "image": "our-work/regular-3.jpg",
+            "label": "Bathroom",
+            "alt": "Clean bathroom with bath, basin and tiled floor after a house clean by Cleaniq Services"
+          },
+          {
+            "image": "our-work/airbnb-4.jpg",
+            "label": "Kitchen & Dining",
+            "alt": "Kitchen and dining area after an Airbnb turnover clean by Cleaniq Services"
+          },
+          {
+            "image": "our-work/regular-5.jpg",
+            "label": "Bedroom",
+            "alt": "Tidy bedroom with a made bed and floor-to-ceiling windows after a clean by Cleaniq Services"
+          }
+        ],
+        "id": "Slideshow-9"
+      }
+    },
+    {
+      "type": "Coverage",
+      "props": {
+        "label": "Our Coverage",
+        "heading": "Cleaners near you across Greater Manchester.",
+        "text": "Our cleaners work across Manchester and the surrounding towns. Choose a service, then your area, to find cleaners near you.",
+        "ctaText": "Don't see your area? Message us — we may still have cleaners near you.",
+        "button": {
+          "label": "Check Availability",
+          "link": "/booking",
+          "style": "dark",
+          "arrow": "yes"
+        },
+        "id": "Coverage-10"
+      }
+    },
+    {
+      "type": "BlogPosts",
+      "props": {
+        "label": "From Our Blog",
+        "heading": "Cleaning tips & expert insights.",
+        "text": "Discover professional end of tenancy advice, industry trends, and practical tips to maintain a spotless home.",
+        "button": {
+          "label": "View All Articles",
+          "link": "/blog",
+          "style": "dark",
+          "arrow": "yes"
+        },
+        "id": "BlogPosts-11"
+      }
+    },
+    {
+      "type": "DarkBanner",
+      "props": {
+        "heading": "Become a Cleaniq Services Pro.",
+        "text": "Are you a professional cleaner in Manchester? Join our platform today. We require all pros to have a valid DBS check for customer safety.",
+        "smallTitle": "Apply Now",
+        "smallText": "Application Requirement",
+        "button": {
+          "label": "Apply Now",
+          "link": "/recruitment",
+          "style": "secondary",
+          "arrow": "yes"
+        },
+        "id": "DarkBanner-12"
+      }
+    },
+    {
+      "type": "CallToAction",
+      "props": {
+        "heading": "Looking for cleaners near you?",
+        "text": "Book a vetted local cleaner anywhere in Greater Manchester today.",
+        "buttons": [
+          {
+            "label": "Book Now",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "no"
+          }
+        ],
+        "background": "mint",
+        "id": "CallToAction-13"
+      }
+    },
+    {
+      "type": "ColumnsText",
+      "props": {
+        "columns": [
+          {
+            "title": "Professional Cleaning Services",
+            "text": "Cleaniq Services is your premier choice for high-quality house cleaning and professional housekeeping across Greater Manchester. We specialize in deep cleaning, move-in/move-out services, End of tenancy cleaning, and office janitorial solutions."
+          },
+          {
+            "title": "Local Impact",
+            "text": "Serving our local communities with reliability and care since 2024."
+          }
+        ],
+        "id": "ColumnsText-14"
+      }
+    }
+  ]
+}

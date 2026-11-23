@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@google-analytics/data": "^6.1.0",
+    "@puckeditor/core": "^0.24.2",
     "@stripe/react-stripe-js": "^2.9.0",
     "@stripe/stripe-js": "^3.5.0",
     "@tailwindcss/vite": "^4.2.4",
