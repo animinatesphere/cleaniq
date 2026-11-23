@@ -277,10 +277,10 @@ const About = () => {
               Trusted cleaners in <span className="text-primary italic">Manchester.</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-600 font-medium leading-relaxed mb-6 max-w-xl">
-              Handing over your keys to a cleaner is a big deal. We get it. That's why every Cleaniq Services cleaner
-              is vetted, DBS-checked and fully insured, and why every clean comes with our free 48-hour re-clean
-              guarantee. Real people, genuine care and results you can see, for homes, rentals, Airbnbs and offices
-              across Manchester and Greater Manchester.
+              Handing over the keys to your home or business to a cleaner is a big deal. We get it. That's why every
+              Cleaniq Services cleaner is vetted, DBS-checked and fully insured, and why every clean comes with our free
+              48-hour re-clean guarantee. Real people, genuine care and results you can see, for homes, rentals,
+              Airbnbs, offices and businesses across Manchester and Greater Manchester.
             </p>
             <ul className="flex flex-wrap gap-2 mb-8">
               {["Vetted & DBS-checked", "Fully insured", "Free 48-hour re-clean"].map((t) => (
