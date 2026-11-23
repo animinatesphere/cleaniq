@@ -164,6 +164,7 @@ const sections = [
       "2. Analyze website traffic and user behavior",
       "3. Provide analytics and performance metrics",
       "Most modern browsers allow you to refuse cookies or alert you when cookies are being sent. Please note that some features of our Site may not function properly without cookies enabled.",
+      "Your cookie choices: when you first visit our Site, we ask for your permission before using any cookies that are not necessary. Necessary cookies keep the Site working, for example keeping you signed in and remembering your cookie choice. Analytics cookies (Google Analytics and Metricool) and marketing cookies (Google Ads and TikTok) are only used if you agree. You can change or withdraw your choice at any time by selecting \"Cookies\" at the bottom of any page.",
     ],
   },
   {

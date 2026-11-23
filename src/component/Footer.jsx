@@ -403,12 +403,14 @@ const Footer = () => {
             >
               Terms
             </Link>
-            <a
-              href="#"
+            {/* Opens the cookie settings (src/component/CookieBanner.jsx) */}
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("cleaniq:open-cookie-settings"))}
               className="text-[10px] md:text-xs font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors"
             >
               Cookies
-            </a>
+            </button>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import TopNav from "./component/TopNav";
 import Footer from "./component/Footer";
 import ScrollToTop from "./component/ScrollToTop";
 import WhatsAppButton from "./component/WhatsAppButton";
+import CookieBanner from "./component/CookieBanner";
 import Home from "./pages/Home";
 // Public pages load when visited, so the homepage doesn't download booking/payment (Stripe),
 // quote, blog and other page code. The homepage itself stays in the main bundle so it shows at once.
@@ -237,6 +238,7 @@ function App() {
 
         {!isAdminPath && !isAccountPath && !isDevPanel && <Footer />}
         {!isAdminPath && !isDevPanel && <WhatsAppButton />}
+        {!isAdminPath && !isDevPanel && <CookieBanner />}
       </div>
     </CustomerAuthProvider>
   );

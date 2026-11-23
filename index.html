@@ -1,14 +1,39 @@
 <!doctype html>
 <html lang="en-GB">
   <head>
+    <!-- Cookie consent. Analytics and marketing tags only load after the visitor agrees in the
+         cookie banner (src/component/CookieBanner.jsx). Google Consent Mode starts as "denied". -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag("consent", "default", {
+        ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied",
+        analytics_storage: "denied", wait_for_update: 500,
+      });
+      window.__lateTags = window.__lateTags || [];
+      // Each tag is registered with its cookie category: "google" (Analytics + Ads), "analytics", "marketing".
+      window.__tag = function (cat, run) { window.__lateTags.push({ cat: cat, run: run }); };
+      window.__readConsent = function () {
+        try { return JSON.parse(localStorage.getItem("cleaniq_cookie_consent") || "null"); } catch (e) { return null; }
+      };
+      (function () {
+        var c = window.__readConsent();
+        if (c) gtag("consent", "update", {
+          analytics_storage: c.analytics ? "granted" : "denied",
+          ad_storage: c.marketing ? "granted" : "denied",
+          ad_user_data: c.marketing ? "granted" : "denied",
+          ad_personalization: c.marketing ? "granted" : "denied",
+        });
+      })();
+    </script>
     <!-- Admin theme sync: runs synchronously before first paint to avoid flash -->
     <!-- twilio-domain-verification=464459e2817183f698073d8cd70d1998 -->
     <!-- TikTok Pixel Code Start -->
     <!-- TikTok Pixel Code Start -->
     <!-- TikTok Pixel Code Start -->
-    <script>(window.__lateTags = window.__lateTags || []).push(function () { function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"b5007dc8e9ffb183934dd0d533032450"})}); });</script>
+    <script>window.__tag("analytics", function () { function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"b5007dc8e9ffb183934dd0d533032450"})}); });</script>
     <script>
-      (window.__lateTags = window.__lateTags || []).push(function () {
+      window.__tag("marketing", function () {
       !(function (w, d, t) {
         w.TiktokAnalyticsObject = t;
         var ttq = (w[t] = w[t] || []);
@@ -79,7 +104,7 @@
     </script>
     <!-- Google Tag Manager -->
     <script>
-      (window.__lateTags = window.__lateTags || []).push(function () {
+      window.__tag("google", function () {
       (function (w, d, s, l, i) {
         w[l] = w[l] || [];
         w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
@@ -117,7 +142,7 @@
       gtag("js", new Date());
       gtag("config", "AW-17946013594");
       // One gtag.js handles both config IDs above; it loads with the other tags below.
-      (window.__lateTags = window.__lateTags || []).push(function () {
+      window.__tag("google", function () {
         var g = document.createElement("script");
         g.async = true;
         g.src = "https://www.googletagmanager.com/gtag/js?id=G-J2ERQRM2YX";
@@ -174,7 +199,7 @@
 
     <!-- TikTok Pixel Code Start -->
     <script>
-      (window.__lateTags = window.__lateTags || []).push(function () {
+      window.__tag("marketing", function () {
       !(function (w, d, t) {
         w.TiktokAnalyticsObject = t;
         var ttq = (w[t] = w[t] || []);
@@ -232,22 +257,43 @@
     </script>
     <!-- TikTok Pixel Code End -->
 
-    <!-- Analytics, ads and tracking tags (Google, TikTok, Metricool) load after the page is ready:
-         on the first scroll, tap or key press, or 4 seconds after the page has loaded. This keeps
-         them from slowing down the first view, especially on phones. Data pushed to dataLayer
-         before then is kept and sent when they load. -->
+    <!-- Analytics, ads and tracking tags (Google, TikTok, Metricool) load only with the visitor's
+         consent, and after the page is ready: on the first scroll, tap or key press, or 4 seconds
+         after the page has loaded. Choosing in the cookie banner loads the agreed ones straight away. -->
     <script>
       (function () {
-        var done = false;
-        function run() {
-          if (done) return;
-          done = true;
-          (window.__lateTags || []).forEach(function (f) { try { f(); } catch (e) {} });
+        var ran = {};
+        var ready = false;
+        function allowed(cat, c) {
+          if (!c) return false;
+          if (cat === "google") return c.analytics || c.marketing;
+          return !!c[cat];
         }
+        function run() {
+          var c = window.__readConsent();
+          (window.__lateTags || []).forEach(function (t, i) {
+            if (ran[i] || !allowed(t.cat, c)) return;
+            ran[i] = true;
+            try { t.run(); } catch (e) {}
+          });
+        }
+        function whenReady() { if (ready) return; ready = true; run(); }
         ["pointerdown", "keydown", "touchstart", "scroll"].forEach(function (e) {
-          window.addEventListener(e, run, { once: true, passive: true });
+          window.addEventListener(e, whenReady, { once: true, passive: true });
         });
-        window.addEventListener("load", function () { setTimeout(run, 4000); });
+        window.addEventListener("load", function () { setTimeout(whenReady, 4000); });
+        // The cookie banner saved a choice: update Google Consent Mode and load what was agreed.
+        window.addEventListener("cleaniq:consent", function (e) {
+          var c = e.detail || {};
+          gtag("consent", "update", {
+            analytics_storage: c.analytics ? "granted" : "denied",
+            ad_storage: c.marketing ? "granted" : "denied",
+            ad_user_data: c.marketing ? "granted" : "denied",
+            ad_personalization: c.marketing ? "granted" : "denied",
+          });
+          ready = true;
+          run();
+        });
       })();
     </script>
     <!-- Consolidated Schema.org JSON-LD bundle (@graph) -->
