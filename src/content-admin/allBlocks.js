@@ -7,5 +7,6 @@ import { CONTACT_BLOCKS } from "../blocks/ContactBlocks";
 import { QUOTE_BLOCKS } from "../blocks/QuoteBlocks";
 import { RECRUIT_BLOCKS } from "../blocks/RecruitBlocks";
 import { LOCATION_BLOCKS } from "../blocks/LocationBlocks";
+import { SERVICE_BLOCKS } from "../blocks/service/ServiceBlocks";
 
-export const ALL_BLOCKS = { ...HOME_BLOCKS, ...ABOUT_BLOCKS, ...SERVICES_BLOCKS, ...CONTACT_BLOCKS, ...QUOTE_BLOCKS, ...RECRUIT_BLOCKS, ...LOCATION_BLOCKS };
+export const ALL_BLOCKS = { ...HOME_BLOCKS, ...ABOUT_BLOCKS, ...SERVICES_BLOCKS, ...CONTACT_BLOCKS, ...QUOTE_BLOCKS, ...RECRUIT_BLOCKS, ...LOCATION_BLOCKS, ...SERVICE_BLOCKS };

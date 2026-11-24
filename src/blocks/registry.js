@@ -35,6 +35,7 @@ export const GROUPS = [
   [() => import("./ContactBlocks"), "CONTACT_BLOCKS", ["ContactForm"]],
   [() => import("./QuoteBlocks"), "QUOTE_BLOCKS", ["QuoteForm"]],
   [() => import("./RecruitBlocks"), "RECRUIT_BLOCKS", ["JobsHero", "BenefitCards", "NumberedSteps", "PhotoGrid", "ImageCards", "JobsInfo", "ApplyForm"]],
+  [() => import("./service/ServiceBlocks"), "SERVICE_BLOCKS", ["SvcBox", "SvcText", "SvcIcon", "SvcImg", "SvcReviews", "SvcRelated", "SvcPriceList", "SvcBeforeAfter", "SvcOurWork", "SvcFaqs", "SvcRoomCard", "SvcSection", "SvcDivider"]],
   [() => import("./LocationBlocks"), "LOCATION_BLOCKS", ["AreaHero", "AreaAbout", "AreaServices", "AreaGuide", "AreaHomes", "AreaBeforeAfter", "AreaNearby", "AreaFaq", "OtherAreas"]],
 ];
 

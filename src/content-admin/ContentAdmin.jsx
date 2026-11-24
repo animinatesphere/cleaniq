@@ -43,7 +43,8 @@ const pageUrl = (key) => {
   return type === "service" ? `/service/${slug}` : `/locations/${slug}`;
 };
 // Pages built from blocks open in the drag-and-drop page builder.
-const isBlockPage = (key) => key.startsWith("page:") || key.startsWith("location:");
+// Every page is built from blocks and opens in the drag-and-drop page builder.
+const isBlockPage = (key) => /^(page|location|service):/.test(key);
 const norm = (t) => String(t || "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s+/g, " ").trim().toLowerCase();
 
 // All text values in the content, with their paths (for click-to-edit).

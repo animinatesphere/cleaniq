@@ -7,6 +7,6 @@
 //
 // Import only what a page needs (each export below pulls in just its own files), so the homepage
 // doesn't download every service and location page's text.
-export { SERVICE_CONTENT } from "./services";
+export { SERVICE_SLUGS, loadServiceContent } from "./services";
 export { LOCATION_CONTENT } from "./locations";
 export { PAGE_CONTENT } from "./pages";

@@ -28,6 +28,7 @@ const str = (p) => (typeof p === "string" ? p : p?.text || "");
 const VOID = new Set(["br", "hr", "img", "input"]);
 
 // Icons the service blocks can show (lucide names, as in the page files).
+// eslint-disable-next-line react-refresh/only-export-components
 export const SERVICE_ICONS = {
   check: Check, "map-pin": MapPin, phone: Phone, "arrow-right": ArrowRight, calendar: Calendar, sparkles: Sparkles,
   "badge-check": BadgeCheck, "shield-check": ShieldCheck, star: Star, clock: Clock, "chevron-down": ChevronDown,
@@ -80,10 +81,10 @@ function renderBlocks(items) {
 }
 
 /* ── Building pieces ─────────────────────────────────────────────── */
-export function SvcBox({ tag, cls, href, hidden, anchor, children }) {
+export function SvcBox({ tag, cls, href, hidden, anchor, children, puck }) {
   const { link } = useTokens();
   const as = tag || "div";
-  const extra = { className: cls || undefined, ...(anchor ? { id: anchor } : {}), ...(hidden === "yes" ? { hidden: true } : {}) };
+  const extra = { className: cls || undefined, ...(anchor ? { id: anchor } : {}), ...(hidden === "yes" ? { hidden: true } : {}), ...(puck?.dragRef ? { ref: puck.dragRef } : {}) };
   if (as === "a" && href && typeof children !== "function") {
     return <BlockLink href={link(href)} {...extra}>{renderBlocks(list(children))}</BlockLink>;
   }
@@ -475,6 +476,7 @@ export function MainColumn({ content }) {
   if (typeof content === "function") return createElement(content, { className: "md:col-span-2 space-y-0" });
   return <div className="md:col-span-2 space-y-0">{renderBlocks(list(content))}</div>;
 }
+// eslint-disable-next-line react-refresh/only-export-components
 export const renderServiceBlocks = (items) => <Fragment>{renderBlocks(list(items))}</Fragment>;
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -490,4 +492,7 @@ export const SERVICE_BLOCKS = {
   SvcOurWork,
   SvcFaqs,
   SvcRoomCard,
+  // Ready-made boxes added from the editor (they are Boxes with a preset look).
+  SvcSection: SvcBox,
+  SvcDivider: SvcBox,
 };

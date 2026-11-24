@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- editor settings file, not hot-reloaded */
 // The visual page editor's blocks: what each block is called, which fields it has, and what a new
 // block starts with. The blocks themselves are the website's own sections (src/blocks).
 import { ALL_BLOCKS } from "./allBlocks";
@@ -7,6 +8,9 @@ import { SERVICE_CARD_KEYS } from "../blocks/ServicesBlocks";
 import { AREAS } from "../utils/areas";
 import { SERVICE_PAGES } from "../utils/servicePages";
 import { AreaContext } from "../blocks/areaContext";
+import { ServiceShell, SERVICE_ICONS } from "../blocks/service/ServiceBlocks";
+import { ServiceContext } from "../blocks/service/serviceContext";
+import { serviceInfo, useLiveServices } from "../blocks/service/serviceData";
 
 const text = (label, inline = false) => ({ type: "text", label, ...(inline ? { contentEditable: true } : {}) });
 const area = (label, inline = false) => ({ type: "textarea", label, ...(inline ? { contentEditable: true } : {}) });
@@ -389,6 +393,65 @@ const components = {
     },
     defaultProps: { label: "FAQs", heading: "Frequently Asked Questions — Cleaners in {area}", faqs: [] },
   },
+  /* ── Service pages: building pieces (each keeps its exact look) + live sections ── */
+  SvcBox: {
+    inline: true,
+    label: "Box (holds other blocks)",
+    fields: { href: text("Link (only if this box is a link/button): " + linkHelp + " · {book} = book this service"), children: { type: "slot" } },
+    defaultProps: { tag: "section", cls: "space-y-5", children: [] },
+  },
+  SvcText: {
+    label: "Text",
+    fields: { text: area("Text ([link](/page), **bold**)", true), href: text("Link (only for a link/button)") },
+    defaultProps: { tag: "p", cls: "text-slate-600 leading-relaxed", text: "New paragraph." },
+    inline: true,
+  },
+  SvcIcon: {
+    label: "Icon",
+    fields: { name: choose("Icon", Object.keys(SERVICE_ICONS).map((k) => [k, k.replace(/-/g, " ")])) },
+    defaultProps: { name: "check", cls: "text-teal-500", size: 16 },
+    inline: true,
+  },
+  SvcImg: {
+    label: "Photo",
+    fields: { image: image("Photo"), alt: text("Photo description") },
+    defaultProps: { image: "our-work/regular-1.jpg", alt: "", cls: "w-full rounded-xl object-cover", lazy: "yes" },
+    inline: true,
+  },
+  SvcSection: {
+    inline: true,
+    label: "Service section (label, heading, text)",
+    fields: { children: { type: "slot" } },
+    defaultProps: {
+      tag: "section", cls: "space-y-5",
+      children: [
+        { type: "SvcText", props: { tag: "p", cls: "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3", text: "Small label" } },
+        { type: "SvcText", props: { tag: "h2", cls: "text-xl sm:text-2xl font-bold text-slate-900", text: "Section heading" } },
+        { type: "SvcText", props: { tag: "p", cls: "text-slate-600 leading-relaxed", text: "Write your text here." } },
+      ],
+    },
+  },
+  SvcDivider: { inline: true,
+    label: "Divider line", fields: {}, defaultProps: { tag: "div", cls: "border-t border-slate-200 my-8 md:my-10", children: [] } },
+  SvcReviews: { label: "Google reviews (live)", fields: { label: text("Small label"), heading: text("Heading"), linkText: text("Link text") }, defaultProps: { label: "Customer reviews", heading: "What Our Customers Say", linkText: "Read all reviews on Google" } },
+  SvcRelated: { label: "Related services (live prices)", fields: { label: text("Small label"), heading: text("Heading") }, defaultProps: { label: "More from Cleaniq Services", heading: "Related cleaning services" } },
+  SvcPriceList: { label: "Price list (live)", fields: { label: text("Small label"), heading: text("Heading"), text: text("Text") }, defaultProps: { label: "Prices", heading: "Prices", text: "Fixed prices, updated automatically from our booking system." } },
+  SvcBeforeAfter: { label: "Before & after photos (this service)", fields: { title: text("Heading"), limit: { type: "number", label: "How many", min: 1, max: 12 } }, defaultProps: { title: "Before & after", limit: 4 } },
+  SvcOurWork: { label: "Photos from our jobs (this service)", fields: { title: text("Heading") }, defaultProps: { title: "Photos from our recent jobs" } },
+  SvcFaqs: {
+    label: "FAQs (click to open)",
+    fields: {
+      numbered: choose("Numbers", [["yes", "1. 2. 3."], ["no", "No numbers"]]),
+      items: { type: "array", label: "Questions", arrayFields: { q: text("Question"), a: area("Answer") }, defaultItemProps: { q: "New question?", a: "Answer." }, getItemSummary: (f) => f?.q || "Question" },
+    },
+    defaultProps: { numbered: "yes", items: [] },
+  },
+  SvcRoomCard: {
+    label: "Room checklist card",
+    fields: { label: text("Small label"), room: text("Room"), image: image("Photo"), alt: text("Photo description"), buttonLabel: text("Button text"), buttonLink: text("Button link ({book} = book this service)"), shown: { type: "number", label: "Tasks shown before \"View full checklist\"", min: 1, max: 30 }, tasks: lines("Tasks", "Task") },
+    defaultProps: { label: "", room: "Room", image: "", alt: "", buttonLabel: "Book now", buttonLink: "{book}", shown: 5, tasks: [] },
+  },
+
   OtherAreas: {
     label: "Area: links to other areas",
     fields: { heading: text("Heading"), prefix: text("Words before each area") },
@@ -398,7 +461,7 @@ const components = {
 
 // Lists of plain text (paragraphs, ticks, points…): the page files keep plain text; the editor shows
 // them as { text } items. Applies at any depth (e.g. each service card's points).
-const STRING_LISTS = new Set(["paragraphs", "chips", "features", "commercialTypes", "successSteps", "successStepsPending", "lookingFor", "services", "goodToKnow", "highlights", "tips", "postcodes", "places"]);
+const STRING_LISTS = new Set(["paragraphs", "chips", "features", "commercialTypes", "successSteps", "successStepsPending", "lookingFor", "services", "goodToKnow", "highlights", "tips", "postcodes", "places", "tasks", "guarantees", "schemaAreas", "priceKeywords"]);
 const convert = (value, toEditorForm) => {
   if (Array.isArray(value)) return value.map((v) => convert(v, toEditorForm));
   if (!value || typeof value !== "object") return value;
@@ -431,7 +494,8 @@ const COMPONENTS = Object.fromEntries(
     // Puck passes its own extras (id, puck, editMode); the block only gets its content.
     const render = (all) => {
       const props = { ...all };
-      ["id", "puck", "editMode"].forEach((k) => delete props[k]);
+      // Blocks drawn without a wrapper ("inline") need Puck's drag handle to be selectable.
+      ["id", ...(c.inline ? [] : ["puck"]), "editMode"].forEach((k) => delete props[k]);
       return <Block {...props} />;
     };
     return [name, { ...c, render }];
@@ -439,8 +503,60 @@ const COMPONENTS = Object.fromEntries(
 );
 
 /** The editor's settings for one page (e.g. "page:about"). */
+// Service pages: the top banner, stats and booking sidebar are page settings; "Above the page body"
+// and the main column hold blocks.
+function ServiceRoot({ slug, props, children }) {
+  const services = useLiveServices();
+  const info = serviceInfo(slug, services, { priceKeywords: props.priceKeywords, quoteMessage: props.quoteMessage });
+  const Top = props.top;
+  return (
+    <ServiceContext.Provider value={info}>
+      <div className="text-slate-900">
+        <ServiceShell settings={props} top={typeof Top === "function" ? <Top /> : null}>
+          <div className="md:col-span-2 space-y-0">{children}</div>
+        </ServiceShell>
+      </div>
+    </ServiceContext.Provider>
+  );
+}
+const SERVICE_ROOT_FIELDS = {
+  title: { type: "text", label: "Page title (Google & browser tab)" },
+  description: { type: "textarea", label: "Google description (120–158 characters)" },
+  shareTitle: { type: "text", label: "Title when shared on social media" },
+  shareDescription: { type: "textarea", label: "Description when shared on social media" },
+  schemaDescription: { type: "textarea", label: "Service description for Google (not shown on the page)" },
+  badge: text("Top banner: small badge"), heading: text("Top banner: heading"), tagline: area("Top banner: tagline"),
+  trustBold: text("Top banner: bold words after the rating"), trustText: text("Top banner: words after them"),
+  ctaLabel: text("Booking card: title"), ctaNote: text("Booking card: small print"), ctaFoot: text("Booking card: bottom line"),
+  bookLabel: text("Book button text"), quoteLabel: text("WhatsApp button text"), quoteMessage: text("WhatsApp message"),
+  showPhone: yesNo("Phone buttons"), phone: text("Phone number"),
+  stats: cardList("Stats bar ({rating} = Google rating)", { value: text("Big text"), label: text("Small text") }, { value: "", label: "" }, "value"),
+  sideLabel: text("Sidebar: title"), sideNote: text("Sidebar: small print"),
+  sidePoints: cardList("Sidebar: points", { icon: choose("Icon", Object.keys(SERVICE_ICONS).map((k) => [k, k.replace(/-/g, " ")])), text: text("Text") }, { icon: "check", text: "" }, "text"),
+  sideFoot: text("Sidebar: bottom line"), guaranteesTitle: text("Guarantees box: title"), guarantees: lines("Guarantees", "Guarantee"),
+  showAreas: yesNo("Sidebar: areas covered"), areasTitle: text("Sidebar: areas title"),
+  mobileBook: text("Phone bar: book button"), mobileCall: text("Phone bar: call button"),
+  priceKeywords: lines("Price list: words that pick this page's prices", "Word"),
+  schemaAreas: lines("Areas listed for Google", "Area"),
+  top: { type: "slot", label: "Above the page body" },
+};
+const SERVICE_PIECES = ["SvcSection", "SvcBox", "SvcText", "SvcIcon", "SvcImg", "SvcDivider", "SvcFaqs", "SvcRoomCard"];
+const SERVICE_LIVE = ["SvcPriceList", "SvcReviews", "SvcRelated", "SvcBeforeAfter", "SvcOurWork"];
+
 export function puckConfigFor(pageKey) {
   const [type, slug] = String(pageKey || "").split(":");
+  if (type === "service") {
+    return {
+      root: { fields: SERVICE_ROOT_FIELDS, render: ({ children, ...props }) => <ServiceRoot slug={slug} props={props}>{children}</ServiceRoot> },
+      categories: {
+        service: { title: "Service page pieces", components: SERVICE_PIECES },
+        serviceLive: { title: "Live from our systems", components: SERVICE_LIVE },
+        basics: { title: "Text, buttons & images (full width)", components: ["TextSection", "Buttons", "Image", "Spacer", "Faq"] },
+        other: { visible: false },
+      },
+      components: COMPONENTS,
+    };
+  }
   const isArea = type === "location";
   const wrapper = isArea ? "pt-36 pb-12 bg-slate-50 min-h-screen" : PAGE_WRAPPERS[slug] || PAGE_WRAPPERS.home;
   const areaName = AREAS.find((a) => a.slug === slug)?.name || "";
