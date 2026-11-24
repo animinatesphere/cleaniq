@@ -20,7 +20,7 @@ function SideBySide({ pair }) {
 }
 
 // One photo pair: drag (or use the arrow keys on) the handle to compare.
-function Compare({ pair }) {
+export function Compare({ pair }) {
   const [pos, setPos] = useState(50);
   return (
     <figure className="rounded-[28px] overflow-hidden bg-white border border-slate-100 shadow-sm">

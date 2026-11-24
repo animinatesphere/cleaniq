@@ -2,6 +2,7 @@
 // Supports what the admin editor (and "Draft with AI") writes:
 //   blank line = new paragraph · "## " = subheading · "- " = bullet point
 //   [link text](/service/... or https://...) = link · bare https://... addresses become links
+//   ![caption](/uploads/blog/...) on its own = a photo (only our uploaded photos or https:// images)
 // Only site paths (/...) and http(s) links are allowed, so nothing in a post can run code.
 import { Link } from "react-router-dom";
 
@@ -41,9 +42,30 @@ function inline(text, keyBase) {
   return out;
 }
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const UPLOADS_BASE = API.replace(/\/api\/?$/, "");
+/** A photo address from a post: our uploads (/uploads/blog/…) or an https:// image. */
+// eslint-disable-next-line react-refresh/only-export-components
+export function blogPhotoUrl(src) {
+  const s = String(src || "").trim();
+  if (/^\/uploads\/blog\/[\w.-]+$/.test(s)) return `${UPLOADS_BASE}${s}`;
+  if (/^https:\/\/[^\s"'<>]+$/.test(s)) return s;
+  return null;
+}
+const PHOTO = /^!\[([^\]]*)\]\(([^)\s]+)\)$/;
+
 // One block of lines → a heading, a bullet list, or a paragraph (a heading can be followed by
 // more lines in the same block).
 function renderBlock(lines, key) {
+  const photo = lines.length === 1 && lines[0].match(PHOTO);
+  if (photo && blogPhotoUrl(photo[2])) {
+    return (
+      <figure key={key} className="my-2">
+        <img src={blogPhotoUrl(photo[2])} alt={photo[1]} loading="lazy" className="w-full rounded-2xl border border-slate-200 shadow-sm object-cover" />
+        {photo[1] && photo[1] !== "Photo" && <figcaption className="mt-2 text-sm text-slate-500 text-center">{photo[1]}</figcaption>}
+      </figure>
+    );
+  }
   if (lines[0].startsWith("## ")) {
     const heading = <h2 key={`${key}h`} className="text-2xl sm:text-3xl font-black text-primary-dark pt-4">{inline(lines[0].slice(3), `${key}h`)}</h2>;
     return lines.length === 1 ? heading : <div key={key} className="space-y-6">{heading}{renderBlock(lines.slice(1), `${key}r`)}</div>;

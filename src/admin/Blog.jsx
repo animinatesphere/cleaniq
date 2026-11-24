@@ -15,6 +15,10 @@ import {
   Sparkles,
   CalendarClock,
   Bot,
+  ArrowLeft,
+  ArrowRight,
+  Images,
+  Columns2,
 } from "lucide-react";
 
 // <input type="datetime-local"> value (local time) ↔ Date
@@ -30,7 +34,7 @@ const statusOf = (post) => {
   if (post.publishAt && new Date(post.publishAt) > new Date()) return "schedule";
   return "now";
 };
-const EMPTY_POST = { title: "", description: "", content: "", author: "Cleaniq Services Team", published: false, status: "draft", publishAt: "", image: null };
+const EMPTY_POST = { title: "", description: "", content: "", author: "Cleaniq Services Team", published: false, status: "draft", publishAt: "", image: null, gallery: [], beforeAfter: [] };
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
 
@@ -89,7 +93,10 @@ const AdminBlog = () => {
     author: "Cleaniq Services Team",
     published: false,
     image: null,
+    gallery: [],
+    beforeAfter: [],
   });
+  const [photoBusy, setPhotoBusy] = useState("");
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -99,6 +106,55 @@ const AdminBlog = () => {
     if (imagePath.startsWith("data:")) return imagePath;
     const cleanPath = imagePath.replace(/^\/api/, "");
     return `${API_URL.replace(/\/api$/, "")}${cleanPath}`;
+  };
+
+  // Upload photos now; they're kept with the post when it's saved.
+  const uploadPhotos = async (files, what) => {
+    const list = [...(files || [])];
+    if (!list.length) return [];
+    const big = list.find((f) => f.size > 5 * 1024 * 1024);
+    if (big) { alert(`"${big.name}" is over 5 MB. Please choose a smaller photo.`); return []; }
+    setPhotoBusy(what);
+    try {
+      const form = new FormData();
+      list.forEach((f) => form.append("photos", f));
+      const r = await fetch(`${API_URL}/blog/admin/photos`, { method: "POST", body: form });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || "Couldn't upload the photos");
+      return d.urls || [];
+    } catch (e) {
+      alert(e.message);
+      return [];
+    } finally {
+      setPhotoBusy("");
+    }
+  };
+  const addGalleryPhotos = async (e) => {
+    const urls = await uploadPhotos(e.target.files, "gallery");
+    e.target.value = "";
+    setFormData((f) => ({ ...f, gallery: [...f.gallery, ...urls.map((url) => ({ url, caption: "" }))] }));
+  };
+  const setGallery = (fn) => setFormData((f) => ({ ...f, gallery: fn(f.gallery) }));
+  const moveGallery = (i, d) => setGallery((g) => {
+    const j = i + d;
+    if (j < 0 || j >= g.length) return g;
+    const c = [...g];
+    [c[i], c[j]] = [c[j], c[i]];
+    return c;
+  });
+  // Put a photo inside the article where the cursor is.
+  const insertPhoto = (photo) => {
+    const el = contentRef.current;
+    const at = el?.selectionStart ?? formData.content.length;
+    const md = `\n\n![${(photo.caption || "Photo").replace(/[[\]]/g, "")}](${photo.url})\n\n`;
+    setFormData((f) => ({ ...f, content: f.content.slice(0, at) + md + f.content.slice(at) }));
+    requestAnimationFrame(() => el?.focus());
+  };
+  const setPairs = (fn) => setFormData((f) => ({ ...f, beforeAfter: fn(f.beforeAfter) }));
+  const setPairPhoto = async (i, side, e) => {
+    const [url] = await uploadPhotos(e.target.files, `pair-${i}-${side}`);
+    e.target.value = "";
+    if (url) setPairs((p) => p.map((x, k) => (k === i ? { ...x, [side]: url } : x)));
   };
 
   const fetchPosts = async () => {
@@ -211,6 +267,13 @@ const AdminBlog = () => {
       if (formData.image instanceof File) {
         form.append("image", formData.image);
       }
+      if (formData.beforeAfter.some((p) => !p.before || !p.after)) {
+        alert("Each before & after pair needs both photos (or remove the unfinished pair).");
+        setSubmitting(false);
+        return;
+      }
+      form.append("gallery", JSON.stringify(formData.gallery));
+      form.append("beforeAfter", JSON.stringify(formData.beforeAfter));
 
       const url = editingId
         ? `${API_URL}/blog/${editingId}`
@@ -257,6 +320,8 @@ const AdminBlog = () => {
       status: statusOf(post),
       publishAt: post.publishAt && statusOf(post) === "schedule" ? toLocalInput(post.publishAt) : "",
       image: null,
+      gallery: post.gallery || [],
+      beforeAfter: post.beforeAfter || [],
     });
     setImagePreview(post.image);
     setEditingId(post._id);
@@ -668,6 +733,82 @@ const AdminBlog = () => {
                   </motion.div>
                 )}
 
+                {/* More photos */}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-white/80 uppercase tracking-wider flex items-center gap-2"><Images size={16} className="text-emerald-400" /> More photos</p>
+                      <p className="text-xs text-white/40 mt-1">Shown under the article. Choose several at once. "Put in article" places a photo where your cursor is in the text.</p>
+                    </div>
+                    <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-bold cursor-pointer hover:bg-emerald-500/20">
+                      <Plus size={16} /> {photoBusy === "gallery" ? "Uploading…" : "Add photos"}
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={addGalleryPhotos} disabled={!!photoBusy} />
+                    </label>
+                  </div>
+                  {formData.gallery.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {formData.gallery.map((g, i) => (
+                        <div key={g.url} className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+                          <img src={getImageUrl(g.url)} alt="" className="w-full h-28 object-cover" />
+                          <div className="p-2 space-y-2">
+                            <input value={g.caption} onChange={(e) => setGallery((list) => list.map((x, k) => (k === i ? { ...x, caption: e.target.value } : x)))}
+                              placeholder="Caption (optional)" maxLength={200}
+                              className="w-full px-2 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white text-xs placeholder:text-white/30 focus:outline-none" />
+                            <div className="flex items-center justify-between gap-1">
+                              <div className="flex gap-1">
+                                <button type="button" title="Move left" onClick={() => moveGallery(i, -1)} className="p-1.5 rounded-lg bg-white/5 text-white/70 hover:bg-white/10"><ArrowLeft size={12} /></button>
+                                <button type="button" title="Move right" onClick={() => moveGallery(i, 1)} className="p-1.5 rounded-lg bg-white/5 text-white/70 hover:bg-white/10"><ArrowRight size={12} /></button>
+                              </div>
+                              <button type="button" onClick={() => insertPhoto(g)} className="px-2 py-1 rounded-lg bg-white/5 text-[11px] font-bold text-white/80 hover:bg-white/10">Put in article</button>
+                              <button type="button" title="Remove" onClick={() => setGallery((list) => list.filter((_, k) => k !== i))} className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20"><Trash2 size={12} /></button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Before & after */}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-white/80 uppercase tracking-wider flex items-center gap-2"><Columns2 size={16} className="text-emerald-400" /> Before &amp; after</p>
+                      <p className="text-xs text-white/40 mt-1">Shown under the article with a slider readers drag to compare. Use photos taken from the same spot.</p>
+                    </div>
+                    <button type="button" onClick={() => setPairs((p) => [...p, { before: "", after: "", caption: "" }])}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-bold hover:bg-emerald-500/20">
+                      <Plus size={16} /> Add a pair
+                    </button>
+                  </div>
+                  {formData.beforeAfter.map((pair, i) => (
+                    <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-3 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        {["before", "after"].map((side) => (
+                          <label key={side} className="block cursor-pointer">
+                            <span className="block text-[11px] font-black uppercase tracking-widest text-white/50 mb-1.5">{side === "before" ? "Before" : "After"}</span>
+                            {pair[side] ? (
+                              <img src={getImageUrl(pair[side])} alt="" className="w-full h-32 object-cover rounded-lg border border-white/10" />
+                            ) : (
+                              <span className="flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                                {photoBusy === `pair-${i}-${side}` ? "Uploading…" : "Choose photo"}
+                              </span>
+                            )}
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => setPairPhoto(i, side, e)} disabled={!!photoBusy} />
+                          </label>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <input value={pair.caption} onChange={(e) => setPairs((p) => p.map((x, k) => (k === i ? { ...x, caption: e.target.value } : x)))}
+                          placeholder="What was cleaned? e.g. Oven deep clean in Salford" maxLength={200}
+                          className="flex-1 px-3 py-2 rounded-lg border border-white/10 bg-white/5 text-white text-sm placeholder:text-white/30 focus:outline-none" />
+                        <button type="button" title="Remove pair" onClick={() => setPairs((p) => p.filter((_, k) => k !== i))} className="px-3 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20"><Trash2 size={14} /></button>
+                      </div>
+                      <p className="text-[11px] text-white/40">Tip: click a photo to replace it.</p>
+                    </div>
+                  ))}
+                </div>
+
                 <div>
                   <label className="block text-sm font-black text-white/70 mb-3 uppercase tracking-wider">
                     Full Article Content
@@ -677,7 +818,7 @@ const AdminBlog = () => {
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-white/80 hover:bg-white/10">
                       <Link2 size={14} /> Insert link
                     </button>
-                    <span className="text-[11px] text-white/40 font-medium">Blank line = new paragraph · <code>## </code> = subheading · <code>- </code> = bullet · <code>[words](/get-a-quote)</code> = link</span>
+                    <span className="text-[11px] text-white/40 font-medium">Blank line = new paragraph · <code>## </code> = subheading · <code>- </code> = bullet · <code>[words](/get-a-quote)</code> = link · <code>![caption](photo)</code> = photo</span>
                   </div>
                   <textarea
                     ref={contentRef}

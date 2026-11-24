@@ -23,6 +23,16 @@ const blogPostSchema = new mongoose.Schema(
       type: String,
       default: "Cleaniq Team",
     },
+    // Extra photos shown under the article, in order, each with an optional caption.
+    gallery: {
+      type: [{ _id: false, url: String, caption: { type: String, default: "" } }],
+      default: [],
+    },
+    // Before & after photo pairs shown with a slider under the article.
+    beforeAfter: {
+      type: [{ _id: false, before: String, after: String, caption: { type: String, default: "" } }],
+      default: [],
+    },
     published: {
       type: Boolean,
       default: true,

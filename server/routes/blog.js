@@ -65,6 +65,35 @@ const upload = multer({
   },
 });
 
+// Photos a post uses must be ones uploaded here (/uploads/blog/...), never other addresses.
+const OUR_PHOTO = /^\/uploads\/blog\/blog-[\w.-]+\.(jpe?g|png|gif|webp)$/i;
+const cap = (v) => String(v || "").trim().slice(0, 200);
+const parseList = (raw) => {
+  if (raw === undefined) return undefined;
+  try {
+    const v = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return Array.isArray(v) ? v.slice(0, 40) : [];
+  } catch {
+    return [];
+  }
+};
+/** gallery: [{ url, caption }] — only our own uploaded photos are kept. */
+function cleanGallery(raw) {
+  const list = parseList(raw);
+  return list && list.filter((g) => OUR_PHOTO.test(g?.url || "")).map((g) => ({ url: g.url, caption: cap(g.caption) }));
+}
+/** beforeAfter: [{ before, after, caption }] — both photos must be our own uploads. */
+function cleanBeforeAfter(raw) {
+  const list = parseList(raw);
+  return list && list.filter((p) => OUR_PHOTO.test(p?.before || "") && OUR_PHOTO.test(p?.after || "")).map((p) => ({ before: p.before, after: p.after, caption: cap(p.caption) }));
+}
+
+// Upload photos for a post (gallery, before & after, or pictures inside the article).
+// Returns their addresses; they're saved with the post when it's saved.
+router.post("/admin/photos", adminAuth, upload.array("photos", 20), (req, res) => {
+  res.json({ urls: (req.files || []).map((f) => `/uploads/blog/${f.filename}`) });
+});
+
 // Debug endpoint - GET all blog posts (published and unpublished) for testing
 router.get("/debug/all", adminAuth, async (req, res) => {
   try {
@@ -236,6 +265,8 @@ router.post("/", adminAuth, upload.single("image"), async (req, res) => {
       description,
       content: content || "",
       image: imagePath,
+      gallery: cleanGallery(req.body.gallery) || [],
+      beforeAfter: cleanBeforeAfter(req.body.beforeAfter) || [],
       author: author || "Cleaniq Team",
       published: live.published,
       publishAt: live.publishAt,
@@ -275,6 +306,10 @@ router.put("/:id", adminAuth, upload.single("image"), async (req, res) => {
     if (description) post.description = description;
     if (content) post.content = content;
     if (author) post.author = author;
+    const gallery = cleanGallery(req.body.gallery);
+    if (gallery) post.gallery = gallery;
+    const beforeAfter = cleanBeforeAfter(req.body.beforeAfter);
+    if (beforeAfter) post.beforeAfter = beforeAfter;
     if (req.body.status || published !== undefined) {
       const live = publishFields(req.body, post);
       if (live.error) {
