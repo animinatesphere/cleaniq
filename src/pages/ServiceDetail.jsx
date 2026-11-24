@@ -140,7 +140,7 @@ import {
 } from "lucide-react";
 
 /* ─── DATA ─────────────────────────────────────────────────────── */
-const EOT_EXTENDED = {
+export const EOT_EXTENDED = {
   intro: `Whether you call it end of tenancy cleaning, move-out cleaning, vacate cleaning, or a checkout clean — Cleaniq Services delivers the same result: a spotless property that satisfies even the strictest landlord or letting agent in Manchester.`,
 
   whyChoosePoints: [
@@ -960,7 +960,7 @@ const GENERAL_EXTENDED = {
   seoFooter: `Cleaniq Services provides reliable general cleaning for homes and apartments across Manchester. Whether you need a regular weekly or fortnightly clean in Manchester City Centre, Didsbury, Chorlton, Salford, or Stockport — our vetted, eco-friendly cleaning team delivers a consistently high standard on every visit. Book your Manchester general cleaning service online or call +44 7846 726428.`,
 };
 
-const SERVICES_MAP = {
+export const SERVICES_MAP = {
   "regular-house-cleaning-manchester": {
     title: "Regular House Cleaning Manchester | House Cleaners Near You",
     areaNoun: "House cleaners",

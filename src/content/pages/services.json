@@ -1,0 +1,197 @@
+{
+  "root": {
+    "props": {
+      "title": "Services | Cleaniq Services — Manchester Cleaning Services",
+      "description": "Professional residential and commercial cleaning services in Manchester: deep clean, end-of-tenancy, Airbnb turnovers and office janitorial services.",
+      "shareTitle": "Services | Cleaniq Services — Manchester Cleaning Services",
+      "shareDescription": "Reliable, eco-friendly cleaning services across Manchester. Book deep cleans, move-outs, and regular home visits online."
+    }
+  },
+  "content": [
+    {
+      "type": "PageHeading",
+      "props": {
+        "id": "PageHeading-svc1",
+        "heading": "Professional Cleaning",
+        "highlight": "Solutions",
+        "headingEnd": "for Your Space.",
+        "text": "From regular home care to complex commercial maintenance, our team delivers excellence with every visit.",
+        "note": "You choose: we bring all supplies & equipment, or you provide your own and save."
+      }
+    },
+    {
+      "type": "ServiceList",
+      "props": {
+        "id": "ServiceList-svc2",
+        "cards": [
+          {
+            "key": "residential",
+            "tag": "Reliable domestic Cleaners",
+            "icon": "home",
+            "image": "our-work/regular-3.jpg",
+            "imageAlt": "Clean bathroom with bath, basin and tiled floor after a house clean by Cleaniq Services",
+            "text": "Reliable, weekly or bi-weekly cleaning for your home.",
+            "features": [
+              "Dusting of all surfaces.",
+              "Vacuuming & Mopping.",
+              "Kitchen degreasing.",
+              "Bathroom sanitization.",
+              "Bed making & tidying.",
+              "Trash removal."
+            ]
+          },
+          {
+            "key": "move",
+            "tag": "Specialist deep cleaning",
+            "icon": "home",
+            "image": "our-work/deep-card.jpg",
+            "imageAlt": "Fridge cleaned inside, shelves and drawers spotless, after a deep clean by Cleaniq Services",
+            "text": "Specialized deep cleaning services for a total refresh.",
+            "features": [
+              "Door frame cleaning.",
+              "Wall spot cleaning.",
+              "Appliance deep clean.",
+              "End-of-tenancy guarantee."
+            ]
+          },
+          {
+            "key": "airbnb",
+            "tag": "Short-let specialist",
+            "icon": "star",
+            "image": "our-work/airbnb-2.jpg",
+            "imageAlt": "Guest-ready bedroom with fresh towels on the bed after an Airbnb turnover clean by Cleaniq Services",
+            "text": "Professional turnover services for your short-let rental.",
+            "features": [
+              "Turnover Specialist",
+              "5-Star Prep",
+              "Guest Ready Check",
+              "Inventory Monitoring",
+              "Consumable Supplies",
+              "Please provide a washing machine,dryer and detergent if on-site linen and towel washing is  required "
+            ]
+          },
+          {
+            "key": "tenancy",
+            "tag": "Moving out/in clean",
+            "icon": "truck",
+            "image": "service-eot-photo-1200.webp",
+            "imageAlt": "Clean kitchen with spotless worktops, oven, washing machine and gleaming tiled floor after an end of tenancy clean by Cleaniq Services",
+            "text": "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
+            "features": [
+              "Full property deep clean.",
+              "Inside all appliances.",
+              "Window & frame cleaning.",
+              "Carpet steam cleaning.",
+              "Deposit back guarantee.",
+              "Move-in ready finish."
+            ]
+          },
+          {
+            "key": "construction",
+            "tag": "Post-renovation specialist",
+            "icon": "shield",
+            "image": "service-postconstruction-photo-1200.webp",
+            "imageAlt": "Empty flat with clean wooden floors after a clean by Cleaniq Services, ready to hand over",
+            "text": "Specialist post-construction and renovation cleaning to clear dust, debris and residue, leaving your property spotless and ready to use.",
+            "features": [
+              "Dust & debris removal from all surfaces.",
+              "Window, frame & sill cleaning.",
+              "Floor deep clean & polish.",
+              "Light fixture & vent dusting.",
+              "Removal of paint, plaster & adhesive residue.",
+              "Final detailed inspection clean."
+            ]
+          },
+          {
+            "key": "carpet",
+            "tag": "Carpet & rug specialist",
+            "icon": "home",
+            "image": "service-carpet-photo-1200.webp",
+            "imageAlt": "Grey carpeted bedroom in a Manchester flat, ready for a professional carpet clean by Cleaniq Services",
+            "text": "Professional carpet cleaning to remove stains, odours, and allergens.",
+            "features": [
+              "Hot water extraction deep clean.",
+              "Stain & odour treatment.",
+              "Allergen removal.",
+              "Drying & finishing."
+            ]
+          },
+          {
+            "key": "oven",
+            "tag": "Oven cleaning specialist",
+            "icon": "shield",
+            "image": "service-oven-photo-1200.webp",
+            "imageAlt": "Oven with clean glass door and racks after an oven clean by Cleaniq Services",
+            "text": "Professional oven cleaning — grease-free, sparkling results.",
+            "features": [
+              "Full oven interior degrease.",
+              "Racks, trays & door glass.",
+              "Hob & extractor clean.",
+              "Safe non-caustic products."
+            ]
+          },
+          {
+            "key": "general",
+            "tag": "Regular home cleaning",
+            "icon": "home",
+            "image": "service-general-photo-1200.webp",
+            "imageAlt": "Cleaniq Services cleaner in uniform and yellow gloves cleaning a kitchen appliance",
+            "text": "Reliable regular cleaning for a consistently spotless home.",
+            "features": [
+              "Full room clean — kitchen, bathrooms, living areas.",
+              "Vacuuming & mopping.",
+              "Surface dusting & sanitisation.",
+              "Flexible weekly or fortnightly schedule."
+            ]
+          }
+        ],
+        "bookLabel": "Book Service",
+        "commercialTitle": "Commercial Cleaning",
+        "commercialTag": "Business & commercial cleaning",
+        "commercialText": "Events, restaurants, gyms, communal areas and contract cleaning. Tell us what you need and how many hours, and we'll send you a quote.",
+        "commercialTypes": [
+          "Event Cleaning",
+          "Restaurant Cleaning",
+          "Contract Cleaning",
+          "Communal Area Cleaning",
+          "Commercial Cleaning",
+          "Gym Cleaning"
+        ],
+        "commercialPrice": "Custom quote",
+        "commercialButton": "Get a Quote",
+        "commercialLink": "/commercial-cleaning",
+        "commercialImage": "service-office-photo-1200.webp",
+        "commercialImageAlt": "Tidy office desk with a computer, plant and chairs, ready for the working day",
+        "commercialIcon": "briefcase"
+      }
+    },
+    {
+      "type": "CommitmentBanner",
+      "props": {
+        "id": "CommitmentBanner-svc3",
+        "badge": "Our Commitment",
+        "heading": "100% Eco-Friendly",
+        "highlight": "Cleaning Solutions.",
+        "text": "We believe that a clean space shouldn't come at the cost of the environment. That's why we use only biodegradable, non-toxic products that are safe for pets, children, and the planet.",
+        "items": [
+          {
+            "icon": "leaf",
+            "label": "Non-Toxic"
+          },
+          {
+            "icon": "heart",
+            "label": "Pet Safe"
+          },
+          {
+            "icon": "shield",
+            "label": "Eco-Cert"
+          },
+          {
+            "icon": "check",
+            "label": "Health First"
+          }
+        ]
+      }
+    }
+  ]
+}

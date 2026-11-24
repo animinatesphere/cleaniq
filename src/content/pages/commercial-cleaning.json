@@ -1,0 +1,63 @@
+{
+  "root": {
+    "props": {
+      "title": "Commercial Cleaning Quote Manchester | Cleaniq Services",
+      "description": "Request a commercial cleaning quote in Manchester: event, restaurant, gym, communal area, contract and office cleaning. Tell us the type and size of the space and we'll send you a quote.",
+      "shareTitle": "Commercial Cleaning Quote Manchester | Cleaniq Services",
+      "shareDescription": ""
+    }
+  },
+  "content": [
+    {
+      "type": "ContactForm",
+      "props": {
+        "id": "ContactForm-cc1",
+        "mode": "commercial",
+        "badge": "Commercial Cleaning",
+        "heading": "Get a Commercial Quote",
+        "text": "Events, restaurants, gyms, communal areas and contract cleaning. Tell us what you need and the size of the space, and we'll send you a quote.",
+        "contactItems": [
+          {
+            "icon": "phone",
+            "label": "Phone Support",
+            "value": "+44 7846 726428",
+            "link": "tel:+447846726428"
+          },
+          {
+            "icon": "mail",
+            "label": "Email Address",
+            "value": "info@cleaniqservices.com",
+            "link": "mailto:info@cleaniqservices.com"
+          },
+          {
+            "icon": "map",
+            "label": "Office Address",
+            "value": "20 Swan St, Manchester M4 5JW, United Kingdom",
+            "link": "https://maps.app.goo.gl/UHcabzmFuj11wuLo9"
+          }
+        ],
+        "hoursTitle": "Office Hours",
+        "hours": [
+          {
+            "day": "Mon – Fri",
+            "hours": "8:00 AM – 6:00 PM"
+          },
+          {
+            "day": "Saturday",
+            "hours": "9:00 AM – 4:00 PM"
+          },
+          {
+            "day": "Sunday",
+            "hours": "Closed"
+          }
+        ],
+        "formTitle": "Send a Message",
+        "formText": "We typically respond within 2–4 hours during business hours.",
+        "successTitle": "Message sent successfully!",
+        "successText": "Our team has received your enquiry and will get back to you shortly.",
+        "errorTitle": "Failed to send message",
+        "buttonLabel": "Request a Quote"
+      }
+    }
+  ]
+}

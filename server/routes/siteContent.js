@@ -35,7 +35,7 @@ const fail = (res, err, fallback) => {
 // Only plain JSON-like content: text, numbers, true/false, lists and groups. The website shows
 // text as text (never as HTML), so content can't inject code into pages.
 function cleanData(value, depth = 0) {
-  if (depth > 8) throw Object.assign(new Error("Content is nested too deeply."), { status: 400 });
+  if (depth > 12) throw Object.assign(new Error("Content is nested too deeply."), { status: 400 });
   if (value === null || typeof value === "boolean") return value;
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
   if (typeof value === "string") return value.slice(0, 20000);

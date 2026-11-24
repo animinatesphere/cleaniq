@@ -1,3 +1,5 @@
+import { whatsappLink } from "../utils/contact";
+
 // Helpers shared by the page blocks (src/blocks) and the visual page editor (/content-admin).
 // Images: a block stores either a site image path (e.g. "our-work/regular-2.jpg", from src/assets)
 // or a full https:// address.
@@ -16,6 +18,8 @@ export const imageUrl = (value) => (value ? IMAGES[value] || (/^https?:\/\//.tes
 /** Turn a link typed in the editor into { internal, href } (site pages use client-side links). */
 export const linkTarget = (href = "") => {
   const h = String(href).trim();
+  // "whatsapp:Your message" opens WhatsApp to our number with that message.
+  if (/^whatsapp:/i.test(h)) return { internal: false, href: `${whatsappLink(h.slice(9).trim() || "Hi Cleaniq!")}` };
   if (/^\/(?!\/)/.test(h)) return { internal: true, href: h };
   if (/^(tel:|mailto:|https?:\/\/|#)/.test(h)) return { internal: false, href: h };
   if (/^\+?\d[\d\s]{7,}$/.test(h)) return { internal: false, href: `tel:${h.replace(/\s/g, "")}` };

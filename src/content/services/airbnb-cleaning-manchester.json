@@ -1,168 +1,5297 @@
 {
-  "basics": {
-    "title": "Airbnb Cleaning Manchester | Short-Let Cleaners Near You",
-    "meta": "Reliable Airbnb and short-let cleaning in Manchester. Fast turnarounds, guest-ready results. Book professional Airbnb cleaners with Cleaniq Services.",
-    "heading": "Airbnb & Short-Let Cleaning in Manchester",
-    "tagline": "Fast Turnarounds, Guest-Ready Results, 5-Star Reviews.",
-    "description": "Maximize your short-let bookings and maintain outstanding 5-star host reviews. Our rapid-response Airbnb cleaners handle fast-turnaround property turnovers, restocking toiletries, laundry, and guest-ready quality checks.",
-    "points": [
-      "Guaranteed same-day turnaround matching guest check-out times",
-      "Restocking of essentials & welcome pack styling",
-      "Linen and towel laundry replacement coordination",
-      "Photo updates & site damage notification logs"
-    ]
-  },
-  "details": {
-    "intro": "Running a successful Airbnb or short-let property in Manchester depends on one thing above all else — consistent, guest-ready cleanliness. Cleaniq Services' specialist Airbnb cleaning team delivers fast, reliable turnovers that protect your ratings and keep your calendar full.",
-    "whyChoose": [
-      {
-        "title": "5-Star Guest-Ready Results",
-        "body": "We clean to the standard guests expect from a hotel — every surface, every fixture, every time."
-      },
-      {
-        "title": "Same-Day Turnaround",
-        "body": "We work around your check-out and check-in times so your property is always ready for the next guest without delay."
-      },
-      {
-        "title": "Damage & Inventory Reports",
-        "body": "Our team photographs and logs any damage or inventory issues found during each turnover — keeping you informed and protected."
-      },
-      {
-        "title": "Consumable Restocking",
-        "body": "We restock toiletries, toilet rolls, and welcome essentials so your guests always arrive to a fully prepared property."
-      }
-    ],
-    "checklist": {
-      "heading": "Airbnb Turnover Cleaning Checklist — Manchester",
-      "intro": "Every Cleaniq Services Airbnb turnover covers the full property to hotel standard. Here is exactly what is completed on every visit:",
-      "rooms": [
-        {
-          "room": "Kitchen",
-          "tasks": [
-            "Full wipe-down of all surfaces and appliance exteriors",
-            "Hob, microwave, and kettle cleaning",
-            "Dishwasher emptying and reset",
-            "Fridge check and wipe-down of interior shelves",
-            "Sink, taps, and draining board polish",
-            "Rubbish removal and bin liner replacement",
-            "Crockery, cutlery, and glassware check and reposition"
-          ]
-        },
-        {
-          "room": "Bedrooms",
-          "tasks": [
-            "Full linen change and hotel-style bed making",
-            "Dusting of all furniture surfaces and headboards",
-            "Vacuuming of carpets and under beds",
-            "Wardrobe interior check and tidy",
-            "Mirror and window sill wipe-down",
-            "Pillow and cushion arrangement",
-            "Welcome item placement if provided"
-          ]
-        },
-        {
-          "room": "Bathrooms",
-          "tasks": [
-            "Full toilet sanitization — bowl, seat, and cistern",
-            "Shower and bath deep scrub and descaling",
-            "Mirror and vanity streak-free clean",
-            "Fresh towel folding and placement",
-            "Toiletry restocking as required",
-            "Floor mopping and grout spot-clean",
-            "Extractor fan grille wipe-down"
-          ]
-        },
-        {
-          "room": "Living Areas & Hallways",
-          "tasks": [
-            "Sofa cushion plumping and arrangement",
-            "Dusting of all surfaces, shelves, and TV units",
-            "Vacuuming and mopping of all floors",
-            "Window sill and interior glass wipe-down",
-            "Hallway and entrance area sweep and mop",
-            "Damage and inventory check with photo log"
-          ]
-        }
-      ]
-    },
-    "whyMatters": {
-      "heading": "Why Professional Airbnb Cleaning Protects Your Listing",
-      "body": [
-        "On platforms like Airbnb and Vrbo, cleanliness is the single most-reviewed category by guests. A single low cleanliness score can suppress your listing in search results, reduce booking rates, and damage a reputation built over months or years.",
-        "Professional short-let cleaning is not simply about tidiness — it is about consistency. Every guest expects the same standard, every time. Cleaniq Services' Airbnb cleaning team in Manchester follows a fixed turnover protocol so your property meets the same high standard whether it is your first guest or your five-hundredth.",
-        "Beyond cleanliness, our turnover team also checks for unreported damage, missing inventory, and maintenance issues — giving you the information you need to protect your property and resolve any disputes with your hosting platform."
-      ]
-    },
-    "seoFooter": "Cleaniq Services provides professional Airbnb cleaning, short-let property cleaning, and holiday let turnovers across Manchester. Whether you need a same-day Airbnb clean in Manchester City Centre, Salford, Didsbury, Chorlton, or Stockport — our experienced turnover team delivers a guest-ready finish every time. Book your Manchester Airbnb cleaning service online or call +44 7846 726428."
-  },
-  "faqs": [
+ "root": {
+  "props": {
+   "title": "Airbnb Cleaning Manchester | Short-Let Cleaners Near You",
+   "description": "Reliable Airbnb and short-let cleaning in Manchester. Fast turnarounds, guest-ready results. Book professional Airbnb cleaners with Cleaniq Services.",
+   "shareTitle": "",
+   "shareDescription": "",
+   "schemaDescription": "Maximize your short-let bookings and maintain outstanding 5-star host reviews. Our rapid-response Airbnb cleaners handle fast-turnaround property turnovers, restocking toiletries, laundry, and guest-ready quality checks.",
+   "schemaAreas": [],
+   "priceKeywords": [],
+   "quoteMessage": "Hi Cleaniq! I'd like a quote for airbnb cleaning.",
+   "badge": "Manchester Cleaning Service",
+   "heading": "Airbnb & Short-Let Cleaning in Manchester",
+   "tagline": "Fast Turnarounds, Guest-Ready Results, 5-Star Reviews.",
+   "trustBold": "48-hr",
+   "trustText": "re-clean guarantee",
+   "ctaLabel": "Book your clean",
+   "ctaNote": "No hidden fees · Insured cleaners",
+   "bookLabel": "Book in 60 Seconds",
+   "quoteLabel": "Get a quote on WhatsApp",
+   "showPhone": "no",
+   "phone": "+44 7846 726428",
+   "ctaFoot": "48-hr satisfaction guarantee included",
+   "stats": [
     {
-      "q": "How quickly can you turn over an Airbnb property?",
-      "a": "Most one and two-bedroom properties can be turned over within 2–3 hours between check-out and check-in. Larger properties are quoted individually. We work to your specific check-in time."
+     "value": "{rating}★",
+     "label": "Google rating"
     },
     {
-      "q": "Do you provide linen and towels?",
-      "a": "We can launder linen and towels on-site if your property has a washing machine and dryer. We can also coordinate with a linen service if you require off-site laundering."
+     "value": "48hr",
+     "label": "Re-clean guarantee"
     },
     {
-      "q": "Can you manage multiple properties?",
-      "a": "Yes. We work with Manchester Airbnb hosts managing single properties and large portfolios alike. We can coordinate across multiple properties and integrate with your Airbnb calendar."
-    },
-    {
-      "q": "What happens if a guest causes damage?",
-      "a": "Our team photographs and logs any damage discovered during the turnover and notifies you immediately — giving you documentation to support a claim with Airbnb or your insurer."
-    },
-    {
-      "q": "Do you cover all Manchester Airbnb areas?",
-      "a": "Yes. We cover all Greater Manchester postcodes including City Centre, Salford, Didsbury, Chorlton, Fallowfield, Stretford, and surrounding areas."
-    },
-    {
-      "q": "What is included in an Airbnb turnover clean?",
-      "a": "Every turnover covers the kitchen, bedrooms, bathrooms, living areas and hallways: surfaces wiped, floors vacuumed and mopped, bathrooms cleaned, beds made with fresh linen, towels folded and bins emptied. The full Airbnb turnover cleaning checklist is on this page."
-    },
-    {
-      "q": "How much does Airbnb cleaning cost in Manchester?",
-      "a": "The price depends on the size of your property and what it needs. Book online to see your price before you pay, or contact us for a free quote if you manage several properties."
-    },
-    {
-      "q": "Do I need to be at the property during the clean?",
-      "a": "No. Just tell us how our cleaner can get in, for example a key safe or smart lock code, when you book."
-    },
-    {
-      "q": "Are your Airbnb cleaners vetted?",
-      "a": "Yes. Every Cleaniq Services cleaner is vetted and background checked before their first job."
-    },
-    {
-      "q": "What if I'm not happy with the clean?",
-      "a": "Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
-    },
-    {
-      "q": "Do you clean holiday lets and serviced apartments too?",
-      "a": "Yes. Our short-let cleaning covers Airbnb, Booking.com and Vrbo listings, holiday lets and serviced apartments across Greater Manchester."
-    },
-    {
-      "q": "Can I add a deep clean or carpet cleaning to my Airbnb clean?",
-      "a": "Yes. Add a deep clean, oven cleaning or carpet cleaning when your property needs more than a turnover. Book online or ask us when you call."
-    },
-    {
-      "q": "Can you clean on the same day as check-out and check-in?",
-      "a": "Yes. Tell us your guests' check-out and check-in times when you book and we'll plan the clean to fit between them. Book early for busy weekends and event days in Manchester."
-    },
-    {
-      "q": "How often should I deep clean my Airbnb?",
-      "a": "Most hosts book a deep clean every few months, depending on how busy the property is. A deep clean reaches the areas a turnover clean can't cover between guests, such as inside appliances and cupboards and behind furniture."
-    },
-    {
-      "q": "Can you clean my property before I list it on Airbnb?",
-      "a": "Yes. Book a deep clean before your first guest arrives, so your property starts spotless and your listing photos show it at its best."
-    },
-    {
-      "q": "Can my Airbnb co-host or property manager book the cleaning?",
-      "a": "Yes. Anyone who looks after your Airbnb can book Airbnb cleaning with us online or by phone. Just make sure they share the check-out time, check-in time and access details for the property."
-    },
-    {
-      "q": "Do you clean Airbnb properties after a long stay?",
-      "a": "Yes. After a long Airbnb stay, a standard turnover may not be enough. Book a deep clean to reset the property before your next Airbnb guest arrives."
+     "value": "100%",
+     "label": "Deposit protection goal"
     }
-  ]
+   ],
+   "sideLabel": "Book your clean",
+   "sideNote": "No hidden fees · Fully insured",
+   "sidePoints": [
+    {
+     "icon": "shield-check",
+     "text": "Vetted & insured cleaners"
+    },
+    {
+     "icon": "calendar",
+     "text": "Flexible scheduling"
+    },
+    {
+     "icon": "star",
+     "text": "{rating}★ rated on Google"
+    }
+   ],
+   "sideFoot": "",
+   "guaranteesTitle": "Our guarantees",
+   "guarantees": [
+    "48-hour free re-clean if unsatisfied",
+    "Fully vetted & DBS-checked cleaners",
+    "Public liability insurance included",
+    "Eco-friendly, non-toxic products"
+   ],
+   "showAreas": "no",
+   "areasTitle": "Areas covered",
+   "mobileCall": "Call",
+   "mobileBook": "Book Now",
+   "top": [
+    {
+     "type": "SvcBox",
+     "props": {
+      "id": "SvcBox-1",
+      "tag": "section",
+      "cls": "px-4 sm:px-6 lg:px-10 xl:px-16 pt-10 sm:pt-14 space-y-8",
+      "children": [
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-2",
+         "tag": "div",
+         "cls": "rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10 grid lg:grid-cols-5 gap-8 items-center",
+         "children": [
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-3",
+            "tag": "div",
+            "cls": "lg:col-span-3 space-y-4",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-4",
+               "tag": "h2",
+               "cls": "text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight",
+               "text": "Airbnb Cleaning in Manchester"
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-5",
+               "tag": "ul",
+               "cls": "space-y-2.5",
+               "children": [
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-6",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-7",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-8",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-9",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Fast turnovers between check-out and check-in"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-10",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-11",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-12",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-13",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Fresh linen, made beds and folded towels"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-14",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-15",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-16",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-17",
+                     "tag": "",
+                     "cls": "",
+                     "text": "A clean, guest-ready property for every new arrival"
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-18",
+               "tag": "div",
+               "cls": "pt-2",
+               "children": [
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-19",
+                  "tag": "div",
+                  "cls": "flex flex-col sm:flex-row gap-3",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-20",
+                     "tag": "a",
+                     "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-21",
+                        "name": "calendar",
+                        "cls": "",
+                        "size": 16
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-22",
+                        "tag": "",
+                        "cls": "",
+                        "text": " Book now"
+                       }
+                      }
+                     ],
+                     "href": "{book}"
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-23",
+                     "tag": "a",
+                     "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-24",
+                        "name": "phone",
+                        "cls": "",
+                        "size": 16
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-25",
+                        "tag": "",
+                        "cls": "",
+                        "text": " Call now"
+                       }
+                      }
+                     ],
+                     "href": "tel:+447846726428"
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-26",
+            "tag": "div",
+            "cls": "lg:col-span-2 space-y-4",
+            "children": [
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-27",
+               "tag": "div",
+               "cls": "rounded-xl bg-[#0A1520] text-white p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-28",
+                  "tag": "p",
+                  "cls": "text-sm text-slate-300 mb-2",
+                  "text": "Questions about cleaning your Airbnb? Call us:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-29",
+                  "tag": "a",
+                  "cls": "flex items-center gap-2 text-2xl font-bold text-teal-400 hover:text-teal-300",
+                  "children": [
+                   {
+                    "type": "SvcIcon",
+                    "props": {
+                     "id": "SvcIcon-30",
+                     "name": "phone",
+                     "cls": "",
+                     "size": 20
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-31",
+                     "tag": "",
+                     "cls": "",
+                     "text": " 07846 726428"
+                    }
+                   }
+                  ],
+                  "href": "tel:+447846726428"
+                 }
+                },
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-32",
+                  "tag": "p",
+                  "cls": "text-xs text-slate-400 mt-2",
+                  "text": "Mon–Fri 8am–6pm, Sat 9am–4pm"
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-33",
+               "tag": "div",
+               "cls": "rounded-xl bg-white border border-slate-200 p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-34",
+                  "tag": "p",
+                  "cls": "text-sm font-semibold text-slate-500 mb-3",
+                  "text": "This is a service for:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-35",
+                  "tag": "div",
+                  "cls": "flex flex-wrap gap-2",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-36",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-37",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-38",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Airbnb Hosts"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-39",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-40",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-41",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Short-Let Landlords"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-42",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-43",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-44",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Property Managers"
+                       }
+                      }
+                     ]
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       },
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-45",
+         "tag": "div",
+         "cls": "rounded-2xl border border-slate-200 bg-white p-6 sm:p-10",
+         "children": [
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-46",
+            "tag": "p",
+            "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-2",
+            "text": "Manchester Airbnb Cleaning"
+           }
+          },
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-47",
+            "tag": "h2",
+            "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+            "text": "Short-let and Airbnb cleaners in Manchester you can rely on"
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-48",
+            "tag": "div",
+            "cls": "space-y-4 text-slate-600 leading-relaxed",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-49",
+               "tag": "p",
+               "cls": "",
+               "text": "Cleaniq Services provides Airbnb cleaning in Manchester and across Greater Manchester for hosts, short-let landlords and property managers. Our local Airbnb cleaners turn your property around between guests, so every new arrival walks into a clean, fresh and fully prepared home."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-50",
+               "tag": "p",
+               "cls": "",
+               "text": "Guests judge a short-let in the first few minutes. Dust on a shelf, a hair in the shower or a crumpled towel can be enough to cost you a star. Our Airbnb turnover cleans follow the same checklist on every visit, so the standard does not drop when your calendar gets busy."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-51",
+               "tag": "p",
+               "cls": "",
+               "text": "Whether you have one apartment in Manchester City Centre or several properties across Salford, Trafford and Stockport, you can book your Airbnb cleaning online in a few minutes or call us on [07846 726428](tel:+447846726428) for a free quote. Need more than a turnover? Add a [deep clean](/service/deep-cleaning-manchester), [oven cleaning](/service/oven-cleaning-manchester) or [carpet cleaning](/service/carpet-cleaning-manchester) when your property needs a bigger refresh.",
+               "linkCls": "text-teal-700 font-semibold hover:underline"
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "content": [
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-52",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-53",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "About this service"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-54",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "What's Included"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-55",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-5",
+       "text": "Maximize your short-let bookings and maintain outstanding 5-star host reviews. Our rapid-response Airbnb cleaners handle fast-turnaround property turnovers, restocking toiletries, laundry, and guest-ready quality checks."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-56",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Running a successful Airbnb or short-let property in Manchester depends on one thing above all else — consistent, guest-ready cleanliness. Cleaniq Services' specialist Airbnb cleaning team delivers fast, reliable turnovers that protect your ratings and keep your calendar full."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-57",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-58",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-59",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-60",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-61",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Guaranteed same-day turnaround matching guest check-out times"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-62",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-63",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-64",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-65",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Restocking of essentials & welcome pack styling"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-66",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-67",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-68",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-69",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Linen and towel laundry replacement coordination"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-70",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-71",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-72",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-73",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Photo updates & site damage notification logs"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-74",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-75",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-76",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Why Cleaniq Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-77",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-6",
+       "text": "Why Choose Cleaniq Services for Airbnb & Short-Let Cleaning in Manchester?"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-78",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-5",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-79",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-80",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-81",
+                "name": "star",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-82",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-83",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "5-Star Guest-Ready Results"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-84",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We clean to the standard guests expect from a hotel — every surface, every fixture, every time."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-85",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-86",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-87",
+                "name": "clock",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-88",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-89",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Same-Day Turnaround"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-90",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We work around your check-out and check-in times so your property is always ready for the next guest without delay."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-91",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-92",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-93",
+                "name": "badge-check",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-94",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-95",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Damage & Inventory Reports"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-96",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Our team photographs and logs any damage or inventory issues found during each turnover — keeping you informed and protected."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-97",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-98",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-99",
+                "name": "sparkles",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-100",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-101",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Consumable Restocking"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-102",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We restock toiletries, toilet rolls, and welcome essentials so your guests always arrive to a fully prepared property."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-103",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-104",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-105",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "How It Works"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-106",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "How does our Airbnb cleaning in Manchester work?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-107",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Booking Airbnb cleaning in Manchester with Cleaniq Services is simple. We know that short-let hosts work to tight schedules, with one guest checking out in the morning and the next arriving in the afternoon. That is why our Airbnb cleaning service is planned around your check-out and check-in times, not ours. Whether you need a one-off turnover after a busy weekend or a cleaner you can rely on after every stay, the process is the same: you tell us what the property needs, our vetted cleaner carries out the turnover using our checklist, and you get back a clean, guest-ready property that is ready for your next booking."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-108",
+       "tag": "ol",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-109",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-110",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-111",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "1"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-112",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Book"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-113",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Book your Airbnb clean online or call us. Tell us your guests' check-out and check-in times, the size of the property and how our cleaner can get in."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-114",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-115",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-116",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "2"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-117",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Turnover clean"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-118",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "A vetted Cleaniq Services cleaner arrives after your guests leave and works through our Airbnb turnover checklist, room by room."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-119",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-120",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-121",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "3"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-122",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Check"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-123",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Before leaving, the cleaner checks the property. If anything is damaged or missing, we let you know so you can deal with it before the next guest arrives."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-124",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-125",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-126",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "4"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-127",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Guest-ready"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-128",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Your property is clean, the beds are made and fresh towels are out, ready for your next guest to check in."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-129",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-130",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-131",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Benefits"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-132",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Benefits of professional Airbnb cleaning in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-133",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Cleaning is one of the biggest jobs in running an Airbnb, and one of the most important. On Airbnb, Booking.com and Vrbo, guests leave a review after every stay, and cleanliness is one of the first things they comment on. A single bad review about hair in the shower or dust on the shelves can put future guests off booking. Professional Airbnb cleaning in Manchester takes that worry away. Our cleaners work to the same standard on every visit, so you can accept bookings with confidence, keep your ratings high and spend your time on the parts of hosting you enjoy, rather than cleaning between guests."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-134",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-135",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-136",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-137",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-138",
+                   "name": "star",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-139",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Better cleanliness reviews"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-140",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Cleanliness is one of the things guests rate after every stay. A consistent, professional clean helps protect your rating and your place in search results."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-141",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-142",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-143",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-144",
+                   "name": "badge-check",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-145",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "The same standard every time"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-146",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Our cleaners follow a set turnover checklist, so your hundredth guest gets the same welcome as your first."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-147",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-148",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-149",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-150",
+                   "name": "clock",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-151",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "More time for you"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-152",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "No more rushing across Manchester between check-out and check-in. We handle the cleaning so you can focus on your guests and your bookings."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-153",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-154",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-155",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-156",
+                   "name": "shield-check",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-157",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Problems spotted early"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-158",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Damage, missing items or maintenance issues are reported to you, not discovered by your next guest."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-159",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-160",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-161",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-162",
+                   "name": "calendar",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-163",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Fits around your bookings"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-164",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "We plan each clean around your guests' check-out and check-in times."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-165",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-166",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-167",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-168",
+                   "name": "sparkles",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-169",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "48-hour re-clean guarantee"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-170",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "If something isn't right, tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-171",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-172",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-173",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Every Type of Short-Let"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-174",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Airbnb cleaning for every type of short-let in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-175",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our Airbnb cleaning service in Manchester is designed for all kinds of short-term rental. Every property is different, so tell us about yours when you book: the number of bedrooms and bathrooms, how many guests it sleeps, and anything your guests should find on arrival. Our cleaners follow your house standards as well as our own turnover checklist, so your listing photos and the real property always match. If you are new to hosting, you can also book a [deep clean](/service/deep-cleaning-manchester) before your first guest arrives, so your listing starts with a spotless home and great first reviews.",
+       "linkCls": "text-teal-700 font-semibold hover:underline"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-176",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-177",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-178",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-179",
+             "tag": "",
+             "cls": "",
+             "text": "Apartments & studios"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-180",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-181",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-182",
+             "tag": "",
+             "cls": "",
+             "text": "Houses"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-183",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-184",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-185",
+             "tag": "",
+             "cls": "",
+             "text": "Serviced apartments"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-186",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-187",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-188",
+             "tag": "",
+             "cls": "",
+             "text": "Holiday lets"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-189",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-190",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-191",
+             "tag": "",
+             "cls": "",
+             "text": "Rooms in shared homes"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-192",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-193",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-194",
+             "tag": "",
+             "cls": "",
+             "text": "Booking.com & Vrbo listings"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-195",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-196",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-197",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Turnover or Deep Clean?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-198",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Airbnb turnover clean or deep clean: what's the difference?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-199",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Most Manchester hosts need both. A turnover clean keeps the property guest-ready between stays, and a deep clean every so often stops dirt building up in the places a quick turnover can't reach."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-200",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-201",
+          "tag": "div",
+          "cls": "p-5 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-202",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-2",
+             "text": "Airbnb turnover clean"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-203",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "A turnover clean happens between every guest. It gets the property ready quickly: the kitchen and bathrooms are cleaned, floors are vacuumed and mopped, beds are made with fresh linen, towels are put out and the rubbish is taken away. It follows our Airbnb turnover checklist and is planned around your check-out and check-in times."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-204",
+          "tag": "div",
+          "cls": "p-5 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-205",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-2",
+             "text": "Deep clean"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-206",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "A deep clean goes further and is best booked every few months, or before you list a property for the first time. It reaches the areas a turnover can't cover in the time between guests: inside appliances and cupboards, behind furniture, skirting boards, limescale and built-up grime. Read more about our [deep cleaning in Manchester](/service/deep-cleaning-manchester).",
+             "linkCls": "text-teal-700 font-semibold hover:underline"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-207",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-208",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-209",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Room-by-room checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-210",
+       "tag": "h2",
+       "cls": "scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Airbnb Turnover Cleaning Checklist — Manchester",
+       "anchor": "full-checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-211",
+       "tag": "p",
+       "cls": "text-slate-500 text-sm mb-8 leading-relaxed",
+       "text": "Every Cleaniq Services Airbnb turnover covers the full property to hotel standard. Here is exactly what is completed on every visit:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-212",
+       "tag": "div",
+       "cls": "space-y-8",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-213",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-214",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-215",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Kitchen"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-216",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-217",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-218",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-219",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-220",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Full wipe-down of all surfaces and appliance exteriors"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-221",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-222",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-223",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Hob, microwave, and kettle cleaning"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-224",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-225",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-226",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Dishwasher emptying and reset"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-227",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-228",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-229",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Fridge check and wipe-down of interior shelves"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-230",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-231",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-232",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Sink, taps, and draining board polish"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-233",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-234",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-235",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Rubbish removal and bin liner replacement"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-236",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-237",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-238",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Crockery, cutlery, and glassware check and reposition"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-239",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-240",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-241",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Bedrooms"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-242",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-243",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-244",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-245",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-246",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Full linen change and hotel-style bed making"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-247",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-248",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-249",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Dusting of all furniture surfaces and headboards"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-250",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-251",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-252",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Vacuuming of carpets and under beds"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-253",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-254",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-255",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wardrobe interior check and tidy"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-256",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-257",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-258",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Mirror and window sill wipe-down"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-259",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-260",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-261",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Pillow and cushion arrangement"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-262",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-263",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-264",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Welcome item placement if provided"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-265",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-266",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-267",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Bathrooms"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-268",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-269",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-270",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-271",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-272",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Full toilet sanitization — bowl, seat, and cistern"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-273",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-274",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-275",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Shower and bath deep scrub and descaling"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-276",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-277",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-278",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Mirror and vanity streak-free clean"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-279",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-280",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-281",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Fresh towel folding and placement"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-282",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-283",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-284",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Toiletry restocking as required"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-285",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-286",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-287",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Floor mopping and grout spot-clean"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-288",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-289",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-290",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Extractor fan grille wipe-down"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-291",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-292",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-293",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Living Areas & Hallways"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-294",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-295",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-296",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-297",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-298",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Sofa cushion plumping and arrangement"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-299",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-300",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-301",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Dusting of all surfaces, shelves, and TV units"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-302",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-303",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-304",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Vacuuming and mopping of all floors"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-305",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-306",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-307",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Window sill and interior glass wipe-down"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-308",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-309",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-310",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Hallway and entrance area sweep and mop"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-311",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-312",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-313",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Damage and inventory check with photo log"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-314",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-315",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-316",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Coverage"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-317",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-3",
+       "text": "Airbnb cleaners Near You"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-318",
+       "tag": "p",
+       "cls": "text-sm text-slate-500 mb-4",
+       "text": "Our airbnb cleaners work across Manchester and Greater Manchester, including:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-319",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-320",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-321",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-322",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-323",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-324",
+             "tag": "",
+             "cls": "",
+             "text": "Manchester City Centre"
+            }
+           }
+          ],
+          "href": "/locations/manchester-city-centre"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-325",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-326",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-327",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-328",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-329",
+             "tag": "",
+             "cls": "",
+             "text": "Salford"
+            }
+           }
+          ],
+          "href": "/locations/salford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-330",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-331",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-332",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-333",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-334",
+             "tag": "",
+             "cls": "",
+             "text": "Trafford"
+            }
+           }
+          ],
+          "href": "/locations/trafford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-335",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-336",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-337",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-338",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-339",
+             "tag": "",
+             "cls": "",
+             "text": "Stockport"
+            }
+           }
+          ],
+          "href": "/locations/stockport"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-340",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-341",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-342",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-343",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-344",
+             "tag": "",
+             "cls": "",
+             "text": "Didsbury"
+            }
+           }
+          ],
+          "href": "/locations/didsbury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-345",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-346",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-347",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-348",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-349",
+             "tag": "",
+             "cls": "",
+             "text": "Chorlton"
+            }
+           }
+          ],
+          "href": "/locations/chorlton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-350",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-351",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-352",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-353",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-354",
+             "tag": "",
+             "cls": "",
+             "text": "Bolton"
+            }
+           }
+          ],
+          "href": "/locations/bolton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-355",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-356",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-357",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-358",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-359",
+             "tag": "",
+             "cls": "",
+             "text": "Bury"
+            }
+           }
+          ],
+          "href": "/locations/bury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-360",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-361",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-362",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-363",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-364",
+             "tag": "",
+             "cls": "",
+             "text": "Oldham"
+            }
+           }
+          ],
+          "href": "/locations/oldham"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-365",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-366",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-367",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-368",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-369",
+             "tag": "",
+             "cls": "",
+             "text": "Rochdale"
+            }
+           }
+          ],
+          "href": "/locations/rochdale"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-370",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-371",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-372",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-373",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-374",
+             "tag": "",
+             "cls": "",
+             "text": "Tameside"
+            }
+           }
+          ],
+          "href": "/locations/tameside"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-375",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-376",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-377",
+             "tag": "",
+             "cls": "",
+             "text": "Airbnb cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-378",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-379",
+             "tag": "",
+             "cls": "",
+             "text": "Wigan"
+            }
+           }
+          ],
+          "href": "/locations/wigan"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-380",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-381",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-382",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Airbnb Cleaners Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-383",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Expert Airbnb cleaners in Manchester you can trust"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-384",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Every Airbnb cleaner who works with Cleaniq Services is vetted and background checked before their first job. They know what hosts and guests expect from an Airbnb and pay attention to the small details guests notice: fresh towels, made beds, clean mirrors, empty bins and a kitchen that's ready to use."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-385",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our Airbnb cleaners in Manchester understand that an Airbnb is your guests' home for a few nights and a business for you. They work carefully, respect your property and its contents, and leave everything where your guests expect to find it. If they notice anything that needs your attention, such as a broken item, a missing piece of inventory or a maintenance problem, we let you know straight away so you can sort it out before your next guest arrives."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-386",
+       "tag": "p",
+       "cls": "text-slate-800 font-semibold",
+       "text": "Our Airbnb cleaners in Manchester are:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-387",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-388",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-389",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-390",
+                "name": "shield-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-391",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Vetted and background checked."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-392",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-393",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-394",
+                "name": "badge-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-395",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Trained to follow our Airbnb turnover checklist."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-396",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-397",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-398",
+                "name": "map-pin",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-399",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Local to Manchester and Greater Manchester."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-400",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-401",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-402",
+                "name": "star",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-403",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Backed by our 48-hour re-clean guarantee."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-404",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-405",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-406",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Extra Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-407",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Combine your Airbnb cleaning with our other services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-408",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "An Airbnb gets far more use than a normal home. Guests come and go every few days, cook in the kitchen, use the bathroom and walk across the carpets, and over time dirt builds up in places a regular turnover clean does not reach. Every few months, give your property a bigger refresh by adding one of our other cleaning services in Manchester. A deep clean, oven clean or carpet clean keeps your Airbnb looking its best in photos and in person, helps your furniture and fittings last longer, and gives your guests one more reason to leave a five-star review. Choose from:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-409",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-410",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-411",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-412",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-413",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Deep Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-414",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-415",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "A top-to-bottom clean of the areas a turnover doesn't reach."
+               }
+              }
+             ],
+             "href": "/service/deep-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-416",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-417",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-418",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-419",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Oven Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-420",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-421",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "Burnt-on grease removed so guests can cook in a clean oven."
+               }
+              }
+             ],
+             "href": "/service/oven-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-422",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-423",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-424",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-425",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Carpet Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-426",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-427",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "Fresh carpets, stairs and upholstery after a busy season."
+               }
+              }
+             ],
+             "href": "/service/carpet-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-428",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-429",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-430",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-431",
+                   "tag": "",
+                   "cls": "",
+                   "text": "End of Tenancy Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-432",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-433",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "For when a property moves from short-let to long-term tenants, or the other way round."
+               }
+              }
+             ],
+             "href": "/service/end-of-tenancy-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-434",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-435",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-436",
+             "name": "calendar",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-437",
+             "tag": "",
+             "cls": "",
+             "text": " Book now"
+            }
+           }
+          ],
+          "href": "{book}"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-438",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-439",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-440",
+             "tag": "",
+             "cls": "",
+             "text": " Call now"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-441",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-442",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-443",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Short-Let Cleaning Across Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-444",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Airbnb cleaning in Manchester's busiest short-let areas"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-445",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Manchester welcomes visitors all year round for football, concerts, conferences, graduations and city breaks, which keeps Airbnb properties busy and turnovers tight. Our Airbnb cleaners cover popular short-let areas including Manchester City Centre, Ancoats and the Northern Quarter, Deansgate, Castlefield and Spinningfields, Salford Quays and MediaCityUK, as well as Didsbury, Chorlton, Stockport, Trafford and the rest of Greater Manchester. Our office is at 20 Swan St in Ancoats, so we are never far from your property."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-446",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "When big events fill the city, check-outs and check-ins often fall on the same day across many properties. Book your Airbnb cleaning early around busy weekends and event days, so we can plan your turnover around your guests and make sure your property is ready on time."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-447",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-448",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-449",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Hosting Tips"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-450",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Tips for keeping your Manchester Airbnb guest-ready"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-451",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "A great clean is easier when your property is set up for it. These simple habits help our cleaners turn your property around quickly and help you get more five-star reviews from your guests:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-452",
+       "tag": "ul",
+       "cls": "space-y-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-453",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-454",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-455",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-456",
+             "tag": "",
+             "cls": "",
+             "text": "Keep at least two full sets of linen and towels for every bed, so one set can be washed while the other is in use."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-457",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-458",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-459",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-460",
+             "tag": "",
+             "cls": "",
+             "text": "Use a key safe or smart lock, so your cleaner and your guests can get in without you being there."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-461",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-462",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-463",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-464",
+             "tag": "",
+             "cls": "",
+             "text": "Set a check-out time that leaves enough time for a full clean before the next guest checks in."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-465",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-466",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-467",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-468",
+             "tag": "",
+             "cls": "",
+             "text": "Keep spare toiletries, toilet rolls and bin bags in a locked cupboard, so they can be topped up between stays."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-469",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-470",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-471",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-472",
+             "tag": "",
+             "cls": "",
+             "text": "Leave a short note asking guests to put rubbish in the bins and load the dishwasher before they leave."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-473",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-474",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-475",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-476",
+             "tag": "",
+             "cls": "",
+             "text": "Read your reviews for comments about cleanliness and tell us, so we can pay extra attention to those areas."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-477",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-478",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-479",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-480",
+             "tag": "",
+             "cls": "",
+             "text": "Book a deep clean every few months to deal with the build-up a turnover clean can't reach."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-481",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-482",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-483",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "What Airbnb Guests Notice"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-484",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "What Airbnb guests notice first, and how our Airbnb cleaning covers it"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-485",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Airbnb guests make up their minds about a property within minutes of arriving, and that first impression often decides their Airbnb review. Our Airbnb cleaning in Manchester focuses on the five things guests notice first:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-486",
+       "tag": "ul",
+       "cls": "space-y-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-487",
+          "tag": "li",
+          "cls": "p-4 rounded-xl bg-white border border-slate-200",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-488",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-1",
+             "text": "The bathroom"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-489",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Airbnb guests check the shower, toilet and sink first. Hair, limescale or a dirty plughole is the most common reason for a low Airbnb cleanliness rating, so our Airbnb cleaners give the bathroom extra attention on every turnover."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-490",
+          "tag": "li",
+          "cls": "p-4 rounded-xl bg-white border border-slate-200",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-491",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-1",
+             "text": "The bed"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-492",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Fresh, crease-free linen and plumped pillows tell Airbnb guests the property has been properly prepared. We change the linen and make every bed to the same neat standard."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-493",
+          "tag": "li",
+          "cls": "p-4 rounded-xl bg-white border border-slate-200",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-494",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-1",
+             "text": "The kitchen"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-495",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Airbnb guests want to cook without cleaning first. Worktops, hob, microwave, sink and fridge are wiped, and crockery and cutlery are checked and put back in place."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-496",
+          "tag": "li",
+          "cls": "p-4 rounded-xl bg-white border border-slate-200",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-497",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-1",
+             "text": "Floors and surfaces"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-498",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Crumbs, dust and marks stand out in listing-style rooms. Floors are vacuumed and mopped, and surfaces, shelves and TV units are dusted."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-499",
+          "tag": "li",
+          "cls": "p-4 rounded-xl bg-white border border-slate-200",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-500",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-1",
+             "text": "The smell"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-501",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "A fresh-smelling property makes a great first impression. Bins are emptied, rubbish is taken away and the property is aired where possible, so your Airbnb feels fresh when guests walk in."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-502",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-503",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-504",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "The case for professionals"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-505",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-5",
+       "text": "Why Professional Airbnb Cleaning Protects Your Listing"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-506",
+       "tag": "div",
+       "cls": "space-y-4",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-507",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "On platforms like Airbnb and Vrbo, cleanliness is the single most-reviewed category by guests. A single low cleanliness score can suppress your listing in search results, reduce booking rates, and damage a reputation built over months or years."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-508",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Professional short-let cleaning is not simply about tidiness — it is about consistency. Every guest expects the same standard, every time. Cleaniq Services' Airbnb cleaning team in Manchester follows a fixed turnover protocol so your property meets the same high standard whether it is your first guest or your five-hundredth."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-509",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Beyond cleanliness, our turnover team also checks for unreported damage, missing inventory, and maintenance issues — giving you the information you need to protect your property and resolve any disputes with your hosting platform."
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-510",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBeforeAfter",
+   "props": {
+    "id": "SvcBeforeAfter-511",
+    "title": "Airbnb & Short-Let Cleaning in Manchester: before & after",
+    "limit": 4
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-512",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcOurWork",
+   "props": {
+    "id": "SvcOurWork-513",
+    "title": "Photos from our recent jobs"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-514",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcReviews",
+   "props": {
+    "id": "SvcReviews-515",
+    "label": "Customer reviews",
+    "heading": "What Our Customers Say",
+    "linkText": "Read all reviews on Google"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-516",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcRelated",
+   "props": {
+    "id": "SvcRelated-517",
+    "label": "More from Cleaniq Services",
+    "heading": "Related cleaning services"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-518",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-519",
+    "tag": "section",
+    "cls": "rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-520",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-100 mb-2",
+       "text": "Contact Us For a Free Quote"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-521",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold mb-3",
+       "text": "Get a free quote for your Airbnb cleaning"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-522",
+       "tag": "p",
+       "cls": "text-teal-50 leading-relaxed mb-6",
+       "text": "Manage more than one Airbnb in Manchester, or have a property with special requirements? Contact Cleaniq Services for a free Airbnb cleaning quote. Tell us how many properties you have, how many bedrooms and bathrooms each one has, and how often your guests change over, and we will recommend the right cleaning for your Airbnb. Call us on 07846 726428, or fill out our quick quote form and we will get back to you. There is no obligation, and our team is happy to answer any questions you have about Airbnb cleaning in Manchester. We clean Airbnb properties across Manchester City Centre, Salford, Trafford, Stockport and the rest of Greater Manchester."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-523",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-524",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-525",
+             "tag": "",
+             "cls": "",
+             "text": "Get a free quote "
+            }
+           },
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-526",
+             "name": "arrow-right",
+             "cls": "",
+             "size": 16
+            }
+           }
+          ],
+          "href": "/get-a-quote"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-527",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-528",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-529",
+             "tag": "",
+             "cls": "",
+             "text": " 07846 726428"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-530",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-531",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-532",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Frequently asked questions"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-533",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Frequently Asked Questions: Airbnb Cleaning Manchester"
+      }
+     },
+     {
+      "type": "SvcFaqs",
+      "props": {
+       "id": "SvcFaqs-534",
+       "numbered": "yes",
+       "items": [
+        {
+         "q": "How quickly can you turn over an Airbnb property?",
+         "a": "Most one and two-bedroom properties can be turned over within 2–3 hours between check-out and check-in. Larger properties are quoted individually. We work to your specific check-in time."
+        },
+        {
+         "q": "Do you provide linen and towels?",
+         "a": "We can launder linen and towels on-site if your property has a washing machine and dryer. We can also coordinate with a linen service if you require off-site laundering."
+        },
+        {
+         "q": "Can you manage multiple properties?",
+         "a": "Yes. We work with Manchester Airbnb hosts managing single properties and large portfolios alike. We can coordinate across multiple properties and integrate with your Airbnb calendar."
+        },
+        {
+         "q": "What happens if a guest causes damage?",
+         "a": "Our team photographs and logs any damage discovered during the turnover and notifies you immediately — giving you documentation to support a claim with Airbnb or your insurer."
+        },
+        {
+         "q": "Do you cover all Manchester Airbnb areas?",
+         "a": "Yes. We cover all Greater Manchester postcodes including City Centre, Salford, Didsbury, Chorlton, Fallowfield, Stretford, and surrounding areas."
+        },
+        {
+         "q": "What is included in an Airbnb turnover clean?",
+         "a": "Every turnover covers the kitchen, bedrooms, bathrooms, living areas and hallways: surfaces wiped, floors vacuumed and mopped, bathrooms cleaned, beds made with fresh linen, towels folded and bins emptied. The full Airbnb turnover cleaning checklist is on this page."
+        },
+        {
+         "q": "How much does Airbnb cleaning cost in Manchester?",
+         "a": "The price depends on the size of your property and what it needs. Book online to see your price before you pay, or contact us for a free quote if you manage several properties."
+        },
+        {
+         "q": "Do I need to be at the property during the clean?",
+         "a": "No. Just tell us how our cleaner can get in, for example a key safe or smart lock code, when you book."
+        },
+        {
+         "q": "Are your Airbnb cleaners vetted?",
+         "a": "Yes. Every Cleaniq Services cleaner is vetted and background checked before their first job."
+        },
+        {
+         "q": "What if I'm not happy with the clean?",
+         "a": "Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
+        },
+        {
+         "q": "Do you clean holiday lets and serviced apartments too?",
+         "a": "Yes. Our short-let cleaning covers Airbnb, Booking.com and Vrbo listings, holiday lets and serviced apartments across Greater Manchester."
+        },
+        {
+         "q": "Can I add a deep clean or carpet cleaning to my Airbnb clean?",
+         "a": "Yes. Add a deep clean, oven cleaning or carpet cleaning when your property needs more than a turnover. Book online or ask us when you call."
+        },
+        {
+         "q": "Can you clean on the same day as check-out and check-in?",
+         "a": "Yes. Tell us your guests' check-out and check-in times when you book and we'll plan the clean to fit between them. Book early for busy weekends and event days in Manchester."
+        },
+        {
+         "q": "How often should I deep clean my Airbnb?",
+         "a": "Most hosts book a deep clean every few months, depending on how busy the property is. A deep clean reaches the areas a turnover clean can't cover between guests, such as inside appliances and cupboards and behind furniture."
+        },
+        {
+         "q": "Can you clean my property before I list it on Airbnb?",
+         "a": "Yes. Book a deep clean before your first guest arrives, so your property starts spotless and your listing photos show it at its best."
+        },
+        {
+         "q": "Can my Airbnb co-host or property manager book the cleaning?",
+         "a": "Yes. Anyone who looks after your Airbnb can book Airbnb cleaning with us online or by phone. Just make sure they share the check-out time, check-in time and access details for the property."
+        },
+        {
+         "q": "Do you clean Airbnb properties after a long stay?",
+         "a": "Yes. After a long Airbnb stay, a standard turnover may not be enough. Book a deep clean to reset the property before your next Airbnb guest arrives."
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-535",
+       "tag": "div",
+       "cls": "mt-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-536",
+          "tag": "h3",
+          "cls": "text-lg sm:text-xl font-bold mb-3",
+          "text": "Book your Airbnb cleaning in Manchester"
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-537",
+          "tag": "p",
+          "cls": "text-teal-50 leading-relaxed mb-6",
+          "text": "Book your next turnover online in a few minutes, or call Cleaniq Services on [07846 726428](tel:+447846726428) and we'll help you plan the cleaning around your guests.",
+          "linkCls": "font-bold underline underline-offset-2 hover:text-white"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-538",
+          "tag": "div",
+          "cls": "flex flex-col sm:flex-row gap-3",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-539",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-540",
+                "name": "calendar",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-541",
+                "tag": "",
+                "cls": "",
+                "text": " Book now"
+               }
+              }
+             ],
+             "href": "{book}"
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-542",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-543",
+                "name": "phone",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-544",
+                "tag": "",
+                "cls": "",
+                "text": " Call now"
+               }
+              }
+             ],
+             "href": "tel:+447846726428"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-545",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-546",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-547",
+       "tag": "p",
+       "cls": "text-xs text-slate-400 leading-relaxed",
+       "text": "Cleaniq Services provides professional Airbnb cleaning, short-let property cleaning, and holiday let turnovers across Manchester. Whether you need a same-day Airbnb clean in Manchester City Centre, Salford, Didsbury, Chorlton, or Stockport — our experienced turnover team delivers a guest-ready finish every time. Book your Manchester Airbnb cleaning service online or call +44 7846 726428."
+      }
+     }
+    ]
+   }
+  }
+ ]
 }

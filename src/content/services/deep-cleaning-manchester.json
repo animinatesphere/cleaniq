@@ -1,135 +1,5513 @@
 {
-  "basics": {
-    "title": "Deep Cleaning Manchester | Deep Cleaners Near You",
-    "meta": "One-off deep cleaning for homes and offices in Manchester. Thorough, eco-friendly, and affordable. Book expert deep cleaners online today with Cleaniq Services.",
-    "heading": "Deep Cleaning Services in Manchester",
-    "tagline": "Thorough, Eco-Friendly, Meticulous Refresh Cleans.",
-    "description": "Our deep cleaning service in Manchester is designed as a complete full and thorough cleaning of the entirety of your property. Every inch of your home will be cleaned, polished, and scrubbed up to the highest professional standards, and following specifically designed checklists. We guarantee that by scheduling our deep cleaning in Manchester your home will be cleaned to exceptional standards. Our experienced cleaners in Manchester will follow our checklists, which we have designed to make sure that every inch of your home is cleaned and left spotless. However, make sure you advise us on any specific requirements you have for your deep cleaning service and we will make sure those are listed as priorities. Our deep cleaning service is ideal for one-off property resets, while our end of tenancy cleaning Manchester is designed for tenants, landlords and letting agents before check-out.",
-    "points": [
-      "Complete sanitization of all high-contact surfaces",
-      "Eco-friendly, chemical-free premium cleaning solutions",
-      "Ideal for seasonal spring cleaning or pre-event preparation",
-      "Specialized room-by-room thorough checklist"
-    ]
-  },
-  "details": {
-    "intro": "",
-    "whyChoose": [
-      {
-        "title": "Beyond Surface-Level Cleaning",
-        "body": "We clean inside appliances, behind furniture, inside cupboards, and along skirting boards — every hidden area included as standard."
-      },
-      {
-        "title": "Satisfaction Guaranteed",
-        "body": "Not happy with any area? We return within 48 hours and re-clean it free of charge — no questions asked."
-      },
-      {
-        "title": "Flexible One-Off Bookings",
-        "body": "No contracts. No subscriptions. Book a one-off deep clean for any occasion — move-in, post-renovation, or just a fresh start."
-      },
-      {
-        "title": "Vetted & Insured Cleaners",
-        "body": "Every Cleaniq Services cleaner is background-checked, fully insured, and trained in our detailed deep cleaning protocol."
-      }
-    ],
-    "checklist": {
-      "heading": "Full Deep Cleaning Checklist — Manchester",
-      "intro": "Our deep clean covers every room from top to bottom. Here is exactly what is included in every booking:",
-      "rooms": [
-        {
-          "room": "Kitchen",
-          "tasks": [
-            "Full oven interior degreasing and rack scrubbing",
-            "Hob, extractor fan filter, and microwave deep clean",
-            "Inside and outside all cupboards and drawers",
-            "Fridge interior sanitization and shelf cleaning",
-            "Sink, taps, and draining board descaling",
-            "Splashback tiles and grout scrubbing",
-            "Worktops, skirting boards, and light switch wipe-down"
-          ]
-        },
-        {
-          "room": "Living Room & Bedrooms",
-          "tasks": [
-            "Full dusting of all surfaces, shelves, and furniture tops",
-            "Vacuuming carpets and upholstery with HEPA equipment",
-            "Hard floor deep mop including edges and corners",
-            "Interior window and sill cleaning",
-            "Wardrobe and storage unit interior wipe-down",
-            "Cobweb removal from ceilings and corners",
-            "Light fittings, switches, and socket plate cleaning"
-          ]
-        },
-        {
-          "room": "Bathrooms",
-          "tasks": [
-            "Full toilet bowl, cistern, seat, and base sanitization",
-            "Shower enclosure, screen, head, and tray descaling",
-            "Bath, taps, and overflow deep clean and polish",
-            "Tile and grout mould removal treatment",
-            "Extractor fan and ventilation grille cleaning",
-            "Mirror and vanity streak-free clean",
-            "Floor scrubbing and sealant line cleaning"
-          ]
-        },
-        {
-          "room": "Hallways & General Areas",
-          "tasks": [
-            "Banister, handrail, and spindle wipe-down",
-            "Front door, frame, and letterbox cleaning",
-            "Radiator panel and top-surface dusting",
-            "Spot-cleaning of marked walls and scuff removal",
-            "Storage cupboard and loft hatch wipe-down"
-          ]
-        }
-      ]
-    },
-    "whyMatters": {
-      "heading": "Why a Professional Deep Clean Makes a Difference",
-      "body": [
-        "Regular cleaning maintains a home — but it rarely reaches the accumulated grime in hidden areas: inside oven cavities, behind appliances, along grout lines, and underneath furniture. Over time, these areas harbour bacteria, allergens, and odours that a standard weekly clean simply cannot address.",
-        "A professional deep clean from Cleaniq Services resets your property to a hygienic baseline. Our Manchester cleaners follow a structured, room-by-room protocol using eco-friendly, non-toxic products that are powerful enough to cut through grease and limescale — without harsh chemicals that affect your family or pets.",
-        "Whether you're preparing for guests, recovering from a renovation, moving into a new property, or simply want a fresh start — a one-off deep clean is the most effective way to restore your home to its best condition."
-      ]
-    },
-    "seoFooter": "Cleaniq Services provides professional deep cleaning, one-off cleaning, and thorough refresh cleans across Manchester. Whether you need a deep clean in Manchester City Centre, Didsbury, Chorlton, Salford, Fallowfield, Withington, or Stockport — our vetted and insured cleaners deliver a guaranteed result. Book your Manchester deep cleaning service online in 60 seconds or call +44 7846 726428."
-  },
-  "faqs": [
+ "root": {
+  "props": {
+   "title": "Deep Cleaning Manchester | Deep Cleaners Near You",
+   "description": "One-off deep cleaning for homes and offices in Manchester. Thorough, eco-friendly, and affordable. Book expert deep cleaners online today with Cleaniq Services.",
+   "shareTitle": "",
+   "shareDescription": "",
+   "schemaDescription": "Our deep cleaning service in Manchester is designed as a complete full and thorough cleaning of the entirety of your property. Every inch of your home will be cleaned, polished, and scrubbed up to the highest professional standards, and following specifically designed checklists. We guarantee that by scheduling our deep cleaning in Manchester your home will be cleaned to exceptional standards. Our experienced cleaners in Manchester will follow our checklists, which we have designed to make sure that every inch of your home is cleaned and left spotless. However, make sure you advise us on any specific requirements you have for your deep cleaning service and we will make sure those are listed as priorities. Our deep cleaning service is ideal for one-off property resets, while our end of tenancy cleaning Manchester is designed for tenants, landlords and letting agents before check-out.",
+   "schemaAreas": [],
+   "priceKeywords": [],
+   "quoteMessage": "Hi Cleaniq! I'd like a quote for deep cleaning.",
+   "badge": "Manchester Cleaning Service",
+   "heading": "Deep Cleaning Services in Manchester",
+   "tagline": "Thorough, Eco-Friendly, Meticulous Refresh Cleans.",
+   "trustBold": "48-hr",
+   "trustText": "re-clean guarantee",
+   "ctaLabel": "Book your clean",
+   "ctaNote": "No hidden fees · Insured cleaners",
+   "bookLabel": "Book in 60 Seconds",
+   "quoteLabel": "Get a quote on WhatsApp",
+   "showPhone": "no",
+   "phone": "+44 7846 726428",
+   "ctaFoot": "48-hr satisfaction guarantee included",
+   "stats": [
     {
-      "q": "What is the difference between the deep cleaning service and your One-Off Cleaning?",
-      "a": "Our Deep Cleaning Services in Manchester will cover the entirety of your home leaving no inch untouched. Our One-Off Cleaning Service is a lighter, more general cleaning that offers some of the benefits of a deep clean, but it is intended to be a much lighter surface clean."
+     "value": "{rating}★",
+     "label": "Google rating"
     },
     {
-      "q": "Do you provide all the cleaning supplies as I don't have any of those in my home?",
-      "a": "Yes. All necessary cleaning detergents and equipment will be provided by us when you schedule our Deep Cleaning Services in Manchester."
+     "value": "48hr",
+     "label": "Re-clean guarantee"
     },
     {
-      "q": "Which areas do you cover?",
-      "a": "We can provide our Deep Cleaning Services on all postcodes in Greater Manchester."
-    },
-    {
-      "q": "Do you clean the oven?",
-      "a": "Yes. All kitchen appliances will be deeply cleaned as part of our Deep Cleaning Service. The oven will be fully deep cleaned and degreased completely free of charge."
-    },
-    {
-      "q": "Do I need to provide parking?",
-      "a": "Parking expenses can come on top of the price for your deep cleaning if only metered parking is available. If there is no free parking available, we do request that clients cover potential parking expenses for our cleaning teams or provide a permit."
-    },
-    {
-      "q": "I have already booked your deep cleaning service, can I reschedule?",
-      "a": "Yes. You can reschedule or amend your deep cleaning booking 24 hours prior to the service taking place."
-    },
-    {
-      "q": "Will you clean the windows as part of the Deep Cleaning?",
-      "a": "Yes. All windows, along with the panes, ledges, sills, and frames, will be cleaned internally as part of the service. You can always schedule external window cleaning in addition to your Deep Cleaning Services in Manchester."
-    },
-    {
-      "q": "There is mould build-up in some parts of the property, will that be removed?",
-      "a": "Our cleaners are expertly trained and experienced professionals. They will attempt to fully eliminate areas of heavy limescale and mould build-up. However, our cleaners are instructed to stop before potentially risking damage to the affected surface. If complete elimination would depend on damaging the area, the cleaners will stop."
-    },
-    {
-      "q": "What areas are not cleaned as part of the deep cleaning?",
-      "a": "The only areas that are exceptions to our Deep Cleaning Services in Manchester are painted walls and ceilings."
+     "value": "100%",
+     "label": "Deposit protection goal"
     }
-  ]
+   ],
+   "sideLabel": "Book your clean",
+   "sideNote": "No hidden fees · Fully insured",
+   "sidePoints": [
+    {
+     "icon": "shield-check",
+     "text": "Vetted & insured cleaners"
+    },
+    {
+     "icon": "calendar",
+     "text": "Flexible scheduling"
+    },
+    {
+     "icon": "star",
+     "text": "{rating}★ rated on Google"
+    }
+   ],
+   "sideFoot": "",
+   "guaranteesTitle": "Our guarantees",
+   "guarantees": [
+    "48-hour free re-clean if unsatisfied",
+    "Fully vetted & DBS-checked cleaners",
+    "Public liability insurance included",
+    "Eco-friendly, non-toxic products"
+   ],
+   "showAreas": "no",
+   "areasTitle": "Areas covered",
+   "mobileCall": "Call",
+   "mobileBook": "Book Now",
+   "top": []
+  }
+ },
+ "content": [
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-1",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-2",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "About this service"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-3",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "What's Included"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-4",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-5",
+       "text": "Our deep cleaning service in Manchester is designed as a complete full and thorough cleaning of the entirety of your property. Every inch of your home will be cleaned, polished, and scrubbed up to the highest professional standards, and following specifically designed checklists. We guarantee that by scheduling our deep cleaning in Manchester your home will be cleaned to exceptional standards. Our experienced cleaners in Manchester will follow our checklists, which we have designed to make sure that every inch of your home is cleaned and left spotless. However, make sure you advise us on any specific requirements you have for your deep cleaning service and we will make sure those are listed as priorities. Our deep cleaning service is ideal for one-off property resets, while our end of tenancy cleaning Manchester is designed for tenants, landlords and letting agents before check-out."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-5",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "children": []
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-6",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-7",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-8",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-9",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-10",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Complete sanitization of all high-contact surfaces"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-11",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-12",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-13",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-14",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Eco-friendly, chemical-free premium cleaning solutions"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-15",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-16",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-17",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-18",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Ideal for seasonal spring cleaning or pre-event preparation"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-19",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-20",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-21",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-22",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Specialized room-by-room thorough checklist"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-23",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-24",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-25",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Choose Cleaniq Services for your next deep cleaning"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-26",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "Deep Cleaning - A Cleaning Service Tailored To Your Needs"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-27",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-5",
+       "text": "Our Manchester deep cleaning service follows specific checklists that have been designed by us to make sure that every inch of your property is cleaned and polished up to the highest possible standards. As such our Manchester cleaners will follow this checklist, however, if you have any individual requirements for your deep cleaning services you can always let us know."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-28",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-5",
+       "text": "You can configure your deep cleaning up to your exact specifications. Choose which areas of your property you would like our cleaners to focus on, choose the day and time for your deep cleaning service, and if you are interested you can always add several additional services to your deep cleaning and make sure that you will receive a personalized, tailored to your requirements cleaning service in a matter of hours."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-29",
+       "tag": "p",
+       "cls": "text-slate-700 font-semibold mb-3",
+       "text": "Additional Services you can add to your deep cleaning in Manchester include:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-30",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-3 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-31",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-32",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-33",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-34",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Carpet Cleaning"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-35",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-36",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-37",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-38",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Upholstery Cleaning"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-39",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-40",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-41",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-42",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "External Window Cleaning"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-43",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-44",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-45",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Why Cleaniq Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-46",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "Why Choose Our Deep Cleaning Services?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-47",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-8",
+       "text": "Our Deep Cleaning in Manchester will transform your property. Our Deep Cleaning is intended to be a complete internal cleaning of your home, therefore it is not necessary to schedule our Deep Cleaning on a shorter frequency. To maintain the cleaning results we recommended that you schedule our Deep Cleaning Service once every 2-3 months. The price for our Deep Cleaning includes all professional cleaning detergents and equipment and you can combine our Deep Clean with any one of your additional services. If you combine our Deep Cleaning with any additional services offered by Cleaniq Services you will receive a personalized discount on the final price."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-48",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-5",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-49",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-50",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-51",
+                "name": "shield-check",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-52",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-53",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Reliable Services delivered by professional and insured cleaners."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-54",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-55",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-56",
+                "name": "phone",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-57",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-58",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "24/7 customer service."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-59",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-60",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-61",
+                "name": "calendar",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-62",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-63",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "7-day-a-week availability."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-64",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-65",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-66",
+                "name": "clock",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-67",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-68",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Flexible Schedule."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-69",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-70",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-71",
+                "name": "badge-check",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-72",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-73",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Obligation-free quotes."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-74",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-75",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-76",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-77",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-78",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Professional cleaning detergents and equipment will be provided by us as part of the Deep Cleaning Services in Manchester."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-79",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-80",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-81",
+                "name": "check",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-82",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-83",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Easy to follow the booking process."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-84",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-85",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-86",
+                "name": "star",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-87",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-88",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "The Deep Cleaning Services can easily be personalized to fit your specific cleaning requirements."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-89",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-90",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-91",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-92",
+             "tag": "div",
+             "cls": "pt-2",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-93",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Extra cleaning services."
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-94",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Feel free to combine our deep cleaning in Manchester with any one of our additional services and you will receive a personalized discount on the final price"
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-95",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-96",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-97",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "The Deep Cleaning Services offered by Cleaniq Services are designed to transform your home. If you require Deep Cleaning in Manchester, Cleaniq Services can help you. Our Manchester Deep Cleaning Service is our most popular cleaning service among clients that are not moving out of their homes, and simply want to have their property freshened up and transformed."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-98",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "If you are moving out of your house or flat we would recommend that you schedule our [End of Tenancy Cleaning Service](/service/end-of-tenancy-cleaning-manchester), if you have had your property refurbished we would recommend that you schedule our [After Builders Cleaning](/service/post-construction-cleaning-manchester), however, if you want to completely transform the condition of your property or if you have just moved in then our Deep Cleaning is the service for you.",
+       "linkCls": "text-teal-700 font-semibold hover:underline"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-99",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "As part of our Deep Clean in Manchester, our cleaners will cover your property inch-by-inch, cleaning even the hardest-to-reach places, they will leave no corner untouched and will make sure that they transform the condition of your house or flat. The condition of your home will be utterly transformed, your property will be neat, tidy, and perfectly cleaned."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-100",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "If you would like to schedule our Deep Cleaning Services on all postcodes in Greater Manchester you can contact us at [07846 726428](tel:+447846726428) 24 hours a day 7 days a week for a perfectly FREE quote for your Deep Clean, or alternatively, simply fill out the corresponding [cleaning service request form](/get-a-quote) linked below.",
+       "linkCls": "text-teal-700 font-semibold hover:underline"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-101",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Take advantage of the many benefits you will receive from our Deep Cleaning Services in Manchester."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-102",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-103",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-104",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Room-by-room checklist"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-105",
+       "tag": "div",
+       "cls": "mb-12",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-106",
+          "tag": "h2",
+          "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-1",
+          "text": "Deep Cleaning Checklist"
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-107",
+          "tag": "h3",
+          "cls": "text-base sm:text-lg font-semibold text-teal-700 mb-4",
+          "text": "What is included in our Deep Cleaning Service in Manchester"
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-108",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed mb-8",
+          "text": "Cleaniq Services is able to help with all of your domestic deep cleaning needs. No matter the size and scope of the job our Manchester deep cleaning technicians are always able to offer a helping hand. Our deep cleaning services follow a specific checklist, which all of our cleaners in Manchester are instructed to follow. However, the deep cleaning service can also be tailored to meet your specific cleaning requirements. See some of the basics that are included in our deep cleaning services in Manchester below, when you contact us with your deep cleaning inquiry make sure to advise us on any personal specifications you may have and we will make sure that those are listed as priorities every time you schedule our deep cleaning."
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-109",
+          "tag": "div",
+          "cls": "grid sm:grid-cols-2 gap-5",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-110",
+             "tag": "article",
+             "cls": "flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm",
+             "children": [
+              {
+               "type": "SvcImg",
+               "props": {
+                "id": "SvcImg-111",
+                "image": "our-work/airbnb-1.jpg",
+                "alt": "Bedroom with a freshly made bed after a deep clean by Cleaniq Services",
+                "cls": "w-full aspect-[16/9] object-cover",
+                "width": "1000",
+                "height": "750",
+                "lazy": "yes"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-112",
+                "tag": "div",
+                "cls": "flex flex-col grow p-5",
+                "children": [
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-113",
+                   "tag": "div",
+                   "cls": "flex items-start justify-between gap-3 mb-4",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-114",
+                      "tag": "div",
+                      "cls": "",
+                      "children": [
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-115",
+                         "tag": "p",
+                         "cls": "text-[11px] font-bold tracking-widest uppercase text-teal-600",
+                         "text": "Deep Cleaning"
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-116",
+                         "tag": "h4",
+                         "cls": "text-lg font-bold text-slate-900 leading-tight",
+                         "text": "Bedroom"
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-117",
+                      "tag": "a",
+                      "cls": "shrink-0 px-3.5 py-2 rounded-lg bg-[#00B5A4] text-white text-xs font-bold hover:bg-teal-600 transition-colors",
+                      "text": "Book now",
+                      "href": "{book}"
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-118",
+                   "tag": "ul",
+                   "cls": "space-y-2.5 grow",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-119",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-120",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-121",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "Carpeted floors will be vacuumed. Hard Floors will be mopped."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-122",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-123",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-124",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "Skirting boards, light sockets, light switches, and plugs will be cleaned."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-125",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-126",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-127",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "Upholstery and furniture will be vacuumed - underneath and behind cushions as well."
+                        }
+                       }
+                      ]
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-128",
+                   "tag": "a",
+                   "cls": "mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline",
+                   "children": [
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-129",
+                      "tag": "",
+                      "cls": "",
+                      "text": "View full checklist "
+                     }
+                    },
+                    {
+                     "type": "SvcIcon",
+                     "props": {
+                      "id": "SvcIcon-130",
+                      "name": "arrow-right",
+                      "cls": "",
+                      "size": 14
+                     }
+                    }
+                   ],
+                   "href": "#full-checklist"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-131",
+             "tag": "article",
+             "cls": "flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm",
+             "children": [
+              {
+               "type": "SvcImg",
+               "props": {
+                "id": "SvcImg-132",
+                "image": "our-work/end-of-tenancy-2.jpg",
+                "alt": "Clean bathroom with a bath, basin and tiled floor after a deep clean by Cleaniq Services",
+                "cls": "w-full aspect-[16/9] object-cover",
+                "width": "1000",
+                "height": "750",
+                "lazy": "yes"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-133",
+                "tag": "div",
+                "cls": "flex flex-col grow p-5",
+                "children": [
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-134",
+                   "tag": "div",
+                   "cls": "flex items-start justify-between gap-3 mb-4",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-135",
+                      "tag": "div",
+                      "cls": "",
+                      "children": [
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-136",
+                         "tag": "p",
+                         "cls": "text-[11px] font-bold tracking-widest uppercase text-teal-600",
+                         "text": "Deep Cleaning"
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-137",
+                         "tag": "h4",
+                         "cls": "text-lg font-bold text-slate-900 leading-tight",
+                         "text": "Bathroom"
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-138",
+                      "tag": "a",
+                      "cls": "shrink-0 px-3.5 py-2 rounded-lg bg-[#00B5A4] text-white text-xs font-bold hover:bg-teal-600 transition-colors",
+                      "text": "Book now",
+                      "href": "{book}"
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-139",
+                   "tag": "ul",
+                   "cls": "space-y-2.5 grow",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-140",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-141",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-142",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "The bathtub will be cleaned."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-143",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-144",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-145",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "The showerhead, the shower screen, and the shower will be cleaned."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-146",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-147",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-148",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "The skirting boards, light sockets, light switches, and plugs will be cleaned."
+                        }
+                       }
+                      ]
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-149",
+                   "tag": "a",
+                   "cls": "mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline",
+                   "children": [
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-150",
+                      "tag": "",
+                      "cls": "",
+                      "text": "View full checklist "
+                     }
+                    },
+                    {
+                     "type": "SvcIcon",
+                     "props": {
+                      "id": "SvcIcon-151",
+                      "name": "arrow-right",
+                      "cls": "",
+                      "size": 14
+                     }
+                    }
+                   ],
+                   "href": "#full-checklist"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-152",
+             "tag": "article",
+             "cls": "flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm",
+             "children": [
+              {
+               "type": "SvcImg",
+               "props": {
+                "id": "SvcImg-153",
+                "image": "our-work/regular-1.jpg",
+                "alt": "Clean kitchen with sink, hob, oven and washing machine after a deep clean by Cleaniq Services",
+                "cls": "w-full aspect-[16/9] object-cover",
+                "width": "1000",
+                "height": "750",
+                "lazy": "yes"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-154",
+                "tag": "div",
+                "cls": "flex flex-col grow p-5",
+                "children": [
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-155",
+                   "tag": "div",
+                   "cls": "flex items-start justify-between gap-3 mb-4",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-156",
+                      "tag": "div",
+                      "cls": "",
+                      "children": [
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-157",
+                         "tag": "p",
+                         "cls": "text-[11px] font-bold tracking-widest uppercase text-teal-600",
+                         "text": "Deep Cleaning"
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-158",
+                         "tag": "h4",
+                         "cls": "text-lg font-bold text-slate-900 leading-tight",
+                         "text": "Kitchen"
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-159",
+                      "tag": "a",
+                      "cls": "shrink-0 px-3.5 py-2 rounded-lg bg-[#00B5A4] text-white text-xs font-bold hover:bg-teal-600 transition-colors",
+                      "text": "Book now",
+                      "href": "{book}"
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-160",
+                   "tag": "ul",
+                   "cls": "space-y-2.5 grow",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-161",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-162",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-163",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "All kitchen appliances will be cleaned from the inside and the outside."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-164",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-165",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-166",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "Oven, cooker, hob along with the burners, extractor will be cleaned."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-167",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-168",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-169",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "The cobwebs will be removed."
+                        }
+                       }
+                      ]
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-170",
+                   "tag": "a",
+                   "cls": "mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline",
+                   "children": [
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-171",
+                      "tag": "",
+                      "cls": "",
+                      "text": "View full checklist "
+                     }
+                    },
+                    {
+                     "type": "SvcIcon",
+                     "props": {
+                      "id": "SvcIcon-172",
+                      "name": "arrow-right",
+                      "cls": "",
+                      "size": 14
+                     }
+                    }
+                   ],
+                   "href": "#full-checklist"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-173",
+             "tag": "article",
+             "cls": "flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm",
+             "children": [
+              {
+               "type": "SvcImg",
+               "props": {
+                "id": "SvcImg-174",
+                "image": "our-work/regular-2.jpg",
+                "alt": "Living and dining room with sofas and a dining table after a deep clean by Cleaniq Services",
+                "cls": "w-full aspect-[16/9] object-cover",
+                "width": "1000",
+                "height": "750",
+                "lazy": "yes"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-175",
+                "tag": "div",
+                "cls": "flex flex-col grow p-5",
+                "children": [
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-176",
+                   "tag": "div",
+                   "cls": "flex items-start justify-between gap-3 mb-4",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-177",
+                      "tag": "div",
+                      "cls": "",
+                      "children": [
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-178",
+                         "tag": "p",
+                         "cls": "text-[11px] font-bold tracking-widest uppercase text-teal-600",
+                         "text": "Deep Cleaning"
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-179",
+                         "tag": "h4",
+                         "cls": "text-lg font-bold text-slate-900 leading-tight",
+                         "text": "Living Room/ Dining Room"
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-180",
+                      "tag": "a",
+                      "cls": "shrink-0 px-3.5 py-2 rounded-lg bg-[#00B5A4] text-white text-xs font-bold hover:bg-teal-600 transition-colors",
+                      "text": "Book now",
+                      "href": "{book}"
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-181",
+                   "tag": "ul",
+                   "cls": "space-y-2.5 grow",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-182",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-183",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-184",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "The cobwebs will be removed."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-185",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-186",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-187",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "The skirting boards, light sockets, light switches, and plugs will be cleaned."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-188",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-189",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-190",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "All windows will be cleaned from the inside."
+                        }
+                       }
+                      ]
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-191",
+                   "tag": "a",
+                   "cls": "mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline",
+                   "children": [
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-192",
+                      "tag": "",
+                      "cls": "",
+                      "text": "View full checklist "
+                     }
+                    },
+                    {
+                     "type": "SvcIcon",
+                     "props": {
+                      "id": "SvcIcon-193",
+                      "name": "arrow-right",
+                      "cls": "",
+                      "size": 14
+                     }
+                    }
+                   ],
+                   "href": "#full-checklist"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-194",
+             "tag": "article",
+             "cls": "flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm",
+             "children": [
+              {
+               "type": "SvcImg",
+               "props": {
+                "id": "SvcImg-195",
+                "image": "cleaning.jpg",
+                "alt": "Cleaner carrying cleaning supplies up a staircase to deep clean the hallway and stairs",
+                "cls": "w-full aspect-[16/9] object-cover",
+                "width": "1000",
+                "height": "750",
+                "lazy": "yes"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-196",
+                "tag": "div",
+                "cls": "flex flex-col grow p-5",
+                "children": [
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-197",
+                   "tag": "div",
+                   "cls": "flex items-start justify-between gap-3 mb-4",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-198",
+                      "tag": "div",
+                      "cls": "",
+                      "children": [
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-199",
+                         "tag": "p",
+                         "cls": "text-[11px] font-bold tracking-widest uppercase text-teal-600",
+                         "text": "Deep Cleaning"
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-200",
+                         "tag": "h4",
+                         "cls": "text-lg font-bold text-slate-900 leading-tight",
+                         "text": "Hallway/Staircases"
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-201",
+                      "tag": "a",
+                      "cls": "shrink-0 px-3.5 py-2 rounded-lg bg-[#00B5A4] text-white text-xs font-bold hover:bg-teal-600 transition-colors",
+                      "text": "Book now",
+                      "href": "{book}"
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-202",
+                   "tag": "ul",
+                   "cls": "space-y-2.5 grow",
+                   "children": [
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-203",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-204",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-205",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "Skirting boards, light sockets, light switches, and plugs will be cleaned."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-206",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-207",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-208",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "Hard floors will be vacuumed and mopped."
+                        }
+                       }
+                      ]
+                     }
+                    },
+                    {
+                     "type": "SvcBox",
+                     "props": {
+                      "id": "SvcBox-209",
+                      "tag": "li",
+                      "cls": "flex gap-2.5 items-start",
+                      "children": [
+                       {
+                        "type": "SvcIcon",
+                        "props": {
+                         "id": "SvcIcon-210",
+                         "name": "check",
+                         "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                         "size": 14
+                        }
+                       },
+                       {
+                        "type": "SvcText",
+                        "props": {
+                         "id": "SvcText-211",
+                         "tag": "span",
+                         "cls": "text-slate-600 text-sm leading-snug",
+                         "text": "Carpeted floors will be vacuumed."
+                        }
+                       }
+                      ]
+                     }
+                    }
+                   ]
+                  }
+                 },
+                 {
+                  "type": "SvcBox",
+                  "props": {
+                   "id": "SvcBox-212",
+                   "tag": "a",
+                   "cls": "mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline",
+                   "children": [
+                    {
+                     "type": "SvcText",
+                     "props": {
+                      "id": "SvcText-213",
+                      "tag": "",
+                      "cls": "",
+                      "text": "View full checklist "
+                     }
+                    },
+                    {
+                     "type": "SvcIcon",
+                     "props": {
+                      "id": "SvcIcon-214",
+                      "name": "arrow-right",
+                      "cls": "",
+                      "size": 14
+                     }
+                    }
+                   ],
+                   "href": "#full-checklist"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-215",
+       "tag": "h2",
+       "cls": "scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Full Deep Cleaning Checklist — Manchester",
+       "anchor": "full-checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-216",
+       "tag": "p",
+       "cls": "text-slate-500 text-sm mb-8 leading-relaxed",
+       "text": "Our deep clean covers every room from top to bottom. Here is exactly what is included in every booking:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-217",
+       "tag": "div",
+       "cls": "space-y-8",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-218",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-219",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-220",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Kitchen"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-221",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-222",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-223",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-224",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-225",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Full oven interior degreasing and rack scrubbing"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-226",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-227",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-228",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Hob, extractor fan filter, and microwave deep clean"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-229",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-230",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-231",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Inside and outside all cupboards and drawers"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-232",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-233",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-234",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Fridge interior sanitization and shelf cleaning"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-235",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-236",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-237",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Sink, taps, and draining board descaling"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-238",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-239",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-240",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Splashback tiles and grout scrubbing"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-241",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-242",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-243",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Worktops, skirting boards, and light switch wipe-down"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-244",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-245",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-246",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Living Room & Bedrooms"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-247",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-248",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-249",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-250",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-251",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Full dusting of all surfaces, shelves, and furniture tops"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-252",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-253",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-254",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Vacuuming carpets and upholstery with HEPA equipment"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-255",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-256",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-257",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Hard floor deep mop including edges and corners"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-258",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-259",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-260",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Interior window and sill cleaning"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-261",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-262",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-263",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wardrobe and storage unit interior wipe-down"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-264",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-265",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-266",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Cobweb removal from ceilings and corners"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-267",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-268",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-269",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Light fittings, switches, and socket plate cleaning"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-270",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-271",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-272",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Bathrooms"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-273",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-274",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-275",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-276",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-277",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Full toilet bowl, cistern, seat, and base sanitization"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-278",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-279",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-280",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Shower enclosure, screen, head, and tray descaling"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-281",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-282",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-283",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Bath, taps, and overflow deep clean and polish"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-284",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-285",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-286",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Tile and grout mould removal treatment"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-287",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-288",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-289",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Extractor fan and ventilation grille cleaning"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-290",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-291",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-292",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Mirror and vanity streak-free clean"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-293",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-294",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-295",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Floor scrubbing and sealant line cleaning"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-296",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-297",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-298",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Hallways & General Areas"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-299",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-300",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-301",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-302",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-303",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Banister, handrail, and spindle wipe-down"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-304",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-305",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-306",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Front door, frame, and letterbox cleaning"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-307",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-308",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-309",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Radiator panel and top-surface dusting"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-310",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-311",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-312",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Spot-cleaning of marked walls and scuff removal"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-313",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-314",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-315",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Storage cupboard and loft hatch wipe-down"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-316",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-317",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-318",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-6",
+       "text": "Benefits of our Manchester Deep Cleaning Service"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-319",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-320",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-321",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-322",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-323",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Outstanding Cleaning Service results delivered by professional and experienced cleaners."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-324",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-325",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-326",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-327",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Our Deep Cleaning can easily be customized to fit your specific requirements."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-328",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-329",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-330",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-331",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "No need to vacate, rearrange, or prepare your property in any way prior to our Deep Cleaning taking place."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-332",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-333",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-334",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-335",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "FREE quotes and 7 days a week availability."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-336",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-337",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-338",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-339",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Effective, hassle-free service."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-340",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-341",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-342",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-343",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Easy and straightforward booking process."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-344",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-345",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-346",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-347",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Your home will be left sparkling."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-348",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-349",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-350",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Customize your Deep Cleaning Service"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-351",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "You can schedule our Deep Cleaning Services in Manchester at any time convenient for you, you can book your next Deep Cleaning simply and easily over the phone within a matter of minutes. You will be given an obligation-free quote which you can quite easily proceed with all in the same phone call. If you want to receive the best deep clean in Manchester you can call us today on [07846 726428](tel:+447846726428).",
+       "linkCls": "text-teal-700 font-semibold hover:underline"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-352",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our Deep Cleaning Services in Manchester will leave your home sparkling and shining. Kitchen, Bathroom, Bedrooms, and every area of your house or flat will be deep cleaned and left in pristine condition. Our Deep Cleaning Services in Manchester come with many benefits! Take advantage of those today!"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-353",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-354",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-355",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-356",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-357",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Flexible booking slots are available."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-358",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-359",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-360",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-361",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "7 Day a week availability"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-362",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-363",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-364",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-365",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Non-hazardous eco-friendly cleaning solutions"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-366",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-367",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-368",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-369",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Fully insured and vetted cleaning professionals."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-370",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "You can freely customize our deep cleaning service to meet the requirements of your apartment or your house cleaning needs. You can freely choose the day and time you schedule your deep cleaning service in Manchester, you can advise us on what areas our Manchester cleaners should focus on and what furniture, areas, decor, or additional services you would like to have included. [Contact us today](/contact) for a perfectly free quote!",
+       "linkCls": "text-teal-700 font-semibold hover:underline"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-371",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-372",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-373",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Intensive grime restoration"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-374",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "What We Tackle: Intensive Grime Restoration & Sanitization"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-375",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Standard domestic cleaning often skims the surface. Our deep cleaning protocol is engineered to penetrate the layers of built-up dirt and mineral deposits that accumulate in every home over time."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-376",
+       "tag": "p",
+       "cls": "text-slate-700 font-semibold",
+       "text": "We focus on the \"stubborn\" areas that haven't been professionally addressed in months:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-377",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-378",
+          "tag": "li",
+          "cls": "p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-379",
+             "tag": "p",
+             "cls": "font-bold text-slate-900 text-sm mb-1",
+             "text": "Deep-Seated Limescale & Mineral Removal:"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-380",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "We don't just spray and wipe; we use professional-grade descaling agents to safely dissolve heavy buildup from showerheads, taps, and glass screens, restoring their original brilliance."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-381",
+          "tag": "li",
+          "cls": "p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-382",
+             "tag": "p",
+             "cls": "font-bold text-slate-900 text-sm mb-1",
+             "text": "Encrusted Kitchen Grease & Carbon:"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-383",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "We tackle the \"burnt-on\" grease on hobs and splashbacks, and deep-clean extractor fan filters to ensure your cooking area is hygienic and touch-dry."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-384",
+          "tag": "li",
+          "cls": "p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-385",
+             "tag": "p",
+             "cls": "font-bold text-slate-900 text-sm mb-1",
+             "text": "Bacteria & Allergen Elimination:"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-386",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Our teams focus on high-traffic touchpoints and hidden nooks—like behind radiators and under heavy furniture—to remove the dust and pathogens that regular vacuums miss."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-387",
+          "tag": "li",
+          "cls": "p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-388",
+             "tag": "p",
+             "cls": "font-bold text-slate-900 text-sm mb-1",
+             "text": "Sanitization of Wet Zones:"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-389",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "We perform an intensive scrub of bathroom tiles and grout lines to eliminate soap scum and prevent the onset of mold in high-moisture environments."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-390",
+          "tag": "li",
+          "cls": "p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-391",
+             "tag": "p",
+             "cls": "font-bold text-slate-900 text-sm mb-1",
+             "text": "Appliance Exterior Restoration:"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-392",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "We remove fingerprints, watermarks, and ingrained dirt from the exteriors of all major appliances, leaving them with a streak-free, professional finish."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-393",
+          "tag": "li",
+          "cls": "p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-394",
+             "tag": "p",
+             "cls": "font-bold text-slate-900 text-sm mb-1",
+             "text": "Dust & Cobweb Extraction:"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-395",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "We target high-level areas including curtain rails, light fixtures, and the tops of wardrobes where \"invisible\" dust creates an unhealthy environment."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-396",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "A true deep clean is more than just an aesthetic upgrade; it is a vital reset for your home’s hygiene and longevity. Over time, environmental pollutants and biological contaminants like pet dander and skin cells settle into the fabric of your property, often in areas a standard weekly clean simply cannot reach. At Cleaniq Services, we utilize industrial-strength, eco-friendly chelating agents that bond with and lift stubborn mineral deposits without abrasive scrubbing that could damage your fixtures."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-397",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Beyond the visible shine, our intensive process significantly improves indoor air quality by extracting allergens that have become embedded in soft furnishings and hidden behind heavy appliances. According to the EPA, indoor air can be two to five times more polluted than outdoor air; our use of HEPA-filtration and steam-sanitization targets these unseen triggers at their source. By investing in a specialist deep clean, you aren't just getting a 'tidy' house—you are disinfecting your living space, reducing the bacterial load in high-moisture 'wet zones,' and preserving the integrity of your home's surfaces for years to come."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-398",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-399",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-400",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Add-on services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-401",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Combine our Deep Cleaning in Manchester with any one of our additional services for a personalized discount"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-402",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "You can combine our Deep Cleaning in Manchester with any one of our additional cleaning services, by doing so we will be able to offer you a personalized discount on the final combined price of your requested cleaning services. You can choose to add Carpet Cleaning, Upholstery Cleaning, External Window Cleaning, or even Pressure Washing for any external areas of your home, to your Deep Cleaning Services in Manchester. As part of our deep cleaning services all carpeted areas of your home will be vacuumed, however, you can add professional carpet cleaning to your service, as well as all windows in your home will be cleaned internally, however, we are able to provide external window cleaning as a separate add-on to your deep cleaning in Manchester."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-403",
+       "tag": "p",
+       "cls": "text-slate-700 font-semibold",
+       "text": "You can combine our Deep Cleaning Service with the following services:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-404",
+       "tag": "ul",
+       "cls": "grid grid-cols-2 sm:grid-cols-4 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-405",
+          "tag": "li",
+          "cls": "flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-406",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-407",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-408",
+             "tag": "a",
+             "cls": "text-slate-800 text-sm font-semibold hover:text-teal-700 hover:underline",
+             "text": "Carpet Cleaning",
+             "href": "/service/carpet-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-409",
+          "tag": "li",
+          "cls": "flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-410",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-411",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-412",
+             "tag": "span",
+             "cls": "text-slate-800 text-sm font-semibold",
+             "text": "Upholstery Cleaning"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-413",
+          "tag": "li",
+          "cls": "flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-414",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-415",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-416",
+             "tag": "span",
+             "cls": "text-slate-800 text-sm font-semibold",
+             "text": "Window Cleaning"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-417",
+          "tag": "li",
+          "cls": "flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-418",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-419",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-420",
+             "tag": "span",
+             "cls": "text-slate-800 text-sm font-semibold",
+             "text": "Antiviral Disinfection"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-421",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "If you would like to schedule our Manchester Deep Cleaning Services you can contact us on [07846 726428](tel:+447846726428), Monday to Sunday at a time convenient for you. Our customer service representatives will assist you with any questions related to our Deep Cleaning you may have. Alternatively, you can fill out our corresponding [Deep Cleaning request form](/get-a-quote) linked below.",
+       "linkCls": "text-teal-700 font-semibold hover:underline"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-422",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-423",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-424",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Coverage"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-425",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-3",
+       "text": "Deep cleaners Near You"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-426",
+       "tag": "h3",
+       "cls": "text-base font-semibold text-slate-800 mb-1",
+       "text": "Areas We Cover"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-427",
+       "tag": "p",
+       "cls": "text-sm text-slate-500 mb-4",
+       "text": "You can schedule our Deep Cleaning Services on all postcodes in: Bolton, Bury, Oldham, Rochdale, Stockport, Tameside, Trafford, Wigan, and the cities of Salford and Manchester"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-428",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-429",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-430",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-431",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-432",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-433",
+             "tag": "",
+             "cls": "",
+             "text": "Manchester City Centre"
+            }
+           }
+          ],
+          "href": "/locations/manchester-city-centre"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-434",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-435",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-436",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-437",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-438",
+             "tag": "",
+             "cls": "",
+             "text": "Salford"
+            }
+           }
+          ],
+          "href": "/locations/salford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-439",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-440",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-441",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-442",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-443",
+             "tag": "",
+             "cls": "",
+             "text": "Trafford"
+            }
+           }
+          ],
+          "href": "/locations/trafford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-444",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-445",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-446",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-447",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-448",
+             "tag": "",
+             "cls": "",
+             "text": "Stockport"
+            }
+           }
+          ],
+          "href": "/locations/stockport"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-449",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-450",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-451",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-452",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-453",
+             "tag": "",
+             "cls": "",
+             "text": "Didsbury"
+            }
+           }
+          ],
+          "href": "/locations/didsbury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-454",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-455",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-456",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-457",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-458",
+             "tag": "",
+             "cls": "",
+             "text": "Chorlton"
+            }
+           }
+          ],
+          "href": "/locations/chorlton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-459",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-460",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-461",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-462",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-463",
+             "tag": "",
+             "cls": "",
+             "text": "Bolton"
+            }
+           }
+          ],
+          "href": "/locations/bolton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-464",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-465",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-466",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-467",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-468",
+             "tag": "",
+             "cls": "",
+             "text": "Bury"
+            }
+           }
+          ],
+          "href": "/locations/bury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-469",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-470",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-471",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-472",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-473",
+             "tag": "",
+             "cls": "",
+             "text": "Oldham"
+            }
+           }
+          ],
+          "href": "/locations/oldham"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-474",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-475",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-476",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-477",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-478",
+             "tag": "",
+             "cls": "",
+             "text": "Rochdale"
+            }
+           }
+          ],
+          "href": "/locations/rochdale"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-479",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-480",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-481",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-482",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-483",
+             "tag": "",
+             "cls": "",
+             "text": "Tameside"
+            }
+           }
+          ],
+          "href": "/locations/tameside"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-484",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-485",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-486",
+             "tag": "",
+             "cls": "",
+             "text": "Deep cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-487",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-488",
+             "tag": "",
+             "cls": "",
+             "text": "Wigan"
+            }
+           }
+          ],
+          "href": "/locations/wigan"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-489",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-490",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-491",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Deep Cleaning Services Provided by Expert Cleaners in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-492",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "You can rely on us for your deep cleaning needs."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-493",
+       "tag": "h3",
+       "cls": "text-lg font-bold text-slate-900 uppercase tracking-wide",
+       "text": "Trust us with your deep cleaning needs"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-494",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our experienced cleaning technicians will follow a specific Deep Cleaning Checklist, thus making sure that every inch and corner, even the hardest-to-reach places that you may not pay attention to during your usual cleaning schedule, is fully and thoroughly cleaned. Our Deep Cleaning checklist is designed to ensure exceptional cleaning results. However, that checklist can also be amended to fit your specific cleaning requirements."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-495",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "If you want to have only parts of your property cleaned you can inform us in advance and we will make sure that our Manchester cleaning teams cover only the areas you have specified. If you want to add additional services to your Deep Cleaning Services you have the opportunity to do so. Feel free to model our Deep Cleaning in any way that you believe will produce the best cleaning outcome for your home! If you have any special requirements for your next Deep Cleaning Service let our office staff know and those requirements will be included as priorities."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-496",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our deep cleaning services are provided by local, professionally trained, fully vetted experienced, and employed cleaners. Our cleaning service providers in Manchester are our biggest asset and we are fully confident in their ability to provide you with the best possible deep cleaning service every time you schedule our one-off deep cleaning in Manchester. Our cleaning staff are available 7 days a week in one of our flexible time slots."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-497",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "All of our cleaning technicians travel fully equipped with the latest cleaning equipment and professional-grade certified safe, cleaning detergents. Our cleaning technicians will work hard to make sure that every inch of your property is cleaned up to the highest professional standards and that your deep house cleaning service is provided exactly up to your personal requirements and that all of your cleaning needs are met."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-498",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-499",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-500",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Exceptional deep cleaning services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-501",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Deep cleaning services provided by expert cleaners in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-502",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Your deep cleaning services will be provided by expertly trained, professional cleaners, employed by our cleaning company in Manchester, who have years of experience in providing deep cleaning services to all clients of every background in the greater Manchester area. Our local Manchester cleaners are professionally trained and in addition, follow a specific deep cleaning checklist. This is why we are certain that we offer the absolute best deep cleaning service throughout the entire Greater Manchester service area."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-503",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-504",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-505",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-506",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-507",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Professionally trained, fully vetted, insured, and experienced cleaners."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-508",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-509",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-510",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-511",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Will arrive fully equipped with the latest cleaning technology and professionally certified cleaning detergents."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-512",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-513",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-514",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-515",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Available 7 days a week."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-516",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-517",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-518",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-519",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Certified and experienced in the lasted cleaning methods."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-520",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-521",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-522",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-523",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Following a professionally designed checklist and applying the latest cleaning methods."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-524",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3 pt-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-525",
+          "tag": "a",
+          "cls": "flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-526",
+             "name": "calendar",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-527",
+             "tag": "",
+             "cls": "",
+             "text": " Book now"
+            }
+           }
+          ],
+          "href": "{book}"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-528",
+          "tag": "a",
+          "cls": "flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#00B5A4] text-teal-700 font-bold text-sm hover:bg-teal-50 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-529",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-530",
+             "tag": "",
+             "cls": "",
+             "text": " Call now"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-531",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-532",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-533",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "The case for professionals"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-534",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-5",
+       "text": "Why a Professional Deep Clean Makes a Difference"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-535",
+       "tag": "div",
+       "cls": "space-y-4",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-536",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Regular cleaning maintains a home — but it rarely reaches the accumulated grime in hidden areas: inside oven cavities, behind appliances, along grout lines, and underneath furniture. Over time, these areas harbour bacteria, allergens, and odours that a standard weekly clean simply cannot address."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-537",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "A professional deep clean from Cleaniq Services resets your property to a hygienic baseline. Our Manchester cleaners follow a structured, room-by-room protocol using eco-friendly, non-toxic products that are powerful enough to cut through grease and limescale — without harsh chemicals that affect your family or pets."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-538",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Whether you're preparing for guests, recovering from a renovation, moving into a new property, or simply want a fresh start — a one-off deep clean is the most effective way to restore your home to its best condition."
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-539",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBeforeAfter",
+   "props": {
+    "id": "SvcBeforeAfter-540",
+    "title": "Deep Cleaning Services in Manchester: before & after",
+    "limit": 4
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-541",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcReviews",
+   "props": {
+    "id": "SvcReviews-542",
+    "label": "Customer reviews",
+    "heading": "What Our Customers Say",
+    "linkText": "Read all reviews on Google"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-543",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcRelated",
+   "props": {
+    "id": "SvcRelated-544",
+    "label": "More from Cleaniq Services",
+    "heading": "Related cleaning services"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-545",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-546",
+    "tag": "section",
+    "cls": "rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-547",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-100 mb-2",
+       "text": "Contact Us For a Free Quote"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-548",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold mb-3",
+       "text": "Contact us for a free quote today!"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-549",
+       "tag": "p",
+       "cls": "text-teal-50 leading-relaxed mb-6",
+       "text": "We provide our customers with bespoke deep cleaning services personalized based on your specific cleaning requirements. Contact us for a free quote today."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-550",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-551",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-552",
+             "tag": "",
+             "cls": "",
+             "text": "Get a free quote "
+            }
+           },
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-553",
+             "name": "arrow-right",
+             "cls": "",
+             "size": 16
+            }
+           }
+          ],
+          "href": "/get-a-quote"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-554",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-555",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-556",
+             "tag": "",
+             "cls": "",
+             "text": " 07846 726428"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-557",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-558",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-559",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Frequently asked questions"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-560",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Frequently Asked Questions: Deep Cleaning Manchester"
+      }
+     },
+     {
+      "type": "SvcFaqs",
+      "props": {
+       "id": "SvcFaqs-561",
+       "numbered": "yes",
+       "items": [
+        {
+         "q": "What is the difference between the deep cleaning service and your One-Off Cleaning?",
+         "a": "Our Deep Cleaning Services in Manchester will cover the entirety of your home leaving no inch untouched. Our One-Off Cleaning Service is a lighter, more general cleaning that offers some of the benefits of a deep clean, but it is intended to be a much lighter surface clean."
+        },
+        {
+         "q": "Do you provide all the cleaning supplies as I don't have any of those in my home?",
+         "a": "Yes. All necessary cleaning detergents and equipment will be provided by us when you schedule our Deep Cleaning Services in Manchester."
+        },
+        {
+         "q": "Which areas do you cover?",
+         "a": "We can provide our Deep Cleaning Services on all postcodes in Greater Manchester."
+        },
+        {
+         "q": "Do you clean the oven?",
+         "a": "Yes. All kitchen appliances will be deeply cleaned as part of our Deep Cleaning Service. The oven will be fully deep cleaned and degreased completely free of charge."
+        },
+        {
+         "q": "Do I need to provide parking?",
+         "a": "Parking expenses can come on top of the price for your deep cleaning if only metered parking is available. If there is no free parking available, we do request that clients cover potential parking expenses for our cleaning teams or provide a permit."
+        },
+        {
+         "q": "I have already booked your deep cleaning service, can I reschedule?",
+         "a": "Yes. You can reschedule or amend your deep cleaning booking 24 hours prior to the service taking place."
+        },
+        {
+         "q": "Will you clean the windows as part of the Deep Cleaning?",
+         "a": "Yes. All windows, along with the panes, ledges, sills, and frames, will be cleaned internally as part of the service. You can always schedule external window cleaning in addition to your Deep Cleaning Services in Manchester."
+        },
+        {
+         "q": "There is mould build-up in some parts of the property, will that be removed?",
+         "a": "Our cleaners are expertly trained and experienced professionals. They will attempt to fully eliminate areas of heavy limescale and mould build-up. However, our cleaners are instructed to stop before potentially risking damage to the affected surface. If complete elimination would depend on damaging the area, the cleaners will stop."
+        },
+        {
+         "q": "What areas are not cleaned as part of the deep cleaning?",
+         "a": "The only areas that are exceptions to our Deep Cleaning Services in Manchester are painted walls and ceilings."
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-562",
+       "tag": "div",
+       "cls": "mt-8 p-6 rounded-2xl bg-teal-50 border border-teal-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-563",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-564",
+             "tag": "p",
+             "cls": "font-bold text-slate-900",
+             "text": "Need help booking your deep clean?"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-565",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm",
+             "text": "Call Cleaniq Services today for a fast quote."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-566",
+          "tag": "a",
+          "cls": "shrink-0 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-567",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-568",
+             "tag": "",
+             "cls": "",
+             "text": " Call 07846 726428"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-569",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-570",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-571",
+       "tag": "p",
+       "cls": "text-xs text-slate-400 leading-relaxed",
+       "text": "Cleaniq Services provides professional deep cleaning, one-off cleaning, and thorough refresh cleans across Manchester. Whether you need a deep clean in Manchester City Centre, Didsbury, Chorlton, Salford, Fallowfield, Withington, or Stockport — our vetted and insured cleaners deliver a guaranteed result. Book your Manchester deep cleaning service online in 60 seconds or call +44 7846 726428."
+      }
+     }
+    ]
+   }
+  }
+ ]
 }

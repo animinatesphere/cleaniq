@@ -1,77 +1,239 @@
 {
-  "basics": {
-    "meta": "Professional cleaners serving Salford and Greater Manchester. Guaranteed end of tenancy cleans, office cleaning, and deep cleaning. Book in 60 seconds.",
-    "tagline": "Dedicated Professional Cleaning in Salford",
-    "description": "From luxury apartments at Salford Quays to bustling office spaces in the city centre, Cleaniq Services provides dependable, high-quality cleaning across Salford. Enjoy our 5-star guaranteed results.",
-    "services": [
-      "End of Tenancy Cleaning in Salford",
-      "One-Off Deep Cleaning",
-      "Airbnb & Short-Let Turnovers",
-      "Commercial & Office Cleaning"
-    ],
-    "faqs": []
+  "root": {
+    "props": {
+      "title": "Cleaners in Salford | Cleaning Services | Cleaniq",
+      "description": "Professional cleaners serving Salford and Greater Manchester. Guaranteed end of tenancy cleans, office cleaning, and deep cleaning. Book in 60 seconds.",
+      "shareTitle": "",
+      "shareDescription": ""
+    }
   },
-  "guide": {
-    "highlights": [
-      "Salford Quays",
-      "Eccles",
-      "Swinton"
-    ],
-    "intro": [
-      "Salford is really several places in one: waterside apartments at Salford Quays and MediaCityUK, Victorian terraces in Pendleton and Seedley, family homes in Swinton, Eccles and Worsley, and student houses close to the University of Salford.",
-      "That variety means our Salford cleaners do a bit of everything, from regular cleans for busy professionals at the Quays to deep cleans for family homes and end of tenancy cleans when student and rental tenancies finish."
-    ],
-    "popular": [
-      {
-        "slug": "end-of-tenancy-cleaning-manchester",
-        "why": "Student and rental tenancies near the university end in summer, and deposits depend on a proper clean."
-      },
-      {
-        "slug": "regular-house-cleaning-manchester",
-        "why": "Busy households in Swinton, Eccles and Worsley keep on top of things with weekly or fortnightly visits."
-      },
-      {
-        "slug": "deep-cleaning-manchester",
-        "why": "Older terraced houses in Pendleton and Seedley often need a top-to-bottom reset."
+  "content": [
+    {
+      "type": "AreaHero",
+      "props": {
+        "id": "AreaHero-salford-1",
+        "badge": "Local Manchester Cleaners",
+        "heading": "Professional Cleaners in",
+        "highlight": "{area}",
+        "tagline": "Dedicated Professional Cleaning in Salford",
+        "text": "Looking for cleaners near you in {area}? Book a vetted local cleaner for regular house cleaning, a deep clean, end of tenancy, oven or carpet cleaning.",
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'm looking for a cleaner in {area}.",
+            "style": "soft",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "whyTitle": "Why Choose Us?",
+        "whyPoints": [
+          {
+            "icon": "shield",
+            "text": "Vetted Local Cleaners"
+          },
+          {
+            "icon": "star",
+            "text": "{rating}★ on Google"
+          },
+          {
+            "icon": "check",
+            "text": "Eco-Friendly Products"
+          },
+          {
+            "icon": "sparkles",
+            "text": "48-Hour Re-Clean Guarantee"
+          }
+        ]
       }
-    ],
-    "goodToKnow": [
-      "End of tenancy dates for student houses cluster in June and July, so book early.",
-      "Quays apartments with glass balconies and big windows are worth adding to a deep clean.",
-      "Family homes in Worsley and Swinton often suit a fortnightly regular clean.",
-      "Tell us about parking permits or visitor bays near your home when you book."
-    ],
-    "faqs": [
-      {
-        "q": "Do you clean apartments at Salford Quays and MediaCityUK?",
-        "a": "Yes. Our cleaners look after apartments across Salford Quays and MediaCityUK, including regular cleans, deep cleans and end of tenancy cleans."
-      },
-      {
-        "q": "Can you clean a student house in Salford at the end of a tenancy?",
-        "a": "Yes. One end of tenancy clean can cover the whole shared house, including the kitchen, bathrooms and every bedroom. Book early for June and July."
-      },
-      {
-        "q": "Do you cover Eccles, Swinton and Worsley?",
-        "a": "Yes. Our Salford cleaners cover Eccles, Swinton, Worsley, Walkden and the rest of the city of Salford."
+    },
+    {
+      "type": "AreaAbout",
+      "props": {
+        "id": "AreaAbout-salford-2",
+        "image1": "our-work/deep-card.jpg",
+        "alt1": "Fridge cleaned inside after a deep clean by Cleaniq Services, a service we offer in {area}",
+        "image2": "our-work/regular-2.jpg",
+        "alt2": "Living room after a house clean by Cleaniq Services, a service we offer across {area}",
+        "image3": "service-office-photo-600.webp",
+        "alt3": "Tidy office desk with a computer and chairs: office cleaning available in {area}",
+        "heading": "About Our {area} Cleaning Services",
+        "paragraphs": [
+          "From luxury apartments at Salford Quays to bustling office spaces in the city centre, Cleaniq Services provides dependable, high-quality cleaning across Salford. Enjoy our 5-star guaranteed results.",
+          "Salford is really several places in one: waterside apartments at Salford Quays and MediaCityUK, Victorian terraces in Pendleton and Seedley, family homes in Swinton, Eccles and Worsley, and student houses close to the University of Salford.",
+          "That variety means our Salford cleaners do a bit of everything, from regular cleans for busy professionals at the Quays to deep cleans for family homes and end of tenancy cleans when student and rental tenancies finish."
+        ],
+        "image4": "our-work/regular-4.jpg",
+        "alt4": "Living room with big windows after a regular clean by Cleaniq Services",
+        "image5": "our-work/oven-3.jpg",
+        "alt5": "Oven cleaned inside by Cleaniq Services, the detail a deep clean covers",
+        "servicesTitle": "Services Available in {area}:",
+        "services": [
+          "End of Tenancy Cleaning in Salford",
+          "One-Off Deep Cleaning",
+          "Airbnb & Short-Let Turnovers",
+          "Commercial & Office Cleaning"
+        ],
+        "cardTitle": "Ready for a clean home?",
+        "cardText": "Book your local {area} cleaner",
+        "cardButton": {
+          "label": "Book Clean Now",
+          "link": "/booking",
+          "style": "secondary",
+          "arrow": "yes",
+          "icon": ""
+        },
+        "helpLabel": "Need Help?",
+        "phone": "+44 7846 726428"
       }
-    ]
-  },
-  "local": {
-    "postcodes": [
-      "M3",
-      "M5",
-      "M6",
-      "M7",
-      "M27",
-      "M28",
-      "M30",
-      "M50"
-    ],
-    "homes": "Salford mixes waterside apartments at Salford Quays and MediaCityUK with Victorian terraces in Pendleton and Seedley, family homes in Swinton, Eccles and Worsley, and student houses near the University of Salford. That means a steady mix of regular cleans for busy professionals, deep cleans for family homes and end of tenancy cleans when student and rental tenancies end in summer.",
-    "tips": [
-      "Student lets: book end of tenancy cleans early for June and July, when most tenancies end.",
-      "Quays apartments often have glass balconies and big windows that are worth adding to a deep clean.",
-      "Family homes in Worsley and Swinton usually suit a fortnightly regular clean."
-    ]
-  }
+    },
+    {
+      "type": "AreaServices",
+      "props": {
+        "id": "AreaServices-salford-3",
+        "heading": "Cleaning services in {area}",
+        "text": "Every cleaning service our cleaners offer near you. Tap one for prices and what's included.",
+        "linkText": "{service} in {area}"
+      }
+    },
+    {
+      "type": "AreaGuide",
+      "props": {
+        "id": "AreaGuide-salford-4",
+        "popularTitle": "Popular cleaning services in {area}",
+        "popularText": "The services {area} customers book most, and why they suit homes here.",
+        "popular": [
+          {
+            "slug": "end-of-tenancy-cleaning-manchester",
+            "why": "Student and rental tenancies near the university end in summer, and deposits depend on a proper clean."
+          },
+          {
+            "slug": "regular-house-cleaning-manchester",
+            "why": "Busy households in Swinton, Eccles and Worsley keep on top of things with weekly or fortnightly visits."
+          },
+          {
+            "slug": "deep-cleaning-manchester",
+            "why": "Older terraced houses in Pendleton and Seedley often need a top-to-bottom reset."
+          }
+        ],
+        "goodTitle": "Good to know in {area}",
+        "goodToKnow": [
+          "End of tenancy dates for student houses cluster in June and July, so book early.",
+          "Quays apartments with glass balconies and big windows are worth adding to a deep clean.",
+          "Family homes in Worsley and Swinton often suit a fortnightly regular clean.",
+          "Tell us about parking permits or visitor bays near your home when you book."
+        ],
+        "highlights": [
+          "Salford Quays",
+          "Eccles",
+          "Swinton"
+        ]
+      }
+    },
+    {
+      "type": "AreaHomes",
+      "props": {
+        "id": "AreaHomes-salford-5",
+        "heading": "Homes in {area} and what they need",
+        "text": "Salford mixes waterside apartments at Salford Quays and MediaCityUK with Victorian terraces in Pendleton and Seedley, family homes in Swinton, Eccles and Worsley, and student houses near the University of Salford. That means a steady mix of regular cleans for busy professionals, deep cleans for family homes and end of tenancy cleans when student and rental tenancies end in summer.",
+        "tipsTitle": "Tips for booking a cleaner in {area}",
+        "tips": [
+          "Student lets: book end of tenancy cleans early for June and July, when most tenancies end.",
+          "Quays apartments often have glass balconies and big windows that are worth adding to a deep clean.",
+          "Family homes in Worsley and Swinton usually suit a fortnightly regular clean."
+        ],
+        "postcodesLabel": "Postcodes we cover in {area}:",
+        "postcodes": [
+          "M3",
+          "M5",
+          "M6",
+          "M7",
+          "M27",
+          "M28",
+          "M30",
+          "M50"
+        ]
+      }
+    },
+    {
+      "type": "AreaBeforeAfter",
+      "props": {
+        "id": "AreaBeforeAfter-salford-6",
+        "title": "Before & after from our recent jobs",
+        "limit": 3
+      }
+    },
+    {
+      "type": "AreaNearby",
+      "props": {
+        "id": "AreaNearby-salford-7",
+        "heading": "Cleaners near you in {area}",
+        "text": "Our {area} cleaners also cover these nearby neighbourhoods.",
+        "prefix": "Cleaners in",
+        "places": [
+          "Salford Quays",
+          "MediaCityUK",
+          "Eccles",
+          "Swinton",
+          "Pendleton",
+          "Walkden"
+        ]
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-salford-8"
+      }
+    },
+    {
+      "type": "AreaFaq",
+      "props": {
+        "id": "AreaFaq-salford-9",
+        "label": "FAQs",
+        "heading": "Frequently Asked Questions — Cleaners in {area}",
+        "faqs": [
+          {
+            "q": "Do you clean apartments at Salford Quays and MediaCityUK?",
+            "a": "Yes. Our cleaners look after apartments across Salford Quays and MediaCityUK, including regular cleans, deep cleans and end of tenancy cleans."
+          },
+          {
+            "q": "Can you clean a student house in Salford at the end of a tenancy?",
+            "a": "Yes. One end of tenancy clean can cover the whole shared house, including the kitchen, bathrooms and every bedroom. Book early for June and July."
+          },
+          {
+            "q": "Do you cover Eccles, Swinton and Worsley?",
+            "a": "Yes. Our Salford cleaners cover Eccles, Swinton, Worsley, Walkden and the rest of the city of Salford."
+          },
+          {
+            "q": "Which {area} postcodes do your cleaners cover?",
+            "a": "Our cleaners cover M3, M5, M6, M7, M27, M28, M30, M50, including Salford Quays, MediaCityUK, Eccles, Swinton, Pendleton, Walkden. Not sure if you're covered? Message us on WhatsApp with your postcode."
+          },
+          {
+            "q": "Do you have cleaners near me in {area}?",
+            "a": "Yes. Our local cleaners cover {area}, including Salford Quays, MediaCityUK, Eccles, Swinton. Book online and we'll match you with a vetted cleaner near you."
+          },
+          {
+            "q": "What cleaning services do your cleaners offer in {area}?",
+            "a": "End of Tenancy Cleaning, Deep Cleaning, Airbnb Cleaning, Office Cleaning, Post-Construction Cleaning, Regular House Cleaning, General Cleaning, Oven Cleaning, Carpet Cleaning. Each service page shows what's included and the latest prices."
+          }
+        ]
+      }
+    },
+    {
+      "type": "OtherAreas",
+      "props": {
+        "id": "OtherAreas-salford-10",
+        "heading": "Cleaners in nearby areas",
+        "prefix": "Cleaners in"
+      }
+    }
+  ]
 }

@@ -2,11 +2,11 @@
 //  - Left: blocks to drag onto the page, and an outline of the page.  Middle: the real page.
 //    Right: the selected block's fields. Click text on the page to type straight into it.
 //  - Save draft keeps your work; Publish commits the page to GitHub (main) and Vercel rebuilds.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Puck } from "@puckeditor/core";
 import "@puckeditor/core/puck.css";
 import { Save, UploadCloud, History, Loader2, RotateCcw } from "lucide-react";
-import { puckConfig, toEditorData, fromEditor } from "./puckConfig";
+import { puckConfigFor, toEditorData, fromEditor } from "./puckConfig";
 import { api } from "./api";
 
 const fmt = (d) => (d ? new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
@@ -21,6 +21,7 @@ export default function PageBuilder({ pageKey, title, notify, onSaved }) {
   const current = useRef(null); // latest data from the editor
   const saved = useRef(null); // what's saved (draft or published)
   const [dirty, setDirty] = useState(false);
+  const config = useMemo(() => puckConfigFor(pageKey), [pageKey]);
 
   // Show a page as loaded from the server (draft if there is one, otherwise the published file).
   const apply = (r) => {
@@ -148,7 +149,7 @@ export default function PageBuilder({ pageKey, title, notify, onSaved }) {
     <div className="flex-1 min-h-0 cms-page-builder">
       <Puck
         key={version}
-        config={puckConfig}
+        config={config}
         data={startData}
         onChange={onChange}
         headerTitle={title}

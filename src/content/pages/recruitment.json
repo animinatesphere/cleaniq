@@ -1,0 +1,240 @@
+{
+  "root": {
+    "props": {
+      "title": "Cleaning Jobs in Manchester | Cleaner Jobs Near You | Cleaniq",
+      "description": "Looking for cleaner jobs near you? Join Cleaniq's cleaners in Manchester and Greater Manchester. £15/hr, choose your hours, manage jobs in our app. Apply in two minutes.",
+      "shareTitle": "Cleaning Jobs in Manchester | Cleaner Jobs Near You | Cleaniq",
+      "shareDescription": ""
+    }
+  },
+  "content": [
+    {
+      "type": "JobsHero",
+      "props": {
+        "id": "JobsHero-r1",
+        "badge": "Now hiring in Manchester",
+        "heading": "Find cleaning jobs in Manchester.",
+        "text": "Looking for cleaner jobs near you? Join our team of cleaners, clean homes and offices across Greater Manchester, choose the hours that suit you, and manage everything from our app.",
+        "image1": "our-work/about-cleaner.jpg",
+        "alt1": "Cleaniq Services cleaner in uniform and gloves cleaning an oven",
+        "image2": "our-work/regular-5.jpg",
+        "alt2": "Cleaner in gloves wiping down a window",
+        "hourlyRate": 15,
+        "applyLabel": "Apply now",
+        "calculatorNote": "Estimate before tax, based on {rate}/hr and 52 weeks a year. Actual earnings depend on the hours and jobs you take on."
+      }
+    },
+    {
+      "type": "BenefitCards",
+      "props": {
+        "id": "BenefitCards-r2",
+        "heading": "Why clean with Cleaniq?",
+        "background": "white",
+        "cards": [
+          {
+            "icon": "pound",
+            "title": "£15 an hour",
+            "text": "Clear hourly pay for every job you complete, before tax."
+          },
+          {
+            "icon": "calendar",
+            "title": "Choose your hours",
+            "text": "Work the days and times that suit you, from a few hours a week to full time."
+          },
+          {
+            "icon": "mobile",
+            "title": "Everything in one app",
+            "text": "See your jobs, schedule and earnings in the Cleaniq worker app."
+          }
+        ]
+      }
+    },
+    {
+      "type": "NumberedSteps",
+      "props": {
+        "id": "NumberedSteps-r3",
+        "heading": "How it works",
+        "background": "light",
+        "steps": [
+          {
+            "title": "Apply online",
+            "text": "Fill in your details and upload your CV. It takes about two minutes."
+          },
+          {
+            "title": "We review your CV",
+            "text": "Our team gets back to you within 24–72 hours."
+          },
+          {
+            "title": "Interview and checks",
+            "text": "A face-to-face interview, background checks and a practical skills assessment."
+          },
+          {
+            "title": "Set up your profile",
+            "text": "We send you login details for the worker app so you can complete your profile."
+          },
+          {
+            "title": "Start cleaning",
+            "text": "Pick up jobs across Manchester and track your earnings in the app."
+          }
+        ]
+      }
+    },
+    {
+      "type": "PhotoGrid",
+      "props": {
+        "id": "PhotoGrid-r4",
+        "heading": "A day as a Cleaniq cleaner",
+        "text": "No two days are the same. Our cleaners work in homes, kitchens, bathrooms, offices and rental properties across Manchester.",
+        "background": "white",
+        "photos": [
+          {
+            "image": "our-work/regular-2.jpg",
+            "label": "Homes",
+            "alt": "Living room after a house clean by Cleaniq Services"
+          },
+          {
+            "image": "our-work/end-of-tenancy-5.jpg",
+            "label": "Kitchens & ovens",
+            "alt": "Oven cleaned inside by Cleaniq Services"
+          },
+          {
+            "image": "our-work/end-of-tenancy-2.jpg",
+            "label": "Bathrooms",
+            "alt": "Clean bathroom with bath, basin and tiled floor after a clean by Cleaniq Services"
+          },
+          {
+            "image": "service-office-photo-600.webp",
+            "label": "Offices",
+            "alt": "Tidy office desk with a computer, plant and chairs, ready for the working day"
+          },
+          {
+            "image": "our-work/airbnb-1.jpg",
+            "label": "Rentals & Airbnbs",
+            "alt": "Guest-ready Airbnb bedroom after a turnover clean by Cleaniq Services"
+          },
+          {
+            "image": "our-work/end-of-tenancy-1.jpg",
+            "label": "End of tenancy",
+            "alt": "Clean kitchen ready for new tenants after an end of tenancy clean by Cleaniq Services"
+          }
+        ]
+      }
+    },
+    {
+      "type": "ImageCards",
+      "props": {
+        "id": "ImageCards-r5",
+        "image": "our-work/oven-1.jpg",
+        "imageAlt": "Cleaniq Services cleaner in yellow gloves cleaning an oven door",
+        "imageSide": "left",
+        "background": "green",
+        "heading": "Flexible cleaner jobs that fit your life",
+        "text": "Whether you want a few hours of cleaning a week or a full-time cleaner job near you, you choose when you work. Here's who our cleaning jobs suit best:",
+        "cards": [
+          {
+            "icon": "study",
+            "title": "Students",
+            "text": "Pick up cleaning shifts around lectures and exams."
+          },
+          {
+            "icon": "baby",
+            "title": "Parents",
+            "text": "Take cleaner jobs near you that fit around the school run."
+          },
+          {
+            "icon": "briefcase",
+            "title": "Experienced cleaners",
+            "text": "Put your cleaning skills to work with a steady flow of jobs."
+          },
+          {
+            "icon": "clock",
+            "title": "Extra income",
+            "text": "Add a few hours of cleaning a week alongside another job."
+          }
+        ]
+      }
+    },
+    {
+      "type": "JobsInfo",
+      "props": {
+        "id": "JobsInfo-r6",
+        "heading": "Cleaning jobs near you across Greater Manchester",
+        "paragraphs": [
+          "Cleaniq Services looks after homes, rental properties and workplaces across Manchester. As a Cleaniq cleaner you'll take on a mix of jobs close to where you live, from regular weekly cleans for families to end-of-tenancy cleans that help tenants get their deposit back.",
+          "You'll see every job's address, time and details in the Cleaniq worker app before you start, so you always know what's next."
+        ],
+        "workTitle": "The work you'll do",
+        "showServices": "yes",
+        "lookingTitle": "What we look for in our cleaners",
+        "lookingFor": [
+          "Reliable and on time for every booking",
+          "Careful, thorough and proud of your work",
+          "Friendly and respectful in customers' homes and workplaces",
+          "The right to work in the UK",
+          "Happy to have an interview and background checks"
+        ],
+        "areasTitle": "Cleaner jobs near you",
+        "areasText": "Jobs are spread across Manchester and Greater Manchester, including:",
+        "areaPrefix": "Cleaning jobs in"
+      }
+    },
+    {
+      "type": "ApplyForm",
+      "props": {
+        "id": "ApplyForm-r7",
+        "heading": "Apply in two minutes",
+        "text": "Send us your details and CV and we'll be in touch.",
+        "formTitle": "Your Details.",
+        "note": "We'll review your CV and contact you within **24–72 hours**. If successful, we'll send you login details and ask you to complete your profile before your first job.",
+        "buttonLabel": "Submit Application",
+        "successTitle": "Application Sent!",
+        "successText": "Thanks for your interest in joining Cleaniq Services. Our team will review your CV and be in touch shortly with next steps.",
+        "successButton": "Return to Home"
+      }
+    },
+    {
+      "type": "FaqList",
+      "props": {
+        "id": "FaqList-r8",
+        "label": "",
+        "heading": "Questions from cleaners",
+        "faqs": [
+          {
+            "q": "What kind of cleaning jobs are there?",
+            "a": "Regular and one-off home cleaning, deep cleans, end-of-tenancy cleans, Airbnb and short-let turnovers, office cleaning and post-construction cleaning."
+          },
+          {
+            "q": "How much can I earn?",
+            "a": "You're paid £15 an hour before tax. Use the calculator at the top of the page to estimate your weekly and monthly earnings. What you actually earn depends on the hours and jobs you take on."
+          },
+          {
+            "q": "Where are the jobs?",
+            "a": "Across Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan."
+          },
+          {
+            "q": "Are there cleaner jobs near me?",
+            "a": "Most likely. We have cleaning jobs across Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside, Wigan, and we try to give you jobs near where you live."
+          },
+          {
+            "q": "Can I work part-time?",
+            "a": "Yes. You choose your hours, from a few hours a week to full time, so cleaning can fit around study, family or another job."
+          },
+          {
+            "q": "What do I need to apply?",
+            "a": "Your name, email, phone number and CV. If your CV is shortlisted, you'll have an interview, background checks and a practical skills assessment before your first job."
+          },
+          {
+            "q": "How long until I hear back?",
+            "a": "We review every application and contact you within 24–72 hours."
+          },
+          {
+            "q": "How do I manage my jobs?",
+            "a": "Once you're approved, you get login details for the Cleaniq worker app, where you can see your jobs, your schedule and what you've earned."
+          }
+        ],
+        "background": "white",
+        "spaceAbove": "no"
+      }
+    }
+  ]
+}

@@ -1,143 +1,4039 @@
 {
-  "basics": {
-    "title": "End of Tenancy Cleaning Manchester | Cleaners Near You",
-    "meta": "Professional end of tenancy cleaning in Manchester. Fully guaranteed, eco-friendly, and landlord-approved. Book vetted cleaners online in 60 seconds. Call +44 7846 726428.",
-    "heading": "End of Tenancy Cleaning in Manchester",
-    "tagline": "Landlord-Approved. Deposit-Protecting. Fully Guaranteed.",
-    "description": "Moving homes can be extremely stressful. Our specialised End of Tenancy cleaning team ensures your property is left in absolutely spotless condition, securing 100% of your deposit refund. We follow a comprehensive, landlord-approved cleaning checklist.",
-    "points": [
-      "Vetted & insured professional local cleaners",
-      "Complete cooker, oven, and fridge cleaning included",
-      "Fully guaranteed for 48 hours — free recleans if needed",
-      "Flexible weekend and same-day booking options"
-    ]
-  },
-  "details": {
-    "intro": "Whether you call it end of tenancy cleaning, move-out cleaning, vacate cleaning, or a checkout clean — Cleaniq Services delivers the same result: a spotless property that satisfies even the strictest landlord or letting agent in Manchester.",
-    "whyChoose": [
-      {
-        "title": "Landlord & Agent Approved",
-        "body": "Our checklist meets the exact inventory standards used by Manchester letting agencies — your property passes checkout first time."
-      },
-      {
-        "title": "48-Hour Re-Clean Guarantee",
-        "body": "If your landlord or agent raises any issue after our clean, we return and re-clean that area at no extra charge."
-      },
-      {
-        "title": "Same-Day & Weekend Booking",
-        "body": "Last-minute keys-back day? We offer same-day and weekend availability across all Manchester postcodes."
-      },
-      {
-        "title": "Eco-Friendly Products",
-        "body": "Non-toxic, eco-safe solutions — tough on grease and grime, gentle on your family and the environment."
-      }
-    ],
-    "checklist": {
-      "heading": "Full End of Tenancy Cleaning Checklist",
-      "intro": "Our move-out clean covers every room and surface specified in standard tenancy agreements. Here is exactly what is included:",
-      "rooms": [
-        {
-          "room": "Kitchen",
-          "tasks": [
-            "Deep clean inside & outside all cupboards and drawers",
-            "Full oven, hob, extractor fan, and microwave degreasing",
-            "Fridge and freezer defrost & interior sanitization",
-            "Dishwasher drum, filter, and door seal cleaning",
-            "Sink, taps, and draining board descaling and polishing",
-            "Splashback, wall tiles, and grout scrubbing",
-            "Wipe-down of all worktops, skirting boards, and light switches"
-          ]
-        },
-        {
-          "room": "Living Room & Bedrooms",
-          "tasks": [
-            "Dusting of all surfaces, shelves, rails, and picture frames",
-            "Interior window cleaning including sills and frames",
-            "Vacuuming carpets with HEPA-filter equipment",
-            "Hard floor mopping and edge skirting board cleaning",
-            "Wardrobe & storage unit interior wipe-down",
-            "Removal of cobwebs from ceilings and corners",
-            "Light fittings, switches, and socket plate cleaning"
-          ]
-        },
-        {
-          "room": "Bathrooms & En-Suites",
-          "tasks": [
-            "Full toilet bowl, seat, cistern, and base sanitization",
-            "Shower enclosure, tray, screen, and head descaling",
-            "Bath, taps, and overflow cleaning and polishing",
-            "Sink, vanity unit, and mirror streak-free cleaning",
-            "Tile and grout mould removal treatment",
-            "Extractor fan and ventilation grille cleaning",
-            "Floor scrubbing and sealant line cleaning"
-          ]
-        },
-        {
-          "room": "Hallways, Stairs & General Areas",
-          "tasks": [
-            "Banister, spindle, and handrail wiping",
-            "Front door, letterbox, and door frame cleaning",
-            "Radiator panel and top-surface dusting",
-            "Loft hatch or storage cupboard wipe-down",
-            "Spot-cleaning of marked walls and scuff removal"
-          ]
-        }
-      ]
-    },
-    "whyMatters": {
-      "heading": "Why a Professional End of Tenancy Clean Matters",
-      "body": [
-        "The most common reason tenants lose part or all of their deposit is cleanliness. Landlords and letting agents in Manchester are legally entitled to deduct from your security deposit if the property is not returned in the condition matching its original state.",
-        "Unlike a standard domestic clean, a professional move-out clean follows a structured, room-by-room protocol aligned with lettings industry standards. Our tenancy cleaners in Manchester are trained specifically for this type of work — handling everything from limescale-encrusted bathrooms to grease-coated oven interiors.",
-        "Booking a professional end of rental clean also saves you significant time during an already stressful moving period. Instead of spending your final days scrubbing appliances, you can focus on your move while our team handles the property to the standard your landlord expects."
-      ]
-    },
-    "seoFooter": "Cleaniq Services provides professional end of tenancy cleaning, move-out cleaning, vacate cleaning, checkout cleaning, and end of lease cleaning across Manchester. Whether you need a tenancy end clean in Manchester City Centre, Didsbury, Chorlton, Salford, Withington, Fallowfield, or Stockport — our vetted and insured tenancy cleaners are ready to help you secure your full deposit refund. Book your Manchester end of tenancy cleaning service online in 60 seconds or call +44 7846 726428."
-  },
-  "faqs": [
+ "root": {
+  "props": {
+   "title": "End of Tenancy Cleaning Manchester | Cleaners Near You",
+   "description": "Professional end of tenancy cleaning in Manchester. Fully guaranteed, eco-friendly, and landlord-approved. Book vetted cleaners online in 60 seconds. Call +44 7846 726428.",
+   "shareTitle": "",
+   "shareDescription": "",
+   "schemaDescription": "Moving homes can be extremely stressful. Our specialised End of Tenancy cleaning team ensures your property is left in absolutely spotless condition, securing 100% of your deposit refund. We follow a comprehensive, landlord-approved cleaning checklist.",
+   "schemaAreas": [
+    "Manchester City",
+    "Salford",
+    "Bolton",
+    "Bury",
+    "Oldham",
+    "Rochdale",
+    "Stockport",
+    "Tameside",
+    "Trafford",
+    "Wigan"
+   ],
+   "priceKeywords": [],
+   "quoteMessage": "Hi Cleaniq! I'd like a quote for end of tenancy cleaning.",
+   "badge": "Manchester Cleaning Service",
+   "heading": "End of Tenancy Cleaning in Manchester",
+   "tagline": "Landlord-Approved. Deposit-Protecting. Fully Guaranteed.",
+   "trustBold": "48-hr",
+   "trustText": "re-clean guarantee",
+   "ctaLabel": "Book your clean",
+   "ctaNote": "No hidden fees · Insured cleaners",
+   "bookLabel": "Book in 60 Seconds",
+   "quoteLabel": "Get a quote on WhatsApp",
+   "showPhone": "yes",
+   "phone": "+44 7846 726428",
+   "ctaFoot": "48-hr satisfaction guarantee included",
+   "stats": [
     {
-      "q": "Does your end of tenancy cleaning guarantee my deposit back?",
-      "a": "While we cannot control the landlord's legal decisions, our service is specifically designed to pass the most rigorous inventory checks. We provide a 48-hour satisfaction guarantee and a professional invoice that acts as evidence for the Tenancy Deposit Scheme (TDS). If your inventory clerk identifies any cleaning issues, we return free of charge to rectify them."
+     "value": "{rating}★",
+     "label": "Google rating"
     },
     {
-      "q": "Is professional oven cleaning included in the price?",
-      "a": "Yes. Unlike many Manchester cleaning companies that charge extra, a full professional oven clean is included as standard in our end of tenancy package. We degrease the interior, clean the racks, and polish the glass to ensure it meets the \"showroom\" standard required by agencies like Jordan Fishwick and Philip James."
+     "value": "48hr",
+     "label": "Re-clean guarantee"
     },
     {
-      "q": "Do I need to be at the property during the clean?",
-      "a": "No. We are experts in remote logistics. We can coordinate key collection and return from your estate agent's office or a concierge desk in developments like Deansgate Square or MediaCityUK. This allows you to focus on your move while we handle the heavy lifting."
-    },
-    {
-      "q": "How long does a professional move-out clean take?",
-      "a": "The duration depends on the size and condition of the property. A studio in the Northern Quarter might take 3-4 hours, while a 4-bedroom family home in Didsbury or Altrincham could take 6-8 hours. We send teams of 2 or 3 cleaners to ensure the job is completed efficiently in a single day."
-    },
-    {
-      "q": "Are your cleaners employees or contractors?",
-      "a": "Every cleaner at Cleaniq Services is a direct employee. We do not use unvetted gig-economy contractors. Our staff are fully background-checked, insured, and trained in our specific \"Inventory-Standard\" checklist to ensure consistent quality across all Manchester postcodes."
-    },
-    {
-      "q": "Do you provide your own cleaning supplies and equipment?",
-      "a": "Yes. Our mobile teams arrive in fully equipped vehicles carrying industrial-grade supplies. This includes HEPA-filtered vacuums, professional steam cleaners for \"wet zones,\" and a full range of eco-friendly, non-toxic detergents. You do not need to provide a single item."
-    },
-    {
-      "q": "Do you clean the windows and frames?",
-      "a": "We clean all windows internally as part of the standard EOT service, including the frames, ledges, and sills. If you require external window cleaning or reach-and-wash services for high-rise apartments, this can be added as an optional extra."
-    },
-    {
-      "q": "Do you cover areas outside of the Manchester City Centre?",
-      "a": "Yes. We cover a 600-square-mile radius across the North West. Our daily routes include Salford, Stockport, Bolton, Oldham, Wigan, Warrington, and Altrincham. If you have a postcode starting with M, SK, WA, WN, or OL, we have a team ready to assist."
-    },
-    {
-      "q": "What happens if the landlord isn't happy with the clean?",
-      "a": "This is where our 48-hour guarantee comes in. If the landlord or agent provides an inventory report showing a cleaning failure, simply send it to us. We will dispatch a team to the property to perform a free re-clean of the disputed areas immediately."
-    },
-    {
-      "q": "Is carpet cleaning included in the end of tenancy service?",
-      "a": "We hoover all carpets as part of the standard clean. However, for properties with deep stains or pet odors, we recommend adding our Professional Carpet Steam Cleaning (Hot Water Extraction). You receive a discount when you bundle this with your move-out clean."
-    },
-    {
-      "q": "Can you perform an EOT clean if the power or water is turned off?",
-      "a": "No. For our teams to achieve an \"Inventory Standard\" finish, we require access to running water and electricity. Please ensure your utilities remain active until the cleaning service is completed."
+     "value": "100%",
+     "label": "Deposit protection goal"
     }
-  ]
+   ],
+   "sideLabel": "Book your clean",
+   "sideNote": "No hidden fees · Fully insured",
+   "sidePoints": [
+    {
+     "icon": "shield-check",
+     "text": "Vetted & insured cleaners"
+    },
+    {
+     "icon": "calendar",
+     "text": "Flexible scheduling"
+    },
+    {
+     "icon": "star",
+     "text": "{rating}★ rated on Google"
+    }
+   ],
+   "sideFoot": "48-hour re-clean guarantee on every job",
+   "guaranteesTitle": "Our guarantees",
+   "guarantees": [
+    "48-hour free re-clean if unsatisfied",
+    "Fully vetted & DBS-checked cleaners",
+    "Public liability insurance included",
+    "Eco-friendly, non-toxic products"
+   ],
+   "showAreas": "yes",
+   "areasTitle": "Areas covered",
+   "mobileCall": "Call",
+   "mobileBook": "Book Now",
+   "top": [
+    {
+     "type": "SvcBox",
+     "props": {
+      "id": "SvcBox-1",
+      "tag": "section",
+      "cls": "px-4 sm:px-6 lg:px-10 xl:px-16 pt-10 sm:pt-14",
+      "children": [
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-2",
+         "tag": "div",
+         "cls": "rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10 grid lg:grid-cols-5 gap-8 items-center",
+         "children": [
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-3",
+            "tag": "div",
+            "cls": "lg:col-span-3 space-y-4",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-4",
+               "tag": "p",
+               "cls": "text-xs font-bold tracking-widest uppercase text-teal-600",
+               "text": "Cleaniq Services"
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-5",
+               "tag": "h2",
+               "cls": "text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight",
+               "text": "Manchester End of Tenancy Cleaning"
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-6",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Our End of Tenancy Cleaning Service in Manchester will be provided up to the highest possible standards."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-7",
+               "tag": "p",
+               "cls": "text-slate-700 font-semibold leading-relaxed",
+               "text": "Make sure your deposit is safely returned in full and schedule our End of Tenancy Cleaning in Manchester today."
+              }
+             }
+            ]
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-8",
+            "tag": "div",
+            "cls": "lg:col-span-2 space-y-4",
+            "children": [
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-9",
+               "tag": "div",
+               "cls": "rounded-xl bg-white border border-slate-200 p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-10",
+                  "tag": "p",
+                  "cls": "text-sm font-semibold text-slate-500 mb-3",
+                  "text": "This is a service for:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-11",
+                  "tag": "div",
+                  "cls": "flex flex-wrap gap-2",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-12",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-13",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-14",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Domestic Clients"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-15",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-16",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-17",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Commercial Clients"
+                       }
+                      }
+                     ]
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-18",
+               "tag": "div",
+               "cls": "flex items-start gap-3 rounded-xl bg-[#0A1520] text-white p-5",
+               "children": [
+                {
+                 "type": "SvcIcon",
+                 "props": {
+                  "id": "SvcIcon-19",
+                  "name": "phone",
+                  "cls": "text-teal-400 shrink-0 mt-0.5",
+                  "size": 18
+                 }
+                },
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-20",
+                  "tag": "p",
+                  "cls": "text-sm leading-relaxed",
+                  "text": "We are always available for any questions you may have! Our phone lines are open 24/7"
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       },
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-21",
+         "tag": "div",
+         "cls": "mt-8 rounded-2xl border border-slate-200 bg-white p-6 sm:p-10",
+         "children": [
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-22",
+            "tag": "p",
+            "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-2",
+            "text": "Full Move-Out Clean"
+           }
+          },
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-23",
+            "tag": "h2",
+            "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-5",
+            "text": "End of tenancy cleaning across Manchester"
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-24",
+            "tag": "div",
+            "cls": "space-y-4 text-slate-600 leading-relaxed",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-25",
+               "tag": "p",
+               "cls": "",
+               "text": "Cleaniq Services offers our End of Tenancy Cleaning on all postcodes in Manchester and the surrounding area. Are you moving out, if so our End of Tenancy Cleaning in Manchester will ensure that the move-out process is as stress-free and as easy for you as possible. No matter if you are a tenant, estate agent, or landlord, our End of Tenancy Cleaning is designed to completely transform a property and our expert cleaners will make sure that every inch is cleaned and polished."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-26",
+               "tag": "p",
+               "cls": "",
+               "text": "The End of Tenancy Cleaning in Manchester offered by Cleaniq Services will meet even the most specific cleaning requirements, no matter who contact us, if you are ending your tenancy and cleaning service you can rely on you can put your trust in Cleaniq Services. We offer a comprehensive move-out clean with affordable prices, expert cleaners, and a 100% satisfaction guarantee on completion of the cleaning service. If you want your deposit back book our End of Tenancy Cleaning Service in Manchester now."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-27",
+               "tag": "p",
+               "cls": "",
+               "text": "You will receive a list of comprehensive benefits from our End of Tenancy Cleaning Service, we offer a full internal clean of your property and a 48-hour guarantee upon completion of the service. Our quality of cleaning along with the guarantee period means that you will receive an exceptional cleaning service, which will meet even the most strict requirements, and that you can rest assured that all requests after a final inspection after you move out of your property take place, will be met. If you are a tenant you can be sure that your deposit will be successfully returned, if you are a landlord you can be sure that your property will be professionally cleaned and ready for the next tenants to move into."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-28",
+               "tag": "p",
+               "cls": "",
+               "text": "If you would like to receive a perfectly FREE Quote for our End of Tenancy Cleaning Service in Manchester you can contact us today on [07846 726428](tel:+447846726428) or simply fill out the corresponding [End of Tenancy Cleaning request form](/get-a-quote) listed below.",
+               "linkCls": "text-teal-700 font-semibold hover:underline"
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-29",
+               "tag": "p",
+               "cls": "text-slate-800 font-semibold",
+               "text": "Is it time to move out and are you looking for an End of Tenancy Cleaning in Manchester, if yes call Cleaniq Services today! Cleaniq Services will provide you with the best end of tenancy cleaning in Manchester at the best possible price. You will receive many benefits from our Manchester End of Tenancy Cleaning."
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "content": [
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-30",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-31",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "About this service"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-32",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "What's Included"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-33",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-5",
+       "text": "Moving homes can be extremely stressful. Our specialised End of Tenancy cleaning team ensures your property is left in absolutely spotless condition, securing 100% of your deposit refund. We follow a comprehensive, landlord-approved cleaning checklist."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-34",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Whether you call it end of tenancy cleaning, move-out cleaning, vacate cleaning, or a checkout clean — Cleaniq Services delivers the same result: a spotless property that satisfies even the strictest landlord or letting agent in Manchester."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-35",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-36",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-37",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-38",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-39",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Vetted & insured professional local cleaners"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-40",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-41",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-42",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-43",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Complete cooker, oven, and fridge cleaning included"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-44",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-45",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-46",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-47",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Fully guaranteed for 48 hours — free recleans if needed"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-48",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-49",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-50",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-51",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Flexible weekend and same-day booking options"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-52",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-53",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-54",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Benefits"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-55",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-6",
+       "text": "Benefits of our Manchester End of Tenancy Cleaning"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-56",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3 mb-6",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-57",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-58",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-59",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-60",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "48-Hour Guarantee - Free Re-Clean if necessary"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-61",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-62",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-63",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-64",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Competitive Prices"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-65",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-66",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-67",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-68",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Fully trained and experienced cleaners"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-69",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-70",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-71",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-72",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Professional Detergents and Equipment"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-73",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-74",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-75",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-76",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "We follow specific End of Tenancy Cleaning Checklists provided by estate agencies"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-77",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-78",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-79",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-80",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Non-hazardous and eco-friendly cleaning detergents"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-81",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-82",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-83",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-84",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Our End of Tenancy Cleaning Services comes with a 100% satisfaction guarantee."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-85",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "We will provide you with exceptional quality end-of-tenancy cleaning at just the right cost. Our End of Tenancy Cleaning Service is specifically designed to make sure that the move-out process is as stress-free and as easy for you as possible. If you are for whatever reason not completely satisfied with any part of the end of tenancy cleaning provided by Cleaniq Services or if after an inspection any areas have to be covered by our cleaners again, we will come back and provide you with a completely free of charge re-clean as long as you make us aware of this in the period of the guarantee. Our fully trained professional cleaners have years of experience in providing End of Tenancy Cleaning Services. You can contact us 24/7 at any point convenient for you."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-86",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-87",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-88",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "How it Works"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-89",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-6",
+       "text": "Manchester End of Tenancy Cleaning"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-90",
+       "tag": "ol",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-91",
+          "tag": "li",
+          "cls": "relative p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-92",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-93",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "1"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-94",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Schedule"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-95",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Contact us over the phone with your original end of tenancy cleaning service inquiry. Provide some basic information about your property, and personal requirements for the service and receive a perfectly free quote for your end of tenancy cleaning over the phone in a single 5 minute conversation and choose to accept it."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-96",
+          "tag": "li",
+          "cls": "relative p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-97",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-98",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "2"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-99",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Service"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-100",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "All you have to do after is grant access to our cleaners, our experienced end of tenancy cleaning service providers will take care of the hard work, leaving your property clean, sparkling, and ready for the inventory inspection. It is a simple as that, our cleaners have years of experience in providing end of tenancy cleaning services in Manchester."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-101",
+          "tag": "li",
+          "cls": "relative p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-102",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-103",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "3"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-104",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Inspection"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-105",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "After your end of tenancy cleaning service has concluded our Manchester cleaners will ask you to inspect your property and make sure that you are happy with the results of your end of tenancy cleaning service. Please note that our cleaners are instructed to cover any area of your property until it is cleaned up to your satisfaction."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-106",
+          "tag": "li",
+          "cls": "relative p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-107",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-108",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "4"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-109",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Result"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-110",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Sit back and enjoy the results of your end of tenancy cleaning services in Manchester. Our end of tenancy cleaning is a complete and comprehensive internal cleaning of the entirety of your property. Our end of tenancy cleaning services will leave your property sparkling clean and we will make sure that your deposit is safely returned in full."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-111",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-112",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-113",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Why Choose Us"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-114",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-6",
+       "text": "Why Choose Us For Your End Of Tenancy Cleaning Service"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-115",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-5",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-116",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-117",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-118",
+                "name": "badge-check",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-119",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-120",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Dedicated Professional Cleaning Staff"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-121",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Our cleaning technicians are fully trained, vetted, instructed, insured, and experienced professionals."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-122",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-123",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-124",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-125",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-126",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Professional Cleaning Detergents and Equipment"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-127",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We will provide all necessary cleaning supplies as part of the End of Tenancy Cleaning."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-128",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-129",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-130",
+                "name": "shield-check",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-131",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-132",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "48-Hour Guarantee"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-133",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Our End of Tenancy Cleaning in Manchester comes with a 48-hour guarantee on completion, you can be sure that you will get your deposit back in full!"
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-134",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-135",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-136",
+                "name": "star",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-137",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-138",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Great End of Tenancy Cleaning At Just The Right Cost"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-139",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We will provide you with the best possible End Of Tenancy cleaning at the best possible price."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-140",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-141",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-142",
+                "name": "calendar",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-143",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-144",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "7 Day Availability"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-145",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We are available for the End of Tenancy Cleaning 7 days a week on all postcodes in Greater Manchester at a time convenient for you."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-146",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-147",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-148",
+                "name": "check",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-149",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-150",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Attention To Detail"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-151",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Our End of Tenancy Cleaners will focus on even the smallest details in your property, for example, light switches, or the biggest challenges, for example, full professional oven cleaning."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-152",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-153",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-154",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Room-by-room checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-155",
+       "tag": "h2",
+       "cls": "scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-1",
+       "text": "End of Tenancy Cleaning Checklist",
+       "anchor": "full-checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-156",
+       "tag": "p",
+       "cls": "text-sm font-semibold text-teal-700 mb-6",
+       "text": "Inventory Standard"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-157",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-5 items-start",
+       "children": [
+        {
+         "type": "SvcRoomCard",
+         "props": {
+          "id": "SvcRoomCard-158",
+          "label": "End of Tenancy Cleaning",
+          "room": "Bedroom",
+          "image": "our-work/airbnb-2.jpg",
+          "alt": "Bedroom with a freshly made bed after an end of tenancy clean by Cleaniq Services",
+          "buttonLabel": "Book now",
+          "buttonLink": "{book}",
+          "shown": 5,
+          "tasks": [
+           "Vacuum and Mop hard floors.",
+           "Vacuum Carpeted floors.",
+           "Dusting and wiping of accessible bedroom surfaces.",
+           "Cleaning of skirting boards, doors, door frames and handles.",
+           "Internal cleaning of wardrobes, cupboards and drawers where empty.",
+           "Removal of cobwebs and dust from reachable corners and ceiling edges.",
+           "Cleaning of mirrors, glass panels and internal window sills.",
+           "Internal window cleaning where safely reachable.",
+           "Dusting of light fittings, lampshades and fixtures where safely accessible.",
+           "Vacuuming of floors, corners, edges and under movable furniture where possible.",
+           "Mopping of hard floors where suitable.",
+           "Bed frames and headboards wiped where accessible.",
+           "Carpets vacuumed as standard.",
+           "Professional carpet steam cleaning available as an optional add-on.",
+           "Final visual check of the bedroom area before completion."
+          ]
+         }
+        },
+        {
+         "type": "SvcRoomCard",
+         "props": {
+          "id": "SvcRoomCard-159",
+          "label": "End of Tenancy Cleaning",
+          "room": "Bathroom",
+          "image": "our-work/end-of-tenancy-2.jpg",
+          "alt": "Clean bathroom with bath, basin and tiled floor after an end of tenancy clean by Cleaniq Services",
+          "buttonLabel": "Book now",
+          "buttonLink": "{book}",
+          "shown": 5,
+          "tasks": [
+           "Clean Bathtub and WC",
+           "Clean Shower and Shower Screen",
+           "Clean and polish Bathroom Tiles. Clean and Polish the sink.",
+           "Cleaning and descaling of sinks, taps and surrounding surfaces where possible.",
+           "Cleaning and descaling of toilets, toilet seats, bases and surrounding areas.",
+           "Cleaning of baths, shower trays, shower screens and shower fittings.",
+           "Removal of soap marks, water marks and general bathroom residue where possible.",
+           "Cleaning of bathroom tiles, splashbacks and reachable wall surfaces.",
+           "Cleaning of mirrors, glass panels and internal window sills.",
+           "Internal window cleaning where safely reachable.",
+           "Cleaning of bathroom cupboards, cabinets and drawers where empty.",
+           "Dusting and wiping of doors, door frames, handles and skirting boards.",
+           "Cleaning of light switches, plug sockets, extractor fan covers and reachable fittings.",
+           "Removal of cobwebs and dust."
+          ]
+         }
+        },
+        {
+         "type": "SvcRoomCard",
+         "props": {
+          "id": "SvcRoomCard-160",
+          "label": "End of Tenancy Cleaning",
+          "room": "Kitchen",
+          "image": "our-work/end-of-tenancy-4.jpg",
+          "alt": "Empty, clean kitchen with spotless worktops and oven after an end of tenancy clean by Cleaniq Services",
+          "buttonLabel": "Book now",
+          "buttonLink": "{book}",
+          "shown": 5,
+          "tasks": [
+           "Cleaning of kitchen worktops, counters and accessible preparation surfaces.",
+           "Cleaning of kitchen cupboards, drawers and shelves internally where empty.",
+           "Cleaning of cupboard fronts, handles and external cabinet surfaces.",
+           "Cleaning of sinks, taps, draining boards and surrounding areas.",
+           "Cleaning and degreasing of kitchen tiles, splashbacks and reachable wall surfaces.",
+           "Oven cleaning included as standard with our end of tenancy cleaning service.",
+           "Cleaning of hob, extractor hood and external appliance surfaces.",
+           "Internal cleaning of fridge and freezer where empty, defrosted and switched off.",
+           "Cleaning of microwave, washing machine and dishwasher exteriors where applicable.",
+           "Cleaning of doors, door frames, handles, skirting boards and reachable ledges.",
+           "Cleaning of light switches, plug sockets and reachable kitchen fittings.",
+           "Internal window cleaning."
+          ]
+         }
+        },
+        {
+         "type": "SvcRoomCard",
+         "props": {
+          "id": "SvcRoomCard-161",
+          "label": "End of Tenancy Cleaning",
+          "room": "Living Room",
+          "image": "our-work/end-of-tenancy-3.jpg",
+          "alt": "Empty living room with sofa and coffee table after an end of tenancy clean by Cleaniq Services",
+          "buttonLabel": "Book now",
+          "buttonLink": "{book}",
+          "shown": 5,
+          "tasks": [
+           "Vacuum all carpeted floors. Vacuum and mop hard floors.",
+           "Remove the cobwebs. Wipe and dust wooden surfaces and fixtures.",
+           "Clean the skirting boards. Clean light sockets, switches, and plugs.",
+           "Dusting and wiping of accessible living room surfaces.",
+           "Cleaning of skirting boards, doors, door frames and handles.",
+           "Cleaning of light switches, plug sockets and reachable ledges.",
+           "Removal of cobwebs and dust from reachable corners and ceiling edges.",
+           "Cleaning of mirrors, glass panels and internal window sills.",
+           "Internal window cleaning where safely reachable.",
+           "Dusting of light fittings, lampshades and fixtures where safely accessible.",
+           "Cleaning of fireplace surrounds, mantelpieces and reachable shelving where applicable.",
+           "Wiping of radiators, accessible pipework and visible marks where possible.",
+           "Cleaning around furniture and under movable items where access allows.",
+           "Vacuuming of floors, corners, edges and accessible areas."
+          ]
+         }
+        },
+        {
+         "type": "SvcRoomCard",
+         "props": {
+          "id": "SvcRoomCard-162",
+          "label": "End of Tenancy Cleaning",
+          "room": "Hallways/Staircases",
+          "image": "cleaning.jpg",
+          "alt": "Cleaner carrying cleaning supplies up a staircase to clean the hallway and stairs",
+          "buttonLabel": "Book now",
+          "buttonLink": "{book}",
+          "shown": 5,
+          "tasks": [
+           "Dusting and wiping of accessible hallway, staircase and landing surfaces.",
+           "Cleaning of skirting boards, doors, door frames and handles.",
+           "Cleaning of light switches, plug sockets and reachable ledges.",
+           "Removal of cobwebs and dust from reachable corners and ceiling edges.",
+           "Cleaning of bannisters, handrails, spindles and stair edges where accessible.",
+           "Cleaning of mirrors, glass panels and internal window sills.",
+           "Internal window cleaning where safely reachable.",
+           "Dusting of light fittings, lampshades and fixtures where safely accessible.",
+           "Cleaning of radiators, visible pipework and reachable wall marks where possible.",
+           "Cleaning of entrance areas, internal doors and high-touch contact points.",
+           "Vacuuming of hallway floors, stairs, landings, corners and edges.",
+           "Mopping of hard floors where suitable.",
+           "Carpets vacuumed as standard.",
+           "Professional carpet steam cleaning available as an optional add-on."
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-163",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-164",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-165",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Coverage"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-166",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-3",
+       "text": "End of tenancy cleaners Near You"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-167",
+       "tag": "h3",
+       "cls": "text-base font-semibold text-slate-800 mb-1",
+       "text": "Areas We Cover"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-168",
+       "tag": "p",
+       "cls": "text-sm text-slate-500 mb-4",
+       "text": "You can schedule our End of Tenancy Cleaning Services on all postcodes in: Bolton, Bury, Oldham, Rochdale, Stockport, Tameside, Trafford, Wigan, Salford and Manchester"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-169",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-170",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-171",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-172",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-173",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-174",
+             "tag": "",
+             "cls": "",
+             "text": "Manchester City Centre"
+            }
+           }
+          ],
+          "href": "/locations/manchester-city-centre"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-175",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-176",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-177",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-178",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-179",
+             "tag": "",
+             "cls": "",
+             "text": "Salford"
+            }
+           }
+          ],
+          "href": "/locations/salford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-180",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-181",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-182",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-183",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-184",
+             "tag": "",
+             "cls": "",
+             "text": "Trafford"
+            }
+           }
+          ],
+          "href": "/locations/trafford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-185",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-186",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-187",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-188",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-189",
+             "tag": "",
+             "cls": "",
+             "text": "Stockport"
+            }
+           }
+          ],
+          "href": "/locations/stockport"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-190",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-191",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-192",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-193",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-194",
+             "tag": "",
+             "cls": "",
+             "text": "Didsbury"
+            }
+           }
+          ],
+          "href": "/locations/didsbury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-195",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-196",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-197",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-198",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-199",
+             "tag": "",
+             "cls": "",
+             "text": "Chorlton"
+            }
+           }
+          ],
+          "href": "/locations/chorlton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-200",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-201",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-202",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-203",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-204",
+             "tag": "",
+             "cls": "",
+             "text": "Bolton"
+            }
+           }
+          ],
+          "href": "/locations/bolton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-205",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-206",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-207",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-208",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-209",
+             "tag": "",
+             "cls": "",
+             "text": "Bury"
+            }
+           }
+          ],
+          "href": "/locations/bury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-210",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-211",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-212",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-213",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-214",
+             "tag": "",
+             "cls": "",
+             "text": "Oldham"
+            }
+           }
+          ],
+          "href": "/locations/oldham"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-215",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-216",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-217",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-218",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-219",
+             "tag": "",
+             "cls": "",
+             "text": "Rochdale"
+            }
+           }
+          ],
+          "href": "/locations/rochdale"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-220",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-221",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-222",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-223",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-224",
+             "tag": "",
+             "cls": "",
+             "text": "Tameside"
+            }
+           }
+          ],
+          "href": "/locations/tameside"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-225",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-226",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-227",
+             "tag": "",
+             "cls": "",
+             "text": "End of tenancy cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-228",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-229",
+             "tag": "",
+             "cls": "",
+             "text": "Wigan"
+            }
+           }
+          ],
+          "href": "/locations/wigan"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-230",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-231",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-232",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Delivered With Convenience"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-233",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "End of Tenancy Cleaning - Delivered With Your Convenience in Mind"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-234",
+       "tag": "p",
+       "cls": "text-sm font-bold uppercase tracking-wide text-teal-700",
+       "text": "Ensure a stress and hassle-free move out process by scheduling our end of tenancy cleaning services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-235",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Cleaniq Services provides bespoke end of tenancy cleaning services based on your personal specifications and cleaning requirements to every client of every background on all postcodes in Greater Manchester. Our end of tenancy cleaning service in Manchester will be delivered on time, on budget, and up to your specific cleaning requirements. Simply provide a few basic details about your property, your requested date and time for your end of tenancy cleaning, receive a free quote, choose to accept it and enjoy the many benefits that come with scheduling our end of tenancy cleaning in Manchester. You can schedule our end of tenancy cleaning services 7 days a week at a time suitable for you, even on Bank Holidays or weekends."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-236",
+       "tag": "div",
+       "cls": "grid grid-cols-3 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-237",
+          "tag": "div",
+          "cls": "rounded-xl bg-teal-50 border border-teal-100 p-4 text-center",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-238",
+             "tag": "p",
+             "cls": "text-2xl font-bold text-teal-700",
+             "text": "Easy"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-239",
+             "tag": "p",
+             "cls": "text-xs sm:text-sm text-slate-600 font-medium",
+             "text": "Scheduling."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-240",
+          "tag": "div",
+          "cls": "rounded-xl bg-teal-50 border border-teal-100 p-4 text-center",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-241",
+             "tag": "p",
+             "cls": "text-2xl font-bold text-teal-700",
+             "text": "Free"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-242",
+             "tag": "p",
+             "cls": "text-xs sm:text-sm text-slate-600 font-medium",
+             "text": "Bespoke quotes."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-243",
+          "tag": "div",
+          "cls": "rounded-xl bg-teal-50 border border-teal-100 p-4 text-center",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-244",
+             "tag": "p",
+             "cls": "text-2xl font-bold text-teal-700",
+             "text": "Fast"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-245",
+             "tag": "p",
+             "cls": "text-xs sm:text-sm text-slate-600 font-medium",
+             "text": "Short-notice availability"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-246",
+       "tag": "div",
+       "cls": "rounded-2xl bg-[#0A1520] text-white p-6 sm:p-8",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-247",
+          "tag": "p",
+          "cls": "text-xs font-bold tracking-widest uppercase text-teal-400 mb-1",
+          "text": "Save your time save your effort choose Cleaniq Services!"
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-248",
+          "tag": "h3",
+          "cls": "text-lg sm:text-xl font-bold mb-4 uppercase",
+          "text": "Choose Cleaniq Services for your end of tenancy cleaning in Manchester"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-249",
+          "tag": "ul",
+          "cls": "space-y-2.5 mb-6",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-250",
+             "tag": "li",
+             "cls": "flex gap-2.5 items-start text-sm text-slate-200",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-251",
+                "name": "check",
+                "cls": "text-teal-400 shrink-0 mt-0.5 stroke-[3]",
+                "size": 15
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-252",
+                "tag": "",
+                "cls": "",
+                "text": "Available 7 days a week at a time convenient to you, even on Bank Holidays and weekends."
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-253",
+             "tag": "li",
+             "cls": "flex gap-2.5 items-start text-sm text-slate-200",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-254",
+                "name": "check",
+                "cls": "text-teal-400 shrink-0 mt-0.5 stroke-[3]",
+                "size": 15
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-255",
+                "tag": "",
+                "cls": "",
+                "text": "Book entirely online or within a 5 minute phone call."
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-256",
+             "tag": "li",
+             "cls": "flex gap-2.5 items-start text-sm text-slate-200",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-257",
+                "name": "check",
+                "cls": "text-teal-400 shrink-0 mt-0.5 stroke-[3]",
+                "size": 15
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-258",
+                "tag": "",
+                "cls": "",
+                "text": "Remote payment options are available."
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-259",
+             "tag": "li",
+             "cls": "flex gap-2.5 items-start text-sm text-slate-200",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-260",
+                "name": "check",
+                "cls": "text-teal-400 shrink-0 mt-0.5 stroke-[3]",
+                "size": 15
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-261",
+                "tag": "",
+                "cls": "",
+                "text": "Keys can be collected and returned upon request."
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-262",
+             "tag": "li",
+             "cls": "flex gap-2.5 items-start text-sm text-slate-200",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-263",
+                "name": "check",
+                "cls": "text-teal-400 shrink-0 mt-0.5 stroke-[3]",
+                "size": 15
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-264",
+                "tag": "",
+                "cls": "",
+                "text": "A final inspection is always conducted."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-265",
+          "tag": "div",
+          "cls": "flex flex-col sm:flex-row gap-3",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-266",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-267",
+                "tag": "",
+                "cls": "",
+                "text": "Get a Free Quote "
+               }
+              },
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-268",
+                "name": "arrow-right",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ],
+             "href": "/get-a-quote"
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-269",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/60 text-white font-bold text-sm hover:bg-white/10 transition-colors",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-270",
+                "name": "phone",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-271",
+                "tag": "",
+                "cls": "",
+                "text": " Call Now"
+               }
+              }
+             ],
+             "href": "tel:+447846726428"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-272",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-273",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-274",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Personalized Discount"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-275",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "Combine our End of Tenancy Cleaning in Manchester with any one of our additional services for a personalized discount"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-276",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "You can combine our End of Tenancy Cleaning in Manchester with any one of our additional cleaning services, by doing so we will be able to offer you a personalized discount on the final combined price of your requested cleaning services. You can choose to add Carpet Cleaning, Upholstery Cleaning, External Window Cleaning, or even Pressure Washing for any external areas of your home, to your End of Tenancy Cleaning Services in Manchester. As part of our End of Tenancy Cleaning services all carpeted areas of your home will be vacuumed, however, you can add professional carpet cleaning to your service, as well as all windows in your home will be cleaned internally, however, we are able to provide external window cleaning as a separate add-on to your End of Tenancy Cleaning in Manchester."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-277",
+       "tag": "p",
+       "cls": "text-slate-700 font-semibold",
+       "text": "You can combine our End of Tenancy Cleaning Service with the following services:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-278",
+       "tag": "ul",
+       "cls": "grid grid-cols-2 sm:grid-cols-4 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-279",
+          "tag": "li",
+          "cls": "flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-280",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-281",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-282",
+             "tag": "a",
+             "cls": "text-slate-800 text-sm font-semibold hover:text-teal-700 hover:underline",
+             "text": "Carpet Cleaning",
+             "href": "/service/carpet-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-283",
+          "tag": "li",
+          "cls": "flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-284",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-285",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-286",
+             "tag": "span",
+             "cls": "text-slate-800 text-sm font-semibold",
+             "text": "Upholstery Cleaning"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-287",
+          "tag": "li",
+          "cls": "flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-288",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-289",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-290",
+             "tag": "span",
+             "cls": "text-slate-800 text-sm font-semibold",
+             "text": "Window Cleaning"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-291",
+          "tag": "li",
+          "cls": "flex flex-col items-center text-center gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-292",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-293",
+                "name": "sparkles",
+                "cls": "",
+                "size": 18
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-294",
+             "tag": "span",
+             "cls": "text-slate-800 text-sm font-semibold",
+             "text": "Antiviral Disinfection"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-295",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "If you would like to schedule our Manchester End of Tenancy Cleaning Services you can contact us on [07846 726428](tel:+447846726428), Monday to Sunday at a time convenient for you. Our customer service representatives will assist you with any questions related to our End of Tenancy Cleaning you may have. Alternatively, you can fill out our corresponding [End of Tenancy Cleaning request form](/get-a-quote) linked below. Upholstery cleaning and Carpet Cleaning can also be added to our end of tenancy cleaning Manchester service for tenants, landlords and letting agents preparing furnished properties for check-out.",
+       "linkCls": "text-teal-700 font-semibold hover:underline"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-296",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-297",
+    "tag": "section",
+    "cls": "rounded-2xl border border-slate-200 bg-white p-6 sm:p-8",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-298",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Get Your Deposit Back in Full"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-299",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-5",
+       "text": "Guaranteed end of tenancy cleaning in Manchester"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-300",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-301",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-302",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-303",
+                "name": "clock",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-304",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Free re-clean within 48 hours if needed."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-305",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-306",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-307",
+                "name": "sparkles",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-308",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Includes all cleaning materials and equipment."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-309",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-310",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-311",
+                "name": "shield-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-312",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "You can extend your guarantee if needed."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-313",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-314",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-315",
+                "name": "badge-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-316",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Professional, qualified, experienced cleaning teams."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-317",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-318",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-319",
+                "name": "shield-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-320",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "We are fully insured."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-321",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-322",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-323",
+                "name": "check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-324",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Add any additional services"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-325",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-326",
+    "tag": "section",
+    "cls": "rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-327",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-100 mb-2",
+       "text": "Contact Us For a Free Quote"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-328",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold mb-3",
+       "text": "Contact us for a free quote today!"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-329",
+       "tag": "p",
+       "cls": "text-teal-50 leading-relaxed mb-6",
+       "text": "We provide our customers with bespoke end of tenancy cleaning services personalized based on your specific cleaning requirements. Contact us for a free quote today."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-330",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-331",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-332",
+             "tag": "",
+             "cls": "",
+             "text": "Get a Free Quote "
+            }
+           },
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-333",
+             "name": "arrow-right",
+             "cls": "",
+             "size": 16
+            }
+           }
+          ],
+          "href": "/get-a-quote"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-334",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-335",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-336",
+             "tag": "",
+             "cls": "",
+             "text": " Call Now"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-337",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-338",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-339",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "One Exceptional Service"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-340",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900",
+       "text": "End of Tenancy Cleaning in Manchester - one exceptional service for all Clients"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-341",
+       "tag": "h3",
+       "cls": "text-lg font-semibold text-teal-700",
+       "text": "Our End of Tenancy Cleaning in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-342",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our Manchester End of Tenancy Cleaning will transform your property. Cleaniq Services will provide you with a complete internal clean as part of the End of Tenancy Cleaning, the only exceptions to the End of Tenancy Cleaning are the painted walls and ceilings as those areas are easily prone to damage. Apart from them everything else in your house or flat will be cleaned. The tenancy cleaners will begin their task by delegating into specific areas of your property. Some of our cleaning experts will cover the bedrooms, living rooms, and common spaces, while specifically trained cleaners will focus on the bathrooms and kitchen."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-343",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "All of the cupboards, cabinets, drawers, shelves will be cleaned as part of our End of Tenancy Cleaning in Manchester. All of the kitchen appliances will be cleaned, including the oven. Effectively free Oven Cleaning is part of our Manchester End of Tenancy Cleaning Service. The cleaners will cover all windows, frames, ledges, and sills internally as part of the cleaning service and will even focus on small details such as light sockets, light switches, and plugs."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-344",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "The entirety of your property will be fully and professionally cleaned, this is why we are certain that you will receive an exceptional End of Tenancy Cleaning if you schedule our cleaning services. Our End of Tenancy Cleaning comes with a specific estate agency regulated checklist, in this way we make sure that you successfully get your deposit back, as we follow specific requirements for cleaning services when a final inspection of your property will be conducted."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-345",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-346",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-347",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "The case for professionals"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-348",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-5",
+       "text": "Why a Professional End of Tenancy Clean Matters"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-349",
+       "tag": "div",
+       "cls": "space-y-4",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-350",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "The most common reason tenants lose part or all of their deposit is cleanliness. Landlords and letting agents in Manchester are legally entitled to deduct from your security deposit if the property is not returned in the condition matching its original state."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-351",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Unlike a standard domestic clean, a professional move-out clean follows a structured, room-by-room protocol aligned with lettings industry standards. Our tenancy cleaners in Manchester are trained specifically for this type of work — handling everything from limescale-encrusted bathrooms to grease-coated oven interiors."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-352",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Booking a professional end of rental clean also saves you significant time during an already stressful moving period. Instead of spending your final days scrubbing appliances, you can focus on your move while our team handles the property to the standard your landlord expects."
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-353",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcOurWork",
+   "props": {
+    "id": "SvcOurWork-354",
+    "title": "Photos from our recent jobs"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-355",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-356",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-357",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Trained, Vetted, Instructed and Insured"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-358",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "Fully insured End of Tenancy Cleaners in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-359",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "We will always send out a team of fully insured cleaners for your end of tenancy cleaning service in Manchester. All of our Manchester cleaners have years of experience in providing end of tenancy cleaning services in Manchester, they have worked on thousands of properties and have successfully won back deposits for many of our clients in the past."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-360",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-361",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-362",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-363",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-364",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Verified, trained, instructed, and insured end of tenancy cleaning specialists."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-365",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-366",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-367",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-368",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Public liability insurance up to 1 million."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-369",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-370",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-371",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-372",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Professional cleaning approach, using specific cleaning techniques and detergents based on specific surfaces."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-373",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-374",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-375",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-376",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Equipped with professional cleaning detergents and supplies."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-377",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-378",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-379",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-380",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Trusted by thousands of clients in Manchester for their end of tenancy cleaning services."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-381",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-382",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-383",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-384",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Dedicated to providing exceptional cleaning services."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-385",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcReviews",
+   "props": {
+    "id": "SvcReviews-386",
+    "label": "Customer reviews",
+    "heading": "What Our Customers Say",
+    "linkText": "Read all reviews on Google"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-387",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcRelated",
+   "props": {
+    "id": "SvcRelated-388",
+    "label": "More from Cleaniq Services",
+    "heading": "Related cleaning services"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-389",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-390",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-391",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Frequently asked questions"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-392",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Frequently Asked Questions: End of Tenancy Cleaning Manchester"
+      }
+     },
+     {
+      "type": "SvcFaqs",
+      "props": {
+       "id": "SvcFaqs-393",
+       "numbered": "yes",
+       "items": [
+        {
+         "q": "Does your end of tenancy cleaning guarantee my deposit back?",
+         "a": "While we cannot control the landlord's legal decisions, our service is specifically designed to pass the most rigorous inventory checks. We provide a 48-hour satisfaction guarantee and a professional invoice that acts as evidence for the Tenancy Deposit Scheme (TDS). If your inventory clerk identifies any cleaning issues, we return free of charge to rectify them."
+        },
+        {
+         "q": "Is professional oven cleaning included in the price?",
+         "a": "Yes. Unlike many Manchester cleaning companies that charge extra, a full professional oven clean is included as standard in our end of tenancy package. We degrease the interior, clean the racks, and polish the glass to ensure it meets the \"showroom\" standard required by agencies like Jordan Fishwick and Philip James."
+        },
+        {
+         "q": "Do I need to be at the property during the clean?",
+         "a": "No. We are experts in remote logistics. We can coordinate key collection and return from your estate agent's office or a concierge desk in developments like Deansgate Square or MediaCityUK. This allows you to focus on your move while we handle the heavy lifting."
+        },
+        {
+         "q": "How long does a professional move-out clean take?",
+         "a": "The duration depends on the size and condition of the property. A studio in the Northern Quarter might take 3-4 hours, while a 4-bedroom family home in Didsbury or Altrincham could take 6-8 hours. We send teams of 2 or 3 cleaners to ensure the job is completed efficiently in a single day."
+        },
+        {
+         "q": "Are your cleaners employees or contractors?",
+         "a": "Every cleaner at Cleaniq Services is a direct employee. We do not use unvetted gig-economy contractors. Our staff are fully background-checked, insured, and trained in our specific \"Inventory-Standard\" checklist to ensure consistent quality across all Manchester postcodes."
+        },
+        {
+         "q": "Do you provide your own cleaning supplies and equipment?",
+         "a": "Yes. Our mobile teams arrive in fully equipped vehicles carrying industrial-grade supplies. This includes HEPA-filtered vacuums, professional steam cleaners for \"wet zones,\" and a full range of eco-friendly, non-toxic detergents. You do not need to provide a single item."
+        },
+        {
+         "q": "Do you clean the windows and frames?",
+         "a": "We clean all windows internally as part of the standard EOT service, including the frames, ledges, and sills. If you require external window cleaning or reach-and-wash services for high-rise apartments, this can be added as an optional extra."
+        },
+        {
+         "q": "Do you cover areas outside of the Manchester City Centre?",
+         "a": "Yes. We cover a 600-square-mile radius across the North West. Our daily routes include Salford, Stockport, Bolton, Oldham, Wigan, Warrington, and Altrincham. If you have a postcode starting with M, SK, WA, WN, or OL, we have a team ready to assist."
+        },
+        {
+         "q": "What happens if the landlord isn't happy with the clean?",
+         "a": "This is where our 48-hour guarantee comes in. If the landlord or agent provides an inventory report showing a cleaning failure, simply send it to us. We will dispatch a team to the property to perform a free re-clean of the disputed areas immediately."
+        },
+        {
+         "q": "Is carpet cleaning included in the end of tenancy service?",
+         "a": "We hoover all carpets as part of the standard clean. However, for properties with deep stains or pet odors, we recommend adding our Professional Carpet Steam Cleaning (Hot Water Extraction). You receive a discount when you bundle this with your move-out clean."
+        },
+        {
+         "q": "Can you perform an EOT clean if the power or water is turned off?",
+         "a": "No. For our teams to achieve an \"Inventory Standard\" finish, we require access to running water and electricity. Please ensure your utilities remain active until the cleaning service is completed."
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-394",
+       "tag": "div",
+       "cls": "mt-8 p-6 rounded-2xl bg-teal-50 border border-teal-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-395",
+          "tag": "p",
+          "cls": "font-bold text-slate-900",
+          "text": "Book your end of tenancy clean"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-396",
+          "tag": "div",
+          "cls": "flex flex-col sm:flex-row gap-3",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-397",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white border border-teal-200 text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-398",
+                "tag": "",
+                "cls": "",
+                "text": "Get a Free Quote "
+               }
+              },
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-399",
+                "name": "arrow-right",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ],
+             "href": "/get-a-quote"
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-400",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-401",
+                "name": "phone",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-402",
+                "tag": "",
+                "cls": "",
+                "text": " Call 07846 726428"
+               }
+              }
+             ],
+             "href": "tel:+447846726428"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-403",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-404",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-405",
+       "tag": "p",
+       "cls": "text-xs text-slate-400 leading-relaxed",
+       "text": "Cleaniq Services provides professional end of tenancy cleaning, move-out cleaning, vacate cleaning, checkout cleaning, and end of lease cleaning across Manchester. Whether you need a tenancy end clean in Manchester City Centre, Didsbury, Chorlton, Salford, Withington, Fallowfield, or Stockport — our vetted and insured tenancy cleaners are ready to help you secure your full deposit refund. Book your Manchester end of tenancy cleaning service online in 60 seconds or call +44 7846 726428."
+      }
+     }
+    ]
+   }
+  }
+ ]
 }

@@ -18,7 +18,20 @@ import { AREAS } from "../utils/areas";
 const SERVICE_NAMES = Object.fromEntries(SERVICE_PAGES.map((p) => [p.slug, p.name]));
 const AREA_NAMES = Object.fromEntries(AREAS.map((a) => [a.slug, a.name]));
 const pretty = (slug) => slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-const PAGE_NAMES = { home: "Homepage" };
+const PAGE_NAMES = {
+  home: "Homepage",
+  about: "About us",
+  services: "Services",
+  contact: "Contact",
+  "commercial-cleaning": "Commercial cleaning quote",
+  "get-a-quote": "Get a quote",
+  recruitment: "Join our team (jobs)",
+};
+const PAGE_ORDER = Object.keys(PAGE_NAMES);
+const pageRank = (row) => {
+  const i = PAGE_ORDER.indexOf(String(row.key).split(":")[1]);
+  return i < 0 ? 99 : i;
+};
 const pageName = (key) => {
   const [type, slug] = key.split(":");
   if (type === "page") return PAGE_NAMES[slug] || pretty(slug);
@@ -30,7 +43,7 @@ const pageUrl = (key) => {
   return type === "service" ? `/service/${slug}` : `/locations/${slug}`;
 };
 // Pages built from blocks open in the drag-and-drop page builder.
-const isBlockPage = (key) => key.startsWith("page:");
+const isBlockPage = (key) => key.startsWith("page:") || key.startsWith("location:");
 const norm = (t) => String(t || "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s+/g, " ").trim().toLowerCase();
 
 // All text values in the content, with their paths (for click-to-edit).
@@ -235,7 +248,7 @@ export default function ContentAdmin() {
     const f = filter.trim().toLowerCase();
     const keep = (row) => !f || pageName(row.key).toLowerCase().includes(f);
     return [
-      { title: "Pages (drag & drop)", icon: LayoutTemplate, rows: (pages.pages || []).filter(keep) },
+      { title: "Pages (drag & drop)", icon: LayoutTemplate, rows: (pages.pages || []).filter(keep).sort((a, b) => pageRank(a) - pageRank(b)) },
       { title: "Service pages", icon: FileText, rows: pages.services.filter(keep) },
       { title: "Location pages", icon: MapPin, rows: pages.locations.filter(keep) },
     ];

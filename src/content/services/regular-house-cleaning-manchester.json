@@ -1,316 +1,4858 @@
 {
-  "basics": {
-    "title": "Regular House Cleaning Manchester | House Cleaners Near You",
-    "meta": "Weekly, fortnightly or monthly house cleaning in Manchester. Vetted local house cleaners near you, eco-friendly products and a 48-hour re-clean guarantee. Book online.",
-    "heading": "Regular House Cleaning in Manchester",
-    "tagline": "Weekly, Fortnightly or Monthly — Your Home, Always Ready.",
-    "description": "Keep on top of your home without giving up your weekends. Book a regular house clean every week, fortnight or month and a vetted Cleaniq cleaner will keep your kitchen, bathrooms, bedrooms and living areas fresh on every visit.",
-    "points": [
-      "Weekly, fortnightly or monthly visits",
-      "Kitchen, bathrooms, bedrooms and living areas every visit",
-      "Vetted local cleaners and a 48-hour re-clean guarantee",
-      "Use your own supplies, or we bring eco-friendly products for £10"
-    ]
-  },
-  "details": {
-    "intro": "Searching for reliable house cleaners near you in Manchester? Cleaniq Services' regular house cleaning keeps your home consistently clean on a schedule that suits you — every week, every fortnight or once a month. Every visit follows the same checklist, so your kitchen, bathrooms, bedrooms and living areas are looked after every time, and you can add extras such as oven cleaning whenever you need them.",
-    "whyChoose": [
-      {
-        "title": "Vetted Local House Cleaners",
-        "body": "Every Cleaniq cleaner has a face-to-face interview, background checks and a practical skills assessment before cleaning a customer's home."
-      },
-      {
-        "title": "A Schedule That Suits You",
-        "body": "Choose weekly, fortnightly or monthly visits when you book, and pick the day and arrival time that works for you."
-      },
-      {
-        "title": "48-Hour Re-Clean Guarantee",
-        "body": "If anything isn't right after a visit, tell us within 48 hours and we'll send a cleaner back to re-clean it for free."
-      },
-      {
-        "title": "Supplies Your Way",
-        "body": "Use your own cleaning products, or we'll bring eco-friendly products and equipment for £10 per visit."
+ "root": {
+  "props": {
+   "title": "Regular House Cleaning Manchester | House Cleaners Near You",
+   "description": "Weekly, fortnightly or monthly house cleaning in Manchester. Vetted local house cleaners near you, eco-friendly products and a 48-hour re-clean guarantee. Book online.",
+   "shareTitle": "",
+   "shareDescription": "",
+   "schemaDescription": "Keep on top of your home without giving up your weekends. Book a regular house clean every week, fortnight or month and a vetted Cleaniq cleaner will keep your kitchen, bathrooms, bedrooms and living areas fresh on every visit.",
+   "schemaAreas": [],
+   "priceKeywords": [],
+   "quoteMessage": "Hi Cleaniq! I'd like a quote for regular house cleaning.",
+   "badge": "Manchester Cleaning Service",
+   "heading": "Regular House Cleaning in Manchester",
+   "tagline": "Weekly, Fortnightly or Monthly — Your Home, Always Ready.",
+   "trustBold": "48-hr",
+   "trustText": "re-clean guarantee",
+   "ctaLabel": "Book your clean",
+   "ctaNote": "No hidden fees · Insured cleaners",
+   "bookLabel": "Book in 60 Seconds",
+   "quoteLabel": "Get a quote on WhatsApp",
+   "showPhone": "no",
+   "phone": "+44 7846 726428",
+   "ctaFoot": "48-hr satisfaction guarantee included",
+   "stats": [
+    {
+     "value": "{rating}★",
+     "label": "Google rating"
+    },
+    {
+     "value": "48hr",
+     "label": "Re-clean guarantee"
+    },
+    {
+     "value": "100%",
+     "label": "Deposit protection goal"
+    }
+   ],
+   "sideLabel": "Book your clean",
+   "sideNote": "No hidden fees · Fully insured",
+   "sidePoints": [
+    {
+     "icon": "shield-check",
+     "text": "Vetted & insured cleaners"
+    },
+    {
+     "icon": "calendar",
+     "text": "Flexible scheduling"
+    },
+    {
+     "icon": "star",
+     "text": "{rating}★ rated on Google"
+    }
+   ],
+   "sideFoot": "",
+   "guaranteesTitle": "Our guarantees",
+   "guarantees": [
+    "48-hour free re-clean if unsatisfied",
+    "Fully vetted & DBS-checked cleaners",
+    "Public liability insurance included",
+    "Eco-friendly, non-toxic products"
+   ],
+   "showAreas": "no",
+   "areasTitle": "Areas covered",
+   "mobileCall": "Call",
+   "mobileBook": "Book Now",
+   "top": [
+    {
+     "type": "SvcBox",
+     "props": {
+      "id": "SvcBox-1",
+      "tag": "section",
+      "cls": "px-4 sm:px-6 lg:px-10 xl:px-16 pt-10 sm:pt-14 space-y-8",
+      "children": [
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-2",
+         "tag": "div",
+         "cls": "rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10 grid lg:grid-cols-5 gap-8 items-center",
+         "children": [
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-3",
+            "tag": "div",
+            "cls": "lg:col-span-3 space-y-4",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-4",
+               "tag": "h2",
+               "cls": "text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight",
+               "text": "Regular House Cleaning in Manchester"
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-5",
+               "tag": "ul",
+               "cls": "space-y-2.5",
+               "children": [
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-6",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-7",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-8",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-9",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Weekly, fortnightly or monthly visits"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-10",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-11",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-12",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-13",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Vetted local house cleaners"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-14",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-15",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-16",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-17",
+                     "tag": "",
+                     "cls": "",
+                     "text": "48-hour re-clean guarantee"
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-18",
+               "tag": "div",
+               "cls": "pt-2",
+               "children": [
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-19",
+                  "tag": "div",
+                  "cls": "flex flex-col sm:flex-row gap-3",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-20",
+                     "tag": "a",
+                     "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-[#00B5A4] text-white hover:bg-teal-600",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-21",
+                        "name": "calendar",
+                        "cls": "",
+                        "size": 16
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-22",
+                        "tag": "",
+                        "cls": "",
+                        "text": " Book now"
+                       }
+                      }
+                     ],
+                     "href": "{book}"
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-23",
+                     "tag": "a",
+                     "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-[#00B5A4] text-teal-700 hover:bg-teal-50",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-24",
+                        "name": "phone",
+                        "cls": "",
+                        "size": 16
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-25",
+                        "tag": "",
+                        "cls": "",
+                        "text": " Call now"
+                       }
+                      }
+                     ],
+                     "href": "tel:+447846726428"
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-26",
+            "tag": "div",
+            "cls": "lg:col-span-2 space-y-4",
+            "children": [
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-27",
+               "tag": "div",
+               "cls": "rounded-xl bg-[#0A1520] text-white p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-28",
+                  "tag": "p",
+                  "cls": "text-sm text-slate-300 mb-2",
+                  "text": "Questions? Call us:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-29",
+                  "tag": "a",
+                  "cls": "flex items-center gap-2 text-2xl font-bold text-teal-400 hover:text-teal-300",
+                  "children": [
+                   {
+                    "type": "SvcIcon",
+                    "props": {
+                     "id": "SvcIcon-30",
+                     "name": "phone",
+                     "cls": "",
+                     "size": 20
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-31",
+                     "tag": "",
+                     "cls": "",
+                     "text": " 07846 726428"
+                    }
+                   }
+                  ],
+                  "href": "tel:+447846726428"
+                 }
+                },
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-32",
+                  "tag": "p",
+                  "cls": "text-xs text-slate-400 mt-2",
+                  "text": "Mon–Fri 8am–6pm, Sat 9am–4pm"
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-33",
+               "tag": "div",
+               "cls": "rounded-xl bg-white border border-slate-200 p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-34",
+                  "tag": "p",
+                  "cls": "text-sm font-semibold text-slate-500 mb-3",
+                  "text": "This is a service for:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-35",
+                  "tag": "div",
+                  "cls": "flex flex-wrap gap-2",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-36",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-37",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-38",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Homeowners"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-39",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-40",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-41",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Tenants"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-42",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-43",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-44",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Busy Families"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-45",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-46",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-47",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Landlords"
+                       }
+                      }
+                     ]
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       },
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-48",
+         "tag": "div",
+         "cls": "rounded-2xl border border-slate-200 bg-white p-6 sm:p-10",
+         "children": [
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-49",
+            "tag": "p",
+            "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-2",
+            "text": "Manchester House Cleaners"
+           }
+          },
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-50",
+            "tag": "h2",
+            "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+            "text": "Regular house cleaners in Manchester you can rely on"
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-51",
+            "tag": "div",
+            "cls": "space-y-4",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-52",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Cleaniq Services provides regular house cleaning in Manchester and across Greater Manchester. Our local house cleaners visit every week, every fortnight or once a month, and follow the same checklist on every visit, so your home stays clean without you having to think about it."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-53",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "A regular cleaner is one of the simplest ways to get your evenings and weekends back. Instead of catching up on housework, you come home to clean floors, fresh bathrooms and a tidy kitchen. You choose the day, the arrival time and how many hours each visit lasts when you book, and your future visits are scheduled for you."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-54",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Book your regular house cleaning online in a few minutes or call us on [07846 726428](tel:+447846726428). Need a bigger refresh first? Start with a [deep clean](/service/deep-cleaning-manchester), keep it that way with regular visits, and add [oven cleaning](/service/oven-cleaning-manchester) or [carpet cleaning](/service/carpet-cleaning-manchester) whenever you need it.",
+               "linkCls": "text-teal-700 font-semibold hover:underline"
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "content": [
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-55",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-56",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "About this service"
       }
-    ],
-    "checklist": {
-      "heading": "Regular House Cleaning Checklist — Manchester",
-      "intro": "What our house cleaners look after on every regular visit:",
-      "rooms": [
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-57",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "What's Included"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-58",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-5",
+       "text": "Keep on top of your home without giving up your weekends. Book a regular house clean every week, fortnight or month and a vetted Cleaniq cleaner will keep your kitchen, bathrooms, bedrooms and living areas fresh on every visit."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-59",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Searching for reliable house cleaners near you in Manchester? Cleaniq Services' regular house cleaning keeps your home consistently clean on a schedule that suits you — every week, every fortnight or once a month. Every visit follows the same checklist, so your kitchen, bathrooms, bedrooms and living areas are looked after every time, and you can add extras such as oven cleaning whenever you need them."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-60",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
         {
-          "room": "Kitchen",
-          "tasks": [
-            "Wipe worktops, splashbacks and cupboard fronts",
-            "Clean the outside of the oven, hob, microwave and fridge",
-            "Clean and polish the sink and taps",
-            "Wipe handles and light switches",
-            "Sweep and mop the floor",
-            "Empty and reline bins"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-61",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-62",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-63",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-64",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Weekly, fortnightly or monthly visits"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "Bathrooms & Toilets",
-          "tasks": [
-            "Clean and disinfect toilets",
-            "Clean the bath, shower, basin and taps",
-            "Wipe tiles, mirrors and glass",
-            "Mop the floor"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-65",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-66",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-67",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-68",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Kitchen, bathrooms, bedrooms and living areas every visit"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "Bedrooms & Living Areas",
-          "tasks": [
-            "Dust surfaces, shelves and furniture",
-            "Vacuum carpets, rugs and upholstery",
-            "Clean mirrors and glass",
-            "Make beds (change linen if left out)",
-            "Tidy and straighten cushions and throws"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-69",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-70",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-71",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-72",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Vetted local cleaners and a 48-hour re-clean guarantee"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "Floors & Finishing Touches",
-          "tasks": [
-            "Vacuum stairs, landings and hallways",
-            "Mop hard floors throughout",
-            "Wipe skirting boards, door handles and switches",
-            "Empty bins in every room"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-73",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-74",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-75",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-76",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Use your own supplies, or we bring eco-friendly products for £10"
+            }
+           }
           ]
+         }
         }
-      ]
-    },
-    "whyMatters": {
-      "heading": "Why a Regular Cleaner Makes Life Easier",
-      "body": [
-        "Dust, grease and limescale build up quickly in a busy home. A regular clean deals with them little and often, so they never become a big job — and your home feels ready for visitors every day of the week.",
-        "Most of our regular customers tell us the biggest difference is time: no more spending evenings and weekends catching up on housework. Booking a weekly or fortnightly house cleaner hands that job to someone who does it every day.",
-        "Because every visit follows the same checklist, nothing gets forgotten. And if you ever need more, you can add extras like oven cleaning or a one-off deep clean when you book."
-      ]
-    },
-    "seoFooter": "Cleaniq Services provides regular house cleaning across Manchester and Greater Manchester. Looking for a house cleaner near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book weekly, fortnightly or monthly cleaning from vetted local cleaners online, or call +44 7846 726428."
+       ]
+      }
+     }
+    ]
+   }
   },
-  "seo": {
-    "faqTitle": "Regular House Cleaning Manchester",
-    "banner": {
-      "h2": "Regular House Cleaning in Manchester",
-      "ticks": [
-        "Weekly, fortnightly or monthly visits",
-        "Vetted local house cleaners",
-        "48-hour re-clean guarantee"
-      ],
-      "serviceFor": [
-        "Homeowners",
-        "Tenants",
-        "Busy Families",
-        "Landlords"
-      ]
-    },
-    "intro": {
-      "label": "Manchester House Cleaners",
-      "h2": "Regular house cleaners in Manchester you can rely on",
-      "paras": [
-        "Cleaniq Services provides regular house cleaning in Manchester and across Greater Manchester. Our local house cleaners visit every week, every fortnight or once a month, and follow the same checklist on every visit, so your home stays clean without you having to think about it.",
-        "A regular cleaner is one of the simplest ways to get your evenings and weekends back. Instead of catching up on housework, you come home to clean floors, fresh bathrooms and a tidy kitchen. You choose the day, the arrival time and how many hours each visit lasts when you book, and your future visits are scheduled for you.",
-        "Book your regular house cleaning online in a few minutes or call us on [07846 726428](tel:+447846726428). Need a bigger refresh first? Start with a [deep clean](/service/deep-cleaning-manchester), keep it that way with regular visits, and add [oven cleaning](/service/oven-cleaning-manchester) or [carpet cleaning](/service/carpet-cleaning-manchester) whenever you need it."
-      ]
-    },
-    "how": {
-      "h2": "How does regular house cleaning in Manchester work?",
-      "intro": "Setting up regular house cleaning with Cleaniq Services takes a few minutes. You tell us how often you'd like a cleaner, which day suits you and how long each visit should last, and we take care of the rest. Every visit follows our regular house cleaning checklist, so the standard stays the same week after week, and you can add extras such as oven cleaning when your home needs a little more. If you ever need to change a visit, just let us know. Here is how it works, step by step:",
-      "steps": [
-        {
-          "title": "Book",
-          "body": "Book online or call us. Choose weekly, fortnightly or monthly visits, the day and arrival time that suit you, and how many hours each visit lasts."
-        },
-        {
-          "title": "Your cleaner arrives",
-          "body": "A vetted Cleaniq Services house cleaner arrives at the agreed time. If you won't be home, tell us how to get in, for example a key or entry code."
-        },
-        {
-          "title": "The clean",
-          "body": "Your cleaner works through our regular house cleaning checklist: kitchen, bathrooms, bedrooms, living areas, stairs and hallways."
-        },
-        {
-          "title": "Repeat",
-          "body": "Your next visits are already scheduled, so your home stays clean week after week. Tell us within 48 hours if anything wasn't right and we'll put it right for free."
-        }
-      ]
-    },
-    "benefits": {
-      "h2": "Benefits of regular house cleaning in Manchester",
-      "intro": "A regular cleaner does more than keep your home tidy. Cleaning little and often stops dust, grease and limescale from building up, which keeps your home healthier for you, your family and your pets, and makes every visit go further. It also takes away one of the biggest sources of weekly stress: housework that never seems to end. Here are the main benefits our regular house cleaning customers in Manchester tell us about:",
-      "items": [
-        {
-          "title": "More free time",
-          "body": "No more spending evenings and weekends catching up on cleaning. Your house cleaner looks after it while you get on with your life."
-        },
-        {
-          "title": "A consistently clean home",
-          "body": "Every visit follows the same checklist, so nothing gets missed and your home is ready for visitors any day of the week."
-        },
-        {
-          "title": "A regular cleaner",
-          "body": "Regular cleans have a regular cleaner, who gets to know your home and how you like things done."
-        },
-        {
-          "title": "Less build-up",
-          "body": "Cleaning little and often keeps dust, grease and limescale under control, so they never turn into a big job."
-        },
-        {
-          "title": "A schedule that suits you",
-          "body": "Weekly, fortnightly or monthly, on the day and at the arrival time you choose."
-        },
-        {
-          "title": "48-hour re-clean guarantee",
-          "body": "If something isn't right, tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
-        }
-      ]
-    },
-    "types": {
-      "label": "Every Type of Home",
-      "h2": "Regular house cleaning for every kind of home in Manchester",
-      "body": "Our house cleaners look after all kinds of homes across Manchester, from city-centre flats to family houses in the suburbs. Every home is different, so tell us about yours when you book: the number of bedrooms and bathrooms, any pets, and anything you'd like your cleaner to focus on. You can use your own cleaning products, or we'll bring eco-friendly products and equipment for £10 per visit.",
-      "chips": [
-        "Flats & apartments",
-        "Family houses",
-        "Shared houses",
-        "Rented homes",
-        "Homes with pets",
-        "New-build homes"
-      ]
-    },
-    "compare": {
-      "label": "Regular or Deep Clean?",
-      "h2": "Regular house cleaning or a deep clean: what's the difference?",
-      "intro": "Most homes need both at some point. A deep clean gets your home to a high standard, and regular house cleaning keeps it there.",
-      "cards": [
-        {
-          "title": "Regular house cleaning",
-          "body": "Visits every week, fortnight or month. Your cleaner keeps on top of the everyday jobs: kitchen surfaces and the outside of appliances, bathrooms, dusting, vacuuming, mopping and bins, following our regular house cleaning checklist."
-        },
-        {
-          "title": "Deep clean",
-          "body": "A one-off, top-to-bottom clean for when your home needs more, or before you start regular cleaning. It reaches the areas a regular visit doesn't cover, such as inside appliances and cupboards, behind furniture and built-up limescale. Read more about our [deep cleaning in Manchester](/service/deep-cleaning-manchester)."
-        }
-      ]
-    },
-    "experts": {
-      "label": "House Cleaners Manchester",
-      "h2": "Vetted house cleaners in Manchester you can trust",
-      "paras": [
-        "Letting someone into your home takes trust. Every Cleaniq Services cleaner has a face-to-face interview, background checks and a practical skills assessment before they clean a customer's home. They know what a regular clean should cover and take pride in leaving your home looking and feeling fresh.",
-        "Your house cleaner works carefully around your belongings, follows any notes you leave, and lets us know if they spot anything that needs your attention. If anything isn't right after a visit, tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
-      ],
-      "points": [
-        "Interviewed face to face and background checked.",
-        "Practical skills assessment before their first clean.",
-        "Local to Manchester and Greater Manchester.",
-        "Backed by our 48-hour re-clean guarantee."
-      ]
-    },
-    "combine": {
-      "h2": "Add extras to your regular house cleaning",
-      "intro": "Regular visits keep on top of the everyday jobs. Every so often, your home will need a little more, and you can add one of our other cleaning services in Manchester whenever you need it. Many customers book a deep clean before their first regular visit, add an oven clean every few months, or have their carpets cleaned once or twice a year to keep their home fresh. Choose from:",
-      "links": [
-        {
-          "to": "/service/deep-cleaning-manchester",
-          "name": "Deep Cleaning",
-          "body": "A top-to-bottom clean of the areas a regular visit doesn't reach."
-        },
-        {
-          "to": "/service/oven-cleaning-manchester",
-          "name": "Oven Cleaning",
-          "body": "Racks, trays, door glass and the oven interior cleaned properly."
-        },
-        {
-          "to": "/service/carpet-cleaning-manchester",
-          "name": "Carpet Cleaning",
-          "body": "Fresher carpets, stairs and upholstery."
-        },
-        {
-          "to": "/service/end-of-tenancy-cleaning-manchester",
-          "name": "End of Tenancy Cleaning",
-          "body": "Moving out? Hand the property back clean."
-        }
-      ]
-    },
-    "local": {
-      "label": "House Cleaning Across Manchester",
-      "h2": "House cleaners across Manchester and Greater Manchester",
-      "paras": [
-        "Our house cleaners cover homes across Manchester and Greater Manchester, including Manchester City Centre, Ancoats and the Northern Quarter, Salford, Didsbury, Chorlton, Stockport, Trafford, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan. Our office is at 20 Swan St in Ancoats, so we're never far from your home.",
-        "Whether you live in a city-centre apartment or a family home in the suburbs, you can book regular house cleaning on the day and at the time that suits you. Choose your area from the list on this page to see more about house cleaning near you."
-      ]
-    },
-    "tips": {
-      "label": "Tips",
-      "h2": "Tips for getting the most from your regular cleaner",
-      "intro": "A few simple habits help your house cleaner get more done in the time you've booked, and keep your home looking its best between visits:",
-      "tips": [
-        "Tidy away clutter, toys and clothes before your cleaner arrives, so they can spend their time cleaning rather than tidying.",
-        "Leave a short note about anything you'd like your cleaner to focus on this visit.",
-        "Tell us how your cleaner can get in if you won't be home, for example a key or entry code.",
-        "Leave fresh bed linen out if you'd like your beds changed.",
-        "Choose enough hours for the size of your home, especially for the first few visits.",
-        "Add an oven clean or a deep clean every few months for the jobs a regular visit doesn't cover.",
-        "Tell us within 48 hours if anything wasn't right, so we can put it right quickly."
-      ]
-    },
-    "quote": {
-      "h2": "Get a quote for regular house cleaning",
-      "body": "Not sure how many hours you need, or how often? Contact Cleaniq Services and we'll help you choose. Tell us how many bedrooms and bathrooms your home has, whether you have pets and how often you'd like a cleaner, and we'll recommend the right regular house cleaning for your home. Call us on 07846 726428 or fill out our quick quote form and we'll get back to you. There's no obligation, and we cover homes right across Manchester and Greater Manchester."
-    },
-    "closing": {
-      "h2": "Book your regular house cleaning in Manchester",
-      "body": "Book your first visit online in a few minutes, or call Cleaniq Services on [07846 726428](tel:+447846726428) and we'll help you set up a schedule that suits you."
-    }
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-77",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
   },
-  "faqs": [
-    {
-      "q": "How much does regular house cleaning cost in Manchester?",
-      "a": "Regular house cleaning is charged by the hour. The current rate is shown at the top of this page and comes straight from our booking system. You choose how many hours each visit lasts when you book."
-    },
-    {
-      "q": "How often can I book a regular cleaner?",
-      "a": "Weekly, fortnightly or monthly. Choose the frequency, day and arrival time when you book, and your future visits are scheduled for you."
-    },
-    {
-      "q": "Do I need to be home while the house cleaner is there?",
-      "a": "No. Many customers leave a key or entry code — just add access notes when you book."
-    },
-    {
-      "q": "Do your cleaners bring cleaning products?",
-      "a": "You choose: use your own supplies, or we bring eco-friendly cleaning products and equipment for £10 per visit."
-    },
-    {
-      "q": "What if I'm not happy with a clean?",
-      "a": "Tell us within 48 hours and we'll send a cleaner back to re-clean anything that wasn't right, free of charge."
-    },
-    {
-      "q": "Where do you have house cleaners near me?",
-      "a": "We clean homes across Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan."
-    },
-    {
-      "q": "What does a regular house clean include?",
-      "a": "Every regular visit covers the kitchen, bathrooms, bedrooms, living areas, stairs and hallways: surfaces wiped, the outside of appliances cleaned, toilets and bathrooms cleaned, dusting, vacuuming, mopping and bins emptied. The full regular house cleaning checklist is on this page."
-    },
-    {
-      "q": "Will I have the same cleaner every time?",
-      "a": "Regular cleans have a regular cleaner, so you see the same person on each visit wherever possible."
-    },
-    {
-      "q": "When am I charged for regular cleans?",
-      "a": "Each visit is charged 24 hours before it takes place, using the card you saved when you booked your first visit."
-    },
-    {
-      "q": "Can I pause or cancel my regular cleaning?",
-      "a": "Yes. Contact us to pause or cancel your regular cleans. Please see our terms and conditions for notice periods and any fees."
-    },
-    {
-      "q": "How many hours do I need for each visit?",
-      "a": "It depends on the size of your home and how much needs doing. You choose the number of hours when you book. If you're not sure, call us on 07846 726428 and we'll help you decide."
-    },
-    {
-      "q": "Do you clean homes with pets?",
-      "a": "Yes. Just let us know about any pets when you book, so your cleaner knows what to expect."
-    }
-  ]
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-78",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-79",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Why Cleaniq Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-80",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-6",
+       "text": "Why Choose Cleaniq Services for Regular House Cleaning in Manchester?"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-81",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-5",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-82",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-83",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-84",
+                "name": "badge-check",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-85",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-86",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Vetted Local House Cleaners"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-87",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Every Cleaniq cleaner has a face-to-face interview, background checks and a practical skills assessment before cleaning a customer's home."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-88",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-89",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-90",
+                "name": "calendar",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-91",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-92",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "A Schedule That Suits You"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-93",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Choose weekly, fortnightly or monthly visits when you book, and pick the day and arrival time that works for you."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-94",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-95",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-96",
+                "name": "shield-check",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-97",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-98",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "48-Hour Re-Clean Guarantee"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-99",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "If anything isn't right after a visit, tell us within 48 hours and we'll send a cleaner back to re-clean it for free."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-100",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-101",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-102",
+                "name": "sparkles",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-103",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-104",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Supplies Your Way"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-105",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Use your own cleaning products, or we'll bring eco-friendly products and equipment for £10 per visit."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-106",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-107",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-108",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "How It Works"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-109",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "How does regular house cleaning in Manchester work?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-110",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Setting up regular house cleaning with Cleaniq Services takes a few minutes. You tell us how often you'd like a cleaner, which day suits you and how long each visit should last, and we take care of the rest. Every visit follows our regular house cleaning checklist, so the standard stays the same week after week, and you can add extras such as oven cleaning when your home needs a little more. If you ever need to change a visit, just let us know. Here is how it works, step by step:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-111",
+       "tag": "ol",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-112",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-113",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-114",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "1"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-115",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Book"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-116",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Book online or call us. Choose weekly, fortnightly or monthly visits, the day and arrival time that suit you, and how many hours each visit lasts."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-117",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-118",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-119",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "2"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-120",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Your cleaner arrives"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-121",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "A vetted Cleaniq Services house cleaner arrives at the agreed time. If you won't be home, tell us how to get in, for example a key or entry code."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-122",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-123",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-124",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "3"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-125",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "The clean"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-126",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Your cleaner works through our regular house cleaning checklist: kitchen, bathrooms, bedrooms, living areas, stairs and hallways."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-127",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-128",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-129",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "4"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-130",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Repeat"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-131",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Your next visits are already scheduled, so your home stays clean week after week. Tell us within 48 hours if anything wasn't right and we'll put it right for free."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-132",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-133",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-134",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Benefits"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-135",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Benefits of regular house cleaning in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-136",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "A regular cleaner does more than keep your home tidy. Cleaning little and often stops dust, grease and limescale from building up, which keeps your home healthier for you, your family and your pets, and makes every visit go further. It also takes away one of the biggest sources of weekly stress: housework that never seems to end. Here are the main benefits our regular house cleaning customers in Manchester tell us about:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-137",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-138",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-139",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-140",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-141",
+                   "name": "clock",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-142",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "More free time"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-143",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "No more spending evenings and weekends catching up on cleaning. Your house cleaner looks after it while you get on with your life."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-144",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-145",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-146",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-147",
+                   "name": "badge-check",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-148",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "A consistently clean home"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-149",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Every visit follows the same checklist, so nothing gets missed and your home is ready for visitors any day of the week."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-150",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-151",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-152",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-153",
+                   "name": "star",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-154",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "A regular cleaner"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-155",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Regular cleans have a regular cleaner, who gets to know your home and how you like things done."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-156",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-157",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-158",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-159",
+                   "name": "shield-check",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-160",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Less build-up"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-161",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Cleaning little and often keeps dust, grease and limescale under control, so they never turn into a big job."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-162",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-163",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-164",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-165",
+                   "name": "calendar",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-166",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "A schedule that suits you"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-167",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Weekly, fortnightly or monthly, on the day and at the arrival time you choose."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-168",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-169",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-170",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-171",
+                   "name": "sparkles",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-172",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "48-hour re-clean guarantee"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-173",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "If something isn't right, tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-174",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-175",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-176",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Every Type of Home"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-177",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Regular house cleaning for every kind of home in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-178",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our house cleaners look after all kinds of homes across Manchester, from city-centre flats to family houses in the suburbs. Every home is different, so tell us about yours when you book: the number of bedrooms and bathrooms, any pets, and anything you'd like your cleaner to focus on. You can use your own cleaning products, or we'll bring eco-friendly products and equipment for £10 per visit."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-179",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-180",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-181",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-182",
+             "tag": "",
+             "cls": "",
+             "text": "Flats & apartments"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-183",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-184",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-185",
+             "tag": "",
+             "cls": "",
+             "text": "Family houses"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-186",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-187",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-188",
+             "tag": "",
+             "cls": "",
+             "text": "Shared houses"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-189",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-190",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-191",
+             "tag": "",
+             "cls": "",
+             "text": "Rented homes"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-192",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-193",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-194",
+             "tag": "",
+             "cls": "",
+             "text": "Homes with pets"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-195",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-196",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-197",
+             "tag": "",
+             "cls": "",
+             "text": "New-build homes"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-198",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-199",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-200",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Regular or Deep Clean?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-201",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Regular house cleaning or a deep clean: what's the difference?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-202",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Most homes need both at some point. A deep clean gets your home to a high standard, and regular house cleaning keeps it there."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-203",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-204",
+          "tag": "div",
+          "cls": "p-5 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-205",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-2",
+             "text": "Regular house cleaning"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-206",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Visits every week, fortnight or month. Your cleaner keeps on top of the everyday jobs: kitchen surfaces and the outside of appliances, bathrooms, dusting, vacuuming, mopping and bins, following our regular house cleaning checklist."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-207",
+          "tag": "div",
+          "cls": "p-5 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-208",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-2",
+             "text": "Deep clean"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-209",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "A one-off, top-to-bottom clean for when your home needs more, or before you start regular cleaning. It reaches the areas a regular visit doesn't cover, such as inside appliances and cupboards, behind furniture and built-up limescale. Read more about our [deep cleaning in Manchester](/service/deep-cleaning-manchester).",
+             "linkCls": "text-teal-700 font-semibold hover:underline"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-210",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-211",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-212",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Room-by-room checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-213",
+       "tag": "h2",
+       "cls": "scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Regular House Cleaning Checklist — Manchester",
+       "anchor": "full-checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-214",
+       "tag": "p",
+       "cls": "text-slate-500 text-sm mb-8 leading-relaxed",
+       "text": "What our house cleaners look after on every regular visit:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-215",
+       "tag": "div",
+       "cls": "space-y-8",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-216",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-217",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-218",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Kitchen"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-219",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-220",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-221",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-222",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-223",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wipe worktops, splashbacks and cupboard fronts"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-224",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-225",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-226",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean the outside of the oven, hob, microwave and fridge"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-227",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-228",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-229",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean and polish the sink and taps"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-230",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-231",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-232",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wipe handles and light switches"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-233",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-234",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-235",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Sweep and mop the floor"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-236",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-237",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-238",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Empty and reline bins"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-239",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-240",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-241",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Bathrooms & Toilets"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-242",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-243",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-244",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-245",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-246",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean and disinfect toilets"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-247",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-248",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-249",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean the bath, shower, basin and taps"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-250",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-251",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-252",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wipe tiles, mirrors and glass"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-253",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-254",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-255",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Mop the floor"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-256",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-257",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-258",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Bedrooms & Living Areas"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-259",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-260",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-261",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-262",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-263",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Dust surfaces, shelves and furniture"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-264",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-265",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-266",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Vacuum carpets, rugs and upholstery"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-267",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-268",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-269",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean mirrors and glass"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-270",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-271",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-272",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Make beds (change linen if left out)"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-273",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-274",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-275",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Tidy and straighten cushions and throws"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-276",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-277",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-278",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Floors & Finishing Touches"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-279",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-280",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-281",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-282",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-283",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Vacuum stairs, landings and hallways"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-284",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-285",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-286",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Mop hard floors throughout"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-287",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-288",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-289",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wipe skirting boards, door handles and switches"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-290",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-291",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-292",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Empty bins in every room"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-293",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-294",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-295",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Coverage"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-296",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-3",
+       "text": "House cleaners Near You"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-297",
+       "tag": "p",
+       "cls": "text-sm text-slate-500 mb-4",
+       "text": "Our house cleaners work across Manchester and Greater Manchester, including:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-298",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-299",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-300",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-301",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-302",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-303",
+             "tag": "",
+             "cls": "",
+             "text": "Manchester City Centre"
+            }
+           }
+          ],
+          "href": "/locations/manchester-city-centre"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-304",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-305",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-306",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-307",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-308",
+             "tag": "",
+             "cls": "",
+             "text": "Salford"
+            }
+           }
+          ],
+          "href": "/locations/salford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-309",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-310",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-311",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-312",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-313",
+             "tag": "",
+             "cls": "",
+             "text": "Trafford"
+            }
+           }
+          ],
+          "href": "/locations/trafford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-314",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-315",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-316",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-317",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-318",
+             "tag": "",
+             "cls": "",
+             "text": "Stockport"
+            }
+           }
+          ],
+          "href": "/locations/stockport"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-319",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-320",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-321",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-322",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-323",
+             "tag": "",
+             "cls": "",
+             "text": "Didsbury"
+            }
+           }
+          ],
+          "href": "/locations/didsbury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-324",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-325",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-326",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-327",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-328",
+             "tag": "",
+             "cls": "",
+             "text": "Chorlton"
+            }
+           }
+          ],
+          "href": "/locations/chorlton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-329",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-330",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-331",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-332",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-333",
+             "tag": "",
+             "cls": "",
+             "text": "Bolton"
+            }
+           }
+          ],
+          "href": "/locations/bolton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-334",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-335",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-336",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-337",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-338",
+             "tag": "",
+             "cls": "",
+             "text": "Bury"
+            }
+           }
+          ],
+          "href": "/locations/bury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-339",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-340",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-341",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-342",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-343",
+             "tag": "",
+             "cls": "",
+             "text": "Oldham"
+            }
+           }
+          ],
+          "href": "/locations/oldham"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-344",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-345",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-346",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-347",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-348",
+             "tag": "",
+             "cls": "",
+             "text": "Rochdale"
+            }
+           }
+          ],
+          "href": "/locations/rochdale"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-349",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-350",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-351",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-352",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-353",
+             "tag": "",
+             "cls": "",
+             "text": "Tameside"
+            }
+           }
+          ],
+          "href": "/locations/tameside"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-354",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-355",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-356",
+             "tag": "",
+             "cls": "",
+             "text": "House cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-357",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-358",
+             "tag": "",
+             "cls": "",
+             "text": "Wigan"
+            }
+           }
+          ],
+          "href": "/locations/wigan"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-359",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-360",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-361",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "House Cleaners Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-362",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Vetted house cleaners in Manchester you can trust"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-363",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Letting someone into your home takes trust. Every Cleaniq Services cleaner has a face-to-face interview, background checks and a practical skills assessment before they clean a customer's home. They know what a regular clean should cover and take pride in leaving your home looking and feeling fresh."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-364",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Your house cleaner works carefully around your belongings, follows any notes you leave, and lets us know if they spot anything that needs your attention. If anything isn't right after a visit, tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-365",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-366",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-367",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-368",
+                "name": "shield-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-369",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Interviewed face to face and background checked."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-370",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-371",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-372",
+                "name": "badge-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-373",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Practical skills assessment before their first clean."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-374",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-375",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-376",
+                "name": "map-pin",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-377",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Local to Manchester and Greater Manchester."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-378",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-379",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-380",
+                "name": "star",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-381",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Backed by our 48-hour re-clean guarantee."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-382",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-383",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-384",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Extra Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-385",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Add extras to your regular house cleaning"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-386",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Regular visits keep on top of the everyday jobs. Every so often, your home will need a little more, and you can add one of our other cleaning services in Manchester whenever you need it. Many customers book a deep clean before their first regular visit, add an oven clean every few months, or have their carpets cleaned once or twice a year to keep their home fresh. Choose from:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-387",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-388",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-389",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-390",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-391",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Deep Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-392",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-393",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "A top-to-bottom clean of the areas a regular visit doesn't reach."
+               }
+              }
+             ],
+             "href": "/service/deep-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-394",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-395",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-396",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-397",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Oven Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-398",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-399",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "Racks, trays, door glass and the oven interior cleaned properly."
+               }
+              }
+             ],
+             "href": "/service/oven-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-400",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-401",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-402",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-403",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Carpet Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-404",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-405",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "Fresher carpets, stairs and upholstery."
+               }
+              }
+             ],
+             "href": "/service/carpet-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-406",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-407",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-408",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-409",
+                   "tag": "",
+                   "cls": "",
+                   "text": "End of Tenancy Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-410",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-411",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "Moving out? Hand the property back clean."
+               }
+              }
+             ],
+             "href": "/service/end-of-tenancy-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-412",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-413",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-[#00B5A4] text-white hover:bg-teal-600",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-414",
+             "name": "calendar",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-415",
+             "tag": "",
+             "cls": "",
+             "text": " Book now"
+            }
+           }
+          ],
+          "href": "{book}"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-416",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-[#00B5A4] text-teal-700 hover:bg-teal-50",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-417",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-418",
+             "tag": "",
+             "cls": "",
+             "text": " Call now"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-419",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-420",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-421",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "House Cleaning Across Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-422",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "House cleaners across Manchester and Greater Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-423",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our house cleaners cover homes across Manchester and Greater Manchester, including Manchester City Centre, Ancoats and the Northern Quarter, Salford, Didsbury, Chorlton, Stockport, Trafford, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan. Our office is at 20 Swan St in Ancoats, so we're never far from your home."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-424",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Whether you live in a city-centre apartment or a family home in the suburbs, you can book regular house cleaning on the day and at the time that suits you. Choose your area from the list on this page to see more about house cleaning near you."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-425",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-426",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-427",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Tips"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-428",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Tips for getting the most from your regular cleaner"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-429",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "A few simple habits help your house cleaner get more done in the time you've booked, and keep your home looking its best between visits:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-430",
+       "tag": "ul",
+       "cls": "space-y-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-431",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-432",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-433",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-434",
+             "tag": "",
+             "cls": "",
+             "text": "Tidy away clutter, toys and clothes before your cleaner arrives, so they can spend their time cleaning rather than tidying."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-435",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-436",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-437",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-438",
+             "tag": "",
+             "cls": "",
+             "text": "Leave a short note about anything you'd like your cleaner to focus on this visit."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-439",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-440",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-441",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-442",
+             "tag": "",
+             "cls": "",
+             "text": "Tell us how your cleaner can get in if you won't be home, for example a key or entry code."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-443",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-444",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-445",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-446",
+             "tag": "",
+             "cls": "",
+             "text": "Leave fresh bed linen out if you'd like your beds changed."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-447",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-448",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-449",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-450",
+             "tag": "",
+             "cls": "",
+             "text": "Choose enough hours for the size of your home, especially for the first few visits."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-451",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-452",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-453",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-454",
+             "tag": "",
+             "cls": "",
+             "text": "Add an oven clean or a deep clean every few months for the jobs a regular visit doesn't cover."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-455",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-456",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-457",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-458",
+             "tag": "",
+             "cls": "",
+             "text": "Tell us within 48 hours if anything wasn't right, so we can put it right quickly."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-459",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-460",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-461",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "The case for professionals"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-462",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-5",
+       "text": "Why a Regular Cleaner Makes Life Easier"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-463",
+       "tag": "div",
+       "cls": "space-y-4",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-464",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Dust, grease and limescale build up quickly in a busy home. A regular clean deals with them little and often, so they never become a big job — and your home feels ready for visitors every day of the week."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-465",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Most of our regular customers tell us the biggest difference is time: no more spending evenings and weekends catching up on housework. Booking a weekly or fortnightly house cleaner hands that job to someone who does it every day."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-466",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Because every visit follows the same checklist, nothing gets forgotten. And if you ever need more, you can add extras like oven cleaning or a one-off deep clean when you book."
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-467",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcOurWork",
+   "props": {
+    "id": "SvcOurWork-468",
+    "title": "Photos from our recent jobs"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-469",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcReviews",
+   "props": {
+    "id": "SvcReviews-470",
+    "label": "Customer reviews",
+    "heading": "What Our Customers Say",
+    "linkText": "Read all reviews on Google"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-471",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcRelated",
+   "props": {
+    "id": "SvcRelated-472",
+    "label": "More from Cleaniq Services",
+    "heading": "Related cleaning services"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-473",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-474",
+    "tag": "section",
+    "cls": "rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-475",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-100 mb-2",
+       "text": "Contact Us For a Free Quote"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-476",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold mb-3",
+       "text": "Get a quote for regular house cleaning"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-477",
+       "tag": "p",
+       "cls": "text-teal-50 leading-relaxed mb-6",
+       "text": "Not sure how many hours you need, or how often? Contact Cleaniq Services and we'll help you choose. Tell us how many bedrooms and bathrooms your home has, whether you have pets and how often you'd like a cleaner, and we'll recommend the right regular house cleaning for your home. Call us on 07846 726428 or fill out our quick quote form and we'll get back to you. There's no obligation, and we cover homes right across Manchester and Greater Manchester."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-478",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-479",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-480",
+             "tag": "",
+             "cls": "",
+             "text": "Get a free quote "
+            }
+           },
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-481",
+             "name": "arrow-right",
+             "cls": "",
+             "size": 16
+            }
+           }
+          ],
+          "href": "/get-a-quote"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-482",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-483",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-484",
+             "tag": "",
+             "cls": "",
+             "text": " 07846 726428"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-485",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-486",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-487",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Frequently asked questions"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-488",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Frequently Asked Questions: Regular House Cleaning Manchester"
+      }
+     },
+     {
+      "type": "SvcFaqs",
+      "props": {
+       "id": "SvcFaqs-489",
+       "numbered": "yes",
+       "items": [
+        {
+         "q": "How much does regular house cleaning cost in Manchester?",
+         "a": "Regular house cleaning is charged by the hour. The current rate is shown at the top of this page and comes straight from our booking system. You choose how many hours each visit lasts when you book."
+        },
+        {
+         "q": "How often can I book a regular cleaner?",
+         "a": "Weekly, fortnightly or monthly. Choose the frequency, day and arrival time when you book, and your future visits are scheduled for you."
+        },
+        {
+         "q": "Do I need to be home while the house cleaner is there?",
+         "a": "No. Many customers leave a key or entry code — just add access notes when you book."
+        },
+        {
+         "q": "Do your cleaners bring cleaning products?",
+         "a": "You choose: use your own supplies, or we bring eco-friendly cleaning products and equipment for £10 per visit."
+        },
+        {
+         "q": "What if I'm not happy with a clean?",
+         "a": "Tell us within 48 hours and we'll send a cleaner back to re-clean anything that wasn't right, free of charge."
+        },
+        {
+         "q": "Where do you have house cleaners near me?",
+         "a": "We clean homes across Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan."
+        },
+        {
+         "q": "What does a regular house clean include?",
+         "a": "Every regular visit covers the kitchen, bathrooms, bedrooms, living areas, stairs and hallways: surfaces wiped, the outside of appliances cleaned, toilets and bathrooms cleaned, dusting, vacuuming, mopping and bins emptied. The full regular house cleaning checklist is on this page."
+        },
+        {
+         "q": "Will I have the same cleaner every time?",
+         "a": "Regular cleans have a regular cleaner, so you see the same person on each visit wherever possible."
+        },
+        {
+         "q": "When am I charged for regular cleans?",
+         "a": "Each visit is charged 24 hours before it takes place, using the card you saved when you booked your first visit."
+        },
+        {
+         "q": "Can I pause or cancel my regular cleaning?",
+         "a": "Yes. Contact us to pause or cancel your regular cleans. Please see our terms and conditions for notice periods and any fees."
+        },
+        {
+         "q": "How many hours do I need for each visit?",
+         "a": "It depends on the size of your home and how much needs doing. You choose the number of hours when you book. If you're not sure, call us on 07846 726428 and we'll help you decide."
+        },
+        {
+         "q": "Do you clean homes with pets?",
+         "a": "Yes. Just let us know about any pets when you book, so your cleaner knows what to expect."
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-490",
+       "tag": "div",
+       "cls": "mt-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-491",
+          "tag": "h3",
+          "cls": "text-lg sm:text-xl font-bold mb-3",
+          "text": "Book your regular house cleaning in Manchester"
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-492",
+          "tag": "p",
+          "cls": "text-teal-50 leading-relaxed mb-6",
+          "text": "Book your first visit online in a few minutes, or call Cleaniq Services on [07846 726428](tel:+447846726428) and we'll help you set up a schedule that suits you.",
+          "linkCls": "font-bold underline underline-offset-2 hover:text-white"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-493",
+          "tag": "div",
+          "cls": "flex flex-col sm:flex-row gap-3",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-494",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-white text-teal-800 hover:bg-teal-50",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-495",
+                "name": "calendar",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-496",
+                "tag": "",
+                "cls": "",
+                "text": " Book now"
+               }
+              }
+             ],
+             "href": "{book}"
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-497",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-white/70 text-white hover:bg-white/10",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-498",
+                "name": "phone",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-499",
+                "tag": "",
+                "cls": "",
+                "text": " Call now"
+               }
+              }
+             ],
+             "href": "tel:+447846726428"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-500",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-501",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-502",
+       "tag": "p",
+       "cls": "text-xs text-slate-400 leading-relaxed",
+       "text": "Cleaniq Services provides regular house cleaning across Manchester and Greater Manchester. Looking for a house cleaner near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book weekly, fortnightly or monthly cleaning from vetted local cleaners online, or call +44 7846 726428."
+      }
+     }
+    ]
+   }
+  }
+ ]
 }

@@ -1,75 +1,237 @@
 {
-  "basics": {
-    "meta": "Cleaniq Services provides expert cleaning across Trafford, including Altrincham and Stretford. Deep cleaning, end of tenancy and Airbnb turnovers.",
-    "tagline": "Premium Cleaning Across Trafford",
-    "description": "From family homes in Altrincham to busy commercial spaces near Trafford Park, Cleaniq Services delivers dependable, high-standard cleaning across the borough. Our vetted, insured cleaners are trusted by residents, landlords and businesses alike.",
-    "services": [
-      "End of Tenancy Cleaning in Trafford",
-      "One-Off Deep Cleaning",
-      "Airbnb & Short-Let Turnovers",
-      "Commercial & Office Cleaning"
-    ],
-    "faqs": []
+  "root": {
+    "props": {
+      "title": "Cleaners in Trafford | Cleaning Services | Cleaniq",
+      "description": "Cleaniq Services provides expert cleaning across Trafford, including Altrincham and Stretford. Deep cleaning, end of tenancy and Airbnb turnovers.",
+      "shareTitle": "",
+      "shareDescription": ""
+    }
   },
-  "guide": {
-    "highlights": [
-      "Sale",
-      "Altrincham",
-      "Stretford"
-    ],
-    "intro": [
-      "Trafford covers everything from terraces and newer flats in Old Trafford and Stretford to family semis in Sale and Urmston and large period homes in Altrincham, Hale and Timperley.",
-      "With so many family homes, our Trafford cleaners spend a lot of time on regular cleans that keep busy weeks under control, plus longer deep cleans for bigger houses that need a proper reset."
-    ],
-    "popular": [
-      {
-        "slug": "regular-house-cleaning-manchester",
-        "why": "Family homes in Sale, Urmston and Timperley stay on top of things with a regular cleaner."
-      },
-      {
-        "slug": "deep-cleaning-manchester",
-        "why": "Larger Altrincham and Hale houses need extra time for a thorough top-to-bottom clean."
-      },
-      {
-        "slug": "carpet-cleaning-manchester",
-        "why": "Family homes with carpeted stairs and lounges benefit from a deep carpet clean once or twice a year."
+  "content": [
+    {
+      "type": "AreaHero",
+      "props": {
+        "id": "AreaHero-trafford-1",
+        "badge": "Local Manchester Cleaners",
+        "heading": "Professional Cleaners in",
+        "highlight": "{area}",
+        "tagline": "Premium Cleaning Across Trafford",
+        "text": "Looking for cleaners near you in {area}? Book a vetted local cleaner for regular house cleaning, a deep clean, end of tenancy, oven or carpet cleaning.",
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'm looking for a cleaner in {area}.",
+            "style": "soft",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "whyTitle": "Why Choose Us?",
+        "whyPoints": [
+          {
+            "icon": "shield",
+            "text": "Vetted Local Cleaners"
+          },
+          {
+            "icon": "star",
+            "text": "{rating}★ on Google"
+          },
+          {
+            "icon": "check",
+            "text": "Eco-Friendly Products"
+          },
+          {
+            "icon": "sparkles",
+            "text": "48-Hour Re-Clean Guarantee"
+          }
+        ]
       }
-    ],
-    "goodToKnow": [
-      "Larger homes in Altrincham and Hale: allow extra hours for a first deep clean.",
-      "Roads around Old Trafford get busy on match days, so a morning clean is often easier.",
-      "Regular cleans have a regular cleaner, which suits family homes with routines.",
-      "Tell us about pets when you book, so your cleaner knows what to expect."
-    ],
-    "faqs": [
-      {
-        "q": "Do you clean large family homes in Altrincham and Hale?",
-        "a": "Yes. Bigger homes simply need more hours. Choose the number of hours when you book, or call us and we'll help you decide."
-      },
-      {
-        "q": "Is there a good time to book a clean near Old Trafford?",
-        "a": "Match days make the roads around Old Trafford busy, so a morning clean on those days is usually easier."
-      },
-      {
-        "q": "Do you cover Sale, Urmston and Timperley?",
-        "a": "Yes. Our Trafford cleaners cover Sale, Urmston, Timperley, Stretford, Altrincham, Hale and Old Trafford."
+    },
+    {
+      "type": "AreaAbout",
+      "props": {
+        "id": "AreaAbout-trafford-2",
+        "image1": "our-work/deep-card.jpg",
+        "alt1": "Fridge cleaned inside after a deep clean by Cleaniq Services, a service we offer in {area}",
+        "image2": "our-work/regular-2.jpg",
+        "alt2": "Living room after a house clean by Cleaniq Services, a service we offer across {area}",
+        "image3": "service-office-photo-600.webp",
+        "alt3": "Tidy office desk with a computer and chairs: office cleaning available in {area}",
+        "heading": "About Our {area} Cleaning Services",
+        "paragraphs": [
+          "From family homes in Altrincham to busy commercial spaces near Trafford Park, Cleaniq Services delivers dependable, high-standard cleaning across the borough. Our vetted, insured cleaners are trusted by residents, landlords and businesses alike.",
+          "Trafford covers everything from terraces and newer flats in Old Trafford and Stretford to family semis in Sale and Urmston and large period homes in Altrincham, Hale and Timperley.",
+          "With so many family homes, our Trafford cleaners spend a lot of time on regular cleans that keep busy weeks under control, plus longer deep cleans for bigger houses that need a proper reset."
+        ],
+        "image4": "our-work/regular-4.jpg",
+        "alt4": "Living room with big windows after a regular clean by Cleaniq Services",
+        "image5": "our-work/oven-3.jpg",
+        "alt5": "Oven cleaned inside by Cleaniq Services, the detail a deep clean covers",
+        "servicesTitle": "Services Available in {area}:",
+        "services": [
+          "End of Tenancy Cleaning in Trafford",
+          "One-Off Deep Cleaning",
+          "Airbnb & Short-Let Turnovers",
+          "Commercial & Office Cleaning"
+        ],
+        "cardTitle": "Ready for a clean home?",
+        "cardText": "Book your local {area} cleaner",
+        "cardButton": {
+          "label": "Book Clean Now",
+          "link": "/booking",
+          "style": "secondary",
+          "arrow": "yes",
+          "icon": ""
+        },
+        "helpLabel": "Need Help?",
+        "phone": "+44 7846 726428"
       }
-    ]
-  },
-  "local": {
-    "postcodes": [
-      "M16",
-      "M32",
-      "M33",
-      "M41",
-      "WA14",
-      "WA15"
-    ],
-    "homes": "Trafford ranges from terraces and newer flats in Old Trafford and Stretford to family semis in Sale and Urmston and larger period homes in Altrincham, Hale and Timperley. Bigger houses often need longer deep cleans, while busy families in Sale and Urmston tend to book weekly or fortnightly regular cleans.",
-    "tips": [
-      "Larger Altrincham and Hale homes: allow extra hours for a first deep clean.",
-      "Roads around Old Trafford get busy on match days, so a morning clean is often easier.",
-      "Regular cleans keep the same cleaner where possible, which suits family homes."
-    ]
-  }
+    },
+    {
+      "type": "AreaServices",
+      "props": {
+        "id": "AreaServices-trafford-3",
+        "heading": "Cleaning services in {area}",
+        "text": "Every cleaning service our cleaners offer near you. Tap one for prices and what's included.",
+        "linkText": "{service} in {area}"
+      }
+    },
+    {
+      "type": "AreaGuide",
+      "props": {
+        "id": "AreaGuide-trafford-4",
+        "popularTitle": "Popular cleaning services in {area}",
+        "popularText": "The services {area} customers book most, and why they suit homes here.",
+        "popular": [
+          {
+            "slug": "regular-house-cleaning-manchester",
+            "why": "Family homes in Sale, Urmston and Timperley stay on top of things with a regular cleaner."
+          },
+          {
+            "slug": "deep-cleaning-manchester",
+            "why": "Larger Altrincham and Hale houses need extra time for a thorough top-to-bottom clean."
+          },
+          {
+            "slug": "carpet-cleaning-manchester",
+            "why": "Family homes with carpeted stairs and lounges benefit from a deep carpet clean once or twice a year."
+          }
+        ],
+        "goodTitle": "Good to know in {area}",
+        "goodToKnow": [
+          "Larger homes in Altrincham and Hale: allow extra hours for a first deep clean.",
+          "Roads around Old Trafford get busy on match days, so a morning clean is often easier.",
+          "Regular cleans have a regular cleaner, which suits family homes with routines.",
+          "Tell us about pets when you book, so your cleaner knows what to expect."
+        ],
+        "highlights": [
+          "Sale",
+          "Altrincham",
+          "Stretford"
+        ]
+      }
+    },
+    {
+      "type": "AreaHomes",
+      "props": {
+        "id": "AreaHomes-trafford-5",
+        "heading": "Homes in {area} and what they need",
+        "text": "Trafford ranges from terraces and newer flats in Old Trafford and Stretford to family semis in Sale and Urmston and larger period homes in Altrincham, Hale and Timperley. Bigger houses often need longer deep cleans, while busy families in Sale and Urmston tend to book weekly or fortnightly regular cleans.",
+        "tipsTitle": "Tips for booking a cleaner in {area}",
+        "tips": [
+          "Larger Altrincham and Hale homes: allow extra hours for a first deep clean.",
+          "Roads around Old Trafford get busy on match days, so a morning clean is often easier.",
+          "Regular cleans keep the same cleaner where possible, which suits family homes."
+        ],
+        "postcodesLabel": "Postcodes we cover in {area}:",
+        "postcodes": [
+          "M16",
+          "M32",
+          "M33",
+          "M41",
+          "WA14",
+          "WA15"
+        ]
+      }
+    },
+    {
+      "type": "AreaBeforeAfter",
+      "props": {
+        "id": "AreaBeforeAfter-trafford-6",
+        "title": "Before & after from our recent jobs",
+        "limit": 3
+      }
+    },
+    {
+      "type": "AreaNearby",
+      "props": {
+        "id": "AreaNearby-trafford-7",
+        "heading": "Cleaners near you in {area}",
+        "text": "Our {area} cleaners also cover these nearby neighbourhoods.",
+        "prefix": "Cleaners in",
+        "places": [
+          "Altrincham",
+          "Sale",
+          "Stretford",
+          "Urmston",
+          "Timperley",
+          "Old Trafford"
+        ]
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-trafford-8"
+      }
+    },
+    {
+      "type": "AreaFaq",
+      "props": {
+        "id": "AreaFaq-trafford-9",
+        "label": "FAQs",
+        "heading": "Frequently Asked Questions — Cleaners in {area}",
+        "faqs": [
+          {
+            "q": "Do you clean large family homes in Altrincham and Hale?",
+            "a": "Yes. Bigger homes simply need more hours. Choose the number of hours when you book, or call us and we'll help you decide."
+          },
+          {
+            "q": "Is there a good time to book a clean near Old Trafford?",
+            "a": "Match days make the roads around Old Trafford busy, so a morning clean on those days is usually easier."
+          },
+          {
+            "q": "Do you cover Sale, Urmston and Timperley?",
+            "a": "Yes. Our Trafford cleaners cover Sale, Urmston, Timperley, Stretford, Altrincham, Hale and Old Trafford."
+          },
+          {
+            "q": "Which {area} postcodes do your cleaners cover?",
+            "a": "Our cleaners cover M16, M32, M33, M41, WA14, WA15, including Altrincham, Sale, Stretford, Urmston, Timperley, Old Trafford. Not sure if you're covered? Message us on WhatsApp with your postcode."
+          },
+          {
+            "q": "Do you have cleaners near me in {area}?",
+            "a": "Yes. Our local cleaners cover {area}, including Altrincham, Sale, Stretford, Urmston. Book online and we'll match you with a vetted cleaner near you."
+          },
+          {
+            "q": "What cleaning services do your cleaners offer in {area}?",
+            "a": "End of Tenancy Cleaning, Deep Cleaning, Airbnb Cleaning, Office Cleaning, Post-Construction Cleaning, Regular House Cleaning, General Cleaning, Oven Cleaning, Carpet Cleaning. Each service page shows what's included and the latest prices."
+          }
+        ]
+      }
+    },
+    {
+      "type": "OtherAreas",
+      "props": {
+        "id": "OtherAreas-trafford-10",
+        "heading": "Cleaners in nearby areas",
+        "prefix": "Cleaners in"
+      }
+    }
+  ]
 }

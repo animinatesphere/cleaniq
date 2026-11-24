@@ -18,7 +18,9 @@ const areaHighlights = () => ({
     for (const f of fs.readdirSync(LOCATIONS_DIR).filter((n) => n.endsWith(".json"))) {
       this.addWatchFile(path.join(LOCATIONS_DIR, f));
       const data = JSON.parse(fs.readFileSync(path.join(LOCATIONS_DIR, f), "utf8"));
-      out[f.replace(/\.json$/, "")] = data.guide?.highlights || [];
+      // Location pages are block pages: the highlights are on the "AreaGuide" block.
+      const guide = (data.content || []).find((b) => b.type === "AreaGuide");
+      out[f.replace(/\.json$/, "")] = (guide?.props?.highlights || []).map((h) => (typeof h === "string" ? h : h?.text || ""));
     }
     return `export default ${JSON.stringify(out)};`;
   },

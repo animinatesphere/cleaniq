@@ -1,0 +1,55 @@
+{
+  "root": {
+    "props": {
+      "title": "Get a Free Cleaning Quote | Cleaniq Services Manchester",
+      "description": "Get a free, no-obligation cleaning quote from Cleaniq Services in Manchester. End of tenancy, deep, Airbnb, office, carpet and oven cleaning — your quote is emailed straight away.",
+      "shareTitle": "Get a Free Cleaning Quote | Cleaniq Services Manchester",
+      "shareDescription": ""
+    }
+  },
+  "content": [
+    {
+      "type": "QuoteForm",
+      "props": {
+        "id": "QuoteForm-q1",
+        "badge": "Free · No obligation",
+        "heading": "Get your free",
+        "highlight": "cleaning quote",
+        "text": "Four quick steps. Your quote lands in your inbox straight away — accept it, pick a time, and you're booked.",
+        "trustPoints": [
+          {
+            "icon": "shield",
+            "text": "Fully insured"
+          },
+          {
+            "icon": "badge",
+            "text": "Vetted cleaners"
+          },
+          {
+            "icon": "clock",
+            "text": "Instant quote"
+          },
+          {
+            "icon": "star",
+            "text": "5-star rated"
+          }
+        ],
+        "successTitle": "Your quote is in your inbox!",
+        "successTitlePending": "Thank you — request received!",
+        "successSteps": [
+          "Open the email and check your quote.",
+          "Click “Accept This Quote” and choose the date and time for your cleaner.",
+          "We email you a secure payment link — your clean is confirmed once it's paid."
+        ],
+        "successStepsPending": [
+          "Our team reviews your property details.",
+          "We email your personalised quote — usually within a few hours.",
+          "Happy with it? Accept it and pick your date and time."
+        ],
+        "helpTitle": "Prefer to talk?",
+        "helpText": "Our team is happy to help.",
+        "whatsappMessage": "Hi Cleaniq! I'd like a cleaning quote."
+      }
+    }
+  ]
+}

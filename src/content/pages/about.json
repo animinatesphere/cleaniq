@@ -1,0 +1,423 @@
+{
+  "root": {
+    "props": {
+      "title": "About Cleaniq Services | Trusted Cleaners in Manchester",
+      "description": "Trusted cleaners in Manchester: vetted, DBS-checked and fully insured, with a free 48-hour re-clean guarantee. Homes, rentals, Airbnbs and offices.",
+      "shareTitle": "About Cleaniq Services | Trusted Cleaners in Manchester",
+      "shareDescription": ""
+    }
+  },
+  "content": [
+    {
+      "type": "PhotoHero",
+      "props": {
+        "id": "PhotoHero-about1",
+        "badge": "About Cleaniq Services",
+        "heading": "Trusted cleaners in",
+        "highlight": "Manchester.",
+        "text": "Handing over the keys to your home or business to a cleaner is a big deal. We get it. That's why every Cleaniq Services cleaner is vetted, DBS-checked and fully insured, and why every clean comes with our free 48-hour re-clean guarantee. Real people, genuine care and results you can see, for homes, rentals, Airbnbs, offices and businesses across Manchester and Greater Manchester.",
+        "chips": [
+          "Vetted & DBS-checked",
+          "Fully insured",
+          "Free 48-hour re-clean"
+        ],
+        "showRating": "yes",
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'd like to book a cleaner.",
+            "style": "soft",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "mainImage": "our-work/about-cleaner.jpg",
+        "mainAlt": "Cleaniq Services cleaner in uniform cleaning an oven",
+        "mainCaption": "Our team at work in Manchester",
+        "image2": "our-work/airbnb-1.jpg",
+        "alt2": "Airbnb bedroom made up by Cleaniq Services",
+        "caption2": "Airbnb turnover",
+        "image3": "our-work/regular-2.jpg",
+        "alt3": "Living room after a clean by Cleaniq Services",
+        "caption3": "Regular clean",
+        "cornerLabel": "Real photos from our jobs"
+      }
+    },
+    {
+      "type": "Story",
+      "props": {
+        "id": "Story-about2",
+        "label": "A Manchester cleaning company built on trust",
+        "heading": "Making cleanliness a lifestyle.",
+        "paragraphs": [
+          "We started Cleaniq Services with one simple belief: you should be able to trust the people who clean your space. In cleaning, trust isn't a nice extra. It's everything. You're letting us into your home, your rental or your business, around the things that matter to you. So everything we do is about earning that trust, and then keeping it. We're a local team, based at 20 Swan St in Ancoats, and we clean right across Manchester and Greater Manchester.",
+          "It starts with who we send. Our cleaners are vetted, DBS-checked and fully insured, and they bring precision cleaning and genuine care to every job. They notice the little things: the dust on the skirting boards behind the sofa, the limescale around the taps, the oven nobody else wants to touch. We don't rush and we don't cut corners. We look after your place the way we'd want our own looked after.",
+          "Every customer is different, so every clean is too. Busy families book a [regular house cleaner](/service/regular-house-cleaning-manchester) to get their evenings back. Tenants rely on our [end of tenancy cleaning](/service/end-of-tenancy-cleaning-manchester) to hand the keys back with confidence. Airbnb hosts trust our [turnover cleans](/service/airbnb-cleaning-manchester) to keep their reviews high, landlords book a [deep clean](/service/deep-cleaning-manchester) between tenancies, and businesses count on our [office cleaning](/service/office-cleaning-manchester) to make the right first impression.",
+          "Whatever the job, you get the same standard: careful, thorough and backed by our free 48-hour re-clean guarantee. If we've missed something, just tell us and we'll come back and sort it. No fuss, no extra cost. That's how we're making cleanliness a lifestyle, one trusted clean at a time."
+        ],
+        "missionTitle": "Our mission",
+        "missionText": "To be the cleaning company Manchester trusts. We want every customer to hand us their keys without a second thought, and come home to a space that feels properly looked after.",
+        "missionPoints": [
+          {
+            "icon": "shield",
+            "title": "Trust",
+            "text": "Vetted, DBS-checked, insured cleaners you can rely on."
+          },
+          {
+            "icon": "gem",
+            "title": "Quality",
+            "text": "Precision cleaning to a checklist, every single visit."
+          },
+          {
+            "icon": "heart",
+            "title": "Care",
+            "text": "Respect for your home, your belongings and your time."
+          }
+        ],
+        "visionTitle": "Our vision",
+        "visionText": "To become Manchester's most trusted name in cleaning, with smarter, greener ways of working that our customers can rely on today, and the planet can rely on tomorrow.",
+        "visionPoints": [
+          {
+            "icon": "idea",
+            "title": "Innovation",
+            "text": "Online booking, an app and live prices."
+          },
+          {
+            "icon": "leaf",
+            "title": "Eco-friendly products",
+            "text": "Safer for families, pets and the planet."
+          },
+          {
+            "icon": "check",
+            "title": "Reliability",
+            "text": "On time, to the same standard, every visit."
+          },
+          {
+            "icon": "refresh",
+            "title": "Sustainability",
+            "text": "Responsible methods that last."
+          },
+          {
+            "icon": "shield",
+            "title": "Trust",
+            "text": "Earned on every clean, never assumed."
+          }
+        ]
+      }
+    },
+    {
+      "type": "LinkCards",
+      "props": {
+        "id": "LinkCards-about3",
+        "label": "What we clean",
+        "heading": "Cleaning services in Manchester, done with care.",
+        "text": "Whatever you need cleaning, the same trusted team and the same standards come with it. Here's how we help homeowners, tenants, landlords, hosts and businesses across Manchester.",
+        "cards": [
+          {
+            "title": "End of Tenancy Cleaning",
+            "text": "Moving out? Our end of tenancy cleaners leave the property ready for checkout, so you can hand the keys back with confidence.",
+            "link": "/service/end-of-tenancy-cleaning-manchester",
+            "image": "our-work/end-of-tenancy-1.jpg",
+            "imageAlt": "End of Tenancy Cleaning by Cleaniq Services: photo from one of our jobs"
+          },
+          {
+            "title": "Deep Cleaning",
+            "text": "For homes that need more than a tidy-up. We get into the corners, appliances and built-up grime that everyday cleaning misses.",
+            "link": "/service/deep-cleaning-manchester",
+            "image": "our-work/deep-card.jpg",
+            "imageAlt": "Deep Cleaning by Cleaniq Services: photo from one of our jobs"
+          },
+          {
+            "title": "Airbnb Cleaning",
+            "text": "Hosts trust us to turn their short-lets around between guests, with fresh linen, clean bathrooms and five-star first impressions.",
+            "link": "/service/airbnb-cleaning-manchester",
+            "image": "our-work/airbnb-4.jpg",
+            "imageAlt": "Airbnb Cleaning by Cleaniq Services: photo from one of our jobs"
+          },
+          {
+            "title": "Office Cleaning",
+            "text": "Insured, vetted office cleaners who work around your hours, so your team walks into a clean, healthy workplace every morning.",
+            "link": "/service/office-cleaning-manchester",
+            "image": "service-office-photo-600.webp",
+            "imageAlt": "Tidy office desk with a computer, plant and chairs, ready for the working day"
+          },
+          {
+            "title": "Post-Construction Cleaning",
+            "text": "After the builders leave, we clear the fine dust, paint splashes and film, so your new space is ready to move into or hand over.",
+            "link": "/service/post-construction-cleaning-manchester",
+            "image": "service-postconstruction-photo-600.webp",
+            "imageAlt": "Empty flat with clean wooden floors after a clean by Cleaniq Services, ready to hand over"
+          },
+          {
+            "title": "Regular House Cleaning",
+            "text": "The same trusted cleaner, weekly, fortnightly or monthly. Come home to a clean house without giving up your evenings.",
+            "link": "/service/regular-house-cleaning-manchester",
+            "image": "our-work/regular-4.jpg",
+            "imageAlt": "Regular House Cleaning by Cleaniq Services: photo from one of our jobs"
+          },
+          {
+            "title": "General Cleaning",
+            "text": "A thorough, whole-home clean whenever you need one: before guests arrive, after a busy month, or just because.",
+            "link": "/service/general-cleaning-manchester",
+            "image": "service-general-photo-1200.webp",
+            "imageAlt": "General Cleaning by Cleaniq Services: photo from one of our jobs"
+          },
+          {
+            "title": "Oven Cleaning",
+            "text": "The job nobody wants. We take out the racks, cut through baked-on grease and leave your oven looking and smelling fresh.",
+            "link": "/service/oven-cleaning-manchester",
+            "image": "our-work/oven-2.jpg",
+            "imageAlt": "Oven Cleaning by Cleaniq Services: photo from one of our jobs"
+          },
+          {
+            "title": "Carpet Cleaning",
+            "text": "Carpets, stairs and upholstery cleaned deep down, lifting the dirt and marks that your vacuum leaves behind.",
+            "link": "/service/carpet-cleaning-manchester",
+            "image": "service-carpet-photo-600.webp",
+            "imageAlt": "Grey carpeted bedroom in a Manchester flat, ready for a professional carpet clean by Cleaniq Services"
+          }
+        ],
+        "background": "light"
+      }
+    },
+    {
+      "type": "IconCards",
+      "props": {
+        "id": "IconCards-about4",
+        "label": "Why trust Cleaniq",
+        "heading": "Why you can trust our cleaners in Manchester.",
+        "text": "Anyone can say they're trustworthy. We'd rather show you. Here's what every Cleaniq Services customer gets, every single time.",
+        "background": "white",
+        "cards": [
+          {
+            "icon": "shield",
+            "title": "Vetted, DBS-checked cleaners",
+            "text": "Every cleaner has a face-to-face interview, a DBS check, background checks and a practical skills assessment before they clean for a customer. If we wouldn't let them into our own homes, they don't join the team."
+          },
+          {
+            "icon": "home",
+            "title": "We take care of your property",
+            "text": "Your home, rental, Airbnb or office is treated with respect. Our fully insured cleaners work carefully around your belongings, follow your notes and tell you if they spot anything that needs your attention."
+          },
+          {
+            "icon": "clock",
+            "title": "48-hour re-clean guarantee",
+            "text": "Not happy with any part of your clean? Let us know within 48 hours and we'll put it right. No chasing, no arguments."
+          },
+          {
+            "icon": "refresh",
+            "title": "Free re-clean",
+            "text": "Re-cleans under our guarantee are completely free. We send a cleaner back to fix it, because the job isn't done until you're happy with it."
+          },
+          {
+            "icon": "percent",
+            "title": "Discount on your next clean",
+            "text": "A few days after your clean, we email you an exclusive returning-customer offer: 10% off your next booking. It's our way of saying thanks for trusting us."
+          }
+        ]
+      }
+    },
+    {
+      "type": "Values",
+      "props": {
+        "id": "Values-about5",
+        "label": "Values",
+        "heading": "What our cleaners stand for.",
+        "cards": [
+          {
+            "icon": "award",
+            "title": "Professionalism",
+            "text": "We carry out every task with precision, dedication, and respect for our clients and their spaces."
+          },
+          {
+            "icon": "shield",
+            "title": "Integrity",
+            "text": "We honour our word, act transparently, and ensure accountability in all we do."
+          },
+          {
+            "icon": "leaf",
+            "title": "Sustainability",
+            "text": "We champion eco-friendly products and responsible methods that protect both people and the planet."
+          },
+          {
+            "icon": "check",
+            "title": "Excellence",
+            "text": "We hold ourselves to the highest standards, striving to exceed expectations every time."
+          },
+          {
+            "icon": "heart",
+            "title": "Trust",
+            "text": "We earn lasting relationships through reliability, consistency, and genuine care for our clients."
+          }
+        ]
+      }
+    },
+    {
+      "type": "AreaLinks",
+      "props": {
+        "id": "AreaLinks-about6",
+        "label": "Local to you",
+        "heading": "A local cleaning team across Greater Manchester.",
+        "text": "We're based in Ancoats, and our cleaners live and work across Manchester and the surrounding towns. Find your area to see the cleaners and services near you.",
+        "linkPrefix": "Cleaners in",
+        "areaTexts": [
+          {
+            "slug": "manchester-city-centre",
+            "text": "Apartments and offices from Deansgate and Spinningfields to Ancoats and the Northern Quarter."
+          },
+          {
+            "slug": "salford",
+            "text": "From Salford Quays apartments to family homes across the city of Salford."
+          },
+          {
+            "slug": "trafford",
+            "text": "Homes and rentals in Sale, Altrincham, Stretford and Urmston."
+          },
+          {
+            "slug": "stockport",
+            "text": "Houses and flats across Stockport, Cheadle and Bramhall."
+          },
+          {
+            "slug": "didsbury",
+            "text": "Family homes and flats in East and West Didsbury."
+          },
+          {
+            "slug": "chorlton",
+            "text": "Terraced houses and apartments around Chorlton."
+          },
+          {
+            "slug": "bolton",
+            "text": "Homes and rental properties across Bolton, Horwich and Farnworth."
+          },
+          {
+            "slug": "bury",
+            "text": "Houses in Bury, Ramsbottom, Radcliffe and Prestwich."
+          },
+          {
+            "slug": "oldham",
+            "text": "Homes across Oldham, Chadderton and Saddleworth."
+          },
+          {
+            "slug": "rochdale",
+            "text": "Homes in Rochdale, Heywood and Middleton."
+          },
+          {
+            "slug": "tameside",
+            "text": "Homes in Ashton-under-Lyne, Hyde, Stalybridge and Denton."
+          },
+          {
+            "slug": "wigan",
+            "text": "Homes and rentals in Wigan, Leigh and Hindley."
+          }
+        ],
+        "background": "light"
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-about7"
+      }
+    },
+    {
+      "type": "FaqList",
+      "props": {
+        "id": "FaqList-about8",
+        "label": "FAQ",
+        "heading": "About our cleaners.",
+        "faqs": [
+          {
+            "q": "Who are Cleaniq Services?",
+            "a": "We're a Manchester cleaning company based at 20 Swan St in Ancoats. Our vetted, DBS-checked and fully insured cleaners look after homes, rentals, Airbnbs and offices across Manchester and Greater Manchester."
+          },
+          {
+            "q": "What makes Cleaniq Services different from other cleaning companies?",
+            "a": "Trust. Every cleaner is vetted, DBS-checked and fully insured, every clean follows a checklist, and every clean is backed by our free 48-hour re-clean guarantee. The photos on our website are from our own jobs, not stock images."
+          },
+          {
+            "q": "Where are Cleaniq Services' cleaners based?",
+            "a": "Our cleaners are based across Manchester and Greater Manchester, so there's usually a local cleaner near you — from Manchester City Centre, Salford and Trafford to Stockport, Bolton and Wigan."
+          },
+          {
+            "q": "Do you have cleaners near me?",
+            "a": "We cover Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside, Wigan. If you're nearby but not listed, message us on WhatsApp and we'll check."
+          },
+          {
+            "q": "What cleaning services do you offer?",
+            "a": "End of Tenancy Cleaning, Deep Cleaning, Airbnb Cleaning, Office Cleaning, Post-Construction Cleaning, Regular House Cleaning, General Cleaning, Oven Cleaning, Carpet Cleaning. Each service has its own page with prices and what's included."
+          },
+          {
+            "q": "Are your cleaners vetted?",
+            "a": "Yes. Every cleaner has a face-to-face interview, a DBS check, background checks and a practical skills assessment before cleaning for our customers."
+          },
+          {
+            "q": "Are your cleaners DBS-checked and insured?",
+            "a": "Yes. Our cleaners are DBS-checked and fully insured, so you can trust them in your home, rental property or workplace."
+          },
+          {
+            "q": "Do you offer a discount on my next clean?",
+            "a": "Yes. A few days after your clean, we email you a returning-customer offer of 10% off your next booking, valid for that week."
+          },
+          {
+            "q": "What if I'm not happy with the cleaning?",
+            "a": "We offer a 48-hour re-clean guarantee. Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
+          },
+          {
+            "q": "Do I need to be home while the cleaner is there?",
+            "a": "No. Many customers leave a key or an entry code. Just add the access details when you book."
+          },
+          {
+            "q": "Do your cleaners bring their own cleaning products?",
+            "a": "You choose. Use your own products, or our cleaners bring eco-friendly cleaning products and equipment for £10 per visit."
+          },
+          {
+            "q": "Can I book a cleaner for my business?",
+            "a": "Yes. We clean offices, restaurants, gyms, communal areas and event spaces. Tell us about your premises on our commercial cleaning form and we'll send you a quote."
+          },
+          {
+            "q": "Can I get a quote before I book?",
+            "a": "Yes. Use our free quote form, message us on WhatsApp or call +44 7846 726428, and we'll help you choose the right clean."
+          },
+          {
+            "q": "How do I book a cleaner?",
+            "a": "Book online in a few steps, message us on WhatsApp (+44 7846 726428), or call +44 7846 726428. We confirm every booking by email."
+          }
+        ],
+        "background": "white"
+      }
+    },
+    {
+      "type": "ContactBanner",
+      "props": {
+        "id": "ContactBanner-about9",
+        "heading": "Looking for cleaners near you?",
+        "text": "Book a vetted Cleaniq cleaner online in a few steps, or message us and we'll help you choose the right cleaning service.",
+        "buttons": [
+          {
+            "label": "Book a clean",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'd like to book a cleaner.",
+            "style": "light",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "phone": "+44 7846 726428",
+        "email": "info@cleaniqservices.com"
+      }
+    }
+  ]
+}

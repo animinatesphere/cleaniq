@@ -287,7 +287,7 @@ export function FaqBlock({ label, heading, faqs }) {
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          mainEntity: items.map((f) => ({ "@type": "Question", name: String(f.q), acceptedAnswer: { "@type": "Answer", text: String(f.a || "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") } })),
+          mainEntity: items.map((f) => ({ "@type": "Question", name: String(f.q), acceptedAnswer: { "@type": "Answer", text: String(f.a || "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replaceAll("**", "") } })),
         })}
       </script>
       <div className="max-w-4xl mx-auto px-6">

@@ -1,77 +1,239 @@
 {
-  "basics": {
-    "meta": "Reliable cleaning across Tameside including Ashton-under-Lyne, Hyde and Stalybridge. End of tenancy, deep cleaning and regular cleans available.",
-    "tagline": "Trusted Cleaning Across Tameside",
-    "description": "Cleaniq Services covers the whole of Tameside, including Ashton-under-Lyne, Hyde and Stalybridge, with thorough, professional cleaning for homes and businesses. Our local, vetted cleaners follow a consistent checklist so you always know what to expect.",
-    "services": [
-      "End of Tenancy Cleaning in Tameside",
-      "One-Off Deep Cleaning",
-      "Regular Domestic Cleaning",
-      "Commercial & Office Cleaning"
-    ],
-    "faqs": []
+  "root": {
+    "props": {
+      "title": "Cleaners in Tameside | Cleaning Services | Cleaniq",
+      "description": "Reliable cleaning across Tameside including Ashton-under-Lyne, Hyde and Stalybridge. End of tenancy, deep cleaning and regular cleans available.",
+      "shareTitle": "",
+      "shareDescription": ""
+    }
   },
-  "guide": {
-    "highlights": [
-      "Ashton-under-Lyne",
-      "Hyde",
-      "Stalybridge"
-    ],
-    "intro": [
-      "Tameside brings together Ashton-under-Lyne, Hyde, Stalybridge, Denton, Dukinfield and Droylsden, with terraced streets, family homes and a good number of rented properties.",
-      "Our Tameside cleaners help families with regular cleaning, help landlords and tenants with end of tenancy cleans, and freshen up kitchens with oven cleaning."
-    ],
-    "popular": [
-      {
-        "slug": "regular-house-cleaning-manchester",
-        "why": "Family homes across Denton, Hyde and Stalybridge stay on top of things with regular visits."
-      },
-      {
-        "slug": "end-of-tenancy-cleaning-manchester",
-        "why": "Rented homes across Tameside need a full clean when tenants move out."
-      },
-      {
-        "slug": "oven-cleaning-manchester",
-        "why": "A professional oven clean freshens up busy family kitchens."
+  "content": [
+    {
+      "type": "AreaHero",
+      "props": {
+        "id": "AreaHero-tameside-1",
+        "badge": "Local Manchester Cleaners",
+        "heading": "Professional Cleaners in",
+        "highlight": "{area}",
+        "tagline": "Trusted Cleaning Across Tameside",
+        "text": "Looking for cleaners near you in {area}? Book a vetted local cleaner for regular house cleaning, a deep clean, end of tenancy, oven or carpet cleaning.",
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'm looking for a cleaner in {area}.",
+            "style": "soft",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "whyTitle": "Why Choose Us?",
+        "whyPoints": [
+          {
+            "icon": "shield",
+            "text": "Vetted Local Cleaners"
+          },
+          {
+            "icon": "star",
+            "text": "{rating}★ on Google"
+          },
+          {
+            "icon": "check",
+            "text": "Eco-Friendly Products"
+          },
+          {
+            "icon": "sparkles",
+            "text": "48-Hour Re-Clean Guarantee"
+          }
+        ]
       }
-    ],
-    "goodToKnow": [
-      "Terraced streets can be busy for parking, so tell us about permits or nearby spaces.",
-      "Landlords: book the clean between tenancies so the property is ready to let.",
-      "Add oven cleaning to any clean, or book it on its own.",
-      "Tell us about pets when you book, so your cleaner knows what to expect."
-    ],
-    "faqs": [
-      {
-        "q": "Do you cover Ashton-under-Lyne and Stalybridge?",
-        "a": "Yes. Our Tameside cleaners cover Ashton-under-Lyne, Stalybridge, Hyde, Denton, Dukinfield and Droylsden."
-      },
-      {
-        "q": "Can you clean my oven in Tameside?",
-        "a": "Yes. Book an oven clean on its own or add it to any clean. Every oven size has a fixed price, shown on our oven cleaning page."
-      },
-      {
-        "q": "Do you clean rental properties in Tameside?",
-        "a": "Yes. Our end of tenancy cleaning gets rented homes ready for the next tenants."
+    },
+    {
+      "type": "AreaAbout",
+      "props": {
+        "id": "AreaAbout-tameside-2",
+        "image1": "our-work/deep-card.jpg",
+        "alt1": "Fridge cleaned inside after a deep clean by Cleaniq Services, a service we offer in {area}",
+        "image2": "our-work/regular-2.jpg",
+        "alt2": "Living room after a house clean by Cleaniq Services, a service we offer across {area}",
+        "image3": "service-office-photo-600.webp",
+        "alt3": "Tidy office desk with a computer and chairs: office cleaning available in {area}",
+        "heading": "About Our {area} Cleaning Services",
+        "paragraphs": [
+          "Cleaniq Services covers the whole of Tameside, including Ashton-under-Lyne, Hyde and Stalybridge, with thorough, professional cleaning for homes and businesses. Our local, vetted cleaners follow a consistent checklist so you always know what to expect.",
+          "Tameside brings together Ashton-under-Lyne, Hyde, Stalybridge, Denton, Dukinfield and Droylsden, with terraced streets, family homes and a good number of rented properties.",
+          "Our Tameside cleaners help families with regular cleaning, help landlords and tenants with end of tenancy cleans, and freshen up kitchens with oven cleaning."
+        ],
+        "image4": "our-work/regular-4.jpg",
+        "alt4": "Living room with big windows after a regular clean by Cleaniq Services",
+        "image5": "our-work/oven-3.jpg",
+        "alt5": "Oven cleaned inside by Cleaniq Services, the detail a deep clean covers",
+        "servicesTitle": "Services Available in {area}:",
+        "services": [
+          "End of Tenancy Cleaning in Tameside",
+          "One-Off Deep Cleaning",
+          "Regular Domestic Cleaning",
+          "Commercial & Office Cleaning"
+        ],
+        "cardTitle": "Ready for a clean home?",
+        "cardText": "Book your local {area} cleaner",
+        "cardButton": {
+          "label": "Book Clean Now",
+          "link": "/booking",
+          "style": "secondary",
+          "arrow": "yes",
+          "icon": ""
+        },
+        "helpLabel": "Need Help?",
+        "phone": "+44 7846 726428"
       }
-    ]
-  },
-  "local": {
-    "postcodes": [
-      "OL5",
-      "OL6",
-      "OL7",
-      "SK14",
-      "SK15",
-      "SK16",
-      "M34",
-      "M43"
-    ],
-    "homes": "Tameside covers nine towns, including Ashton-under-Lyne, Stalybridge, Hyde, Denton, Droylsden, Dukinfield and Mossley. Homes are mostly terraced and semi-detached family houses, with newer developments in Denton and Droylsden, so regular cleans and end of tenancy cleans make up most bookings.",
-    "tips": [
-      "Family homes often book a fortnightly regular clean with the same cleaner.",
-      "Hillside homes towards Mossley and Stalybridge: please mention parking when you book.",
-      "End of tenancy cleans include the oven, which letting agents check closely."
-    ]
-  }
+    },
+    {
+      "type": "AreaServices",
+      "props": {
+        "id": "AreaServices-tameside-3",
+        "heading": "Cleaning services in {area}",
+        "text": "Every cleaning service our cleaners offer near you. Tap one for prices and what's included.",
+        "linkText": "{service} in {area}"
+      }
+    },
+    {
+      "type": "AreaGuide",
+      "props": {
+        "id": "AreaGuide-tameside-4",
+        "popularTitle": "Popular cleaning services in {area}",
+        "popularText": "The services {area} customers book most, and why they suit homes here.",
+        "popular": [
+          {
+            "slug": "regular-house-cleaning-manchester",
+            "why": "Family homes across Denton, Hyde and Stalybridge stay on top of things with regular visits."
+          },
+          {
+            "slug": "end-of-tenancy-cleaning-manchester",
+            "why": "Rented homes across Tameside need a full clean when tenants move out."
+          },
+          {
+            "slug": "oven-cleaning-manchester",
+            "why": "A professional oven clean freshens up busy family kitchens."
+          }
+        ],
+        "goodTitle": "Good to know in {area}",
+        "goodToKnow": [
+          "Terraced streets can be busy for parking, so tell us about permits or nearby spaces.",
+          "Landlords: book the clean between tenancies so the property is ready to let.",
+          "Add oven cleaning to any clean, or book it on its own.",
+          "Tell us about pets when you book, so your cleaner knows what to expect."
+        ],
+        "highlights": [
+          "Ashton-under-Lyne",
+          "Hyde",
+          "Stalybridge"
+        ]
+      }
+    },
+    {
+      "type": "AreaHomes",
+      "props": {
+        "id": "AreaHomes-tameside-5",
+        "heading": "Homes in {area} and what they need",
+        "text": "Tameside covers nine towns, including Ashton-under-Lyne, Stalybridge, Hyde, Denton, Droylsden, Dukinfield and Mossley. Homes are mostly terraced and semi-detached family houses, with newer developments in Denton and Droylsden, so regular cleans and end of tenancy cleans make up most bookings.",
+        "tipsTitle": "Tips for booking a cleaner in {area}",
+        "tips": [
+          "Family homes often book a fortnightly regular clean with the same cleaner.",
+          "Hillside homes towards Mossley and Stalybridge: please mention parking when you book.",
+          "End of tenancy cleans include the oven, which letting agents check closely."
+        ],
+        "postcodesLabel": "Postcodes we cover in {area}:",
+        "postcodes": [
+          "OL5",
+          "OL6",
+          "OL7",
+          "SK14",
+          "SK15",
+          "SK16",
+          "M34",
+          "M43"
+        ]
+      }
+    },
+    {
+      "type": "AreaBeforeAfter",
+      "props": {
+        "id": "AreaBeforeAfter-tameside-6",
+        "title": "Before & after from our recent jobs",
+        "limit": 3
+      }
+    },
+    {
+      "type": "AreaNearby",
+      "props": {
+        "id": "AreaNearby-tameside-7",
+        "heading": "Cleaners near you in {area}",
+        "text": "Our {area} cleaners also cover these nearby neighbourhoods.",
+        "prefix": "Cleaners in",
+        "places": [
+          "Ashton-under-Lyne",
+          "Hyde",
+          "Stalybridge",
+          "Denton",
+          "Dukinfield",
+          "Droylsden"
+        ]
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-tameside-8"
+      }
+    },
+    {
+      "type": "AreaFaq",
+      "props": {
+        "id": "AreaFaq-tameside-9",
+        "label": "FAQs",
+        "heading": "Frequently Asked Questions — Cleaners in {area}",
+        "faqs": [
+          {
+            "q": "Do you cover Ashton-under-Lyne and Stalybridge?",
+            "a": "Yes. Our Tameside cleaners cover Ashton-under-Lyne, Stalybridge, Hyde, Denton, Dukinfield and Droylsden."
+          },
+          {
+            "q": "Can you clean my oven in Tameside?",
+            "a": "Yes. Book an oven clean on its own or add it to any clean. Every oven size has a fixed price, shown on our oven cleaning page."
+          },
+          {
+            "q": "Do you clean rental properties in Tameside?",
+            "a": "Yes. Our end of tenancy cleaning gets rented homes ready for the next tenants."
+          },
+          {
+            "q": "Which {area} postcodes do your cleaners cover?",
+            "a": "Our cleaners cover OL5, OL6, OL7, SK14, SK15, SK16, M34, M43, including Ashton-under-Lyne, Hyde, Stalybridge, Denton, Dukinfield, Droylsden. Not sure if you're covered? Message us on WhatsApp with your postcode."
+          },
+          {
+            "q": "Do you have cleaners near me in {area}?",
+            "a": "Yes. Our local cleaners cover {area}, including Ashton-under-Lyne, Hyde, Stalybridge, Denton. Book online and we'll match you with a vetted cleaner near you."
+          },
+          {
+            "q": "What cleaning services do your cleaners offer in {area}?",
+            "a": "End of Tenancy Cleaning, Deep Cleaning, Airbnb Cleaning, Office Cleaning, Post-Construction Cleaning, Regular House Cleaning, General Cleaning, Oven Cleaning, Carpet Cleaning. Each service page shows what's included and the latest prices."
+          }
+        ]
+      }
+    },
+    {
+      "type": "OtherAreas",
+      "props": {
+        "id": "OtherAreas-tameside-10",
+        "heading": "Cleaners in nearby areas",
+        "prefix": "Cleaners in"
+      }
+    }
+  ]
 }

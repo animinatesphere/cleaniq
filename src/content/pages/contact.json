@@ -1,0 +1,63 @@
+{
+  "root": {
+    "props": {
+      "title": "Contact Us | Cleaniq Services Manchester",
+      "description": "Contact Cleaniq Services in Manchester for a free cleaning quote. We offer end of tenancy, deep cleaning, Airbnb, and office cleaning. Call +44 7846 726428 or email us today.",
+      "shareTitle": "Contact Us | Cleaniq Services Manchester",
+      "shareDescription": ""
+    }
+  },
+  "content": [
+    {
+      "type": "ContactForm",
+      "props": {
+        "id": "ContactForm-c1",
+        "mode": "contact",
+        "badge": "Get in Touch",
+        "heading": "Contact Our Team",
+        "text": "Have questions or need a custom quote? Fill in the form and we'll get back to you within a few hours.",
+        "contactItems": [
+          {
+            "icon": "phone",
+            "label": "Phone Support",
+            "value": "+44 7846 726428",
+            "link": "tel:+447846726428"
+          },
+          {
+            "icon": "mail",
+            "label": "Email Address",
+            "value": "info@cleaniqservices.com",
+            "link": "mailto:info@cleaniqservices.com"
+          },
+          {
+            "icon": "map",
+            "label": "Office Address",
+            "value": "20 Swan St, Manchester M4 5JW, United Kingdom",
+            "link": "https://maps.app.goo.gl/UHcabzmFuj11wuLo9"
+          }
+        ],
+        "hoursTitle": "Office Hours",
+        "hours": [
+          {
+            "day": "Mon – Fri",
+            "hours": "8:00 AM – 6:00 PM"
+          },
+          {
+            "day": "Saturday",
+            "hours": "9:00 AM – 4:00 PM"
+          },
+          {
+            "day": "Sunday",
+            "hours": "Closed"
+          }
+        ],
+        "formTitle": "Send a Message",
+        "formText": "We typically respond within 2–4 hours during business hours.",
+        "successTitle": "Message sent successfully!",
+        "successText": "Our team has received your enquiry and will get back to you shortly.",
+        "errorTitle": "Failed to send message",
+        "buttonLabel": "Send Message"
+      }
+    }
+  ]
+}

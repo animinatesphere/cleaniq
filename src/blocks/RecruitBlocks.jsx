@@ -1,0 +1,383 @@
+// "Join our team" (recruitment) page blocks. The application form always works the same way (it
+// sends the CV to /api/recruitment); the editor changes the text, photos, pay rate and lists.
+import { useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Upload, CheckCircle2, User, Mail, Phone, FileText, ShieldCheck, AlertCircle, ArrowRight, MapPin, Heart } from "lucide-react";
+import LoadingOverlay from "../component/LoadingOverlay";
+import { useRegion } from "../context/RegionContext";
+import { SERVICE_PAGES } from "../utils/servicePages";
+import { AREAS } from "../utils/areas";
+import { imageUrl } from "./blockUtils";
+import { PickedIcon } from "./icons";
+import { RichText } from "./BlockLink";
+
+const list = (v) => (Array.isArray(v) ? v : []);
+const str = (p) => (typeof p === "string" ? p : p?.text || "");
+const BG = { white: "bg-white", light: "bg-slate-50/60", grey: "bg-slate-50", green: "bg-primary/[0.04]", mint: "bg-secondary/10" };
+const WEEKS_PER_MONTH = 52 / 12;
+const MIN_HOURS = 5;
+const MAX_HOURS = 40;
+const money = (n) => `£${Math.round(n).toLocaleString("en-GB")}`;
+
+function EarningsCalculator({ rate, applyLabel, note }) {
+  const [hours, setHours] = useState(25);
+  const weekly = hours * rate;
+  const monthly = weekly * WEEKS_PER_MONTH;
+  const fill = ((hours - MIN_HOURS) / (MAX_HOURS - MIN_HOURS)) * 100;
+  return (
+    <div className="bg-white rounded-[32px] p-6 md:p-8 shadow-2xl shadow-primary/10 border border-slate-100">
+      <div className="flex items-baseline justify-between mb-4">
+        <label htmlFor="hours" className="text-sm font-black text-primary-dark">Your availability</label>
+        <p className="text-sm font-bold text-primary-dark"><span className="text-2xl font-black text-primary">{hours}</span> hrs per week</p>
+      </div>
+      <input
+        id="hours"
+        type="range"
+        min={MIN_HOURS}
+        max={MAX_HOURS}
+        step={1}
+        value={hours}
+        onChange={(e) => setHours(Number(e.target.value))}
+        className="w-full h-3 rounded-full appearance-none cursor-pointer accent-primary"
+        style={{ background: `linear-gradient(to right, var(--color-primary, #0A5C43) ${fill}%, #e2e8f0 ${fill}%)` }}
+        aria-valuetext={`${hours} hours per week`}
+      />
+      <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1.5"><span>{MIN_HOURS} hrs</span><span>{MAX_HOURS} hrs</span></div>
+      <div className="mt-6 grid grid-cols-3 gap-2 p-4 rounded-2xl border-2 border-primary/15 bg-primary/[0.03]" aria-live="polite">
+        <div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pay</p>
+          <p className="text-xl md:text-2xl font-black text-primary-dark">£{rate}<span className="text-xs font-bold text-slate-400">/hr</span></p>
+        </div>
+        <div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Per week</p>
+          <p className="text-xl md:text-2xl font-black text-primary-dark">{money(weekly)}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Per month</p>
+          <p className="text-xl md:text-2xl font-black text-primary">{money(monthly)}</p>
+        </div>
+      </div>
+      <a href="#apply" className="mt-6 btn-primary w-full py-4 text-base flex items-center justify-center gap-2 shadow-xl shadow-primary/20">
+        {applyLabel || "Apply now"} <ArrowRight size={18} />
+      </a>
+      <p className="text-[11px] text-slate-400 mt-3 leading-relaxed">{String(note || "").replaceAll("{rate}", `£${rate}`)}</p>
+    </div>
+  );
+}
+
+/* ── Top of the page: photos + earnings calculator ───────────────── */
+export function JobsHeroBlock({ badge, heading, text, image1, alt1, image2, alt2, hourlyRate, applyLabel, calculatorNote }) {
+  const { region } = useRegion();
+  const isUK = region.id === "UK";
+  const rate = Number(hourlyRate) || 15;
+  return (
+    <section className="bg-primary/[0.06] pt-36 md:pt-44 pb-16 md:pb-24 px-6">
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_440px] gap-10 lg:gap-16 items-center">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6 shadow-sm">
+            {isUK ? badge : "Now hiring"}
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black text-primary-dark mb-6 tracking-tighter leading-[1.05]">{isUK ? heading : "Join our cleaning team."}</h1>
+          <p className="text-lg text-slate-600 max-w-xl font-medium leading-relaxed mb-10">
+            {isUK ? <RichText text={text} /> : "Join Nigeria's premier cleaning network. High pay, flexible hours, and professional growth."}
+          </p>
+          <div className="grid grid-cols-2 gap-4 max-w-lg">
+            <img src={imageUrl(image1)} alt={alt1 || ""} className="w-full aspect-[5/6] object-cover rounded-3xl border border-white shadow-lg" width="640" height="760" />
+            <img src={imageUrl(image2)} alt={alt2 || ""} className="w-full aspect-[5/6] object-cover rounded-3xl border border-white shadow-lg mt-8" width="640" height="760" loading="lazy" />
+          </div>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          {isUK ? (
+            <EarningsCalculator rate={rate} applyLabel={applyLabel} note={calculatorNote} />
+          ) : (
+            <a href="#apply" className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-2">{applyLabel || "Apply now"} <ArrowRight size={18} /></a>
+          )}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Cards with an icon (e.g. "Why clean with Cleaniq?") ─────────── */
+export function BenefitCardsBlock({ heading, cards, background }) {
+  const items = list(cards);
+  return (
+    <section className={`py-20 md:py-28 px-6 ${BG[background] || "bg-white"}`}>
+      <div className="max-w-7xl mx-auto">
+        {heading && <h2 className="text-3xl md:text-5xl font-black text-primary-dark text-center tracking-tighter mb-14">{heading}</h2>}
+        <div className={`grid gap-6 ${items.length === 4 ? "md:grid-cols-2 lg:grid-cols-4" : items.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+          {items.map((b, i) => (
+            <div key={i} className="p-8 rounded-[32px] bg-slate-50 border border-slate-100">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6"><PickedIcon name={b.icon} size={24} /></div>
+              <h3 className="text-xl font-black text-primary-dark mb-3 tracking-tight">{b.title}</h3>
+              <p className="text-slate-500 font-medium leading-relaxed"><RichText text={b.text} /></p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Numbered steps in a row ─────────────────────────────────────── */
+export function NumberedStepsBlock({ heading, steps, background }) {
+  const items = list(steps);
+  return (
+    <section className={`py-20 md:py-28 px-6 ${BG[background] || "bg-slate-50/60"}`}>
+      <div className="max-w-7xl mx-auto">
+        {heading && <h2 className="text-3xl md:text-5xl font-black text-primary-dark text-center tracking-tighter mb-14">{heading}</h2>}
+        <ol className={`grid sm:grid-cols-2 gap-6 ${items.length >= 5 ? "lg:grid-cols-5" : items.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
+          {items.map((s, i) => (
+            <li key={i} className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm">
+              <span className="w-10 h-10 rounded-full bg-primary text-white font-black flex items-center justify-center mb-5">{i + 1}</span>
+              <h3 className="text-lg font-black text-primary-dark mb-2 tracking-tight">{s.title}</h3>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed"><RichText text={s.text} /></p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/* ── Photo grid with labels ──────────────────────────────────────── */
+export function PhotoGridBlock({ heading, text, photos, background }) {
+  return (
+    <section className={`py-20 md:py-28 px-6 ${BG[background] || "bg-white"}`}>
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          {heading && <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-5">{heading}</h2>}
+          {text && <p className="text-lg text-slate-500 font-medium leading-relaxed"><RichText text={text} /></p>}
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+          {list(photos).map((ph, i) => (
+            <figure key={i} className="relative rounded-[28px] overflow-hidden aspect-[4/3] group">
+              <img src={imageUrl(ph.image)} alt={ph.alt || ph.label || ""} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              {ph.label && (
+                <figcaption className="absolute left-3 bottom-3 md:left-4 md:bottom-4 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur text-xs md:text-sm font-black text-primary-dark">{ph.label}</figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Big photo beside a heading, text and small icon cards ───────── */
+export function ImageCardsBlock({ image, imageAlt, imageSide, heading, text, cards, background }) {
+  const right = imageSide === "right";
+  return (
+    <section className={`py-20 md:py-28 px-6 ${BG[background] || "bg-primary/[0.04]"}`}>
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <img src={imageUrl(image)} alt={imageAlt || ""} loading="lazy" decoding="async" className={`w-full aspect-[4/3] object-cover rounded-[40px] shadow-xl ${right ? "lg:order-2" : ""}`} />
+        <div>
+          {heading && <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-5">{heading}</h2>}
+          {text && <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8"><RichText text={text} /></p>}
+          <div className="grid sm:grid-cols-2 gap-4">
+            {list(cards).map((x, i) => (
+              <div key={i} className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4"><PickedIcon name={x.icon} size={22} /></div>
+                <h3 className="font-black text-primary-dark mb-1">{x.title}</h3>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">{x.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Jobs across Greater Manchester: the work, what we look for, areas ─ */
+export function JobsInfoBlock({ heading, paragraphs, workTitle, showServices, lookingTitle, lookingFor, areasTitle, areasText, areaPrefix }) {
+  return (
+    <section className="py-20 md:py-28 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="max-w-3xl mb-12">
+          {heading && <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-6">{heading}</h2>}
+          {list(paragraphs).map((p, i, all) => (
+            <p key={i} className={`text-lg text-slate-600 font-medium leading-relaxed ${i < all.length - 1 ? "mb-4" : ""}`}><RichText text={str(p)} /></p>
+          ))}
+        </div>
+        {showServices !== "no" && (
+          <>
+            {workTitle && <h3 className="text-xl font-black text-primary-dark mb-6">{workTitle}</h3>}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+              {SERVICE_PAGES.map((p) => (
+                <div key={p.slug} className="rounded-3xl overflow-hidden bg-slate-50 border border-slate-100">
+                  <div className="aspect-[16/9] overflow-hidden"><img src={p.image(600)} alt={p.imageAlt} loading="lazy" decoding="async" className="w-full h-full object-cover" /></div>
+                  <div className="p-5">
+                    <h4 className="text-lg font-black text-primary-dark mb-1">{p.name}</h4>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">{p.blurb}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        <div className="grid lg:grid-cols-2 gap-10">
+          <div className="p-8 md:p-10 rounded-[32px] bg-primary text-white">
+            <h3 className="text-2xl font-black tracking-tight mb-6 flex items-center gap-3"><Heart size={24} className="text-secondary" /> {lookingTitle}</h3>
+            <ul className="space-y-4">
+              {list(lookingFor).map((item, i) => (
+                <li key={i} className="flex gap-3 font-medium text-white/90"><CheckCircle2 size={20} className="text-secondary shrink-0 mt-0.5" />{str(item)}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="p-8 md:p-10 rounded-[32px] bg-slate-50 border border-slate-100">
+            <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-3">{areasTitle}</h3>
+            {areasText && <p className="text-slate-500 font-medium mb-6">{areasText}</p>}
+            <div className="flex flex-wrap gap-2">
+              {AREAS.map((a) => (
+                <span key={a.slug} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-100 text-sm font-bold text-primary-dark">
+                  <MapPin size={13} className="text-primary" /> {areaPrefix ?? "Cleaning jobs in"} {a.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Application form (name, email, phone, CV) ───────────────────── */
+export function ApplyFormBlock({ heading, text, formTitle, note, buttonLabel, successTitle, successText, successButton }) {
+  const { region } = useRegion();
+  const isUK = region.id === "UK";
+  const sectionRef = useRef(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [formData, setFormData] = useState({ fullName: "", email: "", phone: "", cv: null });
+
+  const showNotification = (message, type = "error") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.fullName.trim()) return showNotification("Please enter your full name.");
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) return showNotification("Please enter a valid email address.");
+    if (!formData.phone.trim()) return showNotification("Please enter your phone number.");
+    if (!formData.cv) return showNotification("Please upload your CV.");
+
+    setIsSubmitting(true);
+    const data = new FormData();
+    data.append("cv", formData.cv);
+    data.append("data", JSON.stringify({ fullName: formData.fullName, email: formData.email, phone: formData.phone, region: region.id, source: "Website" }));
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/recruitment`, { method: "POST", body: data });
+      if (response.ok) {
+        setSubmitted(true);
+        setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      } else showNotification("Application failed. Please try again.");
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      showNotification("Network error. Please check your connection.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const input = "w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold";
+  const label = "text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5";
+
+  return (
+    <section ref={sectionRef} id="apply" className="py-20 md:py-28 px-6 scroll-mt-28">
+      {isSubmitting && <LoadingOverlay message="Sending your application..." />}
+      {submitted ? (
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto w-full p-6 md:p-12 text-center rounded-4xl md:rounded-[48px] bg-slate-50 border border-slate-100 shadow-xl">
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }} className="w-20 h-20 bg-primary text-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-primary/20 rotate-3">
+            <CheckCircle2 size={40} />
+          </motion.div>
+          <h2 className="text-3xl md:text-4xl font-black text-primary-dark mb-4 tracking-tighter">{successTitle}</h2>
+          <p className="text-slate-500 mb-10 leading-relaxed font-medium">{successText}</p>
+          <Link to="/" className="btn-primary w-full py-5 text-lg shadow-xl shadow-primary/20">{successButton || "Return to Home"}</Link>
+        </motion.div>
+      ) : (
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-10">
+            {heading && <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-4">{heading}</h2>}
+            {text && <p className="text-lg text-slate-500 font-medium">{text}</p>}
+          </div>
+          <div className="bg-slate-50 rounded-[32px] md:rounded-[48px] p-6 md:p-12 border border-slate-100 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
+            <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary"><FileText size={24} /></div>
+                <h3 className="text-2xl font-black text-primary-dark tracking-tight">{formTitle}</h3>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className={label}><User size={10} /> Full Name</label>
+                  <input required type="text" placeholder="John Doe" className={input} value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <label className={label}><Mail size={10} /> Email Address</label>
+                  <input required type="email" placeholder="john@example.com" className={input} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className={label}><Phone size={10} /> Phone Number</label>
+                <input required type="tel" placeholder={isUK ? "+44 7..." : "+234 8..."} className={input} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload CV</label>
+                <div className="relative group">
+                  <input type="file" accept=".pdf,.doc,.docx" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={(e) => setFormData({ ...formData, cv: e.target.files[0] })} />
+                  <div className={`p-8 md:p-10 border-2 border-dashed rounded-4xl flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}>
+                    <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.cv ? "bg-white text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"}`}>
+                      {formData.cv ? <CheckCircle2 size={32} /> : <Upload size={32} />}
+                    </div>
+                    <div className="text-center">
+                      <p className="font-black text-primary-dark">{formData.cv ? formData.cv.name : "Tap to upload your CV"}</p>
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">PDF or Word Doc (Max 5MB)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {note && (
+                <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10 flex gap-4">
+                  <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
+                  <p className="text-sm text-slate-600 font-medium leading-relaxed"><RichText text={note} /></p>
+                </div>
+              )}
+              <button type="submit" disabled={isSubmitting} className="btn-primary w-full py-5 text-base shadow-2xl shadow-primary/20 disabled:opacity-70">{buttonLabel || "Submit Application"}</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <AnimatePresence>
+        {notification && (
+          <motion.div initial={{ opacity: 0, y: -100 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -100 }} className="fixed top-10 left-1/2 -translate-x-1/2 z-100 w-[90%] max-w-md">
+            <div className={`p-6 rounded-[32px] border-2 shadow-2xl flex items-center gap-4 bg-white ${notification.type === "error" ? "border-rose-100 text-rose-600" : "border-emerald-100 text-emerald-600"}`}>
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.type === "error" ? "bg-rose-50" : "bg-emerald-50"}`}>
+                {notification.type === "error" ? <AlertCircle size={24} /> : <CheckCircle2 size={24} />}
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">{notification.type}</p>
+                <p className="font-bold text-sm leading-tight">{notification.message}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const RECRUIT_BLOCKS = {
+  JobsHero: JobsHeroBlock,
+  BenefitCards: BenefitCardsBlock,
+  NumberedSteps: NumberedStepsBlock,
+  PhotoGrid: PhotoGridBlock,
+  ImageCards: ImageCardsBlock,
+  JobsInfo: JobsInfoBlock,
+  ApplyForm: ApplyFormBlock,
+};

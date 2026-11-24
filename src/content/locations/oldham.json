@@ -1,76 +1,238 @@
 {
-  "basics": {
-    "meta": "Cleaniq Services offers expert deep cleaning, end of tenancy and regular cleaning across Oldham. Vetted, insured cleaners. Book online in minutes.",
-    "tagline": "Dependable Cleaning Across Oldham",
-    "description": "Cleaniq Services provides Oldham residents and businesses with thorough, professional cleaning they can count on. From end of tenancy cleans that satisfy strict landlord checklists to regular housekeeping, our local cleaners get the job done right every time.",
-    "services": [
-      "End of Tenancy Cleaning in Oldham",
-      "One-Off Deep Cleaning",
-      "Regular Domestic Cleaning",
-      "Commercial & Office Cleaning"
-    ],
-    "faqs": []
+  "root": {
+    "props": {
+      "title": "Cleaners in Oldham | Cleaning Services | Cleaniq",
+      "description": "Cleaniq Services offers expert deep cleaning, end of tenancy and regular cleaning across Oldham. Vetted, insured cleaners. Book online in minutes.",
+      "shareTitle": "",
+      "shareDescription": ""
+    }
   },
-  "guide": {
-    "highlights": [
-      "Chadderton",
-      "Royton",
-      "Saddleworth"
-    ],
-    "intro": [
-      "Oldham ranges from terraced streets and family homes in Chadderton, Royton, Shaw and Failsworth to the stone villages and rural homes of Saddleworth.",
-      "Our Oldham cleaners help families keep on top of busy weeks, help landlords get properties ready between tenants, and give older homes the deeper clean they need."
-    ],
-    "popular": [
-      {
-        "slug": "regular-house-cleaning-manchester",
-        "why": "Family homes in Chadderton, Royton and Shaw stay clean with weekly or fortnightly visits."
-      },
-      {
-        "slug": "end-of-tenancy-cleaning-manchester",
-        "why": "Rented homes need a full clean so they're ready for the next tenants."
-      },
-      {
-        "slug": "deep-cleaning-manchester",
-        "why": "Older stone homes in Saddleworth benefit from a thorough reset."
+  "content": [
+    {
+      "type": "AreaHero",
+      "props": {
+        "id": "AreaHero-oldham-1",
+        "badge": "Local Manchester Cleaners",
+        "heading": "Professional Cleaners in",
+        "highlight": "{area}",
+        "tagline": "Dependable Cleaning Across Oldham",
+        "text": "Looking for cleaners near you in {area}? Book a vetted local cleaner for regular house cleaning, a deep clean, end of tenancy, oven or carpet cleaning.",
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'm looking for a cleaner in {area}.",
+            "style": "soft",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "whyTitle": "Why Choose Us?",
+        "whyPoints": [
+          {
+            "icon": "shield",
+            "text": "Vetted Local Cleaners"
+          },
+          {
+            "icon": "star",
+            "text": "{rating}★ on Google"
+          },
+          {
+            "icon": "check",
+            "text": "Eco-Friendly Products"
+          },
+          {
+            "icon": "sparkles",
+            "text": "48-Hour Re-Clean Guarantee"
+          }
+        ]
       }
-    ],
-    "goodToKnow": [
-      "Saddleworth homes can be more rural, so share directions and parking details when you book.",
-      "Terraced streets in Chadderton and Failsworth can be busy for parking, so tell us about permits.",
-      "Landlords: book the clean as soon as you know the tenancy end date.",
-      "Older homes: mention damp or mould so your cleaner can focus on it."
-    ],
-    "faqs": [
-      {
-        "q": "Do you cover Saddleworth?",
-        "a": "Yes. Our Oldham cleaners cover Saddleworth as well as Chadderton, Royton, Shaw, Failsworth and Lees. Share directions and parking details when you book."
-      },
-      {
-        "q": "Can you clean a rented house in Oldham between tenants?",
-        "a": "Yes. Our end of tenancy clean covers the kitchen, oven, bathrooms and every room so the property is ready to let."
-      },
-      {
-        "q": "Do you offer regular cleaning in Chadderton and Royton?",
-        "a": "Yes. Choose weekly, fortnightly or monthly visits when you book."
+    },
+    {
+      "type": "AreaAbout",
+      "props": {
+        "id": "AreaAbout-oldham-2",
+        "image1": "our-work/deep-card.jpg",
+        "alt1": "Fridge cleaned inside after a deep clean by Cleaniq Services, a service we offer in {area}",
+        "image2": "our-work/regular-2.jpg",
+        "alt2": "Living room after a house clean by Cleaniq Services, a service we offer across {area}",
+        "image3": "service-office-photo-600.webp",
+        "alt3": "Tidy office desk with a computer and chairs: office cleaning available in {area}",
+        "heading": "About Our {area} Cleaning Services",
+        "paragraphs": [
+          "Cleaniq Services provides Oldham residents and businesses with thorough, professional cleaning they can count on. From end of tenancy cleans that satisfy strict landlord checklists to regular housekeeping, our local cleaners get the job done right every time.",
+          "Oldham ranges from terraced streets and family homes in Chadderton, Royton, Shaw and Failsworth to the stone villages and rural homes of Saddleworth.",
+          "Our Oldham cleaners help families keep on top of busy weeks, help landlords get properties ready between tenants, and give older homes the deeper clean they need."
+        ],
+        "image4": "our-work/regular-4.jpg",
+        "alt4": "Living room with big windows after a regular clean by Cleaniq Services",
+        "image5": "our-work/oven-3.jpg",
+        "alt5": "Oven cleaned inside by Cleaniq Services, the detail a deep clean covers",
+        "servicesTitle": "Services Available in {area}:",
+        "services": [
+          "End of Tenancy Cleaning in Oldham",
+          "One-Off Deep Cleaning",
+          "Regular Domestic Cleaning",
+          "Commercial & Office Cleaning"
+        ],
+        "cardTitle": "Ready for a clean home?",
+        "cardText": "Book your local {area} cleaner",
+        "cardButton": {
+          "label": "Book Clean Now",
+          "link": "/booking",
+          "style": "secondary",
+          "arrow": "yes",
+          "icon": ""
+        },
+        "helpLabel": "Need Help?",
+        "phone": "+44 7846 726428"
       }
-    ]
-  },
-  "local": {
-    "postcodes": [
-      "OL1",
-      "OL2",
-      "OL3",
-      "OL4",
-      "OL8",
-      "OL9",
-      "M35"
-    ],
-    "homes": "Oldham is mainly terraced and semi-detached housing in the town, Chadderton, Royton and Shaw, with stone-built homes in the Saddleworth villages. Rental properties are common, so end of tenancy cleans are frequent, along with regular cleans for family homes.",
-    "tips": [
-      "Saddleworth homes are further out; please book a little ahead so we can plan travel.",
-      "Landlords: end of tenancy cleans help get a property ready for new tenants quickly.",
-      "Terraced homes with small kitchens suit a 2 to 3 hour regular clean."
-    ]
-  }
+    },
+    {
+      "type": "AreaServices",
+      "props": {
+        "id": "AreaServices-oldham-3",
+        "heading": "Cleaning services in {area}",
+        "text": "Every cleaning service our cleaners offer near you. Tap one for prices and what's included.",
+        "linkText": "{service} in {area}"
+      }
+    },
+    {
+      "type": "AreaGuide",
+      "props": {
+        "id": "AreaGuide-oldham-4",
+        "popularTitle": "Popular cleaning services in {area}",
+        "popularText": "The services {area} customers book most, and why they suit homes here.",
+        "popular": [
+          {
+            "slug": "regular-house-cleaning-manchester",
+            "why": "Family homes in Chadderton, Royton and Shaw stay clean with weekly or fortnightly visits."
+          },
+          {
+            "slug": "end-of-tenancy-cleaning-manchester",
+            "why": "Rented homes need a full clean so they're ready for the next tenants."
+          },
+          {
+            "slug": "deep-cleaning-manchester",
+            "why": "Older stone homes in Saddleworth benefit from a thorough reset."
+          }
+        ],
+        "goodTitle": "Good to know in {area}",
+        "goodToKnow": [
+          "Saddleworth homes can be more rural, so share directions and parking details when you book.",
+          "Terraced streets in Chadderton and Failsworth can be busy for parking, so tell us about permits.",
+          "Landlords: book the clean as soon as you know the tenancy end date.",
+          "Older homes: mention damp or mould so your cleaner can focus on it."
+        ],
+        "highlights": [
+          "Chadderton",
+          "Royton",
+          "Saddleworth"
+        ]
+      }
+    },
+    {
+      "type": "AreaHomes",
+      "props": {
+        "id": "AreaHomes-oldham-5",
+        "heading": "Homes in {area} and what they need",
+        "text": "Oldham is mainly terraced and semi-detached housing in the town, Chadderton, Royton and Shaw, with stone-built homes in the Saddleworth villages. Rental properties are common, so end of tenancy cleans are frequent, along with regular cleans for family homes.",
+        "tipsTitle": "Tips for booking a cleaner in {area}",
+        "tips": [
+          "Saddleworth homes are further out; please book a little ahead so we can plan travel.",
+          "Landlords: end of tenancy cleans help get a property ready for new tenants quickly.",
+          "Terraced homes with small kitchens suit a 2 to 3 hour regular clean."
+        ],
+        "postcodesLabel": "Postcodes we cover in {area}:",
+        "postcodes": [
+          "OL1",
+          "OL2",
+          "OL3",
+          "OL4",
+          "OL8",
+          "OL9",
+          "M35"
+        ]
+      }
+    },
+    {
+      "type": "AreaBeforeAfter",
+      "props": {
+        "id": "AreaBeforeAfter-oldham-6",
+        "title": "Before & after from our recent jobs",
+        "limit": 3
+      }
+    },
+    {
+      "type": "AreaNearby",
+      "props": {
+        "id": "AreaNearby-oldham-7",
+        "heading": "Cleaners near you in {area}",
+        "text": "Our {area} cleaners also cover these nearby neighbourhoods.",
+        "prefix": "Cleaners in",
+        "places": [
+          "Chadderton",
+          "Royton",
+          "Shaw",
+          "Failsworth",
+          "Saddleworth",
+          "Lees"
+        ]
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-oldham-8"
+      }
+    },
+    {
+      "type": "AreaFaq",
+      "props": {
+        "id": "AreaFaq-oldham-9",
+        "label": "FAQs",
+        "heading": "Frequently Asked Questions — Cleaners in {area}",
+        "faqs": [
+          {
+            "q": "Do you cover Saddleworth?",
+            "a": "Yes. Our Oldham cleaners cover Saddleworth as well as Chadderton, Royton, Shaw, Failsworth and Lees. Share directions and parking details when you book."
+          },
+          {
+            "q": "Can you clean a rented house in Oldham between tenants?",
+            "a": "Yes. Our end of tenancy clean covers the kitchen, oven, bathrooms and every room so the property is ready to let."
+          },
+          {
+            "q": "Do you offer regular cleaning in Chadderton and Royton?",
+            "a": "Yes. Choose weekly, fortnightly or monthly visits when you book."
+          },
+          {
+            "q": "Which {area} postcodes do your cleaners cover?",
+            "a": "Our cleaners cover OL1, OL2, OL3, OL4, OL8, OL9, M35, including Chadderton, Royton, Shaw, Failsworth, Saddleworth, Lees. Not sure if you're covered? Message us on WhatsApp with your postcode."
+          },
+          {
+            "q": "Do you have cleaners near me in {area}?",
+            "a": "Yes. Our local cleaners cover {area}, including Chadderton, Royton, Shaw, Failsworth. Book online and we'll match you with a vetted cleaner near you."
+          },
+          {
+            "q": "What cleaning services do your cleaners offer in {area}?",
+            "a": "End of Tenancy Cleaning, Deep Cleaning, Airbnb Cleaning, Office Cleaning, Post-Construction Cleaning, Regular House Cleaning, General Cleaning, Oven Cleaning, Carpet Cleaning. Each service page shows what's included and the latest prices."
+          }
+        ]
+      }
+    },
+    {
+      "type": "OtherAreas",
+      "props": {
+        "id": "OtherAreas-oldham-10",
+        "heading": "Cleaners in nearby areas",
+        "prefix": "Cleaners in"
+      }
+    }
+  ]
 }

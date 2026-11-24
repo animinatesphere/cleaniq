@@ -1,95 +1,256 @@
 {
-  "basics": {
-    "meta": "Trusted cleaners for Manchester city centre apartments, offices and Airbnbs. Deep cleaning, end of tenancy and commercial cleaning. Book online today.",
-    "tagline": "Premium Cleaning for Manchester City Centre Living",
-    "description": "Cleaniq Services is the go-to cleaning provider for Manchester's bustling city centre — from high-rise apartments in Deansgate and Ancoats to busy commercial units near Piccadilly. Our vetted, insured cleaners deliver consistent, 5-star results for residents, landlords and businesses alike.",
-    "services": [
-      "End of Tenancy Cleaning in Manchester City Centre",
-      "One-Off Deep Cleaning",
-      "Airbnb & Short-Let Turnovers",
-      "Commercial & Office Cleaning"
-    ],
-    "faqs": [
-      {
-        "q": "Do you offer end of tenancy cleaning in Manchester City Centre?",
-        "a": "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits. We follow a landlord-approved checklist and offer a 48-hour re-clean guarantee."
-      },
-      {
-        "q": "How quickly can you book a cleaner in Manchester City Centre?",
-        "a": "We offer same-day and next-day bookings across Manchester City Centre, including Deansgate, Ancoats, Northern Quarter, and Piccadilly. Book online in under 60 seconds or call +44 7846 726428."
-      },
-      {
-        "q": "What cleaning services do you provide in Manchester City Centre?",
-        "a": "We offer end of tenancy cleaning, deep cleaning, Airbnb and short-let turnovers, office and commercial cleaning, and general domestic cleaning across all Manchester City Centre postcodes including M1, M2, M3, M4, and M15."
-      },
-      {
-        "q": "Are your Manchester City Centre cleaners vetted and insured?",
-        "a": "Yes. Every Cleaniq Services cleaner serving Manchester City Centre is background-checked, fully insured, and trained to our quality standard. We never send unvetted staff into your home or business."
-      },
-      {
-        "q": "Do you clean Airbnb and short-let apartments in Manchester City Centre?",
-        "a": "Yes. We specialise in fast Airbnb turnovers for short-let properties across Manchester City Centre. Our team handles linen changes, restocking, and guest-ready quality checks — matching your check-out and check-in schedule."
-      }
-    ]
+  "root": {
+    "props": {
+      "title": "Cleaners in Manchester City Centre | Cleaning Services | Cleaniq",
+      "description": "Trusted cleaners for Manchester city centre apartments, offices and Airbnbs. Deep cleaning, end of tenancy and commercial cleaning. Book online today.",
+      "shareTitle": "",
+      "shareDescription": ""
+    }
   },
-  "guide": {
-    "highlights": [
-      "Deansgate",
-      "Ancoats",
-      "Northern Quarter"
-    ],
-    "intro": [
-      "Living in Manchester city centre usually means apartment living: a high-rise near Deansgate or Spinningfields, or a converted mill in Ancoats, Castlefield or the Northern Quarter. These flats look great, but big windows, open-plan kitchens and city dust mean they need cleaning more often than you'd think.",
-      "Our city centre cleaners are used to concierge desks, fob entry, lifts and tight parking. Whether you live here, let a flat out or run an office around Piccadilly, we plan the clean around your building and your diary."
-    ],
-    "popular": [
-      {
-        "slug": "airbnb-cleaning-manchester",
-        "why": "Lots of city centre flats are short-lets, and turnovers between guests need to be quick and consistent."
-      },
-      {
-        "slug": "end-of-tenancy-cleaning-manchester",
-        "why": "Most city centre flats are rented, and letting agents check the oven, bathroom and cupboards at checkout."
-      },
-      {
-        "slug": "office-cleaning-manchester",
-        "why": "Offices and co-working spaces around Piccadilly and Spinningfields need cleaning outside working hours."
+  "content": [
+    {
+      "type": "AreaHero",
+      "props": {
+        "id": "AreaHero-manchester-city-centre-1",
+        "badge": "Local Manchester Cleaners",
+        "heading": "Professional Cleaners in",
+        "highlight": "{area}",
+        "tagline": "Premium Cleaning for Manchester City Centre Living",
+        "text": "Looking for cleaners near you in {area}? Book a vetted local cleaner for regular house cleaning, a deep clean, end of tenancy, oven or carpet cleaning.",
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'm looking for a cleaner in {area}.",
+            "style": "soft",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "whyTitle": "Why Choose Us?",
+        "whyPoints": [
+          {
+            "icon": "shield",
+            "text": "Vetted Local Cleaners"
+          },
+          {
+            "icon": "star",
+            "text": "{rating}★ on Google"
+          },
+          {
+            "icon": "check",
+            "text": "Eco-Friendly Products"
+          },
+          {
+            "icon": "sparkles",
+            "text": "48-Hour Re-Clean Guarantee"
+          }
+        ]
       }
-    ],
-    "goodToKnow": [
-      "Tell us about concierge, fob access or key collection when you book, so your cleaner can get straight in.",
-      "Parking is limited and expensive, so we plan city centre visits with that in mind.",
-      "Apartments with floor-to-ceiling windows benefit from a deep clean that includes interior glass and sills.",
-      "Short-let hosts can book turnovers to fit guest check-out and check-in times."
-    ],
-    "faqs": [
-      {
-        "q": "Can your cleaners get into my apartment building in the city centre?",
-        "a": "Yes. Tell us how access works when you book, for example concierge, a fob, a key safe or key collection, and your cleaner will follow those instructions."
-      },
-      {
-        "q": "Do you clean converted mill apartments in Ancoats and the Northern Quarter?",
-        "a": "Yes. Exposed brick, high ceilings and large windows collect dust quickly, so a deep clean is a good place to start, followed by regular cleans."
-      },
-      {
-        "q": "Can you clean my city centre office before or after work?",
-        "a": "Yes. Tell us about your workplace on our commercial cleaning form and we'll plan cleaning around your working hours."
+    },
+    {
+      "type": "AreaAbout",
+      "props": {
+        "id": "AreaAbout-manchester-city-centre-2",
+        "image1": "our-work/deep-card.jpg",
+        "alt1": "Fridge cleaned inside after a deep clean by Cleaniq Services, a service we offer in {area}",
+        "image2": "our-work/regular-2.jpg",
+        "alt2": "Living room after a house clean by Cleaniq Services, a service we offer across {area}",
+        "image3": "service-office-photo-600.webp",
+        "alt3": "Tidy office desk with a computer and chairs: office cleaning available in {area}",
+        "heading": "About Our {area} Cleaning Services",
+        "paragraphs": [
+          "Cleaniq Services is the go-to cleaning provider for Manchester's bustling city centre — from high-rise apartments in Deansgate and Ancoats to busy commercial units near Piccadilly. Our vetted, insured cleaners deliver consistent, 5-star results for residents, landlords and businesses alike.",
+          "Living in Manchester city centre usually means apartment living: a high-rise near Deansgate or Spinningfields, or a converted mill in Ancoats, Castlefield or the Northern Quarter. These flats look great, but big windows, open-plan kitchens and city dust mean they need cleaning more often than you'd think.",
+          "Our city centre cleaners are used to concierge desks, fob entry, lifts and tight parking. Whether you live here, let a flat out or run an office around Piccadilly, we plan the clean around your building and your diary."
+        ],
+        "image4": "our-work/regular-4.jpg",
+        "alt4": "Living room with big windows after a regular clean by Cleaniq Services",
+        "image5": "our-work/oven-3.jpg",
+        "alt5": "Oven cleaned inside by Cleaniq Services, the detail a deep clean covers",
+        "servicesTitle": "Services Available in {area}:",
+        "services": [
+          "End of Tenancy Cleaning in Manchester City Centre",
+          "One-Off Deep Cleaning",
+          "Airbnb & Short-Let Turnovers",
+          "Commercial & Office Cleaning"
+        ],
+        "cardTitle": "Ready for a clean home?",
+        "cardText": "Book your local {area} cleaner",
+        "cardButton": {
+          "label": "Book Clean Now",
+          "link": "/booking",
+          "style": "secondary",
+          "arrow": "yes",
+          "icon": ""
+        },
+        "helpLabel": "Need Help?",
+        "phone": "+44 7846 726428"
       }
-    ]
-  },
-  "local": {
-    "postcodes": [
-      "M1",
-      "M2",
-      "M3",
-      "M4",
-      "M15"
-    ],
-    "homes": "Most homes in the city centre are apartments: new-build towers around Deansgate and Spinningfields, and converted mills and warehouses in Ancoats, the Northern Quarter and Castlefield. Large windows, exposed brick and open-plan kitchens collect city dust quickly, and many flats are rented or let on Airbnb, so end of tenancy cleans and quick turnovers between guests are a big part of the work here.",
-    "tips": [
-      "Parking is limited, so tell us about building access, concierge or key collection when you book.",
-      "Short-let hosts can book turnovers to fit check-out and check-in times.",
-      "Handing back a rented flat? An end of tenancy clean covers the oven, kitchen, bathroom and inside cupboards that letting agents check."
-    ]
-  }
+    },
+    {
+      "type": "AreaServices",
+      "props": {
+        "id": "AreaServices-manchester-city-centre-3",
+        "heading": "Cleaning services in {area}",
+        "text": "Every cleaning service our cleaners offer near you. Tap one for prices and what's included.",
+        "linkText": "{service} in {area}"
+      }
+    },
+    {
+      "type": "AreaGuide",
+      "props": {
+        "id": "AreaGuide-manchester-city-centre-4",
+        "popularTitle": "Popular cleaning services in {area}",
+        "popularText": "The services {area} customers book most, and why they suit homes here.",
+        "popular": [
+          {
+            "slug": "airbnb-cleaning-manchester",
+            "why": "Lots of city centre flats are short-lets, and turnovers between guests need to be quick and consistent."
+          },
+          {
+            "slug": "end-of-tenancy-cleaning-manchester",
+            "why": "Most city centre flats are rented, and letting agents check the oven, bathroom and cupboards at checkout."
+          },
+          {
+            "slug": "office-cleaning-manchester",
+            "why": "Offices and co-working spaces around Piccadilly and Spinningfields need cleaning outside working hours."
+          }
+        ],
+        "goodTitle": "Good to know in {area}",
+        "goodToKnow": [
+          "Tell us about concierge, fob access or key collection when you book, so your cleaner can get straight in.",
+          "Parking is limited and expensive, so we plan city centre visits with that in mind.",
+          "Apartments with floor-to-ceiling windows benefit from a deep clean that includes interior glass and sills.",
+          "Short-let hosts can book turnovers to fit guest check-out and check-in times."
+        ],
+        "highlights": [
+          "Deansgate",
+          "Ancoats",
+          "Northern Quarter"
+        ]
+      }
+    },
+    {
+      "type": "AreaHomes",
+      "props": {
+        "id": "AreaHomes-manchester-city-centre-5",
+        "heading": "Homes in {area} and what they need",
+        "text": "Most homes in the city centre are apartments: new-build towers around Deansgate and Spinningfields, and converted mills and warehouses in Ancoats, the Northern Quarter and Castlefield. Large windows, exposed brick and open-plan kitchens collect city dust quickly, and many flats are rented or let on Airbnb, so end of tenancy cleans and quick turnovers between guests are a big part of the work here.",
+        "tipsTitle": "Tips for booking a cleaner in {area}",
+        "tips": [
+          "Parking is limited, so tell us about building access, concierge or key collection when you book.",
+          "Short-let hosts can book turnovers to fit check-out and check-in times.",
+          "Handing back a rented flat? An end of tenancy clean covers the oven, kitchen, bathroom and inside cupboards that letting agents check."
+        ],
+        "postcodesLabel": "Postcodes we cover in {area}:",
+        "postcodes": [
+          "M1",
+          "M2",
+          "M3",
+          "M4",
+          "M15"
+        ]
+      }
+    },
+    {
+      "type": "AreaBeforeAfter",
+      "props": {
+        "id": "AreaBeforeAfter-manchester-city-centre-6",
+        "title": "Before & after from our recent jobs",
+        "limit": 3
+      }
+    },
+    {
+      "type": "AreaNearby",
+      "props": {
+        "id": "AreaNearby-manchester-city-centre-7",
+        "heading": "Cleaners near you in {area}",
+        "text": "Our {area} cleaners also cover these nearby neighbourhoods.",
+        "prefix": "Cleaners in",
+        "places": [
+          "Deansgate",
+          "Ancoats",
+          "Northern Quarter",
+          "Piccadilly",
+          "Spinningfields",
+          "Castlefield"
+        ]
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-manchester-city-centre-8"
+      }
+    },
+    {
+      "type": "AreaFaq",
+      "props": {
+        "id": "AreaFaq-manchester-city-centre-9",
+        "label": "FAQs",
+        "heading": "Frequently Asked Questions — Cleaners in {area}",
+        "faqs": [
+          {
+            "q": "Can your cleaners get into my apartment building in the city centre?",
+            "a": "Yes. Tell us how access works when you book, for example concierge, a fob, a key safe or key collection, and your cleaner will follow those instructions."
+          },
+          {
+            "q": "Do you clean converted mill apartments in Ancoats and the Northern Quarter?",
+            "a": "Yes. Exposed brick, high ceilings and large windows collect dust quickly, so a deep clean is a good place to start, followed by regular cleans."
+          },
+          {
+            "q": "Can you clean my city centre office before or after work?",
+            "a": "Yes. Tell us about your workplace on our commercial cleaning form and we'll plan cleaning around your working hours."
+          },
+          {
+            "q": "Do you offer end of tenancy cleaning in Manchester City Centre?",
+            "a": "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits. We follow a landlord-approved checklist and offer a 48-hour re-clean guarantee."
+          },
+          {
+            "q": "How quickly can you book a cleaner in Manchester City Centre?",
+            "a": "We offer same-day and next-day bookings across Manchester City Centre, including Deansgate, Ancoats, Northern Quarter, and Piccadilly. Book online in under 60 seconds or call +44 7846 726428."
+          },
+          {
+            "q": "What cleaning services do you provide in Manchester City Centre?",
+            "a": "We offer end of tenancy cleaning, deep cleaning, Airbnb and short-let turnovers, office and commercial cleaning, and general domestic cleaning across all Manchester City Centre postcodes including M1, M2, M3, M4, and M15."
+          },
+          {
+            "q": "Are your Manchester City Centre cleaners vetted and insured?",
+            "a": "Yes. Every Cleaniq Services cleaner serving Manchester City Centre is background-checked, fully insured, and trained to our quality standard. We never send unvetted staff into your home or business."
+          },
+          {
+            "q": "Do you clean Airbnb and short-let apartments in Manchester City Centre?",
+            "a": "Yes. We specialise in fast Airbnb turnovers for short-let properties across Manchester City Centre. Our team handles linen changes, restocking, and guest-ready quality checks — matching your check-out and check-in schedule."
+          },
+          {
+            "q": "Which {area} postcodes do your cleaners cover?",
+            "a": "Our cleaners cover M1, M2, M3, M4, M15, including Deansgate, Ancoats, Northern Quarter, Piccadilly, Spinningfields, Castlefield. Not sure if you're covered? Message us on WhatsApp with your postcode."
+          },
+          {
+            "q": "Do you have cleaners near me in {area}?",
+            "a": "Yes. Our local cleaners cover {area}, including Deansgate, Ancoats, Northern Quarter, Piccadilly. Book online and we'll match you with a vetted cleaner near you."
+          },
+          {
+            "q": "What cleaning services do your cleaners offer in {area}?",
+            "a": "End of Tenancy Cleaning, Deep Cleaning, Airbnb Cleaning, Office Cleaning, Post-Construction Cleaning, Regular House Cleaning, General Cleaning, Oven Cleaning, Carpet Cleaning. Each service page shows what's included and the latest prices."
+          }
+        ]
+      }
+    },
+    {
+      "type": "OtherAreas",
+      "props": {
+        "id": "OtherAreas-manchester-city-centre-10",
+        "heading": "Cleaners in nearby areas",
+        "prefix": "Cleaners in"
+      }
+    }
+  ]
 }

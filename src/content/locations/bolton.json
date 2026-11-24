@@ -1,76 +1,238 @@
 {
-  "basics": {
-    "meta": "Reliable home and office cleaning across Bolton. Deep cleaning, end of tenancy and regular cleans from fully vetted local cleaners. Get a free quote.",
-    "tagline": "Bolton's Trusted Cleaning Specialists",
-    "description": "Cleaniq Services brings dependable, high-standard cleaning to homes and businesses across Bolton. Whether it's a one-off deep clean before moving day or an ongoing regular clean, our local team treats every job with the same care and attention to detail.",
-    "services": [
-      "End of Tenancy Cleaning in Bolton",
-      "One-Off Deep Cleaning",
-      "Regular Domestic Cleaning",
-      "Commercial & Office Cleaning"
-    ],
-    "faqs": []
+  "root": {
+    "props": {
+      "title": "Cleaners in Bolton | Cleaning Services | Cleaniq",
+      "description": "Reliable home and office cleaning across Bolton. Deep cleaning, end of tenancy and regular cleans from fully vetted local cleaners. Get a free quote.",
+      "shareTitle": "",
+      "shareDescription": ""
+    }
   },
-  "guide": {
-    "highlights": [
-      "Horwich",
-      "Farnworth",
-      "Westhoughton"
-    ],
-    "intro": [
-      "Bolton mixes terraced streets close to the town centre with family homes and newer estates in Horwich, Westhoughton and Bromley Cross, and plenty of rented homes in between.",
-      "That means our Bolton cleaners do a lot of end of tenancy cleans for landlords and tenants, alongside regular cleans for family homes and deep cleans for properties that need a fresh start."
-    ],
-    "popular": [
-      {
-        "slug": "end-of-tenancy-cleaning-manchester",
-        "why": "Bolton has lots of rented terraces, and a proper clean makes handover simpler for tenants and landlords."
-      },
-      {
-        "slug": "regular-house-cleaning-manchester",
-        "why": "Family homes in Horwich and Westhoughton stay on top of busy weeks with regular visits."
-      },
-      {
-        "slug": "carpet-cleaning-manchester",
-        "why": "Carpeted terraces and family homes freshen up with a deep carpet clean between tenants or once a year."
+  "content": [
+    {
+      "type": "AreaHero",
+      "props": {
+        "id": "AreaHero-bolton-1",
+        "badge": "Local Manchester Cleaners",
+        "heading": "Professional Cleaners in",
+        "highlight": "{area}",
+        "tagline": "Bolton's Trusted Cleaning Specialists",
+        "text": "Looking for cleaners near you in {area}? Book a vetted local cleaner for regular house cleaning, a deep clean, end of tenancy, oven or carpet cleaning.",
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'm looking for a cleaner in {area}.",
+            "style": "soft",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "whyTitle": "Why Choose Us?",
+        "whyPoints": [
+          {
+            "icon": "shield",
+            "text": "Vetted Local Cleaners"
+          },
+          {
+            "icon": "star",
+            "text": "{rating}★ on Google"
+          },
+          {
+            "icon": "check",
+            "text": "Eco-Friendly Products"
+          },
+          {
+            "icon": "sparkles",
+            "text": "48-Hour Re-Clean Guarantee"
+          }
+        ]
       }
-    ],
-    "goodToKnow": [
-      "Landlords: book the clean between tenancies so the property is ready for viewings.",
-      "Newer estates in Horwich and Westhoughton usually have easy parking; town centre terraces less so.",
-      "Add carpet cleaning to an end of tenancy clean when carpets need more than a vacuum.",
-      "Tell us about pets or anything that needs special care when you book."
-    ],
-    "faqs": [
-      {
-        "q": "Do you clean rental properties in Bolton for landlords?",
-        "a": "Yes. We clean between tenancies so properties are ready to let, including end of tenancy cleans with optional carpet cleaning."
-      },
-      {
-        "q": "Do you cover Horwich, Farnworth and Westhoughton?",
-        "a": "Yes. Our Bolton cleaners cover Horwich, Farnworth, Westhoughton, Kearsley, Little Lever and Bromley Cross."
-      },
-      {
-        "q": "Can you clean carpets as well as the house?",
-        "a": "Yes. Add carpet cleaning to your booking, or book it on its own."
+    },
+    {
+      "type": "AreaAbout",
+      "props": {
+        "id": "AreaAbout-bolton-2",
+        "image1": "our-work/deep-card.jpg",
+        "alt1": "Fridge cleaned inside after a deep clean by Cleaniq Services, a service we offer in {area}",
+        "image2": "our-work/regular-2.jpg",
+        "alt2": "Living room after a house clean by Cleaniq Services, a service we offer across {area}",
+        "image3": "service-office-photo-600.webp",
+        "alt3": "Tidy office desk with a computer and chairs: office cleaning available in {area}",
+        "heading": "About Our {area} Cleaning Services",
+        "paragraphs": [
+          "Cleaniq Services brings dependable, high-standard cleaning to homes and businesses across Bolton. Whether it's a one-off deep clean before moving day or an ongoing regular clean, our local team treats every job with the same care and attention to detail.",
+          "Bolton mixes terraced streets close to the town centre with family homes and newer estates in Horwich, Westhoughton and Bromley Cross, and plenty of rented homes in between.",
+          "That means our Bolton cleaners do a lot of end of tenancy cleans for landlords and tenants, alongside regular cleans for family homes and deep cleans for properties that need a fresh start."
+        ],
+        "image4": "our-work/regular-4.jpg",
+        "alt4": "Living room with big windows after a regular clean by Cleaniq Services",
+        "image5": "our-work/oven-3.jpg",
+        "alt5": "Oven cleaned inside by Cleaniq Services, the detail a deep clean covers",
+        "servicesTitle": "Services Available in {area}:",
+        "services": [
+          "End of Tenancy Cleaning in Bolton",
+          "One-Off Deep Cleaning",
+          "Regular Domestic Cleaning",
+          "Commercial & Office Cleaning"
+        ],
+        "cardTitle": "Ready for a clean home?",
+        "cardText": "Book your local {area} cleaner",
+        "cardButton": {
+          "label": "Book Clean Now",
+          "link": "/booking",
+          "style": "secondary",
+          "arrow": "yes",
+          "icon": ""
+        },
+        "helpLabel": "Need Help?",
+        "phone": "+44 7846 726428"
       }
-    ]
-  },
-  "local": {
-    "postcodes": [
-      "BL1",
-      "BL2",
-      "BL3",
-      "BL4",
-      "BL5",
-      "BL6",
-      "BL7"
-    ],
-    "homes": "Bolton has terraced streets close to the town centre, family homes and new estates in Horwich, Westhoughton and Bromley Cross, and student rentals near the University of Bolton. Regular house cleans for families and end of tenancy cleans for rental properties are the most common jobs across the area.",
-    "tips": [
-      "Landlords with several properties can book end of tenancy cleans back to back.",
-      "New-build homes in Horwich and Westhoughton often need an after-builders clean before moving in.",
-      "Family homes usually choose a weekly or fortnightly regular clean."
-    ]
-  }
+    },
+    {
+      "type": "AreaServices",
+      "props": {
+        "id": "AreaServices-bolton-3",
+        "heading": "Cleaning services in {area}",
+        "text": "Every cleaning service our cleaners offer near you. Tap one for prices and what's included.",
+        "linkText": "{service} in {area}"
+      }
+    },
+    {
+      "type": "AreaGuide",
+      "props": {
+        "id": "AreaGuide-bolton-4",
+        "popularTitle": "Popular cleaning services in {area}",
+        "popularText": "The services {area} customers book most, and why they suit homes here.",
+        "popular": [
+          {
+            "slug": "end-of-tenancy-cleaning-manchester",
+            "why": "Bolton has lots of rented terraces, and a proper clean makes handover simpler for tenants and landlords."
+          },
+          {
+            "slug": "regular-house-cleaning-manchester",
+            "why": "Family homes in Horwich and Westhoughton stay on top of busy weeks with regular visits."
+          },
+          {
+            "slug": "carpet-cleaning-manchester",
+            "why": "Carpeted terraces and family homes freshen up with a deep carpet clean between tenants or once a year."
+          }
+        ],
+        "goodTitle": "Good to know in {area}",
+        "goodToKnow": [
+          "Landlords: book the clean between tenancies so the property is ready for viewings.",
+          "Newer estates in Horwich and Westhoughton usually have easy parking; town centre terraces less so.",
+          "Add carpet cleaning to an end of tenancy clean when carpets need more than a vacuum.",
+          "Tell us about pets or anything that needs special care when you book."
+        ],
+        "highlights": [
+          "Horwich",
+          "Farnworth",
+          "Westhoughton"
+        ]
+      }
+    },
+    {
+      "type": "AreaHomes",
+      "props": {
+        "id": "AreaHomes-bolton-5",
+        "heading": "Homes in {area} and what they need",
+        "text": "Bolton has terraced streets close to the town centre, family homes and new estates in Horwich, Westhoughton and Bromley Cross, and student rentals near the University of Bolton. Regular house cleans for families and end of tenancy cleans for rental properties are the most common jobs across the area.",
+        "tipsTitle": "Tips for booking a cleaner in {area}",
+        "tips": [
+          "Landlords with several properties can book end of tenancy cleans back to back.",
+          "New-build homes in Horwich and Westhoughton often need an after-builders clean before moving in.",
+          "Family homes usually choose a weekly or fortnightly regular clean."
+        ],
+        "postcodesLabel": "Postcodes we cover in {area}:",
+        "postcodes": [
+          "BL1",
+          "BL2",
+          "BL3",
+          "BL4",
+          "BL5",
+          "BL6",
+          "BL7"
+        ]
+      }
+    },
+    {
+      "type": "AreaBeforeAfter",
+      "props": {
+        "id": "AreaBeforeAfter-bolton-6",
+        "title": "Before & after from our recent jobs",
+        "limit": 3
+      }
+    },
+    {
+      "type": "AreaNearby",
+      "props": {
+        "id": "AreaNearby-bolton-7",
+        "heading": "Cleaners near you in {area}",
+        "text": "Our {area} cleaners also cover these nearby neighbourhoods.",
+        "prefix": "Cleaners in",
+        "places": [
+          "Horwich",
+          "Farnworth",
+          "Westhoughton",
+          "Kearsley",
+          "Little Lever",
+          "Bromley Cross"
+        ]
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-bolton-8"
+      }
+    },
+    {
+      "type": "AreaFaq",
+      "props": {
+        "id": "AreaFaq-bolton-9",
+        "label": "FAQs",
+        "heading": "Frequently Asked Questions — Cleaners in {area}",
+        "faqs": [
+          {
+            "q": "Do you clean rental properties in Bolton for landlords?",
+            "a": "Yes. We clean between tenancies so properties are ready to let, including end of tenancy cleans with optional carpet cleaning."
+          },
+          {
+            "q": "Do you cover Horwich, Farnworth and Westhoughton?",
+            "a": "Yes. Our Bolton cleaners cover Horwich, Farnworth, Westhoughton, Kearsley, Little Lever and Bromley Cross."
+          },
+          {
+            "q": "Can you clean carpets as well as the house?",
+            "a": "Yes. Add carpet cleaning to your booking, or book it on its own."
+          },
+          {
+            "q": "Which {area} postcodes do your cleaners cover?",
+            "a": "Our cleaners cover BL1, BL2, BL3, BL4, BL5, BL6, BL7, including Horwich, Farnworth, Westhoughton, Kearsley, Little Lever, Bromley Cross. Not sure if you're covered? Message us on WhatsApp with your postcode."
+          },
+          {
+            "q": "Do you have cleaners near me in {area}?",
+            "a": "Yes. Our local cleaners cover {area}, including Horwich, Farnworth, Westhoughton, Kearsley. Book online and we'll match you with a vetted cleaner near you."
+          },
+          {
+            "q": "What cleaning services do your cleaners offer in {area}?",
+            "a": "End of Tenancy Cleaning, Deep Cleaning, Airbnb Cleaning, Office Cleaning, Post-Construction Cleaning, Regular House Cleaning, General Cleaning, Oven Cleaning, Carpet Cleaning. Each service page shows what's included and the latest prices."
+          }
+        ]
+      }
+    },
+    {
+      "type": "OtherAreas",
+      "props": {
+        "id": "OtherAreas-bolton-10",
+        "heading": "Cleaners in nearby areas",
+        "prefix": "Cleaners in"
+      }
+    }
+  ]
 }

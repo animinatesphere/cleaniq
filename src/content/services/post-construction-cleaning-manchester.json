@@ -1,312 +1,4946 @@
 {
-  "basics": {
-    "title": "Post-Construction Cleaning Manchester | Cleaners Near You",
-    "meta": "Expert post-construction and builders cleaning in Manchester. Dust removal, debris clearance, and final handover cleans. Book Cleaniq Services today.",
-    "heading": "Post-Construction Cleaning in Manchester",
-    "tagline": "Industrial Dust Removal, Paint Spot Cleaning, Final Handover.",
-    "description": "Renovations and construction work leave behind fine drywall dust, residue, paint spots, and debris. Our industrial builders clean prepares your property for instant occupancy and final keys handover.",
-    "points": [
-      "Complete HEPA filter vacuuming of fine plaster & cement dust",
-      "Sanitization of windows, frames, hinges, and sockets",
-      "Scraping and removal of paint droplets, glue, and sealants",
-      "Ready-to-live handover certification cleans"
-    ]
-  },
-  "details": {
-    "intro": "Building work, renovation, and refurbishment leave behind fine dust, debris, paint residue, and construction grime that standard cleaning cannot tackle. Cleaniq Services' post-construction cleaning team in Manchester provides a thorough, professional builders clean that prepares your property for immediate occupation or handover.",
-    "whyChoose": [
-      {
-        "title": "Handover-Ready Finish",
-        "body": "We clean to the standard required for a professional property handover — suitable for architects, developers, and private clients alike."
-      },
-      {
-        "title": "Industrial Equipment",
-        "body": "We use HEPA-filter industrial vacuums and specialist products to remove fine plaster dust, cement residue, and construction debris safely."
-      },
-      {
-        "title": "Flexible Scheduling",
-        "body": "We work around your build schedule and completion dates — including weekend and same-day bookings for urgent handovers."
-      },
-      {
-        "title": "All Property Types",
-        "body": "From single-room refurbishments to full commercial fit-outs — we have the team and equipment to handle any scale of post-build clean."
+ "root": {
+  "props": {
+   "title": "Post-Construction Cleaning Manchester | Cleaners Near You",
+   "description": "Expert post-construction and builders cleaning in Manchester. Dust removal, debris clearance, and final handover cleans. Book Cleaniq Services today.",
+   "shareTitle": "",
+   "shareDescription": "",
+   "schemaDescription": "Renovations and construction work leave behind fine drywall dust, residue, paint spots, and debris. Our industrial builders clean prepares your property for instant occupancy and final keys handover.",
+   "schemaAreas": [],
+   "priceKeywords": [],
+   "quoteMessage": "Hi Cleaniq! I'd like a quote for post-construction cleaning.",
+   "badge": "Manchester Cleaning Service",
+   "heading": "Post-Construction Cleaning in Manchester",
+   "tagline": "Industrial Dust Removal, Paint Spot Cleaning, Final Handover.",
+   "trustBold": "48-hr",
+   "trustText": "re-clean guarantee",
+   "ctaLabel": "Book your clean",
+   "ctaNote": "No hidden fees · Insured cleaners",
+   "bookLabel": "Book in 60 Seconds",
+   "quoteLabel": "Get a quote on WhatsApp",
+   "showPhone": "no",
+   "phone": "+44 7846 726428",
+   "ctaFoot": "48-hr satisfaction guarantee included",
+   "stats": [
+    {
+     "value": "{rating}★",
+     "label": "Google rating"
+    },
+    {
+     "value": "48hr",
+     "label": "Re-clean guarantee"
+    },
+    {
+     "value": "100%",
+     "label": "Deposit protection goal"
+    }
+   ],
+   "sideLabel": "Book your clean",
+   "sideNote": "No hidden fees · Fully insured",
+   "sidePoints": [
+    {
+     "icon": "shield-check",
+     "text": "Vetted & insured cleaners"
+    },
+    {
+     "icon": "calendar",
+     "text": "Flexible scheduling"
+    },
+    {
+     "icon": "star",
+     "text": "{rating}★ rated on Google"
+    }
+   ],
+   "sideFoot": "",
+   "guaranteesTitle": "Our guarantees",
+   "guarantees": [
+    "48-hour free re-clean if unsatisfied",
+    "Fully vetted & DBS-checked cleaners",
+    "Public liability insurance included",
+    "Eco-friendly, non-toxic products"
+   ],
+   "showAreas": "no",
+   "areasTitle": "Areas covered",
+   "mobileCall": "Call",
+   "mobileBook": "Book Now",
+   "top": [
+    {
+     "type": "SvcBox",
+     "props": {
+      "id": "SvcBox-1",
+      "tag": "section",
+      "cls": "px-4 sm:px-6 lg:px-10 xl:px-16 pt-10 sm:pt-14 space-y-8",
+      "children": [
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-2",
+         "tag": "div",
+         "cls": "rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10 grid lg:grid-cols-5 gap-8 items-center",
+         "children": [
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-3",
+            "tag": "div",
+            "cls": "lg:col-span-3 space-y-4",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-4",
+               "tag": "h2",
+               "cls": "text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight",
+               "text": "Post-Construction Cleaning in Manchester"
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-5",
+               "tag": "ul",
+               "cls": "space-y-2.5",
+               "children": [
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-6",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-7",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-8",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-9",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Fine dust removed with HEPA-filter vacuums"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-10",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-11",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-12",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-13",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Paint splashes, film and stickers removed"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-14",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-15",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-16",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-17",
+                     "tag": "",
+                     "cls": "",
+                     "text": "A handover-ready finish"
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-18",
+               "tag": "div",
+               "cls": "pt-2",
+               "children": [
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-19",
+                  "tag": "div",
+                  "cls": "flex flex-col sm:flex-row gap-3",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-20",
+                     "tag": "a",
+                     "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-[#00B5A4] text-white hover:bg-teal-600",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-21",
+                        "name": "calendar",
+                        "cls": "",
+                        "size": 16
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-22",
+                        "tag": "",
+                        "cls": "",
+                        "text": " Book now"
+                       }
+                      }
+                     ],
+                     "href": "{book}"
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-23",
+                     "tag": "a",
+                     "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-[#00B5A4] text-teal-700 hover:bg-teal-50",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-24",
+                        "name": "phone",
+                        "cls": "",
+                        "size": 16
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-25",
+                        "tag": "",
+                        "cls": "",
+                        "text": " Call now"
+                       }
+                      }
+                     ],
+                     "href": "tel:+447846726428"
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-26",
+            "tag": "div",
+            "cls": "lg:col-span-2 space-y-4",
+            "children": [
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-27",
+               "tag": "div",
+               "cls": "rounded-xl bg-[#0A1520] text-white p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-28",
+                  "tag": "p",
+                  "cls": "text-sm text-slate-300 mb-2",
+                  "text": "Questions? Call us:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-29",
+                  "tag": "a",
+                  "cls": "flex items-center gap-2 text-2xl font-bold text-teal-400 hover:text-teal-300",
+                  "children": [
+                   {
+                    "type": "SvcIcon",
+                    "props": {
+                     "id": "SvcIcon-30",
+                     "name": "phone",
+                     "cls": "",
+                     "size": 20
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-31",
+                     "tag": "",
+                     "cls": "",
+                     "text": " 07846 726428"
+                    }
+                   }
+                  ],
+                  "href": "tel:+447846726428"
+                 }
+                },
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-32",
+                  "tag": "p",
+                  "cls": "text-xs text-slate-400 mt-2",
+                  "text": "Mon–Fri 8am–6pm, Sat 9am–4pm"
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-33",
+               "tag": "div",
+               "cls": "rounded-xl bg-white border border-slate-200 p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-34",
+                  "tag": "p",
+                  "cls": "text-sm font-semibold text-slate-500 mb-3",
+                  "text": "This is a service for:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-35",
+                  "tag": "div",
+                  "cls": "flex flex-wrap gap-2",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-36",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-37",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-38",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Homeowners"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-39",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-40",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-41",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Builders"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-42",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-43",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-44",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Developers"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-45",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-46",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-47",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Landlords"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-48",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-49",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-50",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Businesses"
+                       }
+                      }
+                     ]
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       },
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-51",
+         "tag": "div",
+         "cls": "rounded-2xl border border-slate-200 bg-white p-6 sm:p-10",
+         "children": [
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-52",
+            "tag": "p",
+            "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-2",
+            "text": "Manchester Builders Cleaning"
+           }
+          },
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-53",
+            "tag": "h2",
+            "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+            "text": "After-builders cleaning in Manchester you can rely on"
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-54",
+            "tag": "div",
+            "cls": "space-y-4",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-55",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Cleaniq Services provides post-construction cleaning in Manchester and across Greater Manchester. After building work, renovation or a refurbishment, our after-builders cleaners remove the fine dust, debris, paint splashes and grime that standard cleaning can't deal with, leaving the property ready to live in, let or hand over."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-56",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Construction dust gets everywhere: on every surface, inside cupboards, on light fittings and along skirting boards. We use HEPA-filter industrial vacuums and specialist products to remove it properly instead of spreading it around, then clean every surface, fixture and floor."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-57",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Call us on [07846 726428](tel:+447846726428) or use our [quote form](/get-a-quote) to tell us about your project. Moving into a home after the work? Keep it clean afterwards with [regular house cleaning](/service/regular-house-cleaning-manchester), or book [carpet cleaning](/service/carpet-cleaning-manchester) for new or dusty carpets.",
+               "linkCls": "text-teal-700 font-semibold hover:underline"
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "content": [
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-58",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-59",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "About this service"
       }
-    ],
-    "checklist": {
-      "heading": "Post-Construction Cleaning Checklist — Manchester",
-      "intro": "Our builders clean covers every surface and area affected by construction work. Here is exactly what is completed on every job:",
-      "rooms": [
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-60",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "What's Included"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-61",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-5",
+       "text": "Renovations and construction work leave behind fine drywall dust, residue, paint spots, and debris. Our industrial builders clean prepares your property for instant occupancy and final keys handover."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-62",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Building work, renovation, and refurbishment leave behind fine dust, debris, paint residue, and construction grime that standard cleaning cannot tackle. Cleaniq Services' post-construction cleaning team in Manchester provides a thorough, professional builders clean that prepares your property for immediate occupation or handover."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-63",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
         {
-          "room": "All Rooms — General",
-          "tasks": [
-            "HEPA industrial vacuum of all floors, walls, and surfaces",
-            "Removal of plaster dust from all horizontal and vertical surfaces",
-            "Spot-cleaning of paint splashes and sealant residue",
-            "Removal of stickers, labels, and protective film from fixtures",
-            "Cleaning of all light fittings, switches, and socket plates",
-            "Wipe-down of all skirting boards and architrave",
-            "Final floor sweep and mop of all hard surfaces"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-64",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-65",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-66",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-67",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Complete HEPA filter vacuuming of fine plaster & cement dust"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "Windows & Glazing",
-          "tasks": [
-            "Interior glass cleaning — streak-free finish",
-            "Frame, sill, and hinge wipe-down",
-            "Removal of construction stickers and protective coating",
-            "Sealant and silicone residue removal",
-            "Blind or shutter wipe-down where fitted"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-68",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-69",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-70",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-71",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Sanitization of windows, frames, hinges, and sockets"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "Kitchen & Bathrooms",
-          "tasks": [
-            "Full sanitization of all new fixtures and fittings",
-            "Removal of grout haze from tiles and tiling areas",
-            "Sink, basin, and tap polishing",
-            "Shower enclosure and bath protective film removal",
-            "Cupboard interior wipe-down — dust and debris removal",
-            "Worktop and splashback streak-free clean"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-72",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-73",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-74",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-75",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Scraping and removal of paint droplets, glue, and sealants"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "External & Access Areas",
-          "tasks": [
-            "Front door, threshold, and entrance cleaning",
-            "Communal hallway and stairwell dust removal",
-            "Lift interior wipe-down if applicable",
-            "Site debris removal from immediate access areas"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-76",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-77",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-78",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-79",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Ready-to-live handover certification cleans"
+            }
+           }
           ]
+         }
         }
-      ]
-    },
-    "whyMatters": {
-      "heading": "Why a Professional Post-Construction Clean is Essential",
-      "body": [
-        "Construction dust is not ordinary household dust. Fine plaster, cement, and drywall particles are abrasive — damaging to surfaces, harmful when inhaled, and impossible to remove effectively without industrial-grade equipment. Attempting to clean a post-build property with a domestic vacuum simply redistributes the dust rather than removing it.",
-        "A professional builders clean from Cleaniq Services uses HEPA-filter industrial vacuums that capture particles down to 0.3 microns — ensuring that fine construction dust is fully removed rather than recirculated into the air. This protects both the occupants and the surfaces of your newly completed property.",
-        "For developers and contractors, a professional post-construction clean is also a contractual and reputational requirement. Properties handed over with visible dust, paint residue, or construction debris create a poor first impression and can result in snagging disputes. A professional handover clean from Cleaniq Services ensures your project is completed to the standard your clients expect."
-      ]
-    },
-    "seoFooter": "Cleaniq Services provides professional post-construction cleaning, builders cleans, and renovation cleaning across Manchester. Whether you need a post-build clean in Manchester City Centre, Salford, Ancoats, Stockport, or Didsbury — our industrial-equipped team delivers a handover-ready finish. Book your Manchester post-construction cleaning service online or call +44 7846 726428."
+       ]
+      }
+     }
+    ]
+   }
   },
-  "seo": {
-    "faqTitle": "Post-Construction Cleaning Manchester",
-    "banner": {
-      "h2": "Post-Construction Cleaning in Manchester",
-      "ticks": [
-        "Fine dust removed with HEPA-filter vacuums",
-        "Paint splashes, film and stickers removed",
-        "A handover-ready finish"
-      ],
-      "serviceFor": [
-        "Homeowners",
-        "Builders",
-        "Developers",
-        "Landlords",
-        "Businesses"
-      ]
-    },
-    "intro": {
-      "label": "Manchester Builders Cleaning",
-      "h2": "After-builders cleaning in Manchester you can rely on",
-      "paras": [
-        "Cleaniq Services provides post-construction cleaning in Manchester and across Greater Manchester. After building work, renovation or a refurbishment, our after-builders cleaners remove the fine dust, debris, paint splashes and grime that standard cleaning can't deal with, leaving the property ready to live in, let or hand over.",
-        "Construction dust gets everywhere: on every surface, inside cupboards, on light fittings and along skirting boards. We use HEPA-filter industrial vacuums and specialist products to remove it properly instead of spreading it around, then clean every surface, fixture and floor.",
-        "Call us on [07846 726428](tel:+447846726428) or use our [quote form](/get-a-quote) to tell us about your project. Moving into a home after the work? Keep it clean afterwards with [regular house cleaning](/service/regular-house-cleaning-manchester), or book [carpet cleaning](/service/carpet-cleaning-manchester) for new or dusty carpets."
-      ]
-    },
-    "how": {
-      "h2": "How does our post-construction cleaning in Manchester work?",
-      "intro": "Every building project is different, so we start by finding out about yours. Tell us what work has been done, the size of the property and when you need it ready, and we'll plan the clean around your build schedule and handover date. Larger properties and commercial fit-outs are quoted individually after a site assessment. Once the trades have finished, our team carries out the clean using our post-construction checklist. Here is how it works:",
-      "steps": [
-        {
-          "title": "Tell us about the project",
-          "body": "Call us or use our quote form. Tell us what work was done, the size of the property and your handover date."
-        },
-        {
-          "title": "Plan the clean",
-          "body": "We agree a date once the trades have finished. Larger properties and commercial fit-outs are quoted after a site assessment."
-        },
-        {
-          "title": "The builders clean",
-          "body": "Our team removes fine dust with HEPA-filter vacuums, then cleans every surface, fixture, window and floor using our post-construction checklist."
-        },
-        {
-          "title": "Ready for handover",
-          "body": "The property is left clean and ready to move into, let or hand over to your client."
-        }
-      ]
-    },
-    "benefits": {
-      "h2": "Benefits of professional post-construction cleaning",
-      "intro": "Cleaning up after builders is one of the hardest cleaning jobs there is. Fine plaster and cement dust settles on every surface, clings to walls and fittings, and comes straight back if it isn't removed properly. A professional post-construction clean saves you days of work, protects your new surfaces and fittings, and gets the property ready for the people who'll use it. Here are the main benefits:",
-      "items": [
-        {
-          "title": "Dust removed properly",
-          "body": "HEPA-filter industrial vacuums capture fine construction dust instead of spreading it around."
-        },
-        {
-          "title": "New finishes protected",
-          "body": "Paint splashes, sealant residue, stickers and protective film are removed carefully from fixtures and glazing."
-        },
-        {
-          "title": "Ready for handover",
-          "body": "A clean suitable for handing a property over to clients, tenants or buyers."
-        },
-        {
-          "title": "Fits your schedule",
-          "body": "We plan the clean around your build schedule and completion date."
-        },
-        {
-          "title": "Any size of project",
-          "body": "From a single-room refurbishment to a full commercial fit-out."
-        },
-        {
-          "title": "Saves you days of work",
-          "body": "Our team does the hard work, so you can move in, let or sell sooner."
-        }
-      ]
-    },
-    "types": {
-      "label": "Every Type of Project",
-      "h2": "Post-construction cleaning for every type of project",
-      "body": "Our post-construction cleaning team in Manchester cleans up after all kinds of building work, from small home improvements to new-build developments and commercial fit-outs. Tell us what work was done and which rooms were affected, and we'll plan the clean to match the size and condition of the property.",
-      "chips": [
-        "Home renovations",
-        "Extensions",
-        "Kitchen & bathroom fits",
-        "New builds",
-        "Office fit-outs",
-        "Retail units"
-      ]
-    },
-    "compare": {
-      "label": "Builders Clean or Deep Clean?",
-      "h2": "Post-construction clean or deep clean: what's the difference?",
-      "intro": "Both are thorough, but they're designed for different situations.",
-      "cards": [
-        {
-          "title": "Post-construction clean",
-          "body": "For properties after building work. It removes fine plaster and cement dust with HEPA-filter vacuums, paint splashes, sealant residue, stickers, protective film and grout haze, then cleans every surface, fixture and floor ready for handover."
-        },
-        {
-          "title": "Deep clean",
-          "body": "For lived-in homes that need a top-to-bottom refresh: inside appliances and cupboards, behind furniture and built-up limescale and grime. Read more about our [deep cleaning in Manchester](/service/deep-cleaning-manchester)."
-        }
-      ]
-    },
-    "experts": {
-      "label": "After-Builders Cleaners Manchester",
-      "h2": "Experienced after-builders cleaners in Manchester",
-      "paras": [
-        "Post-construction cleaning needs the right equipment and the right approach. Our team uses HEPA-filter industrial vacuums and specialist products for construction dust, paint and sealant residue, working carefully around new fixtures, glazing and finishes so nothing is scratched or damaged.",
-        "We work to your handover deadline and follow a fixed post-construction checklist, so every room, surface and fitting is covered. Whether you're a homeowner after a renovation, a builder finishing a job or a developer handing over new homes, we'll leave the property ready for the people who'll use it."
-      ],
-      "points": [
-        "HEPA-filter industrial vacuums.",
-        "Specialist products for dust, paint and sealant residue.",
-        "A fixed post-construction checklist.",
-        "Residential and commercial projects."
-      ]
-    },
-    "combine": {
-      "h2": "Combine your builders clean with our other services",
-      "intro": "Once the building work is done and the dust is gone, you may want to keep the property in top condition. Add one of our other cleaning services in Manchester to finish the job or keep it clean afterwards. It's a simple way to go from building site to a home or workplace that's ready to enjoy, all with one cleaning company. Choose from:",
-      "links": [
-        {
-          "to": "/service/carpet-cleaning-manchester",
-          "name": "Carpet Cleaning",
-          "body": "For carpets that collected dust during the work."
-        },
-        {
-          "to": "/service/regular-house-cleaning-manchester",
-          "name": "Regular House Cleaning",
-          "body": "Keep your newly finished home clean."
-        },
-        {
-          "to": "/service/office-cleaning-manchester",
-          "name": "Office Cleaning",
-          "body": "Regular cleaning for your new or refurbished workplace."
-        },
-        {
-          "to": "/service/end-of-tenancy-cleaning-manchester",
-          "name": "End of Tenancy Cleaning",
-          "body": "For rental properties between tenants."
-        }
-      ]
-    },
-    "local": {
-      "label": "Builders Cleaning Across Manchester",
-      "h2": "After-builders cleaning across Manchester and Greater Manchester",
-      "paras": [
-        "Our post-construction cleaning team covers homes, developments and commercial premises across Manchester and Greater Manchester, including Manchester City Centre, Ancoats and the Northern Quarter, Salford, Didsbury, Chorlton, Stockport, Trafford, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan. Our office is at 20 Swan St in Ancoats, so we're never far from your project.",
-        "From city-centre apartment refurbishments to new-build homes and commercial fit-outs, we plan each clean around the site, access arrangements and your handover date."
-      ]
-    },
-    "tips": {
-      "label": "Tips",
-      "h2": "How to prepare for a post-construction clean",
-      "intro": "A little preparation helps our team clean faster and more thoroughly, and makes sure the property is ready on time:",
-      "tips": [
-        "Book the clean once all trades have finished, including painters and decorators, so no new dust is created afterwards.",
-        "Ask your builder to clear large waste such as rubble, old fittings and offcuts before the clean.",
-        "Make sure the property has running water and electricity on the day.",
-        "Tell us about delicate new finishes, such as natural stone or high-gloss surfaces.",
-        "Let us know how our team can get in and where to park.",
-        "Keep windows open where possible during and after the work to help clear airborne dust.",
-        "Give yourself a buffer before your handover date in case anything needs a final touch."
-      ]
-    },
-    "quote": {
-      "h2": "Get a quote for post-construction cleaning",
-      "body": "Every building project is different, so we quote for each one. Tell us what work was done, the size of the property, which rooms were affected and when you need it ready, and we'll give you a quote for your post-construction clean. Larger properties and commercial fit-outs are quoted after a site assessment. Call us on 07846 726428 or use our quick quote form. There's no obligation."
-    },
-    "closing": {
-      "h2": "Book your post-construction clean in Manchester",
-      "body": "Call Cleaniq Services on [07846 726428](tel:+447846726428) or use our [quote form](/get-a-quote) to tell us about your project, and we'll plan the clean around your handover date."
-    }
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-80",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
   },
-  "faqs": [
-    {
-      "q": "What is included in a post-construction clean?",
-      "a": "Our builders clean includes full dust removal from all surfaces using industrial HEPA vacuums, paint splash removal, protective film and sticker removal from fixtures and glazing, grout haze removal, and a full floor clean — leaving the property ready for occupation or handover."
-    },
-    {
-      "q": "How long does a post-construction clean take?",
-      "a": "A typical one-bedroom flat takes 4–6 hours. Larger residential properties or commercial fit-outs are quoted individually following a site assessment. We work to your handover deadline."
-    },
-    {
-      "q": "Do you work on commercial construction sites?",
-      "a": "Yes. We handle post-build cleans for residential refurbishments, new-build developments, commercial office fit-outs, retail spaces, and industrial units across Greater Manchester."
-    },
-    {
-      "q": "Can you remove paint from floors and surfaces?",
-      "a": "Yes. We use specialist products to remove paint splashes, sealant residue, and adhesive from hard floors, tiles, glass, and fixtures without causing surface damage."
-    },
-    {
-      "q": "What Manchester areas do you cover for post-construction cleaning?",
-      "a": "We cover all of Greater Manchester including City Centre, Salford, Didsbury, Stockport, Trafford, Wythenshawe, Ancoats, and surrounding postcodes."
-    },
-    {
-      "q": "How much does post-construction cleaning cost in Manchester?",
-      "a": "It depends on the size and condition of the property and what work was done. Larger properties and commercial fit-outs are quoted individually after a site assessment. Call us or use our quote form for a quote."
-    },
-    {
-      "q": "When should I book a post-construction clean?",
-      "a": "Once all trades have finished, including painters and decorators, so no new dust is created after the clean. We'll plan the date around your handover."
-    },
-    {
-      "q": "Do you remove building waste?",
-      "a": "We remove site debris from the immediate access areas as part of the clean. Large waste such as rubble, skips and old fittings should be cleared by your builder first."
-    },
-    {
-      "q": "Can you clean a new-build home before we move in?",
-      "a": "Yes. We clean new-build homes and developments, removing construction dust, stickers and protective film so the property is ready to move into."
-    },
-    {
-      "q": "Is a post-construction clean the same as a deep clean?",
-      "a": "No. A post-construction clean is designed for properties after building work, removing fine construction dust, paint splashes and protective film. A deep clean is for lived-in homes that need a top-to-bottom refresh."
-    }
-  ]
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-81",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-82",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Why Cleaniq Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-83",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-6",
+       "text": "Why Choose Cleaniq Services for Post-Construction Cleaning in Manchester?"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-84",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-5",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-85",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-86",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-87",
+                "name": "badge-check",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-88",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-89",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Handover-Ready Finish"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-90",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We clean to the standard required for a professional property handover — suitable for architects, developers, and private clients alike."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-91",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-92",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-93",
+                "name": "shield-check",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-94",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-95",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Industrial Equipment"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-96",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We use HEPA-filter industrial vacuums and specialist products to remove fine plaster dust, cement residue, and construction debris safely."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-97",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-98",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-99",
+                "name": "clock",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-100",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-101",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Flexible Scheduling"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-102",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "We work around your build schedule and completion dates — including weekend and same-day bookings for urgent handovers."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-103",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-104",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-105",
+                "name": "sparkles",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-106",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-107",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "All Property Types"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-108",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "From single-room refurbishments to full commercial fit-outs — we have the team and equipment to handle any scale of post-build clean."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-109",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-110",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-111",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "How It Works"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-112",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "How does our post-construction cleaning in Manchester work?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-113",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Every building project is different, so we start by finding out about yours. Tell us what work has been done, the size of the property and when you need it ready, and we'll plan the clean around your build schedule and handover date. Larger properties and commercial fit-outs are quoted individually after a site assessment. Once the trades have finished, our team carries out the clean using our post-construction checklist. Here is how it works:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-114",
+       "tag": "ol",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-115",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-116",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-117",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "1"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-118",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Tell us about the project"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-119",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Call us or use our quote form. Tell us what work was done, the size of the property and your handover date."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-120",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-121",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-122",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "2"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-123",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Plan the clean"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-124",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "We agree a date once the trades have finished. Larger properties and commercial fit-outs are quoted after a site assessment."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-125",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-126",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-127",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "3"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-128",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "The builders clean"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-129",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Our team removes fine dust with HEPA-filter vacuums, then cleans every surface, fixture, window and floor using our post-construction checklist."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-130",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-131",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-132",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "4"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-133",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Ready for handover"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-134",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "The property is left clean and ready to move into, let or hand over to your client."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-135",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-136",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-137",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Benefits"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-138",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Benefits of professional post-construction cleaning"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-139",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Cleaning up after builders is one of the hardest cleaning jobs there is. Fine plaster and cement dust settles on every surface, clings to walls and fittings, and comes straight back if it isn't removed properly. A professional post-construction clean saves you days of work, protects your new surfaces and fittings, and gets the property ready for the people who'll use it. Here are the main benefits:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-140",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-141",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-142",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-143",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-144",
+                   "name": "clock",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-145",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Dust removed properly"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-146",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "HEPA-filter industrial vacuums capture fine construction dust instead of spreading it around."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-147",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-148",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-149",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-150",
+                   "name": "badge-check",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-151",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "New finishes protected"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-152",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Paint splashes, sealant residue, stickers and protective film are removed carefully from fixtures and glazing."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-153",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-154",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-155",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-156",
+                   "name": "star",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-157",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Ready for handover"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-158",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "A clean suitable for handing a property over to clients, tenants or buyers."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-159",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-160",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-161",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-162",
+                   "name": "shield-check",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-163",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Fits your schedule"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-164",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "We plan the clean around your build schedule and completion date."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-165",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-166",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-167",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-168",
+                   "name": "calendar",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-169",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Any size of project"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-170",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "From a single-room refurbishment to a full commercial fit-out."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-171",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-172",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-173",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-174",
+                   "name": "sparkles",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-175",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Saves you days of work"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-176",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Our team does the hard work, so you can move in, let or sell sooner."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-177",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-178",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-179",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Every Type of Project"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-180",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Post-construction cleaning for every type of project"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-181",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our post-construction cleaning team in Manchester cleans up after all kinds of building work, from small home improvements to new-build developments and commercial fit-outs. Tell us what work was done and which rooms were affected, and we'll plan the clean to match the size and condition of the property."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-182",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-183",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-184",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-185",
+             "tag": "",
+             "cls": "",
+             "text": "Home renovations"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-186",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-187",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-188",
+             "tag": "",
+             "cls": "",
+             "text": "Extensions"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-189",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-190",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-191",
+             "tag": "",
+             "cls": "",
+             "text": "Kitchen & bathroom fits"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-192",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-193",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-194",
+             "tag": "",
+             "cls": "",
+             "text": "New builds"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-195",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-196",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-197",
+             "tag": "",
+             "cls": "",
+             "text": "Office fit-outs"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-198",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-199",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-200",
+             "tag": "",
+             "cls": "",
+             "text": "Retail units"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-201",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-202",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-203",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Builders Clean or Deep Clean?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-204",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Post-construction clean or deep clean: what's the difference?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-205",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Both are thorough, but they're designed for different situations."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-206",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-207",
+          "tag": "div",
+          "cls": "p-5 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-208",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-2",
+             "text": "Post-construction clean"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-209",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "For properties after building work. It removes fine plaster and cement dust with HEPA-filter vacuums, paint splashes, sealant residue, stickers, protective film and grout haze, then cleans every surface, fixture and floor ready for handover."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-210",
+          "tag": "div",
+          "cls": "p-5 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-211",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-2",
+             "text": "Deep clean"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-212",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "For lived-in homes that need a top-to-bottom refresh: inside appliances and cupboards, behind furniture and built-up limescale and grime. Read more about our [deep cleaning in Manchester](/service/deep-cleaning-manchester).",
+             "linkCls": "text-teal-700 font-semibold hover:underline"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-213",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-214",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-215",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Room-by-room checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-216",
+       "tag": "h2",
+       "cls": "scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Post-Construction Cleaning Checklist — Manchester",
+       "anchor": "full-checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-217",
+       "tag": "p",
+       "cls": "text-slate-500 text-sm mb-8 leading-relaxed",
+       "text": "Our builders clean covers every surface and area affected by construction work. Here is exactly what is completed on every job:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-218",
+       "tag": "div",
+       "cls": "space-y-8",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-219",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-220",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-221",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "All Rooms — General"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-222",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-223",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-224",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-225",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-226",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "HEPA industrial vacuum of all floors, walls, and surfaces"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-227",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-228",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-229",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Removal of plaster dust from all horizontal and vertical surfaces"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-230",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-231",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-232",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Spot-cleaning of paint splashes and sealant residue"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-233",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-234",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-235",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Removal of stickers, labels, and protective film from fixtures"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-236",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-237",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-238",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Cleaning of all light fittings, switches, and socket plates"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-239",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-240",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-241",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wipe-down of all skirting boards and architrave"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-242",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-243",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-244",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Final floor sweep and mop of all hard surfaces"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-245",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-246",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-247",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Windows & Glazing"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-248",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-249",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-250",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-251",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-252",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Interior glass cleaning — streak-free finish"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-253",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-254",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-255",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Frame, sill, and hinge wipe-down"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-256",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-257",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-258",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Removal of construction stickers and protective coating"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-259",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-260",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-261",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Sealant and silicone residue removal"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-262",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-263",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-264",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Blind or shutter wipe-down where fitted"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-265",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-266",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-267",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Kitchen & Bathrooms"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-268",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-269",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-270",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-271",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-272",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Full sanitization of all new fixtures and fittings"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-273",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-274",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-275",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Removal of grout haze from tiles and tiling areas"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-276",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-277",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-278",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Sink, basin, and tap polishing"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-279",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-280",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-281",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Shower enclosure and bath protective film removal"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-282",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-283",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-284",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Cupboard interior wipe-down — dust and debris removal"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-285",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-286",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-287",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Worktop and splashback streak-free clean"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-288",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-289",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-290",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "External & Access Areas"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-291",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-292",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-293",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-294",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-295",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Front door, threshold, and entrance cleaning"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-296",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-297",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-298",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Communal hallway and stairwell dust removal"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-299",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-300",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-301",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Lift interior wipe-down if applicable"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-302",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-303",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-304",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Site debris removal from immediate access areas"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-305",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-306",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-307",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Coverage"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-308",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-3",
+       "text": "After-builders cleaners Near You"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-309",
+       "tag": "p",
+       "cls": "text-sm text-slate-500 mb-4",
+       "text": "Our after-builders cleaners work across Manchester and Greater Manchester, including:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-310",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-311",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-312",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-313",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-314",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-315",
+             "tag": "",
+             "cls": "",
+             "text": "Manchester City Centre"
+            }
+           }
+          ],
+          "href": "/locations/manchester-city-centre"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-316",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-317",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-318",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-319",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-320",
+             "tag": "",
+             "cls": "",
+             "text": "Salford"
+            }
+           }
+          ],
+          "href": "/locations/salford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-321",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-322",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-323",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-324",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-325",
+             "tag": "",
+             "cls": "",
+             "text": "Trafford"
+            }
+           }
+          ],
+          "href": "/locations/trafford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-326",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-327",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-328",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-329",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-330",
+             "tag": "",
+             "cls": "",
+             "text": "Stockport"
+            }
+           }
+          ],
+          "href": "/locations/stockport"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-331",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-332",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-333",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-334",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-335",
+             "tag": "",
+             "cls": "",
+             "text": "Didsbury"
+            }
+           }
+          ],
+          "href": "/locations/didsbury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-336",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-337",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-338",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-339",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-340",
+             "tag": "",
+             "cls": "",
+             "text": "Chorlton"
+            }
+           }
+          ],
+          "href": "/locations/chorlton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-341",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-342",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-343",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-344",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-345",
+             "tag": "",
+             "cls": "",
+             "text": "Bolton"
+            }
+           }
+          ],
+          "href": "/locations/bolton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-346",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-347",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-348",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-349",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-350",
+             "tag": "",
+             "cls": "",
+             "text": "Bury"
+            }
+           }
+          ],
+          "href": "/locations/bury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-351",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-352",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-353",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-354",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-355",
+             "tag": "",
+             "cls": "",
+             "text": "Oldham"
+            }
+           }
+          ],
+          "href": "/locations/oldham"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-356",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-357",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-358",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-359",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-360",
+             "tag": "",
+             "cls": "",
+             "text": "Rochdale"
+            }
+           }
+          ],
+          "href": "/locations/rochdale"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-361",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-362",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-363",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-364",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-365",
+             "tag": "",
+             "cls": "",
+             "text": "Tameside"
+            }
+           }
+          ],
+          "href": "/locations/tameside"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-366",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-367",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-368",
+             "tag": "",
+             "cls": "",
+             "text": "After-builders cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-369",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-370",
+             "tag": "",
+             "cls": "",
+             "text": "Wigan"
+            }
+           }
+          ],
+          "href": "/locations/wigan"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-371",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-372",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-373",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "After-Builders Cleaners Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-374",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Experienced after-builders cleaners in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-375",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Post-construction cleaning needs the right equipment and the right approach. Our team uses HEPA-filter industrial vacuums and specialist products for construction dust, paint and sealant residue, working carefully around new fixtures, glazing and finishes so nothing is scratched or damaged."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-376",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "We work to your handover deadline and follow a fixed post-construction checklist, so every room, surface and fitting is covered. Whether you're a homeowner after a renovation, a builder finishing a job or a developer handing over new homes, we'll leave the property ready for the people who'll use it."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-377",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-378",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-379",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-380",
+                "name": "shield-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-381",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "HEPA-filter industrial vacuums."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-382",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-383",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-384",
+                "name": "badge-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-385",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Specialist products for dust, paint and sealant residue."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-386",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-387",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-388",
+                "name": "map-pin",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-389",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "A fixed post-construction checklist."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-390",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-391",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-392",
+                "name": "star",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-393",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Residential and commercial projects."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-394",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-395",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-396",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Extra Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-397",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Combine your builders clean with our other services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-398",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Once the building work is done and the dust is gone, you may want to keep the property in top condition. Add one of our other cleaning services in Manchester to finish the job or keep it clean afterwards. It's a simple way to go from building site to a home or workplace that's ready to enjoy, all with one cleaning company. Choose from:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-399",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-400",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-401",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-402",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-403",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Carpet Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-404",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-405",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "For carpets that collected dust during the work."
+               }
+              }
+             ],
+             "href": "/service/carpet-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-406",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-407",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-408",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-409",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Regular House Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-410",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-411",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "Keep your newly finished home clean."
+               }
+              }
+             ],
+             "href": "/service/regular-house-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-412",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-413",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-414",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-415",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Office Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-416",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-417",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "Regular cleaning for your new or refurbished workplace."
+               }
+              }
+             ],
+             "href": "/service/office-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-418",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-419",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-420",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-421",
+                   "tag": "",
+                   "cls": "",
+                   "text": "End of Tenancy Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-422",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-423",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "For rental properties between tenants."
+               }
+              }
+             ],
+             "href": "/service/end-of-tenancy-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-424",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-425",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-[#00B5A4] text-white hover:bg-teal-600",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-426",
+             "name": "calendar",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-427",
+             "tag": "",
+             "cls": "",
+             "text": " Book now"
+            }
+           }
+          ],
+          "href": "{book}"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-428",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-[#00B5A4] text-teal-700 hover:bg-teal-50",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-429",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-430",
+             "tag": "",
+             "cls": "",
+             "text": " Call now"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-431",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-432",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-433",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Builders Cleaning Across Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-434",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "After-builders cleaning across Manchester and Greater Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-435",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our post-construction cleaning team covers homes, developments and commercial premises across Manchester and Greater Manchester, including Manchester City Centre, Ancoats and the Northern Quarter, Salford, Didsbury, Chorlton, Stockport, Trafford, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan. Our office is at 20 Swan St in Ancoats, so we're never far from your project."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-436",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "From city-centre apartment refurbishments to new-build homes and commercial fit-outs, we plan each clean around the site, access arrangements and your handover date."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-437",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-438",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-439",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Tips"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-440",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "How to prepare for a post-construction clean"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-441",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "A little preparation helps our team clean faster and more thoroughly, and makes sure the property is ready on time:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-442",
+       "tag": "ul",
+       "cls": "space-y-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-443",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-444",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-445",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-446",
+             "tag": "",
+             "cls": "",
+             "text": "Book the clean once all trades have finished, including painters and decorators, so no new dust is created afterwards."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-447",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-448",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-449",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-450",
+             "tag": "",
+             "cls": "",
+             "text": "Ask your builder to clear large waste such as rubble, old fittings and offcuts before the clean."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-451",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-452",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-453",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-454",
+             "tag": "",
+             "cls": "",
+             "text": "Make sure the property has running water and electricity on the day."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-455",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-456",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-457",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-458",
+             "tag": "",
+             "cls": "",
+             "text": "Tell us about delicate new finishes, such as natural stone or high-gloss surfaces."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-459",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-460",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-461",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-462",
+             "tag": "",
+             "cls": "",
+             "text": "Let us know how our team can get in and where to park."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-463",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-464",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-465",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-466",
+             "tag": "",
+             "cls": "",
+             "text": "Keep windows open where possible during and after the work to help clear airborne dust."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-467",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-468",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-469",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-470",
+             "tag": "",
+             "cls": "",
+             "text": "Give yourself a buffer before your handover date in case anything needs a final touch."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-471",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-472",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-473",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "The case for professionals"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-474",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-5",
+       "text": "Why a Professional Post-Construction Clean is Essential"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-475",
+       "tag": "div",
+       "cls": "space-y-4",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-476",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Construction dust is not ordinary household dust. Fine plaster, cement, and drywall particles are abrasive — damaging to surfaces, harmful when inhaled, and impossible to remove effectively without industrial-grade equipment. Attempting to clean a post-build property with a domestic vacuum simply redistributes the dust rather than removing it."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-477",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "A professional builders clean from Cleaniq Services uses HEPA-filter industrial vacuums that capture particles down to 0.3 microns — ensuring that fine construction dust is fully removed rather than recirculated into the air. This protects both the occupants and the surfaces of your newly completed property."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-478",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "For developers and contractors, a professional post-construction clean is also a contractual and reputational requirement. Properties handed over with visible dust, paint residue, or construction debris create a poor first impression and can result in snagging disputes. A professional handover clean from Cleaniq Services ensures your project is completed to the standard your clients expect."
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-479",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcReviews",
+   "props": {
+    "id": "SvcReviews-480",
+    "label": "Customer reviews",
+    "heading": "What Our Customers Say",
+    "linkText": "Read all reviews on Google"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-481",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcRelated",
+   "props": {
+    "id": "SvcRelated-482",
+    "label": "More from Cleaniq Services",
+    "heading": "Related cleaning services"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-483",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-484",
+    "tag": "section",
+    "cls": "rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-485",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-100 mb-2",
+       "text": "Contact Us For a Free Quote"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-486",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold mb-3",
+       "text": "Get a quote for post-construction cleaning"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-487",
+       "tag": "p",
+       "cls": "text-teal-50 leading-relaxed mb-6",
+       "text": "Every building project is different, so we quote for each one. Tell us what work was done, the size of the property, which rooms were affected and when you need it ready, and we'll give you a quote for your post-construction clean. Larger properties and commercial fit-outs are quoted after a site assessment. Call us on 07846 726428 or use our quick quote form. There's no obligation."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-488",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-489",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-490",
+             "tag": "",
+             "cls": "",
+             "text": "Get a free quote "
+            }
+           },
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-491",
+             "name": "arrow-right",
+             "cls": "",
+             "size": 16
+            }
+           }
+          ],
+          "href": "/get-a-quote"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-492",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-493",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-494",
+             "tag": "",
+             "cls": "",
+             "text": " 07846 726428"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-495",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-496",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-497",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Frequently asked questions"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-498",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Frequently Asked Questions: Post-Construction Cleaning Manchester"
+      }
+     },
+     {
+      "type": "SvcFaqs",
+      "props": {
+       "id": "SvcFaqs-499",
+       "numbered": "yes",
+       "items": [
+        {
+         "q": "What is included in a post-construction clean?",
+         "a": "Our builders clean includes full dust removal from all surfaces using industrial HEPA vacuums, paint splash removal, protective film and sticker removal from fixtures and glazing, grout haze removal, and a full floor clean — leaving the property ready for occupation or handover."
+        },
+        {
+         "q": "How long does a post-construction clean take?",
+         "a": "A typical one-bedroom flat takes 4–6 hours. Larger residential properties or commercial fit-outs are quoted individually following a site assessment. We work to your handover deadline."
+        },
+        {
+         "q": "Do you work on commercial construction sites?",
+         "a": "Yes. We handle post-build cleans for residential refurbishments, new-build developments, commercial office fit-outs, retail spaces, and industrial units across Greater Manchester."
+        },
+        {
+         "q": "Can you remove paint from floors and surfaces?",
+         "a": "Yes. We use specialist products to remove paint splashes, sealant residue, and adhesive from hard floors, tiles, glass, and fixtures without causing surface damage."
+        },
+        {
+         "q": "What Manchester areas do you cover for post-construction cleaning?",
+         "a": "We cover all of Greater Manchester including City Centre, Salford, Didsbury, Stockport, Trafford, Wythenshawe, Ancoats, and surrounding postcodes."
+        },
+        {
+         "q": "How much does post-construction cleaning cost in Manchester?",
+         "a": "It depends on the size and condition of the property and what work was done. Larger properties and commercial fit-outs are quoted individually after a site assessment. Call us or use our quote form for a quote."
+        },
+        {
+         "q": "When should I book a post-construction clean?",
+         "a": "Once all trades have finished, including painters and decorators, so no new dust is created after the clean. We'll plan the date around your handover."
+        },
+        {
+         "q": "Do you remove building waste?",
+         "a": "We remove site debris from the immediate access areas as part of the clean. Large waste such as rubble, skips and old fittings should be cleared by your builder first."
+        },
+        {
+         "q": "Can you clean a new-build home before we move in?",
+         "a": "Yes. We clean new-build homes and developments, removing construction dust, stickers and protective film so the property is ready to move into."
+        },
+        {
+         "q": "Is a post-construction clean the same as a deep clean?",
+         "a": "No. A post-construction clean is designed for properties after building work, removing fine construction dust, paint splashes and protective film. A deep clean is for lived-in homes that need a top-to-bottom refresh."
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-500",
+       "tag": "div",
+       "cls": "mt-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-501",
+          "tag": "h3",
+          "cls": "text-lg sm:text-xl font-bold mb-3",
+          "text": "Book your post-construction clean in Manchester"
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-502",
+          "tag": "p",
+          "cls": "text-teal-50 leading-relaxed mb-6",
+          "text": "Call Cleaniq Services on [07846 726428](tel:+447846726428) or use our [quote form](/get-a-quote) to tell us about your project, and we'll plan the clean around your handover date.",
+          "linkCls": "font-bold underline underline-offset-2 hover:text-white"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-503",
+          "tag": "div",
+          "cls": "flex flex-col sm:flex-row gap-3",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-504",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-white text-teal-800 hover:bg-teal-50",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-505",
+                "name": "calendar",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-506",
+                "tag": "",
+                "cls": "",
+                "text": " Book now"
+               }
+              }
+             ],
+             "href": "{book}"
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-507",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-white/70 text-white hover:bg-white/10",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-508",
+                "name": "phone",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-509",
+                "tag": "",
+                "cls": "",
+                "text": " Call now"
+               }
+              }
+             ],
+             "href": "tel:+447846726428"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-510",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-511",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-512",
+       "tag": "p",
+       "cls": "text-xs text-slate-400 leading-relaxed",
+       "text": "Cleaniq Services provides professional post-construction cleaning, builders cleans, and renovation cleaning across Manchester. Whether you need a post-build clean in Manchester City Centre, Salford, Ancoats, Stockport, or Didsbury — our industrial-equipped team delivers a handover-ready finish. Book your Manchester post-construction cleaning service online or call +44 7846 726428."
+      }
+     }
+    ]
+   }
+  }
+ ]
 }

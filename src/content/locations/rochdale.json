@@ -1,75 +1,237 @@
 {
-  "basics": {
-    "meta": "Trusted home and commercial cleaning in Rochdale. End of tenancy, deep cleaning and Airbnb turnovers from fully vetted local cleaners.",
-    "tagline": "Rochdale's Reliable Cleaning Partner",
-    "description": "Cleaniq Services serves homes, landlords and businesses across Rochdale with meticulous, eco-friendly cleaning. Our vetted team handles everything from deep cleans and end of tenancy turnarounds to fast Airbnb changeovers.",
-    "services": [
-      "End of Tenancy Cleaning in Rochdale",
-      "One-Off Deep Cleaning",
-      "Airbnb & Short-Let Turnovers",
-      "Commercial & Office Cleaning"
-    ],
-    "faqs": []
+  "root": {
+    "props": {
+      "title": "Cleaners in Rochdale | Cleaning Services | Cleaniq",
+      "description": "Trusted home and commercial cleaning in Rochdale. End of tenancy, deep cleaning and Airbnb turnovers from fully vetted local cleaners.",
+      "shareTitle": "",
+      "shareDescription": ""
+    }
   },
-  "guide": {
-    "highlights": [
-      "Heywood",
-      "Middleton",
-      "Littleborough"
-    ],
-    "intro": [
-      "Rochdale takes in the town itself, Heywood and Middleton, and the Pennine-edge villages of Littleborough, Milnrow and Norden, with a mix of terraces, family homes and rentals.",
-      "Our Rochdale cleaners keep family homes on track with regular visits, get rental properties ready between tenants, and tackle the damp and mould that older Pennine homes can suffer from."
-    ],
-    "popular": [
-      {
-        "slug": "regular-house-cleaning-manchester",
-        "why": "Family homes in Heywood, Middleton and Norden suit regular weekly or fortnightly cleans."
-      },
-      {
-        "slug": "deep-cleaning-manchester",
-        "why": "Older homes near the Pennines can need help with condensation, damp and mould."
-      },
-      {
-        "slug": "end-of-tenancy-cleaning-manchester",
-        "why": "Rental properties need a full clean ready for the next tenants."
+  "content": [
+    {
+      "type": "AreaHero",
+      "props": {
+        "id": "AreaHero-rochdale-1",
+        "badge": "Local Manchester Cleaners",
+        "heading": "Professional Cleaners in",
+        "highlight": "{area}",
+        "tagline": "Rochdale's Reliable Cleaning Partner",
+        "text": "Looking for cleaners near you in {area}? Book a vetted local cleaner for regular house cleaning, a deep clean, end of tenancy, oven or carpet cleaning.",
+        "buttons": [
+          {
+            "label": "Book a cleaner",
+            "link": "/booking",
+            "style": "primary",
+            "arrow": "yes",
+            "icon": ""
+          },
+          {
+            "label": "WhatsApp us",
+            "link": "whatsapp:Hi Cleaniq! I'm looking for a cleaner in {area}.",
+            "style": "soft",
+            "arrow": "no",
+            "icon": "whatsapp"
+          }
+        ],
+        "whyTitle": "Why Choose Us?",
+        "whyPoints": [
+          {
+            "icon": "shield",
+            "text": "Vetted Local Cleaners"
+          },
+          {
+            "icon": "star",
+            "text": "{rating}★ on Google"
+          },
+          {
+            "icon": "check",
+            "text": "Eco-Friendly Products"
+          },
+          {
+            "icon": "sparkles",
+            "text": "48-Hour Re-Clean Guarantee"
+          }
+        ]
       }
-    ],
-    "goodToKnow": [
-      "Older homes: mention damp or mould on windows and bathroom silicone when you book.",
-      "Villages like Littleborough and Milnrow can be more spread out, so share directions and parking.",
-      "Middleton and Heywood homes often suit a fortnightly regular clean.",
-      "Landlords: book the clean as soon as you know the tenancy end date."
-    ],
-    "faqs": [
-      {
-        "q": "Do you cover Heywood and Middleton?",
-        "a": "Yes. Our Rochdale cleaners cover Heywood, Middleton, Littleborough, Milnrow, Castleton and Norden."
-      },
-      {
-        "q": "Can you help with mould in an older Rochdale home?",
-        "a": "Yes. A deep clean can include mould spots on bathroom silicone, tiles and window frames. Tell us about it when you book."
-      },
-      {
-        "q": "Can I book a regular cleaner in Rochdale?",
-        "a": "Yes. Choose weekly, fortnightly or monthly visits, and the day and time that suit you."
+    },
+    {
+      "type": "AreaAbout",
+      "props": {
+        "id": "AreaAbout-rochdale-2",
+        "image1": "our-work/deep-card.jpg",
+        "alt1": "Fridge cleaned inside after a deep clean by Cleaniq Services, a service we offer in {area}",
+        "image2": "our-work/regular-2.jpg",
+        "alt2": "Living room after a house clean by Cleaniq Services, a service we offer across {area}",
+        "image3": "service-office-photo-600.webp",
+        "alt3": "Tidy office desk with a computer and chairs: office cleaning available in {area}",
+        "heading": "About Our {area} Cleaning Services",
+        "paragraphs": [
+          "Cleaniq Services serves homes, landlords and businesses across Rochdale with meticulous, eco-friendly cleaning. Our vetted team handles everything from deep cleans and end of tenancy turnarounds to fast Airbnb changeovers.",
+          "Rochdale takes in the town itself, Heywood and Middleton, and the Pennine-edge villages of Littleborough, Milnrow and Norden, with a mix of terraces, family homes and rentals.",
+          "Our Rochdale cleaners keep family homes on track with regular visits, get rental properties ready between tenants, and tackle the damp and mould that older Pennine homes can suffer from."
+        ],
+        "image4": "our-work/regular-4.jpg",
+        "alt4": "Living room with big windows after a regular clean by Cleaniq Services",
+        "image5": "our-work/oven-3.jpg",
+        "alt5": "Oven cleaned inside by Cleaniq Services, the detail a deep clean covers",
+        "servicesTitle": "Services Available in {area}:",
+        "services": [
+          "End of Tenancy Cleaning in Rochdale",
+          "One-Off Deep Cleaning",
+          "Airbnb & Short-Let Turnovers",
+          "Commercial & Office Cleaning"
+        ],
+        "cardTitle": "Ready for a clean home?",
+        "cardText": "Book your local {area} cleaner",
+        "cardButton": {
+          "label": "Book Clean Now",
+          "link": "/booking",
+          "style": "secondary",
+          "arrow": "yes",
+          "icon": ""
+        },
+        "helpLabel": "Need Help?",
+        "phone": "+44 7846 726428"
       }
-    ]
-  },
-  "local": {
-    "postcodes": [
-      "OL10",
-      "OL11",
-      "OL12",
-      "OL15",
-      "OL16",
-      "M24"
-    ],
-    "homes": "Rochdale includes the town centre and its terraced streets, family homes in Norden and Castleton, and nearby towns like Heywood, Middleton, Milnrow and Littleborough. Housing is a mix of older terraces and newer estates, with plenty of rental properties needing end of tenancy cleans between tenants.",
-    "tips": [
-      "Older terraces: a deep clean can tackle limescale and mould in bathrooms.",
-      "Middleton and Heywood are covered as part of our Rochdale area.",
-      "Moving out? Book the end of tenancy clean for after your furniture has gone."
-    ]
-  }
+    },
+    {
+      "type": "AreaServices",
+      "props": {
+        "id": "AreaServices-rochdale-3",
+        "heading": "Cleaning services in {area}",
+        "text": "Every cleaning service our cleaners offer near you. Tap one for prices and what's included.",
+        "linkText": "{service} in {area}"
+      }
+    },
+    {
+      "type": "AreaGuide",
+      "props": {
+        "id": "AreaGuide-rochdale-4",
+        "popularTitle": "Popular cleaning services in {area}",
+        "popularText": "The services {area} customers book most, and why they suit homes here.",
+        "popular": [
+          {
+            "slug": "regular-house-cleaning-manchester",
+            "why": "Family homes in Heywood, Middleton and Norden suit regular weekly or fortnightly cleans."
+          },
+          {
+            "slug": "deep-cleaning-manchester",
+            "why": "Older homes near the Pennines can need help with condensation, damp and mould."
+          },
+          {
+            "slug": "end-of-tenancy-cleaning-manchester",
+            "why": "Rental properties need a full clean ready for the next tenants."
+          }
+        ],
+        "goodTitle": "Good to know in {area}",
+        "goodToKnow": [
+          "Older homes: mention damp or mould on windows and bathroom silicone when you book.",
+          "Villages like Littleborough and Milnrow can be more spread out, so share directions and parking.",
+          "Middleton and Heywood homes often suit a fortnightly regular clean.",
+          "Landlords: book the clean as soon as you know the tenancy end date."
+        ],
+        "highlights": [
+          "Heywood",
+          "Middleton",
+          "Littleborough"
+        ]
+      }
+    },
+    {
+      "type": "AreaHomes",
+      "props": {
+        "id": "AreaHomes-rochdale-5",
+        "heading": "Homes in {area} and what they need",
+        "text": "Rochdale includes the town centre and its terraced streets, family homes in Norden and Castleton, and nearby towns like Heywood, Middleton, Milnrow and Littleborough. Housing is a mix of older terraces and newer estates, with plenty of rental properties needing end of tenancy cleans between tenants.",
+        "tipsTitle": "Tips for booking a cleaner in {area}",
+        "tips": [
+          "Older terraces: a deep clean can tackle limescale and mould in bathrooms.",
+          "Middleton and Heywood are covered as part of our Rochdale area.",
+          "Moving out? Book the end of tenancy clean for after your furniture has gone."
+        ],
+        "postcodesLabel": "Postcodes we cover in {area}:",
+        "postcodes": [
+          "OL10",
+          "OL11",
+          "OL12",
+          "OL15",
+          "OL16",
+          "M24"
+        ]
+      }
+    },
+    {
+      "type": "AreaBeforeAfter",
+      "props": {
+        "id": "AreaBeforeAfter-rochdale-6",
+        "title": "Before & after from our recent jobs",
+        "limit": 3
+      }
+    },
+    {
+      "type": "AreaNearby",
+      "props": {
+        "id": "AreaNearby-rochdale-7",
+        "heading": "Cleaners near you in {area}",
+        "text": "Our {area} cleaners also cover these nearby neighbourhoods.",
+        "prefix": "Cleaners in",
+        "places": [
+          "Heywood",
+          "Middleton",
+          "Littleborough",
+          "Milnrow",
+          "Castleton",
+          "Norden"
+        ]
+      }
+    },
+    {
+      "type": "GoogleReviews",
+      "props": {
+        "id": "GoogleReviews-rochdale-8"
+      }
+    },
+    {
+      "type": "AreaFaq",
+      "props": {
+        "id": "AreaFaq-rochdale-9",
+        "label": "FAQs",
+        "heading": "Frequently Asked Questions — Cleaners in {area}",
+        "faqs": [
+          {
+            "q": "Do you cover Heywood and Middleton?",
+            "a": "Yes. Our Rochdale cleaners cover Heywood, Middleton, Littleborough, Milnrow, Castleton and Norden."
+          },
+          {
+            "q": "Can you help with mould in an older Rochdale home?",
+            "a": "Yes. A deep clean can include mould spots on bathroom silicone, tiles and window frames. Tell us about it when you book."
+          },
+          {
+            "q": "Can I book a regular cleaner in Rochdale?",
+            "a": "Yes. Choose weekly, fortnightly or monthly visits, and the day and time that suit you."
+          },
+          {
+            "q": "Which {area} postcodes do your cleaners cover?",
+            "a": "Our cleaners cover OL10, OL11, OL12, OL15, OL16, M24, including Heywood, Middleton, Littleborough, Milnrow, Castleton, Norden. Not sure if you're covered? Message us on WhatsApp with your postcode."
+          },
+          {
+            "q": "Do you have cleaners near me in {area}?",
+            "a": "Yes. Our local cleaners cover {area}, including Heywood, Middleton, Littleborough, Milnrow. Book online and we'll match you with a vetted cleaner near you."
+          },
+          {
+            "q": "What cleaning services do your cleaners offer in {area}?",
+            "a": "End of Tenancy Cleaning, Deep Cleaning, Airbnb Cleaning, Office Cleaning, Post-Construction Cleaning, Regular House Cleaning, General Cleaning, Oven Cleaning, Carpet Cleaning. Each service page shows what's included and the latest prices."
+          }
+        ]
+      }
+    },
+    {
+      "type": "OtherAreas",
+      "props": {
+        "id": "OtherAreas-rochdale-10",
+        "heading": "Cleaners in nearby areas",
+        "prefix": "Cleaners in"
+      }
+    }
+  ]
 }

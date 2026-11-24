@@ -1,301 +1,4690 @@
 {
-  "basics": {
-    "title": "Oven Cleaning Manchester | Oven Cleaners Near You | Cleaniq",
-    "meta": "Professional oven cleaning in Manchester for single, double and range ovens. Local oven cleaners near you, live prices and a 48-hour re-clean guarantee. Book online.",
-    "heading": "Oven Cleaning in Manchester",
-    "tagline": "Single, Double & Range Ovens — Cleaned Inside and Out.",
-    "description": "Burnt-on grease and carbon are hard to shift at home. Our oven cleaners take care of the racks, trays, door glass and interior, so your oven is clean and ready to cook with again.",
-    "points": [
-      "Single, double and range ovens",
-      "Racks, trays and door glass included",
-      "Fixed prices — see the live price list below",
-      "Book on its own, or add it to any home clean"
-    ]
-  },
-  "details": {
-    "intro": "Looking for oven cleaning near you in Manchester? Cleaniq Services' oven cleaners clean single, double and range ovens inside and out — racks, trays, door glass and the oven interior — so your kitchen looks and smells fresh again. Book an oven clean on its own, or add it to a regular, deep or end of tenancy clean.",
-    "whyChoose": [
-      {
-        "title": "Inside and Out",
-        "body": "Racks, trays, door glass and the oven interior are all cleaned, not just the parts you can see."
-      },
-      {
-        "title": "Fixed, Upfront Prices",
-        "body": "Every oven size has a fixed price, shown live on this page from our booking system — no surprises."
-      },
-      {
-        "title": "On Its Own or With a Clean",
-        "body": "Book an oven clean by itself, or add it as an extra to any home, deep or end of tenancy clean."
-      },
-      {
-        "title": "48-Hour Re-Clean Guarantee",
-        "body": "If anything isn't right, tell us within 48 hours and we'll come back and put it right for free."
+ "root": {
+  "props": {
+   "title": "Oven Cleaning Manchester | Oven Cleaners Near You | Cleaniq",
+   "description": "Professional oven cleaning in Manchester for single, double and range ovens. Local oven cleaners near you, live prices and a 48-hour re-clean guarantee. Book online.",
+   "shareTitle": "",
+   "shareDescription": "",
+   "schemaDescription": "Burnt-on grease and carbon are hard to shift at home. Our oven cleaners take care of the racks, trays, door glass and interior, so your oven is clean and ready to cook with again.",
+   "schemaAreas": [],
+   "priceKeywords": [
+    "oven"
+   ],
+   "quoteMessage": "Hi Cleaniq! I'd like a quote for oven cleaning.",
+   "badge": "Manchester Cleaning Service",
+   "heading": "Oven Cleaning in Manchester",
+   "tagline": "Single, Double & Range Ovens — Cleaned Inside and Out.",
+   "trustBold": "48-hr",
+   "trustText": "re-clean guarantee",
+   "ctaLabel": "Book your clean",
+   "ctaNote": "No hidden fees · Insured cleaners",
+   "bookLabel": "Book in 60 Seconds",
+   "quoteLabel": "Get a quote on WhatsApp",
+   "showPhone": "no",
+   "phone": "+44 7846 726428",
+   "ctaFoot": "48-hr satisfaction guarantee included",
+   "stats": [
+    {
+     "value": "{rating}★",
+     "label": "Google rating"
+    },
+    {
+     "value": "48hr",
+     "label": "Re-clean guarantee"
+    },
+    {
+     "value": "100%",
+     "label": "Deposit protection goal"
+    }
+   ],
+   "sideLabel": "Book your clean",
+   "sideNote": "No hidden fees · Fully insured",
+   "sidePoints": [
+    {
+     "icon": "shield-check",
+     "text": "Vetted & insured cleaners"
+    },
+    {
+     "icon": "calendar",
+     "text": "Flexible scheduling"
+    },
+    {
+     "icon": "star",
+     "text": "{rating}★ rated on Google"
+    }
+   ],
+   "sideFoot": "",
+   "guaranteesTitle": "Our guarantees",
+   "guarantees": [
+    "48-hour free re-clean if unsatisfied",
+    "Fully vetted & DBS-checked cleaners",
+    "Public liability insurance included",
+    "Eco-friendly, non-toxic products"
+   ],
+   "showAreas": "no",
+   "areasTitle": "Areas covered",
+   "mobileCall": "Call",
+   "mobileBook": "Book Now",
+   "top": [
+    {
+     "type": "SvcBox",
+     "props": {
+      "id": "SvcBox-1",
+      "tag": "section",
+      "cls": "px-4 sm:px-6 lg:px-10 xl:px-16 pt-10 sm:pt-14 space-y-8",
+      "children": [
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-2",
+         "tag": "div",
+         "cls": "rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-white p-6 sm:p-10 grid lg:grid-cols-5 gap-8 items-center",
+         "children": [
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-3",
+            "tag": "div",
+            "cls": "lg:col-span-3 space-y-4",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-4",
+               "tag": "h2",
+               "cls": "text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight",
+               "text": "Oven Cleaning in Manchester"
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-5",
+               "tag": "ul",
+               "cls": "space-y-2.5",
+               "children": [
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-6",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-7",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-8",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-9",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Single, double and range ovens"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-10",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-11",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-12",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-13",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Racks, trays and door glass included"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-14",
+                  "tag": "li",
+                  "cls": "flex gap-3 items-center text-slate-700 font-medium",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-15",
+                     "tag": "span",
+                     "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-16",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 13
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-17",
+                     "tag": "",
+                     "cls": "",
+                     "text": "Fixed prices, shown live on this page"
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-18",
+               "tag": "div",
+               "cls": "pt-2",
+               "children": [
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-19",
+                  "tag": "div",
+                  "cls": "flex flex-col sm:flex-row gap-3",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-20",
+                     "tag": "a",
+                     "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-[#00B5A4] text-white hover:bg-teal-600",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-21",
+                        "name": "calendar",
+                        "cls": "",
+                        "size": 16
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-22",
+                        "tag": "",
+                        "cls": "",
+                        "text": " Book now"
+                       }
+                      }
+                     ],
+                     "href": "{book}"
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-23",
+                     "tag": "a",
+                     "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-[#00B5A4] text-teal-700 hover:bg-teal-50",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-24",
+                        "name": "phone",
+                        "cls": "",
+                        "size": 16
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-25",
+                        "tag": "",
+                        "cls": "",
+                        "text": " Call now"
+                       }
+                      }
+                     ],
+                     "href": "tel:+447846726428"
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-26",
+            "tag": "div",
+            "cls": "lg:col-span-2 space-y-4",
+            "children": [
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-27",
+               "tag": "div",
+               "cls": "rounded-xl bg-[#0A1520] text-white p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-28",
+                  "tag": "p",
+                  "cls": "text-sm text-slate-300 mb-2",
+                  "text": "Questions? Call us:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-29",
+                  "tag": "a",
+                  "cls": "flex items-center gap-2 text-2xl font-bold text-teal-400 hover:text-teal-300",
+                  "children": [
+                   {
+                    "type": "SvcIcon",
+                    "props": {
+                     "id": "SvcIcon-30",
+                     "name": "phone",
+                     "cls": "",
+                     "size": 20
+                    }
+                   },
+                   {
+                    "type": "SvcText",
+                    "props": {
+                     "id": "SvcText-31",
+                     "tag": "",
+                     "cls": "",
+                     "text": " 07846 726428"
+                    }
+                   }
+                  ],
+                  "href": "tel:+447846726428"
+                 }
+                },
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-32",
+                  "tag": "p",
+                  "cls": "text-xs text-slate-400 mt-2",
+                  "text": "Mon–Fri 8am–6pm, Sat 9am–4pm"
+                 }
+                }
+               ]
+              }
+             },
+             {
+              "type": "SvcBox",
+              "props": {
+               "id": "SvcBox-33",
+               "tag": "div",
+               "cls": "rounded-xl bg-white border border-slate-200 p-5",
+               "children": [
+                {
+                 "type": "SvcText",
+                 "props": {
+                  "id": "SvcText-34",
+                  "tag": "p",
+                  "cls": "text-sm font-semibold text-slate-500 mb-3",
+                  "text": "This is a service for:"
+                 }
+                },
+                {
+                 "type": "SvcBox",
+                 "props": {
+                  "id": "SvcBox-35",
+                  "tag": "div",
+                  "cls": "flex flex-wrap gap-2",
+                  "children": [
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-36",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-37",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-38",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Homeowners"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-39",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-40",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-41",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Tenants"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-42",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-43",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-44",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Landlords"
+                       }
+                      }
+                     ]
+                    }
+                   },
+                   {
+                    "type": "SvcBox",
+                    "props": {
+                     "id": "SvcBox-45",
+                     "tag": "span",
+                     "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+                     "children": [
+                      {
+                       "type": "SvcIcon",
+                       "props": {
+                        "id": "SvcIcon-46",
+                        "name": "check",
+                        "cls": "stroke-[3]",
+                        "size": 14
+                       }
+                      },
+                      {
+                       "type": "SvcText",
+                       "props": {
+                        "id": "SvcText-47",
+                        "tag": "",
+                        "cls": "",
+                        "text": "Airbnb Hosts"
+                       }
+                      }
+                     ]
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       },
+       {
+        "type": "SvcBox",
+        "props": {
+         "id": "SvcBox-48",
+         "tag": "div",
+         "cls": "rounded-2xl border border-slate-200 bg-white p-6 sm:p-10",
+         "children": [
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-49",
+            "tag": "p",
+            "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-2",
+            "text": "Manchester Oven Cleaners"
+           }
+          },
+          {
+           "type": "SvcText",
+           "props": {
+            "id": "SvcText-50",
+            "tag": "h2",
+            "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+            "text": "Professional oven cleaning in Manchester"
+           }
+          },
+          {
+           "type": "SvcBox",
+           "props": {
+            "id": "SvcBox-51",
+            "tag": "div",
+            "cls": "space-y-4",
+            "children": [
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-52",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Cleaniq Services provides professional oven cleaning in Manchester and across Greater Manchester. Our oven cleaners clean single, double and range ovens inside and out: the oven walls, base and roof, the racks and shelves, baking trays and grill pans, and the inner and outer door glass."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-53",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Grease and food spills bake on every time you cook. Over time they build up into a layer that smokes, smells and is very hard to remove with everyday products. A professional oven clean removes that build-up properly, so your kitchen smells of your cooking, not of last month's roast."
+              }
+             },
+             {
+              "type": "SvcText",
+              "props": {
+               "id": "SvcText-54",
+               "tag": "p",
+               "cls": "text-slate-600 leading-relaxed",
+               "text": "Every oven size has a fixed price, shown live on this page from our booking system. Book your oven clean online in a few minutes or call us on [07846 726428](tel:+447846726428). Moving out? A full oven clean is included as standard in our [end of tenancy cleaning](/service/end-of-tenancy-cleaning-manchester). You can also combine oven cleaning with a [deep clean](/service/deep-cleaning-manchester) or [regular house cleaning](/service/regular-house-cleaning-manchester).",
+               "linkCls": "text-teal-700 font-semibold hover:underline"
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "content": [
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-55",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-56",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "About this service"
       }
-    ],
-    "checklist": {
-      "heading": "Oven Cleaning Checklist — Manchester",
-      "intro": "What our oven cleaners cover on every oven clean:",
-      "rooms": [
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-57",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "What's Included"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-58",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-5",
+       "text": "Burnt-on grease and carbon are hard to shift at home. Our oven cleaners take care of the racks, trays, door glass and interior, so your oven is clean and ready to cook with again."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-59",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Looking for oven cleaning near you in Manchester? Cleaniq Services' oven cleaners clean single, double and range ovens inside and out — racks, trays, door glass and the oven interior — so your kitchen looks and smells fresh again. Book an oven clean on its own, or add it to a regular, deep or end of tenancy clean."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-60",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
         {
-          "room": "Inside the Oven",
-          "tasks": [
-            "Remove racks, trays and shelf supports",
-            "Clean the oven walls, base and roof",
-            "Remove grease and carbon build-up",
-            "Wipe out and dry the oven cavity"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-61",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-62",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-63",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-64",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Single, double and range ovens"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "Door & Glass",
-          "tasks": [
-            "Clean the inner and outer door glass",
-            "Wipe the door seal and hinges",
-            "Clean the door frame"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-65",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-66",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-67",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-68",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Racks, trays and door glass included"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "Racks & Trays",
-          "tasks": [
-            "Soak and degrease racks and shelves",
-            "Clean baking trays and grill pans",
-            "Refit everything once clean"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-69",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-70",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-71",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-72",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Fixed prices — see the live price list below"
+            }
+           }
           ]
+         }
         },
         {
-          "room": "Outside & Finishing",
-          "tasks": [
-            "Wipe control knobs, handles and the oven front",
-            "Leave the surrounding area clean and tidy"
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-73",
+          "tag": "div",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-74",
+             "tag": "div",
+             "cls": "w-5 h-5 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-75",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 11
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-76",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Book on its own, or add it to any home clean"
+            }
+           }
           ]
+         }
         }
-      ]
-    },
-    "whyMatters": {
-      "heading": "Why Get Your Oven Professionally Cleaned",
-      "body": [
-        "Grease and food spills bake on every time you cook. Over time they build up into a layer that smokes, smells and is very hard to remove with everyday products.",
-        "A professional oven clean removes that build-up properly — including the door glass and racks — so cooking smells come from your food, not last month's roast.",
-        "If you're moving out, a clean oven matters: landlords and letting agents usually check it at the end of a tenancy. Add an oven clean to your end of tenancy clean to cover it."
-      ]
-    },
-    "seoFooter": "Cleaniq Services provides professional oven cleaning across Manchester and Greater Manchester. Looking for oven cleaners near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book single, double or range oven cleaning online at a fixed price, or call +44 7846 726428."
+       ]
+      }
+     }
+    ]
+   }
   },
-  "seo": {
-    "faqTitle": "Oven Cleaning Manchester",
-    "banner": {
-      "h2": "Oven Cleaning in Manchester",
-      "ticks": [
-        "Single, double and range ovens",
-        "Racks, trays and door glass included",
-        "Fixed prices, shown live on this page"
-      ],
-      "serviceFor": [
-        "Homeowners",
-        "Tenants",
-        "Landlords",
-        "Airbnb Hosts"
-      ]
-    },
-    "intro": {
-      "label": "Manchester Oven Cleaners",
-      "h2": "Professional oven cleaning in Manchester",
-      "paras": [
-        "Cleaniq Services provides professional oven cleaning in Manchester and across Greater Manchester. Our oven cleaners clean single, double and range ovens inside and out: the oven walls, base and roof, the racks and shelves, baking trays and grill pans, and the inner and outer door glass.",
-        "Grease and food spills bake on every time you cook. Over time they build up into a layer that smokes, smells and is very hard to remove with everyday products. A professional oven clean removes that build-up properly, so your kitchen smells of your cooking, not of last month's roast.",
-        "Every oven size has a fixed price, shown live on this page from our booking system. Book your oven clean online in a few minutes or call us on [07846 726428](tel:+447846726428). Moving out? A full oven clean is included as standard in our [end of tenancy cleaning](/service/end-of-tenancy-cleaning-manchester). You can also combine oven cleaning with a [deep clean](/service/deep-cleaning-manchester) or [regular house cleaning](/service/regular-house-cleaning-manchester)."
-      ]
-    },
-    "how": {
-      "h2": "How does our oven cleaning in Manchester work?",
-      "intro": "Booking an oven clean with Cleaniq Services is quick and simple. You choose your oven size when you book, so the price matches your oven, and pick a day and arrival time that suit you. Your oven cleaner removes the racks, trays and shelf supports, cleans every part of the oven, and refits everything once it's clean. You can book an oven clean on its own or add it to another clean. Here is how it works:",
-      "steps": [
-        {
-          "title": "Book",
-          "body": "Book online or call us. Choose single, double or range oven, the day and the arrival time. The fixed price for your oven size is shown live on this page."
-        },
-        {
-          "title": "Racks and trays out",
-          "body": "Your oven cleaner removes the racks, trays and shelf supports and soaks and degreases them."
-        },
-        {
-          "title": "Inside and out",
-          "body": "The oven walls, base and roof are cleaned, grease and carbon removed, and the inner and outer door glass, seal and hinges cleaned."
-        },
-        {
-          "title": "Refit and finish",
-          "body": "Everything is refitted, the oven front, knobs and handles wiped, and the area around the oven left clean and tidy."
-        }
-      ]
-    },
-    "benefits": {
-      "h2": "Benefits of professional oven cleaning in Manchester",
-      "intro": "Cleaning an oven yourself is one of the least popular jobs in the house. It takes time, strong products and a lot of scrubbing, and the racks and door glass are often left half done. A professional oven clean does the whole job properly, inside and out, so your oven looks better, smells better and is nicer to cook with. Here are the main benefits:",
-      "items": [
-        {
-          "title": "No more scrubbing",
-          "body": "Our oven cleaners do the hard work, so you don't spend your weekend on your knees in front of the oven."
-        },
-        {
-          "title": "Inside and out",
-          "body": "Racks, trays, door glass and the oven interior are all cleaned, not just the parts you can see."
-        },
-        {
-          "title": "Fresher cooking",
-          "body": "Removing baked-on grease and carbon cuts out the smoke and smells from old spills."
-        },
-        {
-          "title": "Fixed prices",
-          "body": "Every oven size has a fixed price, shown live on this page from our booking system."
-        },
-        {
-          "title": "Ready for checkout",
-          "body": "A clean oven helps at the end of a tenancy, when landlords and letting agents usually check it."
-        },
-        {
-          "title": "48-hour re-clean guarantee",
-          "body": "If anything isn't right, tell us within 48 hours and we'll come back and put it right for free."
-        }
-      ]
-    },
-    "types": {
-      "label": "Every Type of Oven",
-      "h2": "Oven cleaning for every type of oven",
-      "body": "Our Manchester oven cleaners clean single ovens, double ovens and range ovens, including the racks, shelves, baking trays, grill pans and door glass. Choose the right oven size when you book so the price matches your oven, and add any notes about your oven or kitchen for your cleaner.",
-      "chips": [
-        "Single ovens",
-        "Double ovens",
-        "Range ovens",
-        "Racks & shelves",
-        "Baking trays & grill pans",
-        "Oven door glass"
-      ]
-    },
-    "compare": {
-      "label": "Professional or DIY?",
-      "h2": "Professional oven cleaning or doing it yourself?",
-      "intro": "You can clean an oven yourself, but a professional oven clean is quicker and more thorough.",
-      "cards": [
-        {
-          "title": "Doing it yourself",
-          "body": "Shop-bought oven cleaners can take hours of soaking and scrubbing, and are often hard to use on the racks, door glass and the roof of the oven. Baked-on carbon is especially difficult to shift."
-        },
-        {
-          "title": "Professional oven clean",
-          "body": "Our oven cleaners remove and degrease the racks, trays and shelf supports, clean the oven walls, base, roof and door glass, and refit everything, following our oven cleaning checklist every time."
-        }
-      ]
-    },
-    "experts": {
-      "label": "Oven Cleaners Manchester",
-      "h2": "Oven cleaners in Manchester you can trust",
-      "paras": [
-        "Every Cleaniq Services cleaner has a face-to-face interview, background checks and a practical skills assessment before they clean a customer's home. Our oven cleaners follow the same oven cleaning checklist on every job, so every part of your oven is cleaned, not just the parts you can see.",
-        "Your oven cleaner works carefully in your kitchen and leaves the area around the oven clean and tidy. If anything isn't right after your oven clean, tell us within 48 hours and we'll come back and put it right, free of charge."
-      ],
-      "points": [
-        "Interviewed face to face and background checked.",
-        "The same oven cleaning checklist on every job.",
-        "Single, double and range ovens.",
-        "Backed by our 48-hour re-clean guarantee."
-      ]
-    },
-    "combine": {
-      "h2": "Combine oven cleaning with our other services",
-      "intro": "An oven clean is often part of a bigger clean. Add it to one of our other cleaning services in Manchester, or book it on its own whenever your oven needs it. Moving out, getting your home ready for guests or catching up on the bigger jobs? Combining services means the whole kitchen, and the rest of your home, gets done in one go. Choose from:",
-      "links": [
-        {
-          "to": "/service/end-of-tenancy-cleaning-manchester",
-          "name": "End of Tenancy Cleaning",
-          "body": "A full oven clean is included as standard when you move out."
-        },
-        {
-          "to": "/service/deep-cleaning-manchester",
-          "name": "Deep Cleaning",
-          "body": "A top-to-bottom clean of your whole home."
-        },
-        {
-          "to": "/service/regular-house-cleaning-manchester",
-          "name": "Regular House Cleaning",
-          "body": "Add an oven clean to your regular visits every few months."
-        },
-        {
-          "to": "/service/airbnb-cleaning-manchester",
-          "name": "Airbnb Cleaning",
-          "body": "A clean oven for your short-let guests."
-        }
-      ]
-    },
-    "local": {
-      "label": "Oven Cleaning Across Manchester",
-      "h2": "Oven cleaners across Manchester and Greater Manchester",
-      "paras": [
-        "Our oven cleaners cover homes across Manchester and Greater Manchester, including Manchester City Centre, Ancoats and the Northern Quarter, Salford, Didsbury, Chorlton, Stockport, Trafford, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan. Our office is at 20 Swan St in Ancoats, so we're never far from your kitchen.",
-        "Whether you're a homeowner, a tenant getting ready to move out, a landlord between tenancies or an Airbnb host, you can book oven cleaning on the day and at the time that suits you."
-      ]
-    },
-    "tips": {
-      "label": "Tips",
-      "h2": "Tips for keeping your oven clean for longer",
-      "intro": "After a professional oven clean, a few simple habits help keep your oven cleaner for longer:",
-      "tips": [
-        "Use a baking tray under dishes that might bubble over.",
-        "Wipe up spills once the oven has cooled, before they bake on next time.",
-        "Cover dishes that spit, such as roasts, with a lid or foil.",
-        "Wipe the inside of the door glass regularly to stop grease building up.",
-        "Clean the racks every few weeks, before grease hardens.",
-        "Book a professional oven clean every few months if you cook often, or before moving out.",
-        "Tell us within 48 hours of your oven clean if anything wasn't right."
-      ]
-    },
-    "quote": {
-      "h2": "Questions about oven cleaning?",
-      "body": "Not sure which oven size to choose, or want to combine oven cleaning with another clean? Contact Cleaniq Services and we'll help. Tell us what type of oven you have and whether you'd like any other cleaning, and we'll make sure you book the right service. Call us on 07846 726428 or fill out our quick quote form and we'll get back to you. Every oven size has a fixed price, shown live on this page."
-    },
-    "closing": {
-      "h2": "Book your oven clean in Manchester",
-      "body": "Book your oven clean online in a few minutes, or call Cleaniq Services on [07846 726428](tel:+447846726428) and we'll help you choose the right service."
-    }
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-77",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
   },
-  "faqs": [
-    {
-      "q": "How much does oven cleaning cost in Manchester?",
-      "a": "Each oven size has a fixed price. The price list on this page comes straight from our booking system, so it always shows today's prices."
-    },
-    {
-      "q": "Which ovens do you clean?",
-      "a": "Single ovens, double ovens and range ovens. Choose the right size when you book so the price matches your oven."
-    },
-    {
-      "q": "Can I add oven cleaning to another clean?",
-      "a": "Yes. Add oven cleaning as an extra when you book a regular, deep or end of tenancy clean, or book it on its own."
-    },
-    {
-      "q": "Do I need to be home for an oven clean?",
-      "a": "No. Many customers leave a key or entry code — just add access notes when you book."
-    },
-    {
-      "q": "What if I'm not happy with the result?",
-      "a": "Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
-    },
-    {
-      "q": "Do you have oven cleaners near me?",
-      "a": "Our oven cleaners cover Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan."
-    },
-    {
-      "q": "Do you clean the oven racks and trays?",
-      "a": "Yes. Racks, shelves, shelf supports, baking trays and grill pans are removed, soaked and degreased, then refitted once the oven is clean."
-    },
-    {
-      "q": "Do you clean the oven door glass?",
-      "a": "Yes. We clean the inner and outer door glass, the door seal, hinges and frame."
-    },
-    {
-      "q": "How often should I get my oven professionally cleaned?",
-      "a": "It depends on how often you cook. Many homes book an oven clean every few months, and it's worth booking one before you move out of a rented home."
-    },
-    {
-      "q": "Is oven cleaning included in end of tenancy cleaning?",
-      "a": "Yes. A full oven clean is included as standard in our end of tenancy cleaning. If you only need your oven cleaned, book an oven clean on its own."
-    }
-  ]
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-78",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-79",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Why Cleaniq Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-80",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-6",
+       "text": "Why Choose Cleaniq Services for Oven Cleaning in Manchester?"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-81",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-5",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-82",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-83",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-84",
+                "name": "sparkles",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-85",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-86",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Inside and Out"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-87",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Racks, trays, door glass and the oven interior are all cleaned, not just the parts you can see."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-88",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-89",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-90",
+                "name": "badge-check",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-91",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-92",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "Fixed, Upfront Prices"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-93",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Every oven size has a fixed price, shown live on this page from our booking system — no surprises."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-94",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-95",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-96",
+                "name": "calendar",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-97",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-98",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "On Its Own or With a Clean"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-99",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "Book an oven clean by itself, or add it as an extra to any home, deep or end of tenancy clean."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-100",
+          "tag": "div",
+          "cls": "flex gap-4 items-start",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-101",
+             "tag": "div",
+             "cls": "w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-102",
+                "name": "shield-check",
+                "cls": "",
+                "size": 22
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-103",
+             "tag": "div",
+             "cls": "",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-104",
+                "tag": "p",
+                "cls": "font-bold text-slate-900 text-sm mb-1",
+                "text": "48-Hour Re-Clean Guarantee"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-105",
+                "tag": "p",
+                "cls": "text-slate-500 text-sm leading-relaxed",
+                "text": "If anything isn't right, tell us within 48 hours and we'll come back and put it right for free."
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-106",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-107",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-108",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "How It Works"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-109",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-4",
+       "text": "How does our oven cleaning in Manchester work?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-110",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed mb-6",
+       "text": "Booking an oven clean with Cleaniq Services is quick and simple. You choose your oven size when you book, so the price matches your oven, and pick a day and arrival time that suit you. Your oven cleaner removes the racks, trays and shelf supports, cleans every part of the oven, and refits everything once it's clean. You can book an oven clean on its own or add it to another clean. Here is how it works:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-111",
+       "tag": "ol",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-112",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-113",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-114",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "1"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-115",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Book"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-116",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Book online or call us. Choose single, double or range oven, the day and the arrival time. The fixed price for your oven size is shown live on this page."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-117",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-118",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-119",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "2"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-120",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Racks and trays out"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-121",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Your oven cleaner removes the racks, trays and shelf supports and soaks and degreases them."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-122",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-123",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-124",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "3"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-125",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Inside and out"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-126",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "The oven walls, base and roof are cleaned, grease and carbon removed, and the inner and outer door glass, seal and hinges cleaned."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-127",
+          "tag": "li",
+          "cls": "p-5 pt-6 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-128",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-3",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-129",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-full bg-[#00B5A4] text-white font-bold flex items-center justify-center shrink-0",
+                "text": "4"
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-130",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Refit and finish"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-131",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Everything is refitted, the oven front, knobs and handles wiped, and the area around the oven left clean and tidy."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-132",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-133",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-134",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Benefits"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-135",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Benefits of professional oven cleaning in Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-136",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Cleaning an oven yourself is one of the least popular jobs in the house. It takes time, strong products and a lot of scrubbing, and the racks and door glass are often left half done. A professional oven clean does the whole job properly, inside and out, so your oven looks better, smells better and is nicer to cook with. Here are the main benefits:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-137",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-138",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-139",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-140",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-141",
+                   "name": "clock",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-142",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "No more scrubbing"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-143",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Our oven cleaners do the hard work, so you don't spend your weekend on your knees in front of the oven."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-144",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-145",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-146",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-147",
+                   "name": "badge-check",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-148",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Inside and out"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-149",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Racks, trays, door glass and the oven interior are all cleaned, not just the parts you can see."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-150",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-151",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-152",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-153",
+                   "name": "star",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-154",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Fresher cooking"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-155",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Removing baked-on grease and carbon cuts out the smoke and smells from old spills."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-156",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-157",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-158",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-159",
+                   "name": "shield-check",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-160",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Fixed prices"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-161",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Every oven size has a fixed price, shown live on this page from our booking system."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-162",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-163",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-164",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-165",
+                   "name": "calendar",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-166",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "Ready for checkout"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-167",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "A clean oven helps at the end of a tenancy, when landlords and letting agents usually check it."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-168",
+          "tag": "li",
+          "cls": "p-5 rounded-xl bg-slate-50 border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-169",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-2",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-170",
+                "tag": "span",
+                "cls": "w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-171",
+                   "name": "sparkles",
+                   "cls": "",
+                   "size": 18
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-172",
+                "tag": "h3",
+                "cls": "font-bold text-slate-900",
+                "text": "48-hour re-clean guarantee"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-173",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "If anything isn't right, tell us within 48 hours and we'll come back and put it right for free."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-174",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-175",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-176",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Every Type of Oven"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-177",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Oven cleaning for every type of oven"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-178",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our Manchester oven cleaners clean single ovens, double ovens and range ovens, including the racks, shelves, baking trays, grill pans and door glass. Choose the right oven size when you book so the price matches your oven, and add any notes about your oven or kitchen for your cleaner."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-179",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-180",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-181",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-182",
+             "tag": "",
+             "cls": "",
+             "text": "Single ovens"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-183",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-184",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-185",
+             "tag": "",
+             "cls": "",
+             "text": "Double ovens"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-186",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-187",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-188",
+             "tag": "",
+             "cls": "",
+             "text": "Range ovens"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-189",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-190",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-191",
+             "tag": "",
+             "cls": "",
+             "text": "Racks & shelves"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-192",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-193",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-194",
+             "tag": "",
+             "cls": "",
+             "text": "Baking trays & grill pans"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-195",
+          "tag": "span",
+          "cls": "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-teal-800 text-sm font-semibold",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-196",
+             "name": "check",
+             "cls": "stroke-[3]",
+             "size": 14
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-197",
+             "tag": "",
+             "cls": "",
+             "text": "Oven door glass"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-198",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-199",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-200",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Professional or DIY?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-201",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Professional oven cleaning or doing it yourself?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-202",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "You can clean an oven yourself, but a professional oven clean is quicker and more thorough."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-203",
+       "tag": "div",
+       "cls": "grid sm:grid-cols-2 gap-4",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-204",
+          "tag": "div",
+          "cls": "p-5 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-205",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-2",
+             "text": "Doing it yourself"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-206",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Shop-bought oven cleaners can take hours of soaking and scrubbing, and are often hard to use on the racks, door glass and the roof of the oven. Baked-on carbon is especially difficult to shift."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-207",
+          "tag": "div",
+          "cls": "p-5 rounded-xl bg-white border border-slate-200 shadow-sm",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-208",
+             "tag": "h3",
+             "cls": "font-bold text-slate-900 mb-2",
+             "text": "Professional oven clean"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-209",
+             "tag": "p",
+             "cls": "text-slate-600 text-sm leading-relaxed",
+             "text": "Our oven cleaners remove and degrease the racks, trays and shelf supports, clean the oven walls, base, roof and door glass, and refit everything, following our oven cleaning checklist every time."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-210",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcPriceList",
+   "props": {
+    "id": "SvcPriceList-211",
+    "label": "Prices",
+    "heading": "Oven Cleaning in Manchester Prices",
+    "text": "Fixed prices, updated automatically from our booking system."
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-212",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-213",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-214",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Room-by-room checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-215",
+       "tag": "h2",
+       "cls": "scroll-mt-32 text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Oven Cleaning Checklist — Manchester",
+       "anchor": "full-checklist"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-216",
+       "tag": "p",
+       "cls": "text-slate-500 text-sm mb-8 leading-relaxed",
+       "text": "What our oven cleaners cover on every oven clean:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-217",
+       "tag": "div",
+       "cls": "space-y-8",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-218",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-219",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-220",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Inside the Oven"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-221",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-222",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-223",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-224",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-225",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Remove racks, trays and shelf supports"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-226",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-227",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-228",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean the oven walls, base and roof"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-229",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-230",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-231",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Remove grease and carbon build-up"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-232",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-233",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-234",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wipe out and dry the oven cavity"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-235",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-236",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-237",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Door & Glass"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-238",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-239",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-240",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-241",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-242",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean the inner and outer door glass"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-243",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-244",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-245",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wipe the door seal and hinges"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-246",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-247",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-248",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean the door frame"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-249",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-250",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-251",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Racks & Trays"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-252",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-253",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-254",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-255",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-256",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Soak and degrease racks and shelves"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-257",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-258",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-259",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Clean baking trays and grill pans"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-260",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-261",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-262",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Refit everything once clean"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-263",
+          "tag": "div",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-264",
+             "tag": "div",
+             "cls": "flex items-center gap-3 mb-4",
+             "children": [
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-265",
+                "tag": "span",
+                "cls": "text-xs font-bold tracking-widest uppercase text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded",
+                "text": "Outside & Finishing"
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-266",
+                "tag": "div",
+                "cls": "flex-1 border-t border-slate-200",
+                "children": []
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-267",
+             "tag": "div",
+             "cls": "grid sm:grid-cols-2 gap-x-8 gap-y-2.5",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-268",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-269",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-270",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Wipe control knobs, handles and the oven front"
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-271",
+                "tag": "div",
+                "cls": "flex gap-2.5 items-start",
+                "children": [
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-272",
+                   "name": "check",
+                   "cls": "text-teal-500 shrink-0 mt-0.5 stroke-[2.5]",
+                   "size": 13
+                  }
+                 },
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-273",
+                   "tag": "span",
+                   "cls": "text-slate-600 text-sm leading-snug",
+                   "text": "Leave the surrounding area clean and tidy"
+                  }
+                 }
+                ]
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-274",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-275",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-276",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Coverage"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-277",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-3",
+       "text": "Oven cleaners Near You"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-278",
+       "tag": "p",
+       "cls": "text-sm text-slate-500 mb-4",
+       "text": "Our oven cleaners work across Manchester and Greater Manchester, including:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-279",
+       "tag": "div",
+       "cls": "flex flex-wrap gap-2",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-280",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-281",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-282",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-283",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-284",
+             "tag": "",
+             "cls": "",
+             "text": "Manchester City Centre"
+            }
+           }
+          ],
+          "href": "/locations/manchester-city-centre"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-285",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-286",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-287",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-288",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-289",
+             "tag": "",
+             "cls": "",
+             "text": "Salford"
+            }
+           }
+          ],
+          "href": "/locations/salford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-290",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-291",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-292",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-293",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-294",
+             "tag": "",
+             "cls": "",
+             "text": "Trafford"
+            }
+           }
+          ],
+          "href": "/locations/trafford"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-295",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-296",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-297",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-298",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-299",
+             "tag": "",
+             "cls": "",
+             "text": "Stockport"
+            }
+           }
+          ],
+          "href": "/locations/stockport"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-300",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-301",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-302",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-303",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-304",
+             "tag": "",
+             "cls": "",
+             "text": "Didsbury"
+            }
+           }
+          ],
+          "href": "/locations/didsbury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-305",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-306",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-307",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-308",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-309",
+             "tag": "",
+             "cls": "",
+             "text": "Chorlton"
+            }
+           }
+          ],
+          "href": "/locations/chorlton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-310",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-311",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-312",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-313",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-314",
+             "tag": "",
+             "cls": "",
+             "text": "Bolton"
+            }
+           }
+          ],
+          "href": "/locations/bolton"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-315",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-316",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-317",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-318",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-319",
+             "tag": "",
+             "cls": "",
+             "text": "Bury"
+            }
+           }
+          ],
+          "href": "/locations/bury"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-320",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-321",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-322",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-323",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-324",
+             "tag": "",
+             "cls": "",
+             "text": "Oldham"
+            }
+           }
+          ],
+          "href": "/locations/oldham"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-325",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-326",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-327",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-328",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-329",
+             "tag": "",
+             "cls": "",
+             "text": "Rochdale"
+            }
+           }
+          ],
+          "href": "/locations/rochdale"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-330",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-331",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-332",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-333",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-334",
+             "tag": "",
+             "cls": "",
+             "text": "Tameside"
+            }
+           }
+          ],
+          "href": "/locations/tameside"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-335",
+          "tag": "a",
+          "cls": "inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-336",
+             "name": "map-pin",
+             "cls": "text-teal-500",
+             "size": 10
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-337",
+             "tag": "",
+             "cls": "",
+             "text": "Oven cleaners"
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-338",
+             "tag": "",
+             "cls": "",
+             "text": " in "
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-339",
+             "tag": "",
+             "cls": "",
+             "text": "Wigan"
+            }
+           }
+          ],
+          "href": "/locations/wigan"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-340",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-341",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-342",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Oven Cleaners Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-343",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Oven cleaners in Manchester you can trust"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-344",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Every Cleaniq Services cleaner has a face-to-face interview, background checks and a practical skills assessment before they clean a customer's home. Our oven cleaners follow the same oven cleaning checklist on every job, so every part of your oven is cleaned, not just the parts you can see."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-345",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Your oven cleaner works carefully in your kitchen and leaves the area around the oven clean and tidy. If anything isn't right after your oven clean, tell us within 48 hours and we'll come back and put it right, free of charge."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-346",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-347",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-348",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-349",
+                "name": "shield-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-350",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Interviewed face to face and background checked."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-351",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-352",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-353",
+                "name": "badge-check",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-354",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "The same oven cleaning checklist on every job."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-355",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-356",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-357",
+                "name": "map-pin",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-358",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Single, double and range ovens."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-359",
+          "tag": "li",
+          "cls": "flex gap-3 items-center p-3.5 bg-slate-50 rounded-lg border border-slate-100",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-360",
+             "tag": "span",
+             "cls": "w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-361",
+                "name": "star",
+                "cls": "",
+                "size": 16
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-362",
+             "tag": "span",
+             "cls": "text-slate-700 text-sm font-medium leading-snug",
+             "text": "Backed by our 48-hour re-clean guarantee."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-363",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-364",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-365",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Extra Services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-366",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Combine oven cleaning with our other services"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-367",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "An oven clean is often part of a bigger clean. Add it to one of our other cleaning services in Manchester, or book it on its own whenever your oven needs it. Moving out, getting your home ready for guests or catching up on the bigger jobs? Combining services means the whole kitchen, and the rest of your home, gets done in one go. Choose from:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-368",
+       "tag": "ul",
+       "cls": "grid sm:grid-cols-2 gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-369",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-370",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-371",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-372",
+                   "tag": "",
+                   "cls": "",
+                   "text": "End of Tenancy Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-373",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-374",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "A full oven clean is included as standard when you move out."
+               }
+              }
+             ],
+             "href": "/service/end-of-tenancy-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-375",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-376",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-377",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-378",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Deep Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-379",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-380",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "A top-to-bottom clean of your whole home."
+               }
+              }
+             ],
+             "href": "/service/deep-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-381",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-382",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-383",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-384",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Regular House Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-385",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-386",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "Add an oven clean to your regular visits every few months."
+               }
+              }
+             ],
+             "href": "/service/regular-house-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-387",
+          "tag": "li",
+          "cls": "",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-388",
+             "tag": "a",
+             "cls": "block h-full p-4 rounded-xl bg-white border border-slate-200 hover:border-teal-400 transition-colors",
+             "children": [
+              {
+               "type": "SvcBox",
+               "props": {
+                "id": "SvcBox-389",
+                "tag": "span",
+                "cls": "flex items-center gap-2 font-bold text-teal-700 mb-1",
+                "children": [
+                 {
+                  "type": "SvcText",
+                  "props": {
+                   "id": "SvcText-390",
+                   "tag": "",
+                   "cls": "",
+                   "text": "Airbnb Cleaning"
+                  }
+                 },
+                 {
+                  "type": "SvcIcon",
+                  "props": {
+                   "id": "SvcIcon-391",
+                   "name": "arrow-right",
+                   "cls": "",
+                   "size": 14
+                  }
+                 }
+                ]
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-392",
+                "tag": "span",
+                "cls": "text-slate-600 text-sm leading-relaxed",
+                "text": "A clean oven for your short-let guests."
+               }
+              }
+             ],
+             "href": "/service/airbnb-cleaning-manchester"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-393",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-394",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-[#00B5A4] text-white hover:bg-teal-600",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-395",
+             "name": "calendar",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-396",
+             "tag": "",
+             "cls": "",
+             "text": " Book now"
+            }
+           }
+          ],
+          "href": "{book}"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-397",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-[#00B5A4] text-teal-700 hover:bg-teal-50",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-398",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-399",
+             "tag": "",
+             "cls": "",
+             "text": " Call now"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-400",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-401",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-402",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Oven Cleaning Across Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-403",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Oven cleaners across Manchester and Greater Manchester"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-404",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Our oven cleaners cover homes across Manchester and Greater Manchester, including Manchester City Centre, Ancoats and the Northern Quarter, Salford, Didsbury, Chorlton, Stockport, Trafford, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan. Our office is at 20 Swan St in Ancoats, so we're never far from your kitchen."
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-405",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "Whether you're a homeowner, a tenant getting ready to move out, a landlord between tenancies or an Airbnb host, you can book oven cleaning on the day and at the time that suits you."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-406",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-407",
+    "tag": "section",
+    "cls": "space-y-5",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-408",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Tips"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-409",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 ",
+       "text": "Tips for keeping your oven clean for longer"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-410",
+       "tag": "p",
+       "cls": "text-slate-600 leading-relaxed",
+       "text": "After a professional oven clean, a few simple habits help keep your oven cleaner for longer:"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-411",
+       "tag": "ul",
+       "cls": "space-y-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-412",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-413",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-414",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-415",
+             "tag": "",
+             "cls": "",
+             "text": "Use a baking tray under dishes that might bubble over."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-416",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-417",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-418",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-419",
+             "tag": "",
+             "cls": "",
+             "text": "Wipe up spills once the oven has cooled, before they bake on next time."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-420",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-421",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-422",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-423",
+             "tag": "",
+             "cls": "",
+             "text": "Cover dishes that spit, such as roasts, with a lid or foil."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-424",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-425",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-426",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-427",
+             "tag": "",
+             "cls": "",
+             "text": "Wipe the inside of the door glass regularly to stop grease building up."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-428",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-429",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-430",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-431",
+             "tag": "",
+             "cls": "",
+             "text": "Clean the racks every few weeks, before grease hardens."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-432",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-433",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-434",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-435",
+             "tag": "",
+             "cls": "",
+             "text": "Book a professional oven clean every few months if you cook often, or before moving out."
+            }
+           }
+          ]
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-436",
+          "tag": "li",
+          "cls": "flex gap-3 items-start p-3.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 text-sm font-medium leading-relaxed",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-437",
+             "tag": "span",
+             "cls": "w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-438",
+                "name": "check",
+                "cls": "stroke-[3]",
+                "size": 13
+               }
+              }
+             ]
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-439",
+             "tag": "",
+             "cls": "",
+             "text": "Tell us within 48 hours of your oven clean if anything wasn't right."
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-440",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-441",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-442",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "The case for professionals"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-443",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-5",
+       "text": "Why Get Your Oven Professionally Cleaned"
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-444",
+       "tag": "div",
+       "cls": "space-y-4",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-445",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "Grease and food spills bake on every time you cook. Over time they build up into a layer that smokes, smells and is very hard to remove with everyday products."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-446",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "A professional oven clean removes that build-up properly — including the door glass and racks — so cooking smells come from your food, not last month's roast."
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-447",
+          "tag": "p",
+          "cls": "text-slate-600 leading-relaxed text-sm sm:text-base",
+          "text": "If you're moving out, a clean oven matters: landlords and letting agents usually check it at the end of a tenancy. Add an oven clean to your end of tenancy clean to cover it."
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-448",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBeforeAfter",
+   "props": {
+    "id": "SvcBeforeAfter-449",
+    "title": "Oven Cleaning in Manchester: before & after",
+    "limit": 4
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-450",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcOurWork",
+   "props": {
+    "id": "SvcOurWork-451",
+    "title": "Photos from our recent jobs"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-452",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcReviews",
+   "props": {
+    "id": "SvcReviews-453",
+    "label": "Customer reviews",
+    "heading": "What Our Customers Say",
+    "linkText": "Read all reviews on Google"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-454",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcRelated",
+   "props": {
+    "id": "SvcRelated-455",
+    "label": "More from Cleaniq Services",
+    "heading": "Related cleaning services"
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-456",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-457",
+    "tag": "section",
+    "cls": "rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white p-7 sm:p-9",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-458",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-100 mb-2",
+       "text": "Contact Us For a Free Quote"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-459",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold mb-3",
+       "text": "Questions about oven cleaning?"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-460",
+       "tag": "p",
+       "cls": "text-teal-50 leading-relaxed mb-6",
+       "text": "Not sure which oven size to choose, or want to combine oven cleaning with another clean? Contact Cleaniq Services and we'll help. Tell us what type of oven you have and whether you'd like any other cleaning, and we'll make sure you book the right service. Call us on 07846 726428 or fill out our quick quote form and we'll get back to you. Every oven size has a fixed price, shown live on this page."
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-461",
+       "tag": "div",
+       "cls": "flex flex-col sm:flex-row gap-3",
+       "children": [
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-462",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white text-teal-800 font-bold text-sm hover:bg-teal-50 transition-colors",
+          "children": [
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-463",
+             "tag": "",
+             "cls": "",
+             "text": "Get a free quote "
+            }
+           },
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-464",
+             "name": "arrow-right",
+             "cls": "",
+             "size": 16
+            }
+           }
+          ],
+          "href": "/get-a-quote"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-465",
+          "tag": "a",
+          "cls": "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-white/70 text-white font-bold text-sm hover:bg-white/10 transition-colors",
+          "children": [
+           {
+            "type": "SvcIcon",
+            "props": {
+             "id": "SvcIcon-466",
+             "name": "phone",
+             "cls": "",
+             "size": 16
+            }
+           },
+           {
+            "type": "SvcText",
+            "props": {
+             "id": "SvcText-467",
+             "tag": "",
+             "cls": "",
+             "text": " 07846 726428"
+            }
+           }
+          ],
+          "href": "tel:+447846726428"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-468",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-469",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-470",
+       "tag": "p",
+       "cls": "text-xs font-bold tracking-widest uppercase text-teal-600 mb-3",
+       "text": "Frequently asked questions"
+      }
+     },
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-471",
+       "tag": "h2",
+       "cls": "text-xl sm:text-2xl font-bold text-slate-900 mb-2",
+       "text": "Frequently Asked Questions: Oven Cleaning Manchester"
+      }
+     },
+     {
+      "type": "SvcFaqs",
+      "props": {
+       "id": "SvcFaqs-472",
+       "numbered": "yes",
+       "items": [
+        {
+         "q": "How much does oven cleaning cost in Manchester?",
+         "a": "Each oven size has a fixed price. The price list on this page comes straight from our booking system, so it always shows today's prices."
+        },
+        {
+         "q": "Which ovens do you clean?",
+         "a": "Single ovens, double ovens and range ovens. Choose the right size when you book so the price matches your oven."
+        },
+        {
+         "q": "Can I add oven cleaning to another clean?",
+         "a": "Yes. Add oven cleaning as an extra when you book a regular, deep or end of tenancy clean, or book it on its own."
+        },
+        {
+         "q": "Do I need to be home for an oven clean?",
+         "a": "No. Many customers leave a key or entry code — just add access notes when you book."
+        },
+        {
+         "q": "What if I'm not happy with the result?",
+         "a": "Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge."
+        },
+        {
+         "q": "Do you have oven cleaners near me?",
+         "a": "Our oven cleaners cover Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan."
+        },
+        {
+         "q": "Do you clean the oven racks and trays?",
+         "a": "Yes. Racks, shelves, shelf supports, baking trays and grill pans are removed, soaked and degreased, then refitted once the oven is clean."
+        },
+        {
+         "q": "Do you clean the oven door glass?",
+         "a": "Yes. We clean the inner and outer door glass, the door seal, hinges and frame."
+        },
+        {
+         "q": "How often should I get my oven professionally cleaned?",
+         "a": "It depends on how often you cook. Many homes book an oven clean every few months, and it's worth booking one before you move out of a rented home."
+        },
+        {
+         "q": "Is oven cleaning included in end of tenancy cleaning?",
+         "a": "Yes. A full oven clean is included as standard in our end of tenancy cleaning. If you only need your oven cleaned, book an oven clean on its own."
+        }
+       ]
+      }
+     },
+     {
+      "type": "SvcBox",
+      "props": {
+       "id": "SvcBox-473",
+       "tag": "div",
+       "cls": "mt-8 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-white",
+       "children": [
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-474",
+          "tag": "h3",
+          "cls": "text-lg sm:text-xl font-bold mb-3",
+          "text": "Book your oven clean in Manchester"
+         }
+        },
+        {
+         "type": "SvcText",
+         "props": {
+          "id": "SvcText-475",
+          "tag": "p",
+          "cls": "text-teal-50 leading-relaxed mb-6",
+          "text": "Book your oven clean online in a few minutes, or call Cleaniq Services on [07846 726428](tel:+447846726428) and we'll help you choose the right service.",
+          "linkCls": "font-bold underline underline-offset-2 hover:text-white"
+         }
+        },
+        {
+         "type": "SvcBox",
+         "props": {
+          "id": "SvcBox-476",
+          "tag": "div",
+          "cls": "flex flex-col sm:flex-row gap-3",
+          "children": [
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-477",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-bold text-sm transition-colors bg-white text-teal-800 hover:bg-teal-50",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-478",
+                "name": "calendar",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-479",
+                "tag": "",
+                "cls": "",
+                "text": " Book now"
+               }
+              }
+             ],
+             "href": "{book}"
+            }
+           },
+           {
+            "type": "SvcBox",
+            "props": {
+             "id": "SvcBox-480",
+             "tag": "a",
+             "cls": "inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 font-bold text-sm transition-colors border-white/70 text-white hover:bg-white/10",
+             "children": [
+              {
+               "type": "SvcIcon",
+               "props": {
+                "id": "SvcIcon-481",
+                "name": "phone",
+                "cls": "",
+                "size": 16
+               }
+              },
+              {
+               "type": "SvcText",
+               "props": {
+                "id": "SvcText-482",
+                "tag": "",
+                "cls": "",
+                "text": " Call now"
+               }
+              }
+             ],
+             "href": "tel:+447846726428"
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-483",
+    "tag": "div",
+    "cls": "border-t border-slate-200 my-8 md:my-10",
+    "children": []
+   }
+  },
+  {
+   "type": "SvcBox",
+   "props": {
+    "id": "SvcBox-484",
+    "tag": "section",
+    "cls": "",
+    "children": [
+     {
+      "type": "SvcText",
+      "props": {
+       "id": "SvcText-485",
+       "tag": "p",
+       "cls": "text-xs text-slate-400 leading-relaxed",
+       "text": "Cleaniq Services provides professional oven cleaning across Manchester and Greater Manchester. Looking for oven cleaners near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book single, double or range oven cleaning online at a fixed price, or call +44 7846 726428."
+      }
+     }
+    ]
+   }
+  }
+ ]
 }
