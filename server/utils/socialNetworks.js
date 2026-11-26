@@ -11,6 +11,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const more = require("./socialMoreNetworks");
+const { VIDEO } = require("./socialVideo");
 
 const env = (k, d = "") => process.env[k] || d;
 const API_BASE = () => env("PUBLIC_API_URL", "https://api.cleaniqservices.com").replace(/\/+$/, "");
@@ -50,7 +51,7 @@ const form = (obj) => new URLSearchParams(Object.entries(obj).filter(([, v]) => 
 // ── photos ────────────────────────────────────────────────────────────────────
 const UPLOAD_DIR = path.join(__dirname, "..", "uploads", "social");
 const LIBRARY_DIR = () => env("SOCIAL_LIBRARY_DIR", path.join(__dirname, "..", "..", "src", "assets"));
-const TYPES = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif" };
+const TYPES = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif", ".mp4": "video/mp4", ".mov": "video/quicktime", ".m4v": "video/mp4" };
 
 /** A post's photo → its file on this server, its public web address and type. */
 function resolvePhoto(ref) {
@@ -84,7 +85,7 @@ function ourPhotos() {
 // ── text per network ──────────────────────────────────────────────────────────
 const X_LIMIT = 280;
 // Most characters each network accepts (longer text is shortened at a word).
-const LIMITS = { x: X_LIMIT, threads: 500, google: 1500, pinterest: 800, tiktok: 4000 };
+const LIMITS = { x: X_LIMIT, threads: 500, google: 1500, pinterest: 800, tiktok: 2200, youtube: 4900 };
 function textFor(post, network) {
   let t = String(post.variants?.[network] || post.text || "").trim();
   const credit = post.credit ? `\n\n${post.credit}` : "";
@@ -291,6 +292,17 @@ async function publishX(acc, text, photos) {
 async function publishTo(acc, post) {
   const photos = (post.images || []).map(resolvePhoto);
   const text = textFor(post, acc.network);
+  if (post.video) {
+    const video = resolvePhoto(post.video);
+    // Google Business Profile posts can't hold a video: post the text (and button) on its own.
+    if (acc.network === "google") {
+      const r = await more.PUBLISH.google(acc, text, [], call);
+      return { ...r, note: "Google Business posts can't include video, so this went out as text" };
+    }
+    if (!VIDEO[acc.network]) throw new Error("This network can't post videos.");
+    return VIDEO[acc.network](acc, text, video, photos[0] || null, call, { linkedinText });
+  }
+  if (acc.network === "youtube") throw new Error("YouTube needs a video. Add a video to the post or untick YouTube.");
   if (acc.network === "facebook") return publishFacebook(acc, text, photos);
   if (acc.network === "instagram") return publishInstagram(acc, text, photos);
   if (acc.network === "linkedin") return publishLinkedIn(acc, text, photos);

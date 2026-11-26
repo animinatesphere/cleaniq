@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 
 const socialAccountSchema = new mongoose.Schema(
   {
-    network: { type: String, enum: ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest"], required: true },
+    network: { type: String, enum: ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest", "youtube"], required: true },
     externalId: { type: String, required: true }, // page id / ig user id / urn:li:person|organization:… / x user id
     name: { type: String, default: "" },
     handle: { type: String, default: "" },

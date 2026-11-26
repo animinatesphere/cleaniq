@@ -21,9 +21,11 @@ const TIKTOK_API = () => env("TIKTOK_API_URL", "https://open.tiktokapis.com");
 const PIN_AUTH = () => env("PINTEREST_AUTH_URL", "https://www.pinterest.com");
 const PIN_API = () => env("PINTEREST_API_URL", "https://api.pinterest.com");
 const SITE = () => env("SOCIAL_SITE_URL", "https://www.cleaniqservices.com");
+const YT_API = () => env("YOUTUBE_API_URL", "https://www.googleapis.com");
 
 const configured = () => ({
   google: !!(env("GOOGLE_CLIENT_ID") && env("GOOGLE_CLIENT_SECRET")),
+  youtube: !!(env("GOOGLE_CLIENT_ID") && env("GOOGLE_CLIENT_SECRET")),
   threads: !!(env("THREADS_APP_ID") && env("THREADS_APP_SECRET")),
   tiktok: !!(env("TIKTOK_CLIENT_KEY") && env("TIKTOK_CLIENT_SECRET")),
   pinterest: !!(env("PINTEREST_APP_ID") && env("PINTEREST_APP_SECRET")),
@@ -37,6 +39,7 @@ const basic = (id, secret) => `Basic ${Buffer.from(`${id}:${secret}`).toString("
 function authUrl(network, state, callbackUrl) {
   const redirect = callbackUrl(network);
   if (network === "google") return `${GOOGLE_AUTH()}/o/oauth2/v2/auth?${form({ client_id: env("GOOGLE_CLIENT_ID"), redirect_uri: redirect, response_type: "code", scope: "https://www.googleapis.com/auth/business.manage", access_type: "offline", prompt: "consent", include_granted_scopes: "true", state })}`;
+  if (network === "youtube") return `${GOOGLE_AUTH()}/o/oauth2/v2/auth?${form({ client_id: env("GOOGLE_CLIENT_ID"), redirect_uri: redirect, response_type: "code", scope: "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly", access_type: "offline", prompt: "consent", include_granted_scopes: "true", state })}`;
   if (network === "threads") return `${THREADS_AUTH()}/oauth/authorize?${form({ client_id: env("THREADS_APP_ID"), redirect_uri: redirect, scope: "threads_basic,threads_content_publish", response_type: "code", state })}`;
   if (network === "tiktok") return `${TIKTOK_AUTH()}/v2/auth/authorize/?${form({ client_key: env("TIKTOK_CLIENT_KEY"), redirect_uri: redirect, scope: "user.info.basic,video.publish", response_type: "code", state })}`;
   if (network === "pinterest") return `${PIN_AUTH()}/oauth/?${form({ client_id: env("PINTEREST_APP_ID"), redirect_uri: redirect, response_type: "code", scope: "boards:read,pins:read,pins:write,user_accounts:read", state })}`;
@@ -60,6 +63,12 @@ async function finishConnect(network, code, callbackUrl, call) {
     }
     if (!out.length) throw new Error("No Google Business Profile locations were found for this Google account.");
     return out;
+  }
+  if (network === "youtube") {
+    const tok = (await call(`${GOOGLE_TOKEN()}/token`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form({ code, client_id: env("GOOGLE_CLIENT_ID"), client_secret: env("GOOGLE_CLIENT_SECRET"), redirect_uri: redirect, grant_type: "authorization_code" }) }, "Google sign-in")).data;
+    const channels = (await call(`${YT_API()}/youtube/v3/channels?part=snippet&mine=true`, { headers: { Authorization: `Bearer ${tok.access_token}` } }, "YouTube channel")).data.items || [];
+    if (!channels.length) throw new Error("This Google account has no YouTube channel. Create one on YouTube first, then connect again.");
+    return channels.map((c) => ({ network: "youtube", externalId: c.id, name: c.snippet?.title || "YouTube channel", handle: c.snippet?.customUrl || "YouTube", picture: c.snippet?.thumbnails?.default?.url || "", token: tok.access_token, refreshToken: tok.refresh_token || "", expiresAt: expiry(tok.expires_in, 3600) }));
   }
   if (network === "threads") {
     const short = (await call(`${THREADS_API()}/oauth/access_token`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form({ client_id: env("THREADS_APP_ID"), client_secret: env("THREADS_APP_SECRET"), grant_type: "authorization_code", redirect_uri: redirect, code }) }, "Threads sign-in")).data;
@@ -88,7 +97,7 @@ async function finishConnect(network, code, callbackUrl, call) {
 
 /** Fresh token fields for an account whose token is running out. */
 async function refresh(network, { token, refreshToken }, call) {
-  if (network === "google") {
+  if (network === "google" || network === "youtube") {
     const t = (await call(`${GOOGLE_TOKEN()}/token`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form({ client_id: env("GOOGLE_CLIENT_ID"), client_secret: env("GOOGLE_CLIENT_SECRET"), refresh_token: refreshToken, grant_type: "refresh_token" }) }, "Google sign-in")).data;
     return { token: t.access_token, refreshToken, expiresAt: expiry(t.expires_in, 3600) };
   }
@@ -108,7 +117,7 @@ async function refresh(network, { token, refreshToken }, call) {
   return null;
 }
 // How long before running out a token is refreshed (Threads: renew a week ahead; others: minutes).
-const REFRESH_AHEAD = { google: 5 * 60e3, threads: 7 * 86400e3, tiktok: 30 * 60e3, pinterest: 2 * 86400e3 };
+const REFRESH_AHEAD = { google: 5 * 60e3, youtube: 5 * 60e3, threads: 7 * 86400e3, tiktok: 30 * 60e3, pinterest: 2 * 86400e3 };
 
 // ── publish ───────────────────────────────────────────────────────────────────
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));

@@ -70,6 +70,22 @@ function startFake() {
       if (p === "/v5/user_account") return send({ username: "cleaniq" });
       if (p === "/v5/boards") return send({ items: [{ id: "B1", name: "Before & after" }, { id: "B2", name: "Cleaning tips" }] });
       if (p === "/v5/pins") return send({ id: "PIN1" });
+      // Video
+      if (p === "/v23.0/PAGE1/videos") return send({ id: "FBVID1" });
+      if (p === "/rest/videos" && u.searchParams.get("action") === "initializeUpload") return send({ value: { video: "urn:li:video:V1", uploadToken: "tok", uploadInstructions: [{ uploadUrl: `${fakeBase}/li-vupload`, firstByte: 0, lastByte: 99999999 }] } });
+      if (p === "/li-vupload") { res.writeHead(200, { etag: "etag-1" }); return res.end(); }
+      if (p === "/rest/videos" && u.searchParams.get("action") === "finalizeUpload") { res.writeHead(200); return res.end(); }
+      if (p === "/2/media/upload/initialize") return send({ data: { id: "XV1" } });
+      if (p === "/2/media/upload/XV1/append") { res.writeHead(204); return res.end(); }
+      if (p === "/2/media/upload/XV1/finalize") return send({ data: { id: "XV1", processing_info: { state: "pending" } } });
+      if (p === "/2/media/upload" && u.searchParams.get("command") === "STATUS") return send({ data: { id: "XV1", processing_info: { state: "succeeded" } } });
+      if (p === "/v2/post/publish/video/init/") return send({ data: { publish_id: "VPUB1" }, error: { code: "ok" } });
+      if (p === "/v5/media" && req.method === "POST") return send({ media_id: "M1", upload_url: `${fakeBase}/pin-upload`, upload_parameters: { key: "k1" } });
+      if (p === "/pin-upload") { res.writeHead(204); return res.end(); }
+      if (p === "/v5/media/M1") return send({ status: "succeeded" });
+      if (p === "/youtube/v3/channels") return send({ items: [{ id: "UC1", snippet: { title: "Cleaniq Services", customUrl: "@cleaniq" } }] });
+      if (p === "/upload/youtube/v3/videos") { res.writeHead(200, { location: `${fakeBase}/yt-session` }); return res.end(); }
+      if (p === "/yt-session") return send({ id: "YT1", status: { privacyStatus: "private" } });
       // Unsplash
       if (p === "/search/photos") return send({ results: [{ user: { name: "Jane Doe" }, links: { download_location: `${fakeBase}/unsplash-dl` }, urls: { raw: `${fakeBase}/unsplash-img?x=1` } }] });
       if (p === "/unsplash-dl") return send({ url: "ok" });
@@ -98,6 +114,7 @@ test.before(async () => {
     GOOGLE_CLIENT_ID: "g-id", GOOGLE_CLIENT_SECRET: "g-secret", GOOGLE_AUTH_URL: fakeBase, GOOGLE_TOKEN_URL: fakeBase, GBP_ACCOUNTS_URL: fakeBase, GBP_INFO_URL: fakeBase, GBP_POSTS_URL: fakeBase,
     THREADS_APP_ID: "th-id", THREADS_APP_SECRET: "th-secret", THREADS_AUTH_URL: fakeBase, THREADS_API_URL: fakeBase,
     TIKTOK_CLIENT_KEY: "tt-key", TIKTOK_CLIENT_SECRET: "tt-secret", TIKTOK_AUTH_URL: fakeBase, TIKTOK_API_URL: fakeBase,
+    YOUTUBE_API_URL: fakeBase, YOUTUBE_UPLOAD_URL: fakeBase,
     PINTEREST_APP_ID: "pin-id", PINTEREST_APP_SECRET: "pin-secret", PINTEREST_AUTH_URL: fakeBase, PINTEREST_API_URL: fakeBase,
     UNSPLASH_ACCESS_KEY: "u-key", UNSPLASH_API_URL: fakeBase,
     ANTHROPIC_API_KEY: "test-key", ANTHROPIC_BASE_URL: fakeBase,
@@ -331,4 +348,43 @@ test("Google Business Profile, Threads, TikTok and Pinterest: connect and post w
   assert.ok(calls.some((c) => c.path === "/token" && /grant_type=refresh_token/.test(c.body)));
   assert.ok(calls.some((c) => c.path === "/refresh_access_token"));
   assert.equal(calls.find((c) => c.path === "/v4/accounts/111/locations/222/localPosts").headers.authorization, "Bearer g-token-2");
+});
+
+test("video: upload an MP4 and post it to every network (YouTube too)", async () => {
+  assert.match((await connect("youtube")).headers.get("location"), /connected=1/);
+  const fd = new FormData();
+  fd.append("photos", new Blob([Buffer.alloc(2048, 7)], { type: "video/mp4" }), "clean.mp4");
+  const up = await api("/photos", { method: "POST", body: fd }, socialToken);
+  assert.equal(up.status, 201);
+  const [vid] = await up.json();
+  made.push(vid.ref);
+  assert.equal(vid.kind, "video");
+  const accounts = await jsonOf(await api("/accounts", {}, socialToken));
+  const all = accounts.filter((a) => a.network !== "pinterest" || a.name === "Before & after");
+  const ids = all.map((a) => a._id);
+  // YouTube needs a video; Pinterest video pins need a cover photo.
+  assert.equal((await api("/posts", { method: "POST", body: JSON.stringify({ text: "x", images: photoRefs, accounts: [all.find((a) => a.network === "youtube")._id], action: "now" }) }, socialToken)).status, 400);
+  assert.equal((await api("/posts", { method: "POST", body: JSON.stringify({ text: "x", video: vid.ref, accounts: [all.find((a) => a.network === "pinterest")._id], action: "now" }) }, socialToken)).status, 400);
+  calls.length = 0;
+  const post = await jsonOf(await api("/posts", { method: "POST", body: JSON.stringify({ text: "Watch this oven clean\nFrom grime to shine. #Manchester", video: vid.ref, images: [photoRefs[0]], accounts: ids, action: "now" }) }, socialToken));
+  assert.equal(post.status, "posted", JSON.stringify(post.results ? post.results.filter((r) => r.status !== "posted") : post));
+  assert.equal(post.results.length, ids.length);
+  const has = (path, re) => calls.some((c) => c.path === path && (!re || re.test(c.body)));
+  assert.ok(has("/v23.0/PAGE1/videos", /file_url=https%3A%2F%2Fapi\.example\.test%2Fuploads%2Fsocial%2F.+\.mp4/), "Facebook video");
+  assert.ok(has("/v23.0/IG1/media", /media_type=REELS/), "Instagram Reel");
+  assert.ok(has("/li-vupload") && has("/rest/videos") && JSON.parse(calls.find((c) => c.path === "/rest/posts").body).content.media.id === "urn:li:video:V1", "LinkedIn video");
+  assert.equal(JSON.parse(calls.find((c) => c.path === "/2/tweets").body).media.media_ids[0], "XV1", "X video");
+  assert.ok(has("/2/media/upload"), "X waits for processing");
+  assert.ok(has("/v1.0/TH1/threads", /media_type=VIDEO/), "Threads video");
+  assert.match(JSON.parse(calls.find((c) => c.path === "/v2/post/publish/video/init/").body).source_info.video_url, /\.mp4$/, "TikTok video");
+  const pin = JSON.parse(calls.find((c) => c.path === "/v5/pins").body);
+  assert.equal(pin.media_source.source_type, "video_id");
+  assert.match(pin.media_source.cover_image_url, /^https:\/\/api\.example\.test\/uploads\/social\//);
+  assert.ok(has("/yt-session"), "YouTube upload");
+  assert.match(JSON.parse(calls.find((c) => c.path === "/upload/youtube/v3/videos").body).snippet.title, /^Watch this oven clean$/);
+  assert.match(post.results.find((r) => r.network === "youtube").note, /private/);
+  // Google Business: text only, with a note.
+  const g = JSON.parse(calls.find((c) => c.path === "/v4/accounts/111/locations/222/localPosts").body);
+  assert.equal(g.media, undefined);
+  assert.match(post.results.find((r) => r.network === "google").note, /can't include video/);
 });

@@ -1,6 +1,6 @@
 // Overview, Calendar and Posts pages of the social media dashboard.
 import { useMemo, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, PenSquare, Bot, ExternalLink, RotateCcw, Trash2, Pencil, Send, Clock, CheckCircle2, AlertTriangle, Sparkles, Link2, ImageIcon } from "lucide-react";
+import { Film, CalendarDays, ChevronLeft, ChevronRight, PenSquare, Bot, ExternalLink, RotateCcw, Trash2, Pencil, Send, Clock, CheckCircle2, AlertTriangle, Sparkles, Link2, ImageIcon } from "lucide-react";
 import { api, photoUrl } from "./api";
 import { NETWORKS, NETWORK_ORDER, NetworkMark, AccountAvatar, Button, Card, CardHeader, StatusBadge, Empty, Modal, fmtDate } from "./ui";
 import { Preview } from "./Composer";
@@ -10,6 +10,8 @@ const postDate = (p) => new Date(p.postedAt || p.scheduledAt || p.createdAt);
 const netsOf = (post, accounts) => [...new Set((post.accounts || []).map((id) => accounts.find((a) => a._id === String(id))?.network).filter(Boolean))].sort((a, b) => NETWORK_ORDER.indexOf(a) - NETWORK_ORDER.indexOf(b));
 
 function PostThumb({ post, size = 44 }) {
+  if (post.video && !post.images?.length)
+    return <span className="rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0" style={{ width: size, height: size }}><Film size={size * 0.4} /></span>;
   return post.images?.length ? (
     <img src={photoUrl(post.images[0])} alt="" className="rounded-lg object-cover shrink-0 ring-1 ring-slate-200" style={{ width: size, height: size }} />
   ) : (
@@ -115,7 +117,7 @@ export function PostDetail({ post, accounts, onClose, onEdit, onChanged, notify 
           <div className="flex gap-1 bg-slate-200/60 rounded-lg p-1 mb-4 w-fit">
             {nets.map((n) => <button key={n} type="button" onClick={() => setNet(n)} className={`w-8 h-7 rounded-md flex items-center justify-center ${show === n ? "bg-white shadow-sm" : "opacity-50 hover:opacity-100"}`} aria-label={NETWORKS[n].label}><NetworkMark network={n} size={15} /></button>)}
           </div>
-          <Preview network={show} account={accounts.find((a) => a.network === show && (post.accounts || []).map(String).includes(a._id))} text={text} images={post.images || []} />
+          <Preview network={show} account={accounts.find((a) => a.network === show && (post.accounts || []).map(String).includes(a._id))} text={text} images={post.images || []} video={post.video || ""} />
         </div>
       </div>
     </Modal>

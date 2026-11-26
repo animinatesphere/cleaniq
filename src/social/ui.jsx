@@ -12,8 +12,11 @@ export const NETWORKS = {
   threads: { label: "Threads", color: "#000000", soft: "bg-slate-900/10 text-slate-900" },
   tiktok: { label: "TikTok", color: "#000000", soft: "bg-slate-900/10 text-slate-900" },
   pinterest: { label: "Pinterest", color: "#E60023", soft: "bg-[#E60023]/10 text-[#E60023]" },
+  youtube: { label: "YouTube", color: "#FF0000", soft: "bg-[#FF0000]/10 text-[#CC0000]" },
 };
-export const NETWORK_ORDER = ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest"];
+export const NETWORK_ORDER = ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest", "youtube"];
+/** Networks that only take videos. */
+export const VIDEO_ONLY = ["youtube"];
 /** Networks that can't post without a photo. */
 export const PHOTO_ONLY = ["instagram", "tiktok", "pinterest"];
 
@@ -76,6 +79,13 @@ export function NetworkMark({ network, size = 16, className = "" }) {
         <path fill="#25F4EE" transform="translate(-.6 -.5)" d="M10.3 10.6v-.8a5.2 5.2 0 1 0 3.6 5V9.9a6.5 6.5 0 0 0 3.8 1.2V8.4a3.8 3.8 0 0 1-3-3.2h-2.6v10.3a2.4 2.4 0 1 1-1.8-2.3z" />
         <path fill="#FE2C55" transform="translate(.6 .5)" d="M10.3 10.6v-.8a5.2 5.2 0 1 0 3.6 5V9.9a6.5 6.5 0 0 0 3.8 1.2V8.4a3.8 3.8 0 0 1-3-3.2h-2.6v10.3a2.4 2.4 0 1 1-1.8-2.3z" />
         <path fill="#fff" d="M10.3 10.6v-.8a5.2 5.2 0 1 0 3.6 5V9.9a6.5 6.5 0 0 0 3.8 1.2V8.4a3.8 3.8 0 0 1-3-3.2h-2.6v10.3a2.4 2.4 0 1 1-1.8-2.3z" />
+      </svg>
+    );
+  if (network === "youtube")
+    return (
+      <svg viewBox="0 0 24 24" style={s} className={className} aria-label="YouTube" role="img">
+        <rect width="24" height="24" rx="5" fill="#FF0000" />
+        <path fill="#fff" d="M10 8.6v6.8l5.8-3.4z" />
       </svg>
     );
   if (network === "pinterest")

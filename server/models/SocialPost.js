@@ -30,9 +30,12 @@ const socialPostSchema = new mongoose.Schema(
       threads: { type: String, default: "" },
       tiktok: { type: String, default: "" },
       pinterest: { type: String, default: "" },
+      youtube: { type: String, default: "" },
     },
     // Photos: "/uploads/social/…" (uploaded) or "library:our-work/…" (our own job photos).
     images: { type: [String], default: [] },
+    // One video ("/uploads/social/…"). With a video, the first photo is only used as a cover (Pinterest).
+    video: { type: String, default: "" },
     credit: { type: String, default: "" }, // e.g. "Photo: Jane Doe on Unsplash"
     accounts: [{ type: mongoose.Schema.Types.ObjectId, ref: "SocialAccount" }],
     status: { type: String, enum: ["draft", "scheduled", "posting", "posted", "partial", "failed"], default: "draft", index: true },

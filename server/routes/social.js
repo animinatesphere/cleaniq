@@ -24,9 +24,9 @@ const scheduler = require("../utils/socialScheduler");
 
 const json = express.json({ limit: "1mb" });
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const NETWORKS = ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest"];
-const CONNECT = ["meta", "linkedin", "x", "google", "threads", "tiktok", "pinterest"];
-const CONNECT_NAMES = { meta: "Facebook/Instagram", linkedin: "LinkedIn", x: "X", google: "Google Business Profile", threads: "Threads", tiktok: "TikTok", pinterest: "Pinterest" };
+const NETWORKS = ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest", "youtube"];
+const CONNECT = ["meta", "linkedin", "x", "google", "youtube", "threads", "tiktok", "pinterest"];
+const CONNECT_NAMES = { meta: "Facebook/Instagram", linkedin: "LinkedIn", x: "X", google: "Google Business Profile", youtube: "YouTube", threads: "Threads", tiktok: "TikTok", pinterest: "Pinterest" };
 const APP_URL = () => (process.env.SOCIAL_APP_URL || "https://www.cleaniqservices.com/social").replace(/\/+$/, "");
 const isId = (id) => mongoose.isValidObjectId(id);
 const adminOnly = (req, res, next) => (req.socialUser ? res.status(403).json({ message: "Only main admins can manage social media logins." }) : next());
@@ -170,26 +170,39 @@ router.get("/connect/:network/callback", async (req, res) => {
 
 // ── photos ────────────────────────────────────────────────────────────────────
 fs.mkdirSync(networks.UPLOAD_DIR, { recursive: true });
+const PHOTO_MAX = 8 * 1024 * 1024;
+const VIDEO_MAX = 500 * 1024 * 1024;
 const upload = multer({
   storage: multer.diskStorage({
     destination: networks.UPLOAD_DIR,
-    filename: (req, file, cb) => cb(null, `social-${Date.now()}-${crypto.randomBytes(4).toString("hex")}${path.extname(file.originalname).toLowerCase().replace(/[^.a-z]/g, "") || ".jpg"}`),
+    filename: (req, file, cb) => cb(null, `social-${Date.now()}-${crypto.randomBytes(4).toString("hex")}${path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, "") || ".jpg"}`),
   }),
-  limits: { fileSize: 8 * 1024 * 1024, files: 10 },
-  fileFilter: (req, file, cb) => cb(/^image\/(jpeg|png)$/.test(file.mimetype) && /\.(jpe?g|png)$/i.test(file.originalname) ? null : bad("Photos must be JPEG or PNG (Instagram needs JPEG)."), true),
+  limits: { fileSize: VIDEO_MAX, files: 10 },
+  fileFilter: (req, file, cb) => {
+    const photo = /^image\/(jpeg|png)$/.test(file.mimetype) && /\.(jpe?g|png)$/i.test(file.originalname);
+    const video = /^video\/(mp4|quicktime)$/.test(file.mimetype) && /\.(mp4|mov|m4v)$/i.test(file.originalname);
+    cb(photo || video ? null : bad("Use JPEG or PNG photos (Instagram needs JPEG) or MP4/MOV videos."), true);
+  },
 });
+const isVideoFile = (f) => /^video\//.test(f.mimetype);
 
 router.get("/photos", socialAuth, async (req, res) => {
   const uploaded = await SocialPhoto.find().sort({ createdAt: -1 }).limit(300).lean();
   res.json({
-    uploaded: uploaded.map((p) => ({ _id: p._id, ref: p.path, description: p.description, createdAt: p.createdAt })),
+    uploaded: uploaded.map((p) => ({ _id: p._id, ref: p.path, kind: p.kind || "photo", description: p.description, createdAt: p.createdAt })),
     ours: networks.ourPhotos(),
   });
 });
-router.post("/photos", socialAuth, (req, res, next) => upload.array("photos", 10)(req, res, (err) => (err ? res.status(400).json({ message: err.code === "LIMIT_FILE_SIZE" ? "Each photo must be under 8 MB." : err.message }) : next())), async (req, res) => {
+router.post("/photos", socialAuth, (req, res, next) => upload.array("photos", 10)(req, res, (err) => (err ? res.status(400).json({ message: err.code === "LIMIT_FILE_SIZE" ? "Videos must be under 500 MB." : err.message }) : next())), async (req, res) => {
   const description = String(req.body?.description || "").trim().slice(0, 300);
-  const rows = await SocialPhoto.insertMany((req.files || []).map((f) => ({ path: `/uploads/social/${f.filename}`, description, uploadedBy: req.actor })));
-  res.status(201).json(rows.map((p) => ({ _id: p._id, ref: p.path, description: p.description })));
+  const files = req.files || [];
+  const tooBig = files.find((f) => !isVideoFile(f) && f.size > PHOTO_MAX);
+  if (tooBig) {
+    files.forEach((f) => fs.unlink(f.path, () => {}));
+    return res.status(400).json({ message: "Each photo must be under 8 MB." });
+  }
+  const rows = await SocialPhoto.insertMany(files.map((f) => ({ path: `/uploads/social/${f.filename}`, kind: isVideoFile(f) ? "video" : "photo", description, uploadedBy: req.actor })));
+  res.status(201).json(rows.map((p) => ({ _id: p._id, ref: p.path, kind: p.kind, description: p.description })));
 });
 router.patch("/photos/:id", socialAuth, json, async (req, res) => {
   if (!isId(req.params.id)) return res.status(404).json({ message: "Not found" });
@@ -203,21 +216,26 @@ router.delete("/photos/:id", socialAuth, async (req, res) => {
 
 // ── posts ─────────────────────────────────────────────────────────────────────
 const PHOTO_REF = /^(\/uploads\/social\/[\w.-]+|library:our-work\/[\w.-]+)$/;
+const VIDEO_REF = /\.(mp4|mov|m4v)$/i;
 async function postFields(body, existing) {
   const text = String(body.text ?? existing?.text ?? "").slice(0, 5000);
   const variants = {};
   for (const n of NETWORKS) variants[n] = String(body.variants?.[n] ?? existing?.variants?.[n] ?? "").slice(0, 5000);
-  const images = (body.images ?? existing?.images ?? []).map(String).filter((r) => PHOTO_REF.test(r)).slice(0, 10);
+  const images = (body.images ?? existing?.images ?? []).map(String).filter((r) => PHOTO_REF.test(r) && !VIDEO_REF.test(r)).slice(0, 10);
+  const rawVideo = String(body.video ?? existing?.video ?? "");
+  const video = PHOTO_REF.test(rawVideo) && VIDEO_REF.test(rawVideo) ? rawVideo : "";
   const ids = (body.accounts ?? existing?.accounts ?? []).map(String).filter(isId);
   const accounts = await SocialAccount.find({ _id: { $in: ids } }).select("_id network").lean();
   if (!text.trim() && !NETWORKS.some((n) => variants[n].trim())) throw bad("Write something to post.");
-  return { text, variants, images, accounts, credit: String(body.credit ?? existing?.credit ?? "").slice(0, 200) };
+  return { text, variants, images, video, accounts, credit: String(body.credit ?? existing?.credit ?? "").slice(0, 200) };
 }
 function checkPostable(f) {
   if (!f.accounts.length) throw bad("Choose at least one account to post to.");
   for (const [n, label] of [["instagram", "Instagram"], ["tiktok", "TikTok"], ["pinterest", "Pinterest"]]) {
-    if (f.accounts.some((a) => a.network === n) && !f.images.length) throw bad(`${label} posts need a photo. Add a photo or untick ${label}.`);
+    if (f.accounts.some((a) => a.network === n) && !f.images.length && !f.video) throw bad(`${label} posts need a photo or video. Add one or untick ${label}.`);
   }
+  if (f.accounts.some((a) => a.network === "youtube") && !f.video) throw bad("YouTube needs a video. Add a video or untick YouTube.");
+  if (f.video && f.accounts.some((a) => a.network === "pinterest") && !f.images.length) throw bad("Pinterest video pins need a cover photo. Add a photo as well as the video, or untick Pinterest.");
   const xText = networks.textFor({ text: f.text, variants: f.variants, credit: f.credit }, "x");
   if (f.accounts.some((a) => a.network === "x") && !xText.trim()) throw bad("Write the text for X.");
 }

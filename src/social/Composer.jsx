@@ -1,25 +1,28 @@
 // Create or edit a post: choose accounts, write once (or per network), add photos, preview it as
 // each network shows it, then post now, schedule or save as a draft.
 import { useEffect, useMemo, useState } from "react";
-import { ImagePlus, Send, CalendarClock, Save, AlertTriangle, ArrowLeft, ArrowRight, Trash2, Heart, MessageCircle, Repeat2, Share2, Bookmark, ThumbsUp, Globe2, MoreHorizontal, Upload, Check } from "lucide-react";
+import { Film, ImagePlus, Send, CalendarClock, Save, AlertTriangle, ArrowLeft, ArrowRight, Trash2, Heart, MessageCircle, Repeat2, Share2, Bookmark, ThumbsUp, Globe2, MoreHorizontal, Upload, Check } from "lucide-react";
 import { api, photoUrl } from "./api";
-import { NETWORKS, NETWORK_ORDER, PHOTO_ONLY, NetworkMark, AccountAvatar, Button, Card, Modal, inputCls, labelCls, toLocalInput } from "./ui";
+import { NETWORKS, NETWORK_ORDER, PHOTO_ONLY, VIDEO_ONLY, NetworkMark, AccountAvatar, Button, Card, Modal, inputCls, labelCls, toLocalInput } from "./ui";
 
-const LIMITS = { facebook: 63206, instagram: 2200, linkedin: 3000, x: 280, threads: 500, google: 1500, tiktok: 4000, pinterest: 800 };
+const LIMITS = { facebook: 63206, instagram: 2200, linkedin: 3000, x: 280, threads: 500, google: 1500, tiktok: 2200, pinterest: 800, youtube: 4900 };
+const vidEl = (video, cls) => <video src={photoUrl(video)} className={cls} muted playsInline controls preload="metadata" />;
+
 const TIPS = {
   x: " X allows 280 characters.",
   instagram: " Put hashtags at the end.",
   threads: " Threads allows 500 characters.",
   google: " Keep it plain and local, no hashtags. A Learn more button to the website is added.",
   pinterest: " The first line becomes the pin title (up to 100 characters).",
-  tiktok: " Posted as a photo post; the first line becomes the title.",
+  tiktok: " Photos go out as a photo post; the first line becomes the title.",
+  youtube: " The first line becomes the video title (up to 100 characters); the rest is the description.",
 };
 
 /** Photo library picker: our job photos and uploaded photos; upload new ones here too. */
 export function PhotoPicker({ open, ...rest }) {
   return open ? <PickerBody {...rest} /> : null;
 }
-function PickerBody({ onClose, onPick, multiple = true }) {
+function PickerBody({ onClose, onPick, multiple = true, kind = "photo" }) {
   const [lib, setLib] = useState(null);
   const [chosen, setChosen] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -45,27 +48,33 @@ function PickerBody({ onClose, onPick, multiple = true }) {
     }
   };
   const toggle = (ref) => setChosen((c) => (c.includes(ref) ? c.filter((x) => x !== ref) : multiple ? [...c, ref] : [ref]));
-  const all = lib ? [...lib.uploaded.map((p) => ({ ...p, group: "Uploaded" })), ...lib.ours.map((p) => ({ ...p, group: "Our job photos" }))] : [];
+  const all = lib
+    ? [...lib.uploaded.filter((p) => (p.kind || "photo") === kind).map((p) => ({ ...p, group: "Uploaded" })), ...(kind === "photo" ? lib.ours.map((p) => ({ ...p, group: "Our job photos" })) : [])]
+    : [];
+  const noun = kind === "video" ? "video" : "photo";
   return (
-    <Modal open onClose={onClose} title="Choose photos" wide>
+    <Modal open onClose={onClose} title={kind === "video" ? "Choose a video" : "Choose photos"} wide>
       <div className="p-6">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <p className="text-sm text-slate-500">Tick the photos to add. Instagram needs JPEG photos.</p>
+          <p className="text-sm text-slate-500">{kind === "video" ? "MP4 or MOV, up to 500 MB. Vertical videos work best for Reels, TikTok and Shorts." : "Tick the photos to add. Instagram needs JPEG photos."}</p>
           <label className={`inline-flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-semibold cursor-pointer ${busy ? "bg-slate-100 text-slate-400" : "bg-primary/10 text-primary hover:bg-primary/15"}`}>
-            <Upload size={16} /> {busy ? "Uploading…" : "Upload photos"}
-            <input type="file" accept="image/jpeg,image/png" multiple className="hidden" onChange={upload} disabled={busy} />
+            <Upload size={16} /> {busy ? "Uploading…" : kind === "video" ? "Upload a video" : "Upload photos"}
+            <input type="file" accept={kind === "video" ? "video/mp4,video/quicktime" : "image/jpeg,image/png"} multiple={multiple} className="hidden" onChange={upload} disabled={busy} />
           </label>
         </div>
         {error && <p className="mb-4 text-sm text-rose-600">{error}</p>}
         {!lib ? (
-          <p className="text-sm text-slate-400 py-10 text-center">Loading photos…</p>
+          <p className="text-sm text-slate-400 py-10 text-center">Loading…</p>
+        ) : !all.length ? (
+          <p className="text-sm text-slate-400 py-10 text-center">No {noun}s yet. Upload one above.</p>
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 max-h-[55vh] overflow-y-auto pr-1">
             {all.map((p) => {
               const on = chosen.includes(p.ref);
               return (
                 <button key={p.ref} type="button" onClick={() => toggle(p.ref)} title={p.description} className={`relative aspect-square rounded-xl overflow-hidden ring-2 transition ${on ? "ring-primary" : "ring-transparent hover:ring-slate-300"}`}>
-                  <img src={photoUrl(p.ref)} alt={p.description} loading="lazy" className="w-full h-full object-cover" />
+                  {kind === "video" ? <video src={photoUrl(p.ref)} muted preload="metadata" className="w-full h-full object-cover bg-black" /> : <img src={photoUrl(p.ref)} alt={p.description} loading="lazy" className="w-full h-full object-cover" />}
+                  {kind === "video" && <span className="absolute inset-0 flex items-center justify-center"><span className="w-9 h-9 rounded-full bg-black/55 text-white flex items-center justify-center"><Film size={16} /></span></span>}
                   <span className={`absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs ${on ? "bg-primary" : "bg-black/30 ring-2 ring-white/80"}`}>{on && <Check size={14} />}</span>
                   <span className="absolute bottom-0 inset-x-0 px-1.5 py-1 text-[10px] font-medium text-white bg-gradient-to-t from-black/70 to-transparent text-left truncate">{p.group}</span>
                 </button>
@@ -76,7 +85,7 @@ function PickerBody({ onClose, onPick, multiple = true }) {
       </div>
       <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/60 rounded-b-2xl">
         <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button onClick={() => { onPick(chosen); onClose(); }} disabled={!chosen.length}>Add {chosen.length ? `${chosen.length} photo${chosen.length > 1 ? "s" : ""}` : "photos"}</Button>
+        <Button onClick={() => { onPick(chosen); onClose(); }} disabled={!chosen.length}>Add {chosen.length ? `${chosen.length} ${noun}${chosen.length > 1 ? "s" : ""}` : `${noun}s`}</Button>
       </div>
     </Modal>
   );
@@ -86,7 +95,8 @@ function PickerBody({ onClose, onPick, multiple = true }) {
 function PreviewText({ text, clamp }) {
   return <p className={`whitespace-pre-wrap break-words ${clamp ? "line-clamp-6" : ""}`}>{text.split(/(#\w+|https?:\/\/\S+)/g).map((part, i) => (/^(#\w+|https?:\/\/)/.test(part) ? <span key={i} className="text-[#1D72D8]">{part}</span> : part))}</p>;
 }
-function Photos({ images, className = "" }) {
+function Photos({ images, video, className = "" }) {
+  if (video) return vidEl(video, `w-full max-h-96 bg-black ${className}`);
   if (!images.length) return null;
   if (images.length === 1) return <img src={photoUrl(images[0])} alt="" className={`w-full object-cover max-h-80 ${className}`} />;
   return (
@@ -100,13 +110,25 @@ function Photos({ images, className = "" }) {
     </div>
   );
 }
-export function Preview({ network, account, text, images }) {
+export function Preview({ network, account, text, images, video }) {
   const name = account?.name || NETWORKS[network].label;
+  if (network === "youtube") {
+    const [title, ...rest] = text.split("\n");
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden text-slate-900">
+        {video ? vidEl(video, "w-full aspect-video bg-black") : <div className="aspect-video bg-slate-900 flex flex-col items-center justify-center gap-2 text-white/60"><Film size={28} /><span className="text-xs font-medium">YouTube needs a video</span></div>}
+        <div className="p-3 flex gap-2.5">
+          {account ? <AccountAvatar account={account} size={34} /> : <span className="w-[34px] h-[34px] rounded-full bg-slate-200" />}
+          <div className="min-w-0"><p className="font-semibold text-[14px] leading-snug line-clamp-2">{title.replace(/#\w+/g, "").trim() || "Video title"}</p><p className="text-xs text-slate-500 mt-0.5">{name} · 0 views · just now</p><p className="text-xs text-slate-500 mt-1 line-clamp-2">{rest.join(" ").trim()}</p></div>
+        </div>
+      </div>
+    );
+  }
   if (network === "pinterest") {
     const [title, ...rest] = text.split("\n");
     return (
       <div className="mx-auto max-w-[260px] text-slate-900">
-        {images.length ? <img src={photoUrl(images[0])} alt="" className="w-full rounded-2xl object-cover" /> : <div className="aspect-[2/3] rounded-2xl bg-slate-100 flex items-center justify-center text-xs text-slate-400">Pinterest needs a photo</div>}
+        {video ? vidEl(video, "w-full aspect-[2/3] rounded-2xl object-cover bg-black") : images.length ? <img src={photoUrl(images[0])} alt="" className="w-full rounded-2xl object-cover" /> : <div className="aspect-[2/3] rounded-2xl bg-slate-100 flex items-center justify-center text-xs text-slate-400">Pinterest needs a photo</div>}
         <p className="mt-2 font-semibold text-[14px] leading-snug line-clamp-2">{title.replace(/#\w+/g, "").trim()}</p>
         <p className="text-xs text-slate-500 line-clamp-2 mt-0.5">{rest.join(" ").trim()}</p>
         <div className="flex items-center gap-1.5 mt-2">{account && <AccountAvatar account={account} size={20} />}<span className="text-xs font-medium">{account?.name || "Board"}</span></div>
@@ -116,7 +138,7 @@ export function Preview({ network, account, text, images }) {
   if (network === "tiktok") {
     return (
       <div className="mx-auto w-[230px] aspect-[9/16] rounded-[28px] overflow-hidden bg-black relative text-white shadow-xl">
-        {images.length ? <img src={photoUrl(images[0])} alt="" className="absolute inset-0 w-full h-full object-cover" /> : <div className="absolute inset-0 flex items-center justify-center text-xs text-white/50">TikTok needs a photo</div>}
+        {video ? vidEl(video, "absolute inset-0 w-full h-full object-cover") : images.length ? <img src={photoUrl(images[0])} alt="" className="absolute inset-0 w-full h-full object-cover" /> : <div className="absolute inset-0 flex items-center justify-center text-xs text-white/50">TikTok needs a photo or video</div>}
         {images.length > 1 && <div className="absolute top-3 inset-x-0 flex justify-center gap-1">{images.slice(0, 6).map((r, i) => <span key={r} className={`h-1 w-4 rounded-full ${i ? "bg-white/40" : "bg-white"}`} />)}</div>}
         <div className="absolute inset-x-0 bottom-0 p-3 pt-16 bg-gradient-to-t from-black/80 to-transparent">
           <p className="text-[12px] font-semibold">@{account?.name || "cleaniq"}</p>
@@ -129,7 +151,7 @@ export function Preview({ network, account, text, images }) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden text-[13px] text-slate-900">
         <div className="flex items-center gap-2.5 px-3.5 pt-3">{account ? <AccountAvatar account={account} size={34} /> : <span className="w-[34px] h-[34px] rounded-full bg-slate-200" />}<div className="leading-tight"><p className="font-semibold">{name}</p><p className="text-[11px] text-slate-500">Just now · Google</p></div></div>
-        {images.length > 0 && <img src={photoUrl(images[0])} alt="" className="w-full aspect-[4/3] object-cover mt-3" />}
+        {video ? <p className="mx-3.5 mt-3 rounded-lg bg-amber-50 text-amber-800 text-[11px] font-medium px-2.5 py-1.5">Google Business posts can't show video — this goes out as text.</p> : images.length > 0 && <img src={photoUrl(images[0])} alt="" className="w-full aspect-[4/3] object-cover mt-3" />}
         <div className="px-3.5 py-3"><PreviewText text={text} clamp /></div>
         <div className="px-3.5 pb-3.5"><span className="inline-block rounded-full border border-slate-300 px-3.5 py-1.5 text-[12px] font-medium text-[#1A73E8]">Learn more</span></div>
       </div>
@@ -143,7 +165,8 @@ export function Preview({ network, account, text, images }) {
           <div className="min-w-0 flex-1">
             <p className="leading-tight"><span className="font-semibold">{account?.name || "cleaniq"}</span> <span className="text-slate-400">now</span></p>
             <div className="mt-1 leading-snug"><PreviewText text={text} /></div>
-            {images.length > 0 && <div className="flex gap-1.5 mt-2.5 overflow-hidden">{images.slice(0, 3).map((r) => <img key={r} src={photoUrl(r)} alt="" className="h-36 w-28 rounded-lg object-cover shrink-0" />)}</div>}
+            {video && vidEl(video, "mt-2.5 w-full max-h-72 rounded-lg bg-black")}
+            {!video && images.length > 0 && <div className="flex gap-1.5 mt-2.5 overflow-hidden">{images.slice(0, 3).map((r) => <img key={r} src={photoUrl(r)} alt="" className="h-36 w-28 rounded-lg object-cover shrink-0" />)}</div>}
             <div className="flex gap-4 text-slate-500 mt-3"><Heart size={17} /><MessageCircle size={17} /><Repeat2 size={17} /><Send size={16} /></div>
           </div>
         </div>
@@ -158,7 +181,9 @@ export function Preview({ network, account, text, images }) {
           <span className="font-semibold">{account?.handle?.replace("@", "") || name}</span>
           <MoreHorizontal size={16} className="ml-auto text-slate-500" />
         </div>
-        {images.length ? (
+        {video ? (
+          <div className="relative">{vidEl(video, "w-full aspect-[4/5] object-cover bg-black")}<span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[11px] font-semibold">Reel</span></div>
+        ) : images.length ? (
           <div className="relative">
             <img src={photoUrl(images[0])} alt="" className="w-full aspect-square object-cover" />
             {images.length > 1 && <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[11px] font-semibold">1/{images.length}</span>}
@@ -179,7 +204,7 @@ export function Preview({ network, account, text, images }) {
           <div className="min-w-0 flex-1">
             <p className="leading-tight"><span className="font-bold">{name}</span> <span className="text-slate-500">{account?.handle || "@cleaniq"} · now</span></p>
             <div className="mt-1 leading-snug"><PreviewText text={text} /></div>
-            <Photos images={images} className="mt-2.5 rounded-2xl overflow-hidden border border-slate-200" />
+            <Photos images={images} video={video} className="mt-2.5 rounded-2xl overflow-hidden border border-slate-200" />
             <div className="flex justify-between text-slate-500 mt-3 pr-6"><MessageCircle size={16} /><Repeat2 size={16} /><Heart size={16} /><Share2 size={16} /></div>
           </div>
         </div>
@@ -194,7 +219,7 @@ export function Preview({ network, account, text, images }) {
           <div className="leading-tight"><p className="font-semibold">{name}</p><p className="text-[11px] text-slate-500">{account?.handle || "Company page"}</p><p className="text-[11px] text-slate-500 flex items-center gap-1">now · <Globe2 size={10} /></p></div>
         </div>
         <div className="px-3.5 py-2.5"><PreviewText text={text} clamp /></div>
-        <Photos images={images} />
+        <Photos images={images} video={video} />
         <div className="flex justify-around text-slate-500 text-xs font-semibold border-t border-slate-100 py-2"><span className="flex items-center gap-1"><ThumbsUp size={14} /> Like</span><span className="flex items-center gap-1"><MessageCircle size={14} /> Comment</span><span className="flex items-center gap-1"><Repeat2 size={14} /> Repost</span><span className="flex items-center gap-1"><Send size={14} /> Send</span></div>
       </div>
     );
@@ -207,7 +232,7 @@ export function Preview({ network, account, text, images }) {
         <MoreHorizontal size={18} className="ml-auto text-slate-500" />
       </div>
       <div className="px-3.5 py-2.5"><PreviewText text={text} clamp /></div>
-      <Photos images={images} />
+      <Photos images={images} video={video} />
       <div className="flex justify-around text-slate-500 text-[13px] font-semibold border-t border-slate-100 mx-3 py-2"><span className="flex items-center gap-1.5"><ThumbsUp size={16} /> Like</span><span className="flex items-center gap-1.5"><MessageCircle size={16} /> Comment</span><span className="flex items-center gap-1.5"><Share2 size={16} /> Share</span></div>
     </div>
   );
@@ -222,6 +247,8 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
   const [text, setText] = useState(post?.text || "");
   const [variants, setVariants] = useState({ facebook: "", instagram: "", linkedin: "", x: "", ...(post?.variants || {}) });
   const [images, setImages] = useState(post?.images || []);
+  const [video, setVideo] = useState(post?.video || "");
+  const [videoPicker, setVideoPicker] = useState(false);
   const [tab, setTab] = useState("all");
   const [mode, setMode] = useState(post?.status === "scheduled" || defaultWhen ? "schedule" : "now");
   const [when, setWhen] = useState(() => toLocalInput(post?.scheduledAt && post.status === "scheduled" ? post.scheduledAt : defaultWhen || Date.now() + 3600 * 1000));
@@ -240,19 +267,21 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
     const out = [];
     if (!selected.length) out.push("Choose at least one account.");
     if (!text.trim() && !nets.some((n) => variants[n]?.trim())) out.push("Write something to post.");
-    for (const n of PHOTO_ONLY) if (nets.includes(n) && !images.length) out.push(`${NETWORKS[n].label} needs at least one photo.`);
-    if (nets.includes("tiktok") && images.some((r) => !/\.(jpe?g|webp)$/i.test(r))) out.push("TikTok only accepts JPEG photos — one of your photos is a PNG.");
-    if (nets.includes("instagram") && images.some((r) => !/\.jpe?g$/i.test(r))) out.push("Instagram only accepts JPEG photos — one of your photos is a PNG.");
+    for (const n of PHOTO_ONLY) if (nets.includes(n) && !images.length && !video) out.push(`${NETWORKS[n].label} needs a photo or a video.`);
+    for (const n of VIDEO_ONLY) if (nets.includes(n) && !video) out.push(`${NETWORKS[n].label} needs a video.`);
+    if (video && nets.includes("pinterest") && !images.length) out.push("Pinterest video pins need a cover photo — add a photo too.");
+    if (!video && nets.includes("instagram") && images.some((r) => !/\.jpe?g$/i.test(r))) out.push("Instagram only accepts JPEG photos — one of your photos is a PNG.");
+    if (!video && nets.includes("tiktok") && images.some((r) => !/\.(jpe?g|webp)$/i.test(r))) out.push("TikTok only accepts JPEG photos — one of your photos is a PNG.");
     for (const n of nets) if (textFor(n).length > LIMITS[n]) out.push(`${NETWORKS[n].label} text is too long (${textFor(n).length} of ${LIMITS[n]} characters).`);
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected, text, variants, images, nets]);
+  }, [selected, text, variants, images, video, nets]);
 
   const save = async (action) => {
     setBusy(action);
     setError("");
     try {
-      const body = { text, variants, images, accounts: chosen, action, ...(action === "schedule" ? { scheduledAt: new Date(when).toISOString() } : {}) };
+      const body = { text, variants, images, video, accounts: chosen, action, ...(action === "schedule" ? { scheduledAt: new Date(when).toISOString() } : {}) };
       const saved = editing ? await api(`/posts/${post._id}`, { method: "PATCH", body }) : await api("/posts", { method: "POST", body });
       if (action === "now") {
         const ok = saved.results?.filter((r) => r.status === "posted").length || 0;
@@ -321,7 +350,30 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
 
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-slate-900">Photos <span className="font-normal text-slate-400">({images.length}/10)</span></p>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Video</p>
+              <p className="text-xs text-slate-500 mt-0.5">Goes out as a Reel on Instagram, a video on TikTok, YouTube, Facebook, LinkedIn, X, Threads and Pinterest.</p>
+            </div>
+            {!video && <Button variant="secondary" size="sm" onClick={() => setVideoPicker(true)}><Film size={15} /> Add a video</Button>}
+          </div>
+          {video ? (
+            <div className="flex items-start gap-4">
+              {vidEl(video, "w-56 max-h-72 rounded-xl bg-black")}
+              <div className="space-y-2">
+                <Button variant="secondary" size="sm" onClick={() => setVideoPicker(true)}><Film size={14} /> Change video</Button>
+                <Button variant="danger" size="sm" onClick={() => setVideo("")}><Trash2 size={14} /> Remove video</Button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setVideoPicker(true)} className="w-full rounded-xl border-2 border-dashed border-slate-200 py-6 text-sm text-slate-500 hover:border-primary/40 hover:text-primary transition flex flex-col items-center gap-2">
+              <Film size={22} /> Add a video (MP4 or MOV) — optional
+            </button>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-slate-900">{video ? "Cover photo" : "Photos"} <span className="font-normal text-slate-400">{video ? "(optional — Pinterest uses it as the video cover)" : `(${images.length}/10)`}</span></p>
             <Button variant="secondary" size="sm" onClick={() => setPicker(true)} disabled={images.length >= 10}><ImagePlus size={15} /> Add photos</Button>
           </div>
           {images.length ? (
@@ -385,12 +437,13 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
           </div>
         </div>
         <div className="rounded-2xl bg-slate-100/80 p-4">
-          <Preview network={previewNet} account={selected.find((a) => a.network === previewNet)} text={textFor(previewNet) || "Your post will appear here."} images={images} />
+          <Preview network={previewNet} account={selected.find((a) => a.network === previewNet)} text={textFor(previewNet) || "Your post will appear here."} images={images} video={video} />
         </div>
         <p className="text-xs text-slate-400 px-1">A close guide to how it will look; each network may crop photos a little differently.</p>
       </div>
 
       <PhotoPicker open={picker} onClose={() => setPicker(false)} onPick={(refs) => setImages((l) => [...l, ...refs.filter((r) => !l.includes(r))].slice(0, 10))} />
+      <PhotoPicker open={videoPicker} kind="video" multiple={false} onClose={() => setVideoPicker(false)} onPick={(refs) => refs[0] && setVideo(refs[0])} />
     </div>
   );
 }

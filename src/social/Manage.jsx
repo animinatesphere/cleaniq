@@ -56,6 +56,19 @@ const CONNECT = [
     callbackAt: 3,
   },
   {
+    key: "youtube", networks: ["youtube"], title: "YouTube",
+    text: "Uploads videos to your channel (vertical videos under 3 minutes become Shorts).",
+    steps: [
+      "Use the same Google Cloud project as Google Business Profile (or create one at console.cloud.google.com).",
+      "In APIs and Services, enable the YouTube Data API v3.",
+      "On the OAuth consent screen, add the scopes youtube.upload and youtube.readonly, and add your Google account as a test user.",
+      "In Credentials, open your Web application OAuth client and add this Authorised redirect URI:",
+      "It uses the same GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET as Google Business Profile — nothing extra in .env.",
+      "Until Google verifies the app, YouTube may set uploads to private. Apply for verification in the OAuth consent screen when you are ready.",
+    ],
+    callbackAt: 3,
+  },
+  {
     key: "threads", networks: ["threads"], title: "Threads",
     text: "Posts to your Threads profile. Uses a Meta developer app.",
     steps: [
@@ -244,22 +257,22 @@ export function Photos({ notify }) {
             <input id="ph-desc" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Kitchen after an end of tenancy clean in Salford" className={inputCls} />
           </div>
           <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-lg text-sm font-semibold cursor-pointer ${busy ? "bg-slate-100 text-slate-400" : "bg-primary text-white hover:bg-primary-dark"}`}>
-            <Upload size={16} /> {busy ? "Uploading…" : "Upload photos"}
-            <input type="file" accept="image/jpeg,image/png" multiple className="hidden" onChange={upload} disabled={busy} />
+            <Upload size={16} /> {busy ? "Uploading…" : "Upload photos or videos"}
+            <input type="file" accept="image/jpeg,image/png,video/mp4,video/quicktime" multiple className="hidden" onChange={upload} disabled={busy} />
           </label>
         </div>
-        <p className="text-xs text-slate-500 mt-2">JPEG or PNG, up to 8 MB each. Use JPEG for Instagram.</p>
+        <p className="text-xs text-slate-500 mt-2">Photos: JPEG or PNG, up to 8 MB (use JPEG for Instagram). Videos: MP4 or MOV, up to 500 MB.</p>
       </Card>
       {!lib ? <p className="text-sm text-slate-400">Loading…</p> : (
         <>
           <Card>
-            <CardHeader title="Uploaded photos" subtitle="Click a description to change it." />
+            <CardHeader title="Uploaded photos & videos" subtitle="Click a description to change it." />
             {lib.uploaded.length ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 p-5 pt-2">
                 {lib.uploaded.map((p) => (
                   <div key={p._id} className="group">
                     <div className="relative aspect-square rounded-xl overflow-hidden ring-1 ring-slate-200">
-                      <img src={photoUrl(p.ref)} alt={p.description} loading="lazy" className="w-full h-full object-cover" />
+                      {p.kind === "video" ? <video src={photoUrl(p.ref)} muted controls preload="metadata" className="w-full h-full object-cover bg-black" /> : <img src={photoUrl(p.ref)} alt={p.description} loading="lazy" className="w-full h-full object-cover" />}
                       <button type="button" onClick={() => remove(p)} className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-white/95 text-rose-600 shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition" aria-label="Remove"><Trash2 size={14} /></button>
                     </div>
                     <input defaultValue={p.description} onBlur={(e) => e.target.value !== p.description && saveDesc(p, e.target.value)} placeholder="Add a description" className="mt-2 w-full text-xs text-slate-600 bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-primary focus:outline-none px-0 py-1" />

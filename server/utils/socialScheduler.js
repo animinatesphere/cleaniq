@@ -93,7 +93,8 @@ async function runAutopilot(ap, { publish = true } = {}) {
   }
   const accounts = await SocialAccount.find({ _id: { $in: ap.accounts }, active: true }).select("_id network").lean();
   // Instagram, TikTok and Pinterest can't post without a photo.
-  const targets = accounts.filter((a) => !PHOTO_ONLY.includes(a.network) || images.length).map((a) => a._id);
+  // YouTube only takes videos, which the autopilot doesn't make.
+  const targets = accounts.filter((a) => (!PHOTO_ONLY.includes(a.network) || images.length) && a.network !== "youtube").map((a) => a._id);
   const post = await SocialPost.create({
     text: draft.text, variants: draft.variants, images, credit, accounts: targets,
     status: publish ? "posting" : "draft", scheduledAt: new Date(), source: "autopilot", autopilot: ap._id, createdBy: `Autopilot: ${ap.name}`,
