@@ -40,6 +40,9 @@ const AdminLayout = lazy(() => import("./admin/AdminLayout"));
 // Website content editor: its own sign-in, separate from the main admin (/content-admin).
 const ContentAdmin = lazy(() => import("./content-admin/ContentAdmin"));
 const ContentLogin = lazy(() => import("./content-admin/ContentLogin"));
+// Social media dashboard: its own sign-in, separate from the main admin (/social).
+const SocialApp = lazy(() => import("./social/SocialApp"));
+const SocialLogin = lazy(() => import("./social/SocialLogin"));
 const ContentEditors = lazy(() => import("./admin/ContentEditors"));
 const Dashboard = lazy(() => import("./admin/Dashboard"));
 const Bookings = lazy(() => import("./admin/Bookings"));
@@ -113,10 +116,10 @@ function App() {
   const location = useLocation();
   const isAdminPath   = location.pathname.startsWith("/admin");
   const isAccountPath = location.pathname.startsWith("/account");
-  const isDevPanel    = location.pathname.startsWith("/devpanel") || location.pathname.startsWith("/content-admin");
+  const isDevPanel    = location.pathname.startsWith("/devpanel") || location.pathname.startsWith("/content-admin") || /^\/social(\/|$)/.test(location.pathname);
   // Logged-in, payment and admin pages are browser-only and kept out of search results
   // (vercel.json also sends an X-Robots-Tag header for them).
-  const isPrivatePage = /^\/(admin|account|devpanel|payment|content-admin)(\/|$)/.test(location.pathname);
+  const isPrivatePage = /^\/(admin|account|devpanel|payment|content-admin|social)(\/|$)/.test(location.pathname);
 
   // Creator / influencer links (?ref=CODE) are remembered for checkout and quotes.
   useEffect(() => { captureCreatorRef(location.search); }, [location.search]);
@@ -174,6 +177,8 @@ function App() {
             {/* Admin Routes */}
             <Route path="/content-admin" element={<ContentAdmin />} />
             <Route path="/content-admin/login" element={<ContentLogin />} />
+            <Route path="/social" element={<SocialApp />} />
+            <Route path="/social/login" element={<SocialLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="content-editors" element={<ContentEditors />} />
               <Route index element={<Dashboard />} />

@@ -1,0 +1,122 @@
+// Social autopilot writer: Claude writes one post (with wording for each network) from the team's
+// instructions and picks a photo — one of our own photos first, a free Unsplash photo if none fits.
+//
+// Uses ANTHROPIC_API_KEY (model SOCIAL_AI_MODEL, default Claude Opus 5.5) and, for Unsplash,
+// UNSPLASH_ACCESS_KEY (free at unsplash.com/developers). Unsplash photos are credited in the post.
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const SocialPhoto = require("../models/SocialPhoto");
+const { ourPhotos, UPLOAD_DIR, X_LIMIT } = require("./socialNetworks");
+
+const MODEL = () => process.env.SOCIAL_AI_MODEL || "claude-opus-5-5";
+const UNSPLASH = () => process.env.UNSPLASH_API_URL || "https://api.unsplash.com";
+
+const SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["text", "facebook", "instagram", "linkedin", "x", "photo", "unsplashSearch"],
+  properties: {
+    text: { type: "string", description: "The main post text" },
+    facebook: { type: "string", description: "Wording for Facebook" },
+    instagram: { type: "string", description: "Wording for Instagram, with 5-10 relevant hashtags at the end" },
+    linkedin: { type: "string", description: "Wording for LinkedIn: a little more professional" },
+    x: { type: "string", description: `Wording for X, at most ${X_LIMIT - 40} characters including hashtags` },
+    photo: { type: "string", description: 'The id of the best photo from the list, or "none" if none fits the post' },
+    unsplashSearch: { type: "string", description: "2-4 word Unsplash search for a photo that fits, used only if none of ours fits" },
+  },
+};
+
+/** Photos the autopilot can choose from: our job photos and the dashboard's photo library. */
+async function libraryPhotos() {
+  const uploaded = (await SocialPhoto.find().sort({ createdAt: -1 }).limit(200).lean()).map((p) => ({ ref: p.path, description: p.description || "Photo uploaded by the team" }));
+  return [...uploaded, ...ourPhotos()];
+}
+
+async function businessFacts() {
+  const lines = ["Cleaniq Services is a cleaning company in Manchester and Greater Manchester, UK. Website: https://www.cleaniqservices.com"];
+  try {
+    const { loadUkServices } = require("./aiTools");
+    const services = (await loadUkServices()).filter((s) => s.category === "Base").map((s) => s.name);
+    if (services.length) lines.push(`Services we offer: ${[...new Set(services)].join(", ")}.`);
+  } catch {}
+  lines.push("Cleaners are vetted (interview, background checks, skills assessment). 48-hour re-clean guarantee. Eco-friendly products. Book online at https://www.cleaniqservices.com/booking or get a free quote at https://www.cleaniqservices.com/get-a-quote.");
+  return lines.join("\n");
+}
+
+/**
+ * Write a post.
+ * @param {{ instructions: string, pictures: string, recent?: string[] }} input
+ * @returns {Promise<{ text, variants: {facebook, instagram, linkedin, x}, photoRef: string|null, unsplashSearch: string }>}
+ */
+async function writePost({ instructions, pictures = "ours-then-unsplash", recent = [] }) {
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not set on the server.");
+  const sdk = require("@anthropic-ai/sdk");
+  const Anthropic = sdk.default || sdk;
+  const client = new Anthropic({ timeout: 120000, maxRetries: 2, ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}) });
+  const photos = pictures === "ours" || pictures === "ours-then-unsplash" ? await libraryPhotos() : [];
+
+  const system = `You write social media posts for Cleaniq Services, a cleaning company in Manchester, UK.
+
+What you know about the business (use only this; never invent prices, offers, discounts, statistics, awards, reviews or guarantees beyond it):
+${await businessFacts()}
+
+Write in friendly, natural British English. Short paragraphs. At most 2 emojis per post. No made-up customer quotes.
+Give wording for each network: Facebook (conversational), Instagram (caption, hashtags at the end), LinkedIn (a little more professional), X (short — at most ${X_LIMIT - 40} characters).
+Photos: choose the id of the photo from the list that best fits the post, or "none" if none of them fits.${photos.length ? "" : " (There is no photo list this time: answer \"none\".)"}`;
+
+  const user = [
+    `Instructions from the team:\n${instructions}`,
+    photos.length && `Photos we have (id — what's in it):\n${photos.map((p, i) => `${i} — ${p.description}`).join("\n")}`,
+    recent.length && `Recent posts — say something different, don't repeat these:\n${recent.map((t) => `- ${String(t).slice(0, 200)}`).join("\n")}`,
+  ].filter(Boolean).join("\n\n");
+
+  const response = await client.messages.create({
+    model: MODEL(),
+    max_tokens: 4000,
+    output_config: { effort: "medium", format: { type: "json_schema", schema: SCHEMA } },
+    system,
+    messages: [{ role: "user", content: user }],
+  });
+  if (response.stop_reason === "refusal") throw new Error("Claude declined to write this post. Try rewording the instructions.");
+  const raw = response.content.filter((b) => b.type === "text").map((b) => b.text).join("");
+  let d;
+  try {
+    d = JSON.parse(raw);
+  } catch {
+    throw new Error("Claude's reply couldn't be read. Please try again.");
+  }
+  const pick = /^\d+$/.test(String(d.photo).trim()) ? photos[Number(d.photo)] : null;
+  const clean = (s) => String(s || "").trim().slice(0, 3000);
+  return {
+    text: clean(d.text),
+    variants: { facebook: clean(d.facebook), instagram: clean(d.instagram), linkedin: clean(d.linkedin), x: clean(d.x) },
+    photoRef: pick ? pick.ref : null,
+    unsplashSearch: String(d.unsplashSearch || "").trim().slice(0, 60),
+  };
+}
+
+/**
+ * Find a free photo on Unsplash, save it to our uploads (so Instagram & co. can fetch it) and
+ * return its address and the credit line Unsplash asks for.
+ */
+async function unsplashPhoto(query) {
+  const key = process.env.UNSPLASH_ACCESS_KEY;
+  if (!key || !query) return null;
+  const headers = { Authorization: `Client-ID ${key}`, "Accept-Version": "v1" };
+  const res = await fetch(`${UNSPLASH()}/search/photos?${new URLSearchParams({ query, per_page: "10", orientation: "squarish", content_filter: "high" })}`, { headers, signal: AbortSignal.timeout(20000) });
+  if (!res.ok) throw new Error(`Unsplash search failed (HTTP ${res.status})`);
+  const results = (await res.json()).results || [];
+  if (!results.length) return null;
+  const photo = results[Math.floor(Math.random() * Math.min(results.length, 5))];
+  // Unsplash asks apps to report each download.
+  fetch(photo.links.download_location, { headers, signal: AbortSignal.timeout(20000) }).catch(() => {});
+  const img = await fetch(`${photo.urls.raw}&w=1600&fm=jpg&q=85`, { signal: AbortSignal.timeout(60000) });
+  if (!img.ok) throw new Error(`Unsplash photo download failed (HTTP ${img.status})`);
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  const name = `unsplash-${Date.now()}-${crypto.randomBytes(4).toString("hex")}.jpg`;
+  fs.writeFileSync(path.join(UPLOAD_DIR, name), Buffer.from(await img.arrayBuffer()));
+  return { ref: `/uploads/social/${name}`, credit: `Photo: ${photo.user?.name || "Unsplash photographer"} on Unsplash` };
+}
+
+module.exports = { writePost, unsplashPhoto, libraryPhotos };

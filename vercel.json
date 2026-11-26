@@ -126,6 +126,15 @@
           "value": "noindex, nofollow"
         }
       ]
+    },
+    {
+      "source": "/social(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
   ]
 }

@@ -99,6 +99,11 @@ app.use("/uploads", (req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
 }, express.static(path.join(__dirname, "uploads")));
+// Our own job photos (website repo), so Instagram/Facebook can fetch them for social posts.
+app.use("/social-library/our-work", (req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  next();
+}, express.static(path.join(__dirname, "..", "src", "assets", "our-work"), { index: false, dotfiles: "deny" }));
 app.use("/public", (req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
@@ -116,6 +121,7 @@ mongoose
     require("./utils/subscriptions").startSubscriptionScheduler();
     require("./utils/creators").startCreatorScheduler();
     require("./utils/blogAutopilot").startBlogAutopilot();
+    require("./utils/socialScheduler").startSocialScheduler();
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -241,6 +247,7 @@ app.use("/api/blog", blogRoutes);
 app.use("/api/site-content", require("./routes/siteContent"));
 // Content editor logins for /content-admin (accounts are managed by main admins).
 app.use("/api/content-editors", require("./routes/contentEditors"));
+app.use("/api/social", require("./routes/social")); // social media dashboard (/social)
 app.use("/api/comments", commentRoutes);
 app.use("/api/properties", propertiesRoutes);
 app.use("/api/settings", settingsRoutes);
