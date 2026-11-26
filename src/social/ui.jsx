@@ -8,8 +8,14 @@ export const NETWORKS = {
   instagram: { label: "Instagram", color: "#E1306C", soft: "bg-[#E1306C]/10 text-[#C13584]" },
   linkedin: { label: "LinkedIn", color: "#0A66C2", soft: "bg-[#0A66C2]/10 text-[#0A66C2]" },
   x: { label: "X", color: "#0F1419", soft: "bg-slate-900/10 text-slate-900" },
+  google: { label: "Google Business", color: "#1A73E8", soft: "bg-[#1A73E8]/10 text-[#1A73E8]" },
+  threads: { label: "Threads", color: "#000000", soft: "bg-slate-900/10 text-slate-900" },
+  tiktok: { label: "TikTok", color: "#000000", soft: "bg-slate-900/10 text-slate-900" },
+  pinterest: { label: "Pinterest", color: "#E60023", soft: "bg-[#E60023]/10 text-[#E60023]" },
 };
-export const NETWORK_ORDER = ["facebook", "instagram", "linkedin", "x"];
+export const NETWORK_ORDER = ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest"];
+/** Networks that can't post without a photo. */
+export const PHOTO_ONLY = ["instagram", "tiktok", "pinterest"];
 
 /** Each network's mark, drawn simply (not the official logo files). */
 export function NetworkMark({ network, size = 16, className = "" }) {
@@ -45,6 +51,38 @@ export function NetworkMark({ network, size = 16, className = "" }) {
       <svg viewBox="0 0 24 24" style={s} className={className} aria-label="LinkedIn" role="img">
         <rect width="24" height="24" rx="5" fill="#0A66C2" />
         <path fill="#fff" d="M7.2 9.6h2.4v7.7H7.2zM8.4 5.8a1.4 1.4 0 110 2.8 1.4 1.4 0 010-2.8zM11.1 9.6h2.3v1.1c.3-.6 1.1-1.3 2.3-1.3 2.4 0 2.9 1.6 2.9 3.7v4.2h-2.4v-3.7c0-.9 0-2-1.2-2s-1.5 1-1.5 2v3.8h-2.4z" />
+      </svg>
+    );
+  if (network === "google")
+    return (
+      <svg viewBox="0 0 24 24" style={s} className={className} aria-label="Google Business Profile" role="img">
+        <rect width="24" height="24" rx="5" fill="#1A73E8" />
+        <path fill="#fff" d="M5.5 9.2 6.8 6h10.4l1.3 3.2c0 1.2-.9 2-2 2-.8 0-1.4-.4-1.8-1-.3.6-1 1-1.7 1s-1.4-.4-1.7-1c-.4.6-1 1-1.8 1-.8 0-1.4-.4-1.8-1-.3.6-1 1-1.7 1-1 0-2-.8-2-2z" />
+        <path fill="#fff" d="M7 12.3c.3.1.6.1.9.1v5.6h8.2v-5.6c.3 0 .6 0 .9-.1V19H7z" />
+        <path fill="#FBBC04" d="M12 13.4a2 2 0 0 1 2 2h-.9a1.1 1.1 0 1 0-.3.8h-.9v-.8H14v.2a2 2 0 1 1-2-2.2z" />
+      </svg>
+    );
+  if (network === "threads")
+    return (
+      <svg viewBox="0 0 24 24" style={s} className={className} aria-label="Threads" role="img">
+        <rect width="24" height="24" rx="5" fill="#000" />
+        <path fill="none" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" d="M15.6 11.2c-.3-2-1.6-3-3.6-3-2.3 0-3.7 1.6-3.7 3.9s1.4 3.9 3.7 3.9c1.8 0 3-.9 3.3-2.3.3-1.6-.8-2.7-2.7-2.7-1.4 0-2.2.7-2.2 1.6 0 .9.8 1.5 1.8 1.4 1.6-.1 2.2-1.4 2.2-3.2 0-.2 0 3.4 2.1 3.4 1.3 0 1.9-1.3 1.9-3 0-3.2-2.4-5.6-5.5-5.6-3.4 0-5.6 2.4-5.6 6s2.2 6 5.6 6c1.4 0 2.5-.3 3.4-.9" />
+      </svg>
+    );
+  if (network === "tiktok")
+    return (
+      <svg viewBox="0 0 24 24" style={s} className={className} aria-label="TikTok" role="img">
+        <rect width="24" height="24" rx="5" fill="#000" />
+        <path fill="#25F4EE" transform="translate(-.6 -.5)" d="M10.3 10.6v-.8a5.2 5.2 0 1 0 3.6 5V9.9a6.5 6.5 0 0 0 3.8 1.2V8.4a3.8 3.8 0 0 1-3-3.2h-2.6v10.3a2.4 2.4 0 1 1-1.8-2.3z" />
+        <path fill="#FE2C55" transform="translate(.6 .5)" d="M10.3 10.6v-.8a5.2 5.2 0 1 0 3.6 5V9.9a6.5 6.5 0 0 0 3.8 1.2V8.4a3.8 3.8 0 0 1-3-3.2h-2.6v10.3a2.4 2.4 0 1 1-1.8-2.3z" />
+        <path fill="#fff" d="M10.3 10.6v-.8a5.2 5.2 0 1 0 3.6 5V9.9a6.5 6.5 0 0 0 3.8 1.2V8.4a3.8 3.8 0 0 1-3-3.2h-2.6v10.3a2.4 2.4 0 1 1-1.8-2.3z" />
+      </svg>
+    );
+  if (network === "pinterest")
+    return (
+      <svg viewBox="0 0 24 24" style={s} className={className} aria-label="Pinterest" role="img">
+        <circle cx="12" cy="12" r="12" fill="#E60023" />
+        <path fill="#fff" d="M12.3 5C8.4 5 6.3 7.6 6.3 10.4c0 1.3.7 2.9 1.8 3.4.2.1.3 0 .3-.1l.3-1.1c0-.1 0-.2-.1-.3-.4-.5-.7-1.3-.7-2.1 0-2 1.5-4 4.2-4 2.3 0 3.9 1.6 3.9 3.8 0 2.5-1.3 4.3-2.9 4.3-.9 0-1.6-.8-1.4-1.7.3-1.1.8-2.3.8-3.1 0-.7-.4-1.3-1.2-1.3-.9 0-1.7 1-1.7 2.3 0 .8.3 1.4.3 1.4l-1.1 4.6c-.3 1.3 0 3.2.1 3.4 0 .1.1.1.2 0 .1-.2 1.3-1.8 1.6-3l.6-2.3c.3.6 1.2 1.1 2.2 1.1 2.9 0 4.9-2.6 4.9-6.1C18.2 7.4 15.8 5 12.3 5z" />
       </svg>
     );
   return (

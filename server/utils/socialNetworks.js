@@ -10,6 +10,7 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const more = require("./socialMoreNetworks");
 
 const env = (k, d = "") => process.env[k] || d;
 const API_BASE = () => env("PUBLIC_API_URL", "https://api.cleaniqservices.com").replace(/\/+$/, "");
@@ -28,6 +29,7 @@ function configured() {
     meta: !!(env("META_APP_ID") && env("META_APP_SECRET")),
     linkedin: !!(env("LINKEDIN_CLIENT_ID") && env("LINKEDIN_CLIENT_SECRET")),
     x: !!(env("X_CLIENT_ID") && env("X_CLIENT_SECRET")),
+    ...more.configured(),
   };
 }
 
@@ -81,11 +83,14 @@ function ourPhotos() {
 
 // ── text per network ──────────────────────────────────────────────────────────
 const X_LIMIT = 280;
+// Most characters each network accepts (longer text is shortened at a word).
+const LIMITS = { x: X_LIMIT, threads: 500, google: 1500, pinterest: 800, tiktok: 4000 };
 function textFor(post, network) {
   let t = String(post.variants?.[network] || post.text || "").trim();
   const credit = post.credit ? `\n\n${post.credit}` : "";
-  if (network === "x") {
-    const room = X_LIMIT - credit.length;
+  const limit = LIMITS[network];
+  if (limit) {
+    const room = limit - credit.length;
     if (t.length > room) t = `${t.slice(0, room - 1).replace(/\s+\S*$/, "")}…`;
   }
   return t + credit;
@@ -117,6 +122,8 @@ function authUrl(network, state, verifier) {
     const challenge = crypto.createHash("sha256").update(verifier).digest("base64url");
     return `${X_AUTH()}/i/oauth2/authorize?${form({ response_type: "code", client_id: env("X_CLIENT_ID"), redirect_uri: callbackUrl("x"), scope: X_SCOPES, state, code_challenge: challenge, code_challenge_method: "S256" })}`;
   }
+  const other = more.authUrl(network, state, callbackUrl);
+  if (other) return other;
   throw new Error("Unknown network");
 }
 
@@ -167,6 +174,8 @@ async function finishConnect(network, code, verifier) {
     const me = (await call(`${X_API()}/2/users/me?user.fields=profile_image_url`, { headers: { Authorization: `Bearer ${tok.access_token}` } }, "X profile")).data.data;
     return [{ network: "x", externalId: me.id, name: me.name, handle: `@${me.username}`, picture: me.profile_image_url || "", token: tok.access_token, refreshToken: tok.refresh_token || "", expiresAt: new Date(Date.now() + (tok.expires_in || 7200) * 1000) }];
   }
+  const other = await more.finishConnect(network, code, callbackUrl, call);
+  if (other) return other;
   throw new Error("Unknown network");
 }
 
@@ -286,7 +295,15 @@ async function publishTo(acc, post) {
   if (acc.network === "instagram") return publishInstagram(acc, text, photos);
   if (acc.network === "linkedin") return publishLinkedIn(acc, text, photos);
   if (acc.network === "x") return publishX(acc, text, photos);
+  if (more.PUBLISH[acc.network]) return more.PUBLISH[acc.network](acc, text, photos, call);
   throw new Error("Unknown network");
 }
 
-module.exports = { configured, authUrl, finishConnect, refreshX, publishTo, resolvePhoto, ourPhotos, textFor, linkedinText, callbackUrl, UPLOAD_DIR, X_LIMIT };
+/** Accounts whose token runs out: when to renew, and how. */
+const REFRESH_AHEAD = { x: 5 * 60e3, ...more.REFRESH_AHEAD };
+async function refreshToken(network, tokens) {
+  if (network === "x") return refreshX(tokens.refreshToken);
+  return more.refresh(network, tokens, call);
+}
+
+module.exports = { configured, authUrl, finishConnect, refreshX, refreshToken, REFRESH_AHEAD, LIMITS, publishTo, resolvePhoto, ourPhotos, textFor, linkedinText, callbackUrl, UPLOAD_DIR, X_LIMIT };

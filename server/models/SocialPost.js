@@ -8,6 +8,7 @@ const resultSchema = new mongoose.Schema(
     network: String,
     name: String,
     status: { type: String, enum: ["posted", "failed"] },
+    note: String,
     externalId: String,
     url: String,
     error: String,
@@ -25,6 +26,10 @@ const socialPostSchema = new mongoose.Schema(
       instagram: { type: String, default: "" },
       linkedin: { type: String, default: "" },
       x: { type: String, default: "" },
+      google: { type: String, default: "" },
+      threads: { type: String, default: "" },
+      tiktok: { type: String, default: "" },
+      pinterest: { type: String, default: "" },
     },
     // Photos: "/uploads/social/…" (uploaded) or "library:our-work/…" (our own job photos).
     images: { type: [String], default: [] },

@@ -8,14 +8,21 @@ const networks = require("./socialNetworks");
 const { writePost, unsplashPhoto } = require("./socialWriter");
 const { ukTimeOn } = require("./blogAutopilot");
 
+const PHOTO_ONLY = ["instagram", "tiktok", "pinterest"];
+
 /** The account with a usable token (X tokens are refreshed when they're about to run out). */
 async function usableAccount(acc) {
-  if (acc.network === "x" && acc.refreshToken && (!acc.expiresAt || acc.expiresAt.getTime() < Date.now() + 5 * 60 * 1000)) {
-    const fresh = await networks.refreshX(decrypt(acc.refreshToken));
-    await SocialAccount.updateOne({ _id: acc._id }, { token: encrypt(fresh.token), refreshToken: encrypt(fresh.refreshToken), expiresAt: fresh.expiresAt });
+  const ahead = networks.REFRESH_AHEAD[acc.network];
+  const now = Date.now();
+  const expired = acc.expiresAt && acc.expiresAt.getTime() < now;
+  // Threads renews with the current token, so it must still be valid; the rest use a refresh token.
+  const renewable = acc.network === "threads" ? !expired : !!acc.refreshToken;
+  if (ahead && renewable && (!acc.expiresAt || acc.expiresAt.getTime() < now + ahead)) {
+    const fresh = await networks.refreshToken(acc.network, { token: decrypt(acc.token), refreshToken: decrypt(acc.refreshToken) });
+    await SocialAccount.updateOne({ _id: acc._id }, { token: encrypt(fresh.token), refreshToken: encrypt(fresh.refreshToken || ""), expiresAt: fresh.expiresAt });
     return { ...acc, token: fresh.token };
   }
-  if (acc.expiresAt && acc.expiresAt.getTime() < Date.now()) throw new Error("The connection has expired. Reconnect this account on the Accounts page.");
+  if (expired) throw new Error("The connection has expired. Reconnect this account on the Accounts page.");
   return { ...acc, token: decrypt(acc.token) };
 }
 
@@ -32,7 +39,7 @@ async function publishPost(postId, { onlyFailed = false } = {}) {
     try {
       const acc = await usableAccount(raw);
       const r = await networks.publishTo(acc, post);
-      results.push({ ...base, status: "posted", externalId: r.externalId, url: r.url });
+      results.push({ ...base, status: "posted", externalId: r.externalId, url: r.url, ...(r.note ? { note: r.note } : {}) });
       await SocialAccount.updateOne({ _id: raw._id }, { status: "ok", lastError: "" });
     } catch (err) {
       results.push({ ...base, status: "failed", error: err.message.slice(0, 500) });
@@ -85,8 +92,8 @@ async function runAutopilot(ap, { publish = true } = {}) {
     if (u) { images = [u.ref]; credit = u.credit; }
   }
   const accounts = await SocialAccount.find({ _id: { $in: ap.accounts }, active: true }).select("_id network").lean();
-  // Instagram can't post without a photo.
-  const targets = accounts.filter((a) => a.network !== "instagram" || images.length).map((a) => a._id);
+  // Instagram, TikTok and Pinterest can't post without a photo.
+  const targets = accounts.filter((a) => !PHOTO_ONLY.includes(a.network) || images.length).map((a) => a._id);
   const post = await SocialPost.create({
     text: draft.text, variants: draft.variants, images, credit, accounts: targets,
     status: publish ? "posting" : "draft", scheduledAt: new Date(), source: "autopilot", autopilot: ap._id, createdBy: `Autopilot: ${ap.name}`,

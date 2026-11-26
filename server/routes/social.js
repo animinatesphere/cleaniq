@@ -24,7 +24,9 @@ const scheduler = require("../utils/socialScheduler");
 
 const json = express.json({ limit: "1mb" });
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const NETWORKS = ["facebook", "instagram", "linkedin", "x"];
+const NETWORKS = ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest"];
+const CONNECT = ["meta", "linkedin", "x", "google", "threads", "tiktok", "pinterest"];
+const CONNECT_NAMES = { meta: "Facebook/Instagram", linkedin: "LinkedIn", x: "X", google: "Google Business Profile", threads: "Threads", tiktok: "TikTok", pinterest: "Pinterest" };
 const APP_URL = () => (process.env.SOCIAL_APP_URL || "https://www.cleaniqservices.com/social").replace(/\/+$/, "");
 const isId = (id) => mongoose.isValidObjectId(id);
 const adminOnly = (req, res, next) => (req.socialUser ? res.status(403).json({ message: "Only main admins can manage social media logins." }) : next());
@@ -106,7 +108,7 @@ router.get("/status", socialAuth, (req, res) => {
     configured: networks.configured(),
     unsplash: !!process.env.UNSPLASH_ACCESS_KEY,
     ai: !!process.env.ANTHROPIC_API_KEY,
-    callbacks: { meta: networks.callbackUrl("meta"), linkedin: networks.callbackUrl("linkedin"), x: networks.callbackUrl("x") },
+    callbacks: Object.fromEntries(CONNECT.map((n) => [n, networks.callbackUrl(n)])),
   });
 });
 
@@ -136,8 +138,8 @@ const oauthState = mongoose.models.SocialOAuthState || mongoose.model("SocialOAu
 router.post("/connect/:network/start", socialAuth, async (req, res) => {
   const network = req.params.network;
   const keys = networks.configured();
-  if (!["meta", "linkedin", "x"].includes(network)) return res.status(404).json({ message: "Unknown network" });
-  if (!keys[network]) return res.status(400).json({ message: `The ${network === "meta" ? "Facebook/Instagram" : network === "x" ? "X" : "LinkedIn"} app keys aren't set on the server yet. See the setup steps on this page.` });
+  if (!CONNECT.includes(network)) return res.status(404).json({ message: "Unknown network" });
+  if (!keys[network]) return res.status(400).json({ message: `The ${CONNECT_NAMES[network]} app keys aren't set on the server yet. See the setup steps on this page.` });
   const state = crypto.randomBytes(24).toString("base64url");
   const verifier = crypto.randomBytes(48).toString("base64url");
   await oauthState.create({ state, network, verifier, by: req.actor });
@@ -213,7 +215,9 @@ async function postFields(body, existing) {
 }
 function checkPostable(f) {
   if (!f.accounts.length) throw bad("Choose at least one account to post to.");
-  if (f.accounts.some((a) => a.network === "instagram") && !f.images.length) throw bad("Instagram posts need a photo. Add a photo or untick Instagram.");
+  for (const [n, label] of [["instagram", "Instagram"], ["tiktok", "TikTok"], ["pinterest", "Pinterest"]]) {
+    if (f.accounts.some((a) => a.network === n) && !f.images.length) throw bad(`${label} posts need a photo. Add a photo or untick ${label}.`);
+  }
   const xText = networks.textFor({ text: f.text, variants: f.variants, credit: f.credit }, "x");
   if (f.accounts.some((a) => a.network === "x") && !xText.trim()) throw bad("Write the text for X.");
 }

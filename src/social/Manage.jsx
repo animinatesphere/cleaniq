@@ -42,6 +42,58 @@ const CONNECT = [
     ],
     callbackAt: 2,
   },
+  {
+    key: "google", networks: ["google"], title: "Google Business Profile",
+    text: "Posts updates to your Google listing, shown on Google Search and Maps.",
+    steps: [
+      "Go to console.cloud.google.com, create a project (e.g. Cleaniq Social).",
+      "Request access to the Business Profile APIs (search Google Business Profile API access request form). Google approves this, usually within a few days.",
+      "Once approved, enable My Business Account Management API, My Business Business Information API and Google My Business API in APIs and Services.",
+      "In APIs and Services, Credentials, create an OAuth client ID of type Web application, and add this Authorised redirect URI:",
+      "Copy the Client ID and Client secret into the server .env as GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, then restart the server.",
+      "Press Connect and sign in with the Google account that manages your Business Profile.",
+    ],
+    callbackAt: 3,
+  },
+  {
+    key: "threads", networks: ["threads"], title: "Threads",
+    text: "Posts to your Threads profile. Uses a Meta developer app.",
+    steps: [
+      "Your Threads profile must be linked to the Cleaniq Instagram account.",
+      "At developers.facebook.com, open your app (or create one) and add the use case Access the Threads API.",
+      "Turn on the permissions threads_basic and threads_content_publish.",
+      "In the Threads use case settings, add this Redirect Callback URL:",
+      "Copy the Threads App ID and Threads App Secret into the server .env as THREADS_APP_ID and THREADS_APP_SECRET, then restart the server.",
+      "In App roles, add your Threads profile as a Threads Tester and accept the invite in Threads (Settings, Account, Website permissions).",
+    ],
+    callbackAt: 3,
+  },
+  {
+    key: "tiktok", networks: ["tiktok"], title: "TikTok",
+    text: "Photo posts. Private (only you) until TikTok approves the app.",
+    steps: [
+      "Go to developers.tiktok.com, create an app and add the products Login Kit and Content Posting API (turn on Direct Post).",
+      "Add the scopes user.info.basic and video.publish.",
+      "In Login Kit, add this Redirect URI:",
+      "In Content Posting API, verify the photo address prefix https://api.cleaniqservices.com/ (URL properties), so TikTok can fetch the photos.",
+      "Copy the Client key and Client secret into the server .env as TIKTOK_CLIENT_KEY and TIKTOK_CLIENT_SECRET, then restart the server.",
+      "Submit the app for TikTok review. Until it is approved, TikTok makes every post private (visible only to you).",
+    ],
+    callbackAt: 2,
+  },
+  {
+    key: "pinterest", networks: ["pinterest"], title: "Pinterest",
+    text: "Pins your photos to your boards, linking to the website.",
+    steps: [
+      "Use a Pinterest business account with at least one board (e.g. Before and after).",
+      "Go to developers.pinterest.com, Apps, Connect app, and request Trial access.",
+      "In the app settings, add this Redirect URI:",
+      "Copy the App ID and App secret key into the server .env as PINTEREST_APP_ID and PINTEREST_APP_SECRET, then restart the server.",
+      "Press Connect. Each board shows as its own account, so you choose which board to pin to.",
+      "Trial access has low limits; apply for Standard access when you are posting regularly.",
+    ],
+    callbackAt: 2,
+  },
 ];
 
 function CopyBox({ value }) {
@@ -82,7 +134,7 @@ export function Accounts({ accounts, status, reload, notify }) {
   const soon = (a) => a.expiresAt && a.network === "linkedin" && new Date(a.expiresAt) - now < 10 * 864e5;
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         {CONNECT.map((c) => {
           const ready = status?.configured?.[c.key];
           const connected = accounts.filter((a) => c.networks.includes(a.network));

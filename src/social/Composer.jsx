@@ -3,9 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { ImagePlus, Send, CalendarClock, Save, AlertTriangle, ArrowLeft, ArrowRight, Trash2, Heart, MessageCircle, Repeat2, Share2, Bookmark, ThumbsUp, Globe2, MoreHorizontal, Upload, Check } from "lucide-react";
 import { api, photoUrl } from "./api";
-import { NETWORKS, NETWORK_ORDER, NetworkMark, AccountAvatar, Button, Card, Modal, inputCls, labelCls, toLocalInput } from "./ui";
+import { NETWORKS, NETWORK_ORDER, PHOTO_ONLY, NetworkMark, AccountAvatar, Button, Card, Modal, inputCls, labelCls, toLocalInput } from "./ui";
 
-const LIMITS = { facebook: 63206, instagram: 2200, linkedin: 3000, x: 280 };
+const LIMITS = { facebook: 63206, instagram: 2200, linkedin: 3000, x: 280, threads: 500, google: 1500, tiktok: 4000, pinterest: 800 };
+const TIPS = {
+  x: " X allows 280 characters.",
+  instagram: " Put hashtags at the end.",
+  threads: " Threads allows 500 characters.",
+  google: " Keep it plain and local, no hashtags. A Learn more button to the website is added.",
+  pinterest: " The first line becomes the pin title (up to 100 characters).",
+  tiktok: " Posted as a photo post; the first line becomes the title.",
+};
 
 /** Photo library picker: our job photos and uploaded photos; upload new ones here too. */
 export function PhotoPicker({ open, ...rest }) {
@@ -94,6 +102,54 @@ function Photos({ images, className = "" }) {
 }
 export function Preview({ network, account, text, images }) {
   const name = account?.name || NETWORKS[network].label;
+  if (network === "pinterest") {
+    const [title, ...rest] = text.split("\n");
+    return (
+      <div className="mx-auto max-w-[260px] text-slate-900">
+        {images.length ? <img src={photoUrl(images[0])} alt="" className="w-full rounded-2xl object-cover" /> : <div className="aspect-[2/3] rounded-2xl bg-slate-100 flex items-center justify-center text-xs text-slate-400">Pinterest needs a photo</div>}
+        <p className="mt-2 font-semibold text-[14px] leading-snug line-clamp-2">{title.replace(/#\w+/g, "").trim()}</p>
+        <p className="text-xs text-slate-500 line-clamp-2 mt-0.5">{rest.join(" ").trim()}</p>
+        <div className="flex items-center gap-1.5 mt-2">{account && <AccountAvatar account={account} size={20} />}<span className="text-xs font-medium">{account?.name || "Board"}</span></div>
+      </div>
+    );
+  }
+  if (network === "tiktok") {
+    return (
+      <div className="mx-auto w-[230px] aspect-[9/16] rounded-[28px] overflow-hidden bg-black relative text-white shadow-xl">
+        {images.length ? <img src={photoUrl(images[0])} alt="" className="absolute inset-0 w-full h-full object-cover" /> : <div className="absolute inset-0 flex items-center justify-center text-xs text-white/50">TikTok needs a photo</div>}
+        {images.length > 1 && <div className="absolute top-3 inset-x-0 flex justify-center gap-1">{images.slice(0, 6).map((r, i) => <span key={r} className={`h-1 w-4 rounded-full ${i ? "bg-white/40" : "bg-white"}`} />)}</div>}
+        <div className="absolute inset-x-0 bottom-0 p-3 pt-16 bg-gradient-to-t from-black/80 to-transparent">
+          <p className="text-[12px] font-semibold">@{account?.name || "cleaniq"}</p>
+          <p className="text-[11px] leading-snug line-clamp-3 mt-1">{text}</p>
+        </div>
+      </div>
+    );
+  }
+  if (network === "google") {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden text-[13px] text-slate-900">
+        <div className="flex items-center gap-2.5 px-3.5 pt-3">{account ? <AccountAvatar account={account} size={34} /> : <span className="w-[34px] h-[34px] rounded-full bg-slate-200" />}<div className="leading-tight"><p className="font-semibold">{name}</p><p className="text-[11px] text-slate-500">Just now · Google</p></div></div>
+        {images.length > 0 && <img src={photoUrl(images[0])} alt="" className="w-full aspect-[4/3] object-cover mt-3" />}
+        <div className="px-3.5 py-3"><PreviewText text={text} clamp /></div>
+        <div className="px-3.5 pb-3.5"><span className="inline-block rounded-full border border-slate-300 px-3.5 py-1.5 text-[12px] font-medium text-[#1A73E8]">Learn more</span></div>
+      </div>
+    );
+  }
+  if (network === "threads") {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 p-3.5 text-[14px] text-slate-900">
+        <div className="flex gap-2.5">
+          {account ? <AccountAvatar account={account} size={36} /> : <span className="w-9 h-9 rounded-full bg-slate-200" />}
+          <div className="min-w-0 flex-1">
+            <p className="leading-tight"><span className="font-semibold">{account?.name || "cleaniq"}</span> <span className="text-slate-400">now</span></p>
+            <div className="mt-1 leading-snug"><PreviewText text={text} /></div>
+            {images.length > 0 && <div className="flex gap-1.5 mt-2.5 overflow-hidden">{images.slice(0, 3).map((r) => <img key={r} src={photoUrl(r)} alt="" className="h-36 w-28 rounded-lg object-cover shrink-0" />)}</div>}
+            <div className="flex gap-4 text-slate-500 mt-3"><Heart size={17} /><MessageCircle size={17} /><Repeat2 size={17} /><Send size={16} /></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (network === "instagram") {
     return (
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden text-[13px] text-slate-900">
@@ -184,7 +240,8 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
     const out = [];
     if (!selected.length) out.push("Choose at least one account.");
     if (!text.trim() && !nets.some((n) => variants[n]?.trim())) out.push("Write something to post.");
-    if (nets.includes("instagram") && !images.length) out.push("Instagram needs at least one photo.");
+    for (const n of PHOTO_ONLY) if (nets.includes(n) && !images.length) out.push(`${NETWORKS[n].label} needs at least one photo.`);
+    if (nets.includes("tiktok") && images.some((r) => !/\.(jpe?g|webp)$/i.test(r))) out.push("TikTok only accepts JPEG photos — one of your photos is a PNG.");
     if (nets.includes("instagram") && images.some((r) => !/\.jpe?g$/i.test(r))) out.push("Instagram only accepts JPEG photos — one of your photos is a PNG.");
     for (const n of nets) if (textFor(n).length > LIMITS[n]) out.push(`${NETWORKS[n].label} text is too long (${textFor(n).length} of ${LIMITS[n]} characters).`);
     return out;
@@ -250,7 +307,7 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
           </div>
           <div className="p-5">
             {tab !== "all" && (
-              <p className="text-xs text-slate-500 mb-2">Wording just for {NETWORKS[tab].label}. Leave empty to use the main text.{tab === "x" && " X allows 280 characters."}{tab === "instagram" && " Put hashtags at the end."}</p>
+              <p className="text-xs text-slate-500 mb-2">Wording just for {NETWORKS[tab].label}. Leave empty to use the main text.{TIPS[tab] || ""}</p>
             )}
             <textarea value={current} onChange={(e) => setCurrent(e.target.value)} rows={tab === "x" ? 5 : 9}
               placeholder={tab === "all" ? "What would you like to share? e.g. a cleaning tip, a before & after, a special day…" : `Leave empty to use the main text: "${text.slice(0, 60)}${text.length > 60 ? "…" : ""}"`}

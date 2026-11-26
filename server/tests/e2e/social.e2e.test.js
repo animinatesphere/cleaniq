@@ -46,6 +46,30 @@ function startFake() {
       if (p === "/2/users/me") return send({ data: { id: "X1", name: "Cleaniq", username: "cleaniq" } });
       if (p === "/2/media/upload") return send({ data: { id: `XM${calls.length}` } });
       if (p === "/2/tweets") return req.headers.authorization === "Bearer x-token-expired" ? send({ detail: "Unauthorized" }, 401) : send({ data: { id: "T1" } });
+      // Google Business Profile
+      if (p === "/token") return send({ access_token: /refresh_token/.test(text) ? "g-token-2" : "g-token", refresh_token: "g-refresh", expires_in: 3600 });
+      if (p === "/v1/accounts") return send({ accounts: [{ name: "accounts/111" }] });
+      if (p === "/v1/accounts/111/locations") return send({ locations: [{ name: "locations/222", title: "Cleaniq Services", storefrontAddress: { locality: "Manchester" } }] });
+      if (p === "/v4/accounts/111/locations/222/localPosts") return send({ name: "accounts/111/locations/222/localPosts/9", searchUrl: "https://g.page/post/9" });
+      // Threads
+      if (p === "/oauth/access_token") return send({ access_token: "th-short", user_id: "TH1" });
+      if (p === "/access_token") return send({ access_token: "th-long", expires_in: 5184000 });
+      if (p === "/refresh_access_token") return send({ access_token: "th-long-2", expires_in: 5184000 });
+      if (p === "/v1.0/me") return send({ id: "TH1", username: "cleaniq" });
+      if (p === "/v1.0/TH1/threads") return send({ id: `THC${calls.length}` });
+      if (/^\/v1\.0\/THC\d+$/.test(p)) return send({ status: "FINISHED" });
+      if (p === "/v1.0/TH1/threads_publish") return send({ id: "THPOST" });
+      if (p === "/v1.0/THPOST") return send({ permalink: "https://www.threads.net/@cleaniq/post/x" });
+      // TikTok
+      if (p === "/v2/oauth/token/") return send({ access_token: "tt-token", refresh_token: "tt-refresh", expires_in: 86400, open_id: "TT1" });
+      if (p === "/v2/user/info/") return send({ data: { user: { open_id: "TT1", display_name: "Cleaniq" } } });
+      if (p === "/v2/post/publish/creator_info/query/") return send({ data: { privacy_level_options: ["SELF_ONLY"] }, error: { code: "ok" } });
+      if (p === "/v2/post/publish/content/init/") return send({ data: { publish_id: "PUB1" }, error: { code: "ok" } });
+      // Pinterest
+      if (p === "/v5/oauth/token") return send({ access_token: "pin-token", refresh_token: "pin-refresh", expires_in: 2592000 });
+      if (p === "/v5/user_account") return send({ username: "cleaniq" });
+      if (p === "/v5/boards") return send({ items: [{ id: "B1", name: "Before & after" }, { id: "B2", name: "Cleaning tips" }] });
+      if (p === "/v5/pins") return send({ id: "PIN1" });
       // Unsplash
       if (p === "/search/photos") return send({ results: [{ user: { name: "Jane Doe" }, links: { download_location: `${fakeBase}/unsplash-dl` }, urls: { raw: `${fakeBase}/unsplash-img?x=1` } }] });
       if (p === "/unsplash-dl") return send({ url: "ok" });
@@ -71,6 +95,10 @@ test.before(async () => {
     META_APP_ID: "meta-id", META_APP_SECRET: "meta-secret", META_GRAPH_URL: fakeBase, META_DIALOG_URL: fakeBase,
     LINKEDIN_CLIENT_ID: "li-id", LINKEDIN_CLIENT_SECRET: "li-secret", LINKEDIN_API_URL: fakeBase, LINKEDIN_AUTH_URL: fakeBase,
     X_CLIENT_ID: "x-id", X_CLIENT_SECRET: "x-secret", X_API_URL: fakeBase, X_AUTH_URL: fakeBase,
+    GOOGLE_CLIENT_ID: "g-id", GOOGLE_CLIENT_SECRET: "g-secret", GOOGLE_AUTH_URL: fakeBase, GOOGLE_TOKEN_URL: fakeBase, GBP_ACCOUNTS_URL: fakeBase, GBP_INFO_URL: fakeBase, GBP_POSTS_URL: fakeBase,
+    THREADS_APP_ID: "th-id", THREADS_APP_SECRET: "th-secret", THREADS_AUTH_URL: fakeBase, THREADS_API_URL: fakeBase,
+    TIKTOK_CLIENT_KEY: "tt-key", TIKTOK_CLIENT_SECRET: "tt-secret", TIKTOK_AUTH_URL: fakeBase, TIKTOK_API_URL: fakeBase,
+    PINTEREST_APP_ID: "pin-id", PINTEREST_APP_SECRET: "pin-secret", PINTEREST_AUTH_URL: fakeBase, PINTEREST_API_URL: fakeBase,
     UNSPLASH_ACCESS_KEY: "u-key", UNSPLASH_API_URL: fakeBase,
     ANTHROPIC_API_KEY: "test-key", ANTHROPIC_BASE_URL: fakeBase,
     PUBLIC_API_URL: "https://api.example.test", SOCIAL_APP_URL: "https://site.example.test/social", SOCIAL_IG_POLL_MS: "10",
@@ -267,4 +295,40 @@ test("next run: chosen weekdays and UK times", () => {
   const winter = nextRunAfter({ days: [1], times: ["08:30"] }, new Date("2026-12-01T12:00:00Z"));
   assert.equal(winter.toISOString(), "2026-12-07T08:30:00.000Z"); // Monday 08:30 GMT
   assert.equal(nextRunAfter({ days: [], times: ["08:30"] }), null);
+});
+
+test("Google Business Profile, Threads, TikTok and Pinterest: connect and post with photos", async () => {
+  for (const n of ["google", "threads", "tiktok", "pinterest"]) assert.match((await connect(n)).headers.get("location"), /connected=\d/, n);
+  const accounts = await jsonOf(await api("/accounts", {}, socialToken));
+  const mine = accounts.filter((a) => ["google", "threads", "tiktok", "pinterest"].includes(a.network));
+  assert.deepEqual(mine.map((a) => a.network).sort(), ["google", "pinterest", "pinterest", "threads", "tiktok"], "each Pinterest board is its own account");
+  assert.equal(mine.find((a) => a.network === "google").name, "Cleaniq Services");
+  const ids = mine.filter((a) => a.network !== "pinterest" || a.name === "Before & after").map((a) => a._id);
+  // TikTok and Pinterest need a photo.
+  assert.equal((await api("/posts", { method: "POST", body: JSON.stringify({ text: "Hi", accounts: ids, action: "now" }) }, socialToken)).status, 400);
+  calls.length = 0;
+  const post = await jsonOf(await api("/posts", { method: "POST", body: JSON.stringify({ text: "Spotless kitchen in Salford\nBefore & after from today. #Manchester", variants: { threads: "Threads wording" }, images: photoRefs, accounts: ids, action: "now" }) }, socialToken));
+  assert.equal(post.status, "posted", JSON.stringify(post.results));
+  const g = JSON.parse(calls.find((c) => c.path === "/v4/accounts/111/locations/222/localPosts").body);
+  assert.equal(g.media.length, 2);
+  assert.match(g.media[0].sourceUrl, /^https:\/\/api\.example\.test\/uploads\/social\//);
+  assert.ok(calls.some((c) => c.path === "/v1.0/TH1/threads" && /media_type=CAROUSEL/.test(c.body) && /text=Threads\+wording/.test(c.body)));
+  const tt = JSON.parse(calls.find((c) => c.path === "/v2/post/publish/content/init/").body);
+  assert.equal(tt.media_type, "PHOTO");
+  assert.equal(tt.post_info.privacy_level, "SELF_ONLY");
+  assert.equal(tt.source_info.photo_images.length, 2);
+  assert.match(post.results.find((r) => r.network === "tiktok").note, /private/);
+  const pin = JSON.parse(calls.find((c) => c.path === "/v5/pins").body);
+  assert.equal(pin.board_id, "B1");
+  assert.equal(pin.title, "Spotless kitchen in Salford");
+  assert.equal(pin.media_source.source_type, "multiple_image_urls");
+  // Running-out tokens are renewed first (Google: refresh token; Threads: a week ahead).
+  const SocialAccount = require("../../models/SocialAccount");
+  await SocialAccount.updateMany({ network: { $in: ["google", "threads"] } }, { expiresAt: new Date(Date.now() + 60e3) });
+  calls.length = 0;
+  const again = await jsonOf(await api("/posts", { method: "POST", body: JSON.stringify({ text: "Again", accounts: mine.filter((a) => ["google", "threads"].includes(a.network)).map((a) => a._id), action: "now" }) }, socialToken));
+  assert.equal(again.status, "posted", JSON.stringify(again.results));
+  assert.ok(calls.some((c) => c.path === "/token" && /grant_type=refresh_token/.test(c.body)));
+  assert.ok(calls.some((c) => c.path === "/refresh_access_token"));
+  assert.equal(calls.find((c) => c.path === "/v4/accounts/111/locations/222/localPosts").headers.authorization, "Bearer g-token-2");
 });
