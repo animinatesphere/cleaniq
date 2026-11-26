@@ -35,7 +35,27 @@ function configured() {
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
-async function call(url, opts = {}, what = "request") {
+// Facebook/Instagram (Graph API) requests are signed with the app secret ("appsecret_proof"), which
+// Meta requires when the app's "Require App Secret" setting is on (and accepts when it's off).
+const proof = (token) => crypto.createHmac("sha256", env("META_APP_SECRET")).update(token).digest("hex");
+function signGraph(url, opts) {
+  if (!env("META_APP_SECRET") || !String(url).startsWith(GRAPH())) return [url, opts];
+  const u = new URL(url);
+  if (u.searchParams.get("access_token") && !u.searchParams.has("appsecret_proof")) {
+    u.searchParams.set("appsecret_proof", proof(u.searchParams.get("access_token")));
+    url = u.toString();
+  }
+  const b = opts.body;
+  if (b instanceof URLSearchParams && b.get("access_token") && !b.has("appsecret_proof")) {
+    const body = new URLSearchParams(b);
+    body.set("appsecret_proof", proof(b.get("access_token")));
+    opts = { ...opts, body };
+  }
+  return [url, opts];
+}
+
+async function call(rawUrl, rawOpts = {}, what = "request") {
+  const [url, opts] = signGraph(rawUrl, rawOpts);
   const res = await fetch(url, { ...opts, signal: AbortSignal.timeout(60000) });
   const text = await res.text();
   let data = {};

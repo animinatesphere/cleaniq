@@ -26,7 +26,13 @@ function startFake() {
       const text = body.toString("utf8");
       calls.push({ method: req.method, path: p, query: Object.fromEntries(u.searchParams), body: text, headers: req.headers });
       const send = (obj, status = 200, headers = {}) => { res.writeHead(status, { "Content-Type": "application/json", ...headers }); res.end(JSON.stringify(obj)); };
-      // Meta
+      // Meta: like an app with "Require App Secret" on, every call with a token must be signed.
+      if (p.startsWith("/v23.0/") && p !== "/v23.0/oauth/access_token") {
+        const params = new URLSearchParams(req.method === "GET" ? u.search : text);
+        const tok = params.get("access_token");
+        const want = tok && require("crypto").createHmac("sha256", "meta-secret").update(tok).digest("hex");
+        if (tok && params.get("appsecret_proof") !== want) return send({ error: { message: "API calls from the server require an appsecret_proof argument" } }, 400);
+      }
       if (p === "/v23.0/oauth/access_token") return send({ access_token: u.searchParams.get("grant_type") ? "long-user" : "short-user" });
       if (p === "/v23.0/me/accounts") return send({ data: [{ id: "PAGE1", name: "Cleaniq Services", access_token: "page-token", instagram_business_account: { id: "IG1", username: "cleaniq" } }] });
       if (p === "/v23.0/PAGE1/feed") return send({ id: "PAGE1_POST" });
