@@ -394,3 +394,41 @@ test("video: upload an MP4 and post it to every network (YouTube too)", async ()
   assert.equal(g.media, undefined);
   assert.match(post.results.find((r) => r.network === "google").note, /can't include video/);
 });
+
+test("autopilot with the team's own photos and videos: uses each before repeating; a video goes to YouTube too", async () => {
+  const accounts = await jsonOf(await api("/accounts", {}, socialToken));
+  const lib = await jsonOf(await api("/photos", {}, socialToken));
+  const vid = lib.uploaded.find((p) => p.kind === "video");
+  assert.ok(vid, "a video is in the library (from the video test)");
+  const ids = accounts.filter((a) => ["facebook", "youtube", "x"].includes(a.network)).map((a) => a._id);
+  const ap = await jsonOf(await api("/autopilots", { method: "POST", body: JSON.stringify({
+    name: "Our media", enabled: true, instructions: "Show off our recent jobs in Manchester.", accounts: ids, days: [1], times: ["09:00"],
+    media: [{ ref: vid.ref, note: "Oven clean timelapse" }, { ref: photoRefs[0], note: "Kitchen after a clean" }, { ref: "https://evil.example/x.jpg" }],
+  }) }, socialToken));
+  assert.deepEqual(ap.media.map((m) => m.kind), ["video", "photo"], "only our own media is kept, videos are recognised");
+  // "Try it" doesn't use anything up.
+  const preview = await jsonOf(await api(`/autopilots/${ap._id}/preview`, { method: "POST" }, socialToken));
+  assert.equal(preview.video, vid.ref);
+  const SocialAutopilot = require("../../models/SocialAutopilot");
+  assert.equal((await SocialAutopilot.findById(ap._id).lean()).usedMedia.length, 0);
+  // Claude's list shows the team's notes and marks the video.
+  const claude = calls.filter((c) => c.path === "/v1/messages").pop();
+  assert.match(claude.body, /\[VIDEO\] Oven clean timelapse/);
+  assert.match(claude.body, /you must choose one/);
+  const run = async () => {
+    await SocialAutopilot.updateOne({ _id: ap._id }, { nextRunAt: new Date(Date.now() - 1000) });
+    await require("../../utils/socialScheduler").runDueAutopilots(new Date());
+    const a = await SocialAutopilot.findById(ap._id).lean();
+    return require("../../models/SocialPost").findById(a.lastPost).lean();
+  };
+  const first = await run();
+  assert.equal(first.video, vid.ref);
+  assert.equal(first.accounts.length, 3, "YouTube is included for a video");
+  assert.equal(first.status, "posted", JSON.stringify(first.results));
+  const second = await run();
+  assert.equal(second.video, "");
+  assert.deepEqual(second.images, [photoRefs[0]], "the next post uses the item not used yet");
+  assert.equal(second.accounts.length, 2, "YouTube is skipped for a photo");
+  const third = await run();
+  assert.equal(third.video, vid.ref, "after all are used, it starts again");
+});

@@ -1,8 +1,9 @@
 // Autopilot: Claude writes posts from your instructions and posts them by itself on the days and
 // times you choose, with a photo (ours first, Unsplash if none fits).
 import { useState } from "react";
-import { Bot, Plus, Sparkles, Play, Trash2, Clock, Image as ImageIcon, X as Close, Pencil, CalendarDays, CheckCircle2, AlertTriangle } from "lucide-react";
-import { api } from "./api";
+import { Bot, Plus, Sparkles, Play, Trash2, Clock, Image as ImageIcon, X as Close, Pencil, CalendarDays, CheckCircle2, AlertTriangle, Film } from "lucide-react";
+import { api, photoUrl } from "./api";
+import { PhotoPicker } from "./Composer";
 import { AccountAvatar, Button, Card, Empty, Modal, inputCls, labelCls, fmtDate } from "./ui";
 
 const DAYS = [[1, "Mon"], [2, "Tue"], [3, "Wed"], [4, "Thu"], [5, "Fri"], [6, "Sat"], [0, "Sun"]];
@@ -19,8 +20,10 @@ const EXAMPLES = [
 ];
 
 function Editor({ value, accounts, onClose, onSaved, notify }) {
-  const [f, setF] = useState(() => ({ name: "", instructions: "", accounts: accounts.filter((a) => a.active).map((a) => a._id), days: [1, 3, 5], times: ["10:00"], pictures: "ours-then-unsplash", enabled: true, ...(value || {}), ...(value ? { accounts: (value.accounts || []).map(String) } : {}) }));
+  const [f, setF] = useState(() => ({ name: "", instructions: "", accounts: accounts.filter((a) => a.active).map((a) => a._id), days: [1, 3, 5], times: ["10:00"], pictures: "ours-then-unsplash", enabled: true, media: [], ...(value || {}), ...(value ? { accounts: (value.accounts || []).map(String) } : {}) }));
   const [time, setTime] = useState("13:00");
+  const [picker, setPicker] = useState(""); // "" | "photo" | "video"
+  const addMedia = (refs, kind) => set("media", [...f.media, ...refs.filter((r) => !f.media.some((m) => m.ref === r)).map((ref) => ({ ref, kind, note: "" }))].slice(0, 50));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const set = (k, v) => setF((x) => ({ ...x, [k]: v }));
@@ -28,7 +31,7 @@ function Editor({ value, accounts, onClose, onSaved, notify }) {
     setBusy(true);
     setError("");
     try {
-      const body = { name: f.name, instructions: f.instructions, accounts: f.accounts, days: f.days, times: f.times, pictures: f.pictures, enabled: f.enabled };
+      const body = { name: f.name, instructions: f.instructions, accounts: f.accounts, days: f.days, times: f.times, pictures: f.pictures, enabled: f.enabled, media: f.media };
       const saved = value?._id ? await api(`/autopilots/${value._id}`, { method: "PATCH", body }) : await api("/autopilots", { method: "POST", body });
       notify(saved.enabled ? `Autopilot on. First post ${fmtDate(saved.nextRunAt, { weekday: "long" })}.` : "Autopilot saved (switched off).");
       onSaved(saved);
@@ -70,6 +73,31 @@ function Editor({ value, accounts, onClose, onSaved, notify }) {
               {!accounts.length && <p className="text-sm text-slate-500">Connect accounts first.</p>}
             </div>
           </div>
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <p className={labelCls + " !mb-0"}>Your photos & videos <span className="font-normal text-slate-400">(optional)</span></p>
+              <span className="flex gap-2">
+                <Button variant="secondary" size="sm" onClick={() => setPicker("photo")}><ImageIcon size={14} /> Add photos</Button>
+                <Button variant="secondary" size="sm" onClick={() => setPicker("video")}><Film size={14} /> Add videos</Button>
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mb-3">Each post uses one of these: Claude picks the one that fits the post and writes about it, and uses every one before repeating. Videos also go to YouTube. Leave empty to let the autopilot choose photos itself.</p>
+            {f.media.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {f.media.map((m, i) => (
+                  <div key={m.ref} className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                    <div className="relative aspect-video bg-slate-100">
+                      {m.kind === "video" ? <video src={photoUrl(m.ref)} muted preload="metadata" className="w-full h-full object-cover bg-black" /> : <img src={photoUrl(m.ref)} alt="" className="w-full h-full object-cover" />}
+                      {m.kind === "video" && <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-semibold"><Film size={10} /> Video</span>}
+                      <button type="button" onClick={() => set("media", f.media.filter((_, k) => k !== i))} className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-white/95 shadow text-rose-600 flex items-center justify-center" aria-label="Remove"><Trash2 size={12} /></button>
+                    </div>
+                    <input value={m.note} maxLength={200} onChange={(e) => set("media", f.media.map((x, k) => (k === i ? { ...x, note: e.target.value } : x)))}
+                      placeholder="What does it show? (helps Claude)" className="w-full px-2.5 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <div className="p-6 bg-slate-50/70 border-t lg:border-t-0 lg:border-l border-slate-100 space-y-5">
           <div>
@@ -92,7 +120,8 @@ function Editor({ value, accounts, onClose, onSaved, notify }) {
             </div>
           </div>
           <div>
-            <p className={labelCls}>Photos</p>
+            <p className={labelCls}>{f.media.length ? "Photos when your list is empty" : "Photos"}</p>
+            {f.media.length > 0 && <p className="text-xs text-slate-500 -mt-1 mb-2">Not used while you have photos & videos in your list above.</p>}
             <div className="space-y-1.5">
               {PICTURES.map(([k, label]) => (
                 <label key={k} className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm cursor-pointer ${f.pictures === k ? "border-primary bg-white ring-2 ring-primary/10" : "border-slate-200 bg-white text-slate-600"}`}>
@@ -107,6 +136,7 @@ function Editor({ value, accounts, onClose, onSaved, notify }) {
           </label>
         </div>
       </div>
+      <PhotoPicker open={!!picker} kind={picker || "photo"} multiple onClose={() => setPicker("")} onPick={(refs) => addMedia(refs, picker || "photo")} />
       {error && <p className="mx-6 mb-2 text-sm text-rose-600 bg-rose-50 rounded-lg px-3 py-2">{error}</p>}
       <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-100">
         <Button variant="secondary" onClick={onClose}>Cancel</Button>
@@ -181,7 +211,7 @@ export default function Autopilot({ autopilots, accounts, reload, notify, onOpen
                 <p className="text-sm text-slate-600 mt-3 line-clamp-3 leading-relaxed">{ap.instructions || <span className="italic text-slate-400">No instructions yet</span>}</p>
                 <div className="flex items-center gap-3 mt-4">
                   <span className="flex -space-x-1.5">{(ap.accounts || []).map((id) => accounts.find((a) => a._id === String(id))).filter(Boolean).map((a) => <AccountAvatar key={a._id} account={a} size={26} />)}</span>
-                  <span className="text-xs text-slate-500 flex items-center gap-1"><ImageIcon size={12} /> {PICTURES.find(([k]) => k === ap.pictures)?.[1]}</span>
+                  <span className="text-xs text-slate-500 flex items-center gap-1"><ImageIcon size={12} /> {ap.media?.length ? `${ap.media.length} of your photos & videos` : PICTURES.find(([k]) => k === ap.pictures)?.[1]}</span>
                 </div>
                 <div className="mt-4 rounded-xl bg-slate-50 px-3.5 py-2.5 text-xs space-y-1">
                   <p className="text-slate-600"><span className="font-semibold text-slate-800">Next post:</span> {ap.enabled && ap.nextRunAt ? fmtDate(ap.nextRunAt, { weekday: "long" }) : "Paused"}</p>

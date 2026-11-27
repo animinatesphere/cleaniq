@@ -11,6 +11,13 @@ const socialAutopilotSchema = new mongoose.Schema(
     days: { type: [Number], default: [1, 3, 5] }, // 0 = Sunday … 6 = Saturday
     times: { type: [String], default: ["10:00"] }, // "HH:MM", UK time
     pictures: { type: String, enum: ["ours-then-unsplash", "ours", "unsplash", "none"], default: "ours-then-unsplash" },
+    // Photos and videos the team chose for this autopilot. Each post uses one (Claude picks the best
+    // fit) and they're all used before any repeats. When empty, "pictures" decides.
+    media: {
+      type: [{ _id: false, ref: String, kind: { type: String, enum: ["photo", "video"], default: "photo" }, note: { type: String, default: "" } }],
+      default: [],
+    },
+    usedMedia: { type: [String], default: [] },
     nextRunAt: { type: Date, default: null, index: true },
     lastRunAt: { type: Date, default: null },
     lastResult: { type: String, default: "" },

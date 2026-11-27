@@ -50,15 +50,17 @@ async function businessFacts() {
 
 /**
  * Write a post.
- * @param {{ instructions: string, pictures: string, recent?: string[] }} input
+ * @param {{ instructions: string, pictures: string, recent?: string[], pool?: Array<{ref, kind, description}> }} input
+ *   pool: the team's own photos/videos for this autopilot — Claude must pick one of them.
  * @returns {Promise<{ text, variants: {facebook, instagram, linkedin, x}, photoRef: string|null, unsplashSearch: string }>}
  */
-async function writePost({ instructions, pictures = "ours-then-unsplash", recent = [] }) {
+async function writePost({ instructions, pictures = "ours-then-unsplash", recent = [], pool = null }) {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not set on the server.");
   const sdk = require("@anthropic-ai/sdk");
   const Anthropic = sdk.default || sdk;
   const client = new Anthropic({ timeout: 120000, maxRetries: 2, ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}) });
-  const photos = pictures === "ours" || pictures === "ours-then-unsplash" ? await libraryPhotos() : [];
+  const mine = Array.isArray(pool) && pool.length > 0;
+  const photos = mine ? pool : pictures === "ours" || pictures === "ours-then-unsplash" ? await libraryPhotos() : [];
 
   const system = `You write social media posts for Cleaniq Services, a cleaning company in Manchester, UK.
 
@@ -67,11 +69,13 @@ ${await businessFacts()}
 
 Write in friendly, natural British English. Short paragraphs. At most 2 emojis per post. No made-up customer quotes.
 Give wording for each network: Facebook (conversational), Instagram (caption, hashtags at the end), LinkedIn (a little more professional), X (short — at most ${X_LIMIT - 40} characters), Threads (casual, short), Google Business Profile (plain and local, no hashtags), Pinterest (searchable title line, then a description) and TikTok (a hook, hashtags at the end).
-Photos: choose the id of the photo from the list that best fits the post, or "none" if none of them fits.${photos.length ? "" : " (There is no photo list this time: answer \"none\".)"}`;
+${mine
+    ? "Media: the team chose the photos and videos in the list for these posts. Choose the id of the one that best fits the post (you must choose one), and write the post so it matches what it shows. For a video, write as if introducing the video."
+    : `Photos: choose the id of the photo from the list that best fits the post, or "none" if none of them fits.${photos.length ? "" : " (There is no photo list this time: answer \"none\".)"}`}`;
 
   const user = [
     `Instructions from the team:\n${instructions}`,
-    photos.length && `Photos we have (id — what's in it):\n${photos.map((p, i) => `${i} — ${p.description}`).join("\n")}`,
+    photos.length && `${mine ? "Photos and videos to choose from" : "Photos we have"} (id — what's in it):\n${photos.map((p, i) => `${i} — ${p.kind === "video" ? "[VIDEO] " : ""}${p.description}`).join("\n")}`,
     recent.length && `Recent posts — say something different, don't repeat these:\n${recent.map((t) => `- ${String(t).slice(0, 200)}`).join("\n")}`,
   ].filter(Boolean).join("\n\n");
 
@@ -90,12 +94,14 @@ Photos: choose the id of the photo from the list that best fits the post, or "no
   } catch {
     throw new Error("Claude's reply couldn't be read. Please try again.");
   }
-  const pick = /^\d+$/.test(String(d.photo).trim()) ? photos[Number(d.photo)] : null;
+  // With the team's own media, one is always used (the first if Claude's choice can't be read).
+  const pick = (/^\d+$/.test(String(d.photo).trim()) ? photos[Number(d.photo)] : null) || (mine ? photos[0] : null);
   const clean = (s) => String(s || "").trim().slice(0, 3000);
   return {
     text: clean(d.text),
     variants: { facebook: clean(d.facebook), instagram: clean(d.instagram), linkedin: clean(d.linkedin), x: clean(d.x), threads: clean(d.threads), google: clean(d.google), pinterest: clean(d.pinterest), tiktok: clean(d.tiktok) },
     photoRef: pick ? pick.ref : null,
+    pickedKind: pick?.kind || "photo",
     unsplashSearch: String(d.unsplashSearch || "").trim().slice(0, 60),
   };
 }

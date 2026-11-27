@@ -311,12 +311,16 @@ async function autopilotFields(body, existing = {}) {
   const pictures = ["ours-then-unsplash", "ours", "unsplash", "none"].includes(body.pictures) ? body.pictures : existing.pictures || "ours-then-unsplash";
   const instructions = String(body.instructions ?? existing.instructions ?? "").slice(0, 4000);
   const enabled = typeof body.enabled === "boolean" ? body.enabled : !!existing.enabled;
+  const media = (body.media ?? existing.media ?? [])
+    .filter((m) => PHOTO_REF.test(String(m?.ref || "")))
+    .slice(0, 50)
+    .map((m) => ({ ref: String(m.ref), kind: VIDEO_REF.test(m.ref) ? "video" : "photo", note: String(m.note || "").trim().slice(0, 200) }));
   if (enabled) {
     if (instructions.trim().length < 10) throw bad("Write the instructions for Claude before switching the autopilot on.");
     if (!accounts.length) throw bad("Choose at least one account before switching the autopilot on.");
     if (!days.length || !times.length) throw bad("Choose at least one day and one time.");
   }
-  return { name, accounts, days, times, pictures, instructions, enabled };
+  return { name, accounts, days, times, pictures, instructions, enabled, media };
 }
 
 router.get("/autopilots", socialAuth, async (req, res) => {

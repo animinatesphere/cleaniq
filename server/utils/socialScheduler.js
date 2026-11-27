@@ -81,22 +81,50 @@ function nextRunAfter(ap, from = new Date()) {
   return null;
 }
 
+/** The autopilot's own photos/videos not used yet (all of them again once every one has been used). */
+async function mediaPool(ap) {
+  const media = (ap.media || []).filter((m) => m?.ref);
+  if (!media.length) return null;
+  const used = new Set(ap.usedMedia || []);
+  const fresh = media.filter((m) => !used.has(m.ref));
+  const list = fresh.length ? fresh : media;
+  const SocialPhoto = require("../models/SocialPhoto");
+  const saved = Object.fromEntries((await SocialPhoto.find({ path: { $in: list.map((m) => m.ref) } }).lean()).map((p) => [p.path, p.description]));
+  const ours = Object.fromEntries(networks.ourPhotos().map((p) => [p.ref, p.description]));
+  return {
+    restart: !fresh.length,
+    items: list.map((m) => ({ ref: m.ref, kind: m.kind, description: m.note || saved[m.ref] || ours[m.ref] || (m.kind === "video" ? "A video from our team" : "A photo from our team") })),
+  };
+}
+
 /** Claude writes a post for this autopilot and it's published straight away. */
 async function runAutopilot(ap, { publish = true } = {}) {
   const recent = (await SocialPost.find({ autopilot: ap._id }).sort({ createdAt: -1 }).limit(10).select("text").lean()).map((p) => p.text);
-  const draft = await writePost({ instructions: ap.instructions, pictures: ap.pictures, recent });
-  let images = draft.photoRef ? [draft.photoRef] : [];
+  const pool = await mediaPool(ap);
+  const draft = await writePost({ instructions: ap.instructions, pictures: ap.pictures, recent, pool: pool?.items || null });
+  const isVideo = !!pool && draft.pickedKind === "video";
+  let images = draft.photoRef && !isVideo ? [draft.photoRef] : [];
+  const video = isVideo ? draft.photoRef : "";
   let credit = "";
-  if (!images.length && (ap.pictures === "ours-then-unsplash" || ap.pictures === "unsplash")) {
+  if (publish && pool && draft.photoRef) {
+    // Remember it (not for "Try it" previews), so every chosen photo/video is used before any repeats.
+    const used = pool.restart ? [draft.photoRef] : [...(ap.usedMedia || []), draft.photoRef];
+    await SocialAutopilot.updateOne({ _id: ap._id }, { usedMedia: used.slice(-200) });
+  }
+  if (!pool && !images.length && (ap.pictures === "ours-then-unsplash" || ap.pictures === "unsplash")) {
     const u = await unsplashPhoto(draft.unsplashSearch || "clean home").catch((e) => { console.warn("[social] Unsplash:", e.message); return null; });
     if (u) { images = [u.ref]; credit = u.credit; }
   }
   const accounts = await SocialAccount.find({ _id: { $in: ap.accounts }, active: true }).select("_id network").lean();
-  // Instagram, TikTok and Pinterest can't post without a photo.
-  // YouTube only takes videos, which the autopilot doesn't make.
-  const targets = accounts.filter((a) => (!PHOTO_ONLY.includes(a.network) || images.length) && a.network !== "youtube").map((a) => a._id);
+  // Instagram, TikTok and Pinterest need a photo or video (Pinterest video pins also need a photo
+  // as the cover); YouTube only takes videos.
+  const targets = accounts.filter((a) => {
+    if (a.network === "youtube") return !!video;
+    if (a.network === "pinterest" && video) return false;
+    return !PHOTO_ONLY.includes(a.network) || images.length || video;
+  }).map((a) => a._id);
   const post = await SocialPost.create({
-    text: draft.text, variants: draft.variants, images, credit, accounts: targets,
+    text: draft.text, variants: draft.variants, images, video, credit, accounts: targets,
     status: publish ? "posting" : "draft", scheduledAt: new Date(), source: "autopilot", autopilot: ap._id, createdBy: `Autopilot: ${ap.name}`,
   });
   return publish ? publishPost(post._id) : post;
