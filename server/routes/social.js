@@ -146,6 +146,14 @@ router.post("/connect/:network/start", socialAuth, async (req, res) => {
   res.json({ url: networks.authUrl(network, state, verifier) });
 });
 
+// Threads asks for "uninstall" and "delete data" callback addresses. When someone removes the app
+// in Threads, their Threads connection is switched off here (we keep no other Threads data).
+router.post(["/connect/threads/uninstall", "/connect/threads/delete"], express.urlencoded({ extended: false }), async (req, res) => {
+  console.log(`[social] Threads ${req.path.endsWith("delete") ? "delete-data" : "uninstall"} request received`);
+  const code = crypto.randomBytes(8).toString("hex");
+  res.json({ url: `${APP_URL()}#accounts`, confirmation_code: code });
+});
+
 router.get("/connect/:network/callback", async (req, res) => {
   const back = (q) => res.redirect(`${APP_URL()}?${new URLSearchParams(q)}#accounts`);
   const { code, state, error, error_description: desc } = req.query;
