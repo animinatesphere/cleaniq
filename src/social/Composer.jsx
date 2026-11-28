@@ -239,6 +239,52 @@ export function Preview({ network, account, text, images, video }) {
 }
 
 /* ── the composer ───────────────────────────────────────────────────── */
+// Reddit and Nextdoor don't let new apps post for you (Reddit needs approval under its Responsible
+// Builder Policy; Nextdoor's posting API is for approved partners). Until then: copy the post and
+// open the site with it filled in, ready to post by hand.
+function HandShare({ text, images }) {
+  const [sub, setSub] = useState("");
+  const [copied, setCopied] = useState("");
+  const body = text.trim();
+  const title = (body.split("\n").find((l) => l.trim()) || "").slice(0, 300);
+  const rest = body.slice(body.indexOf(title) + title.length).trim();
+  const copy = async (what) => {
+    try { await navigator.clipboard.writeText(body); } catch { /* still opens the site */ }
+    setCopied(what);
+    setTimeout(() => setCopied(""), 2500);
+  };
+  const subName = sub.trim().replace(/^\/?r\//i, "").replace(/[^A-Za-z0-9_]/g, "");
+  const redditUrl = `https://www.reddit.com/${subName ? `r/${subName}/` : ""}submit?type=TEXT&title=${encodeURIComponent(title)}&text=${encodeURIComponent(rest)}`;
+  const nextdoorUrl = `https://nextdoor.com/sharekit/?source=${encodeURIComponent("https://www.cleaniqservices.com")}&body=${encodeURIComponent(body)}`;
+  const btn = (href, what, color, label) => (
+    <a href={body ? href : undefined} target="_blank" rel="noreferrer" onClick={() => body && copy(what)}
+      className={`flex items-center justify-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold text-white transition ${body ? "hover:opacity-90" : "opacity-40 pointer-events-none"}`} style={{ background: color }}>
+      {copied === what ? <><Check size={15} /> Copied — paste if needed</> : label}
+    </a>
+  );
+  return (
+    <Card className="p-5">
+      <p className="text-sm font-semibold text-slate-900">Reddit & Nextdoor <span className="font-normal text-slate-400">(post by hand)</span></p>
+      <p className="text-xs text-slate-500 mt-0.5 mb-3">These two don't allow automatic posting yet. Click to open the site with your post filled in (it's also copied, in case the site doesn't fill it). Add your photos there and press Post.</p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <input value={sub} onChange={(e) => setSub(e.target.value)} placeholder="Subreddit (optional), e.g. manchester" className={inputCls} />
+          {btn(redditUrl, "reddit", "#FF4500", "Open in Reddit")}
+          <p className="text-[11px] text-slate-400">The first line becomes the title. Most subreddits ban adverts — check their rules, or post to your own profile.</p>
+        </div>
+        <div className="space-y-2">
+          <div className="h-[38px] flex items-center text-xs text-slate-500">Shares to your Nextdoor neighbourhood.</div>
+          {btn(nextdoorUrl, "nextdoor", "#1B8751", "Open in Nextdoor")}
+          <p className="text-[11px] text-slate-400">To post as the business, switch to your Cleaniq business page in Nextdoor first.</p>
+        </div>
+      </div>
+      {images.length > 0 && (
+        <p className="text-xs text-slate-500 mt-3">Photos to add: {images.map((r, i) => <a key={r} href={photoUrl(r)} target="_blank" rel="noreferrer" download className="text-primary font-semibold hover:underline mr-2">photo {i + 1}</a>)}</p>
+      )}
+    </Card>
+  );
+}
+
 export default function Composer({ accounts, post, onDone, notify, defaultWhen }) {
   const editing = !!post?._id;
   // Until you change it: the post's accounts, or every switched-on account for a new post.
@@ -398,6 +444,8 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
             </button>
           )}
         </Card>
+
+        <HandShare text={text} images={images} />
 
         <Card className="p-5">
           <p className={labelCls}>When</p>
