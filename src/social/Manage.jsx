@@ -1,7 +1,7 @@
 // Accounts (connect networks, with setup steps), photo library and team logins.
 import { useEffect, useState } from "react";
 import { Link2, Unplug, AlertTriangle, CheckCircle2, Copy, ChevronDown, Upload, Trash2, Users, Plus, ImageIcon, KeyRound } from "lucide-react";
-import { api, photoUrl } from "./api";
+import { api, photoUrl, uploadFiles } from "./api";
 import { NETWORKS, NetworkMark, AccountAvatar, Button, Card, CardHeader, Empty, inputCls, labelCls, fmtDate } from "./ui";
 
 const CONNECT = [
@@ -207,6 +207,8 @@ export function Accounts({ accounts, status, reload, notify }) {
 export function Photos({ notify }) {
   const [lib, setLib] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [pct, setPct] = useState(0);
+  const [upName, setUpName] = useState("");
   const [desc, setDesc] = useState("");
   const load = () => api("/photos").then(setLib).catch((e) => notify(e.message, "error"));
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -215,13 +217,15 @@ export function Photos({ notify }) {
     e.target.value = "";
     if (!files.length) return;
     setBusy(true);
+    setPct(0);
+    setUpName(files.length > 1 ? `${files.length} files` : files[0].name);
     try {
       const form = new FormData();
       files.forEach((f) => form.append("photos", f));
       form.append("description", desc);
-      await api("/photos", { method: "POST", form });
+      await uploadFiles("/photos", form, setPct);
       setDesc("");
-      notify(`${files.length} photo${files.length > 1 ? "s" : ""} added.`);
+      notify(`${files.length} file${files.length > 1 ? "s" : ""} added.`);
       load();
     } catch (err) {
       notify(err.message, "error");
@@ -244,10 +248,16 @@ export function Photos({ notify }) {
             <input id="ph-desc" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Kitchen after an end of tenancy clean in Salford" className={inputCls} />
           </div>
           <label className={`inline-flex items-center gap-2 h-10 px-4 rounded-lg text-sm font-semibold cursor-pointer ${busy ? "bg-slate-100 text-slate-400" : "bg-primary text-white hover:bg-primary-dark"}`}>
-            <Upload size={16} /> {busy ? "Uploading…" : "Upload photos or videos"}
+            <Upload size={16} /> {busy ? `Uploading ${pct}%` : "Upload photos or videos"}
             <input type="file" accept="image/jpeg,image/png,video/mp4,video/quicktime" multiple className="hidden" onChange={upload} disabled={busy} />
           </label>
         </div>
+        {busy && (
+          <div className="mt-3">
+            <div className="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span className="truncate">{pct >= 100 ? "Saving on the server…" : `Uploading ${upName}…`}</span><span className="tabular-nums">{pct}%</span></div>
+            <div className="h-2 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-primary transition-[width] duration-200" style={{ width: `${pct}%` }} /></div>
+          </div>
+        )}
         <p className="text-xs text-slate-500 mt-2">Photos: JPEG or PNG, up to 8 MB (use JPEG for Instagram). Videos: MP4 or MOV, up to 500 MB.</p>
       </Card>
       {!lib ? <p className="text-sm text-slate-400">Loading…</p> : (

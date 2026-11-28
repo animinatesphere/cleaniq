@@ -2,7 +2,7 @@
 // each network shows it, then post now, schedule or save as a draft.
 import { useEffect, useMemo, useState } from "react";
 import { Film, ImagePlus, Send, CalendarClock, Save, AlertTriangle, ArrowLeft, ArrowRight, Trash2, Heart, MessageCircle, Repeat2, Share2, Bookmark, ThumbsUp, Globe2, MoreHorizontal, Upload, Check } from "lucide-react";
-import { api, photoUrl } from "./api";
+import { api, photoUrl, uploadFiles } from "./api";
 import { NETWORKS, NETWORK_ORDER, PHOTO_ONLY, VIDEO_ONLY, NetworkMark, AccountAvatar, Button, Card, Modal, inputCls, labelCls, toLocalInput } from "./ui";
 
 const LIMITS = { facebook: 63206, instagram: 2200, linkedin: 3000, x: 280, threads: 500, google: 1500, tiktok: 2200, pinterest: 800, youtube: 4900 };
@@ -26,6 +26,8 @@ function PickerBody({ onClose, onPick, multiple = true, kind = "photo" }) {
   const [lib, setLib] = useState(null);
   const [chosen, setChosen] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [pct, setPct] = useState(0);
+  const [upName, setUpName] = useState("");
   const [error, setError] = useState("");
   const load = () => api("/photos").then(setLib).catch((e) => setError(e.message));
   useEffect(() => { load(); }, []);
@@ -34,11 +36,13 @@ function PickerBody({ onClose, onPick, multiple = true, kind = "photo" }) {
     e.target.value = "";
     if (!files.length) return;
     setBusy(true);
+    setPct(0);
+    setUpName(files.length > 1 ? `${files.length} files` : files[0].name);
     setError("");
     try {
       const form = new FormData();
       files.forEach((f) => form.append("photos", f));
-      const added = await api("/photos", { method: "POST", form });
+      const added = await uploadFiles("/photos", form, setPct);
       await load();
       setChosen((c) => (multiple ? [...c, ...added.map((p) => p.ref)] : [added[0]?.ref].filter(Boolean)));
     } catch (err) {
@@ -58,10 +62,16 @@ function PickerBody({ onClose, onPick, multiple = true, kind = "photo" }) {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <p className="text-sm text-slate-500">{kind === "video" ? "MP4 or MOV, up to 500 MB. Vertical videos work best for Reels, TikTok and Shorts." : "Tick the photos to add. Instagram needs JPEG photos."}</p>
           <label className={`inline-flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-semibold cursor-pointer ${busy ? "bg-slate-100 text-slate-400" : "bg-primary/10 text-primary hover:bg-primary/15"}`}>
-            <Upload size={16} /> {busy ? "Uploading…" : kind === "video" ? "Upload a video" : "Upload photos"}
+            <Upload size={16} /> {busy ? `Uploading ${pct}%` : kind === "video" ? "Upload a video" : "Upload photos"}
             <input type="file" accept={kind === "video" ? "video/mp4,video/quicktime" : "image/jpeg,image/png"} multiple={multiple} className="hidden" onChange={upload} disabled={busy} />
           </label>
         </div>
+        {busy && (
+          <div className="mb-4">
+            <div className="flex justify-between text-xs font-semibold text-slate-600 mb-1"><span>{pct >= 100 ? "Saving on the server…" : `Uploading ${upName}…`}</span><span className="tabular-nums">{pct}%</span></div>
+            <div className="h-2 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-primary transition-[width] duration-200" style={{ width: `${pct}%` }} /></div>
+          </div>
+        )}
         {error && <p className="mb-4 text-sm text-rose-600">{error}</p>}
         {!lib ? (
           <p className="text-sm text-slate-400 py-10 text-center">Loading…</p>
