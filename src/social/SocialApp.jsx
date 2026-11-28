@@ -52,12 +52,17 @@ export default function SocialApp() {
     return () => clearTimeout(t);
   }, [toast]);
 
+  // If loading fails, say so (instead of looking like nothing is connected).
   const reload = useCallback(() => {
-    api("/accounts").then(setAccounts).catch(() => {});
-    api("/posts").then(setPosts).catch(() => {});
-    api("/autopilots").then(setAutopilots).catch(() => {});
-    api("/status").then(setStatus).catch(() => {});
-  }, []);
+    const failed = (e) => {
+      if (e?.status === 401) { signOut(); navigate("/social/login", { replace: true }); return; }
+      notify(`Couldn't load your dashboard (${e?.message || "no connection"}). Refresh the page, or log out and in again.`, "error");
+    };
+    api("/accounts").then(setAccounts).catch(failed);
+    api("/posts").then(setPosts).catch(failed);
+    api("/autopilots").then(setAutopilots).catch(failed);
+    api("/status").then(setStatus).catch(failed);
+  }, [notify, navigate]);
 
   useEffect(() => {
     if (!getToken()) {
