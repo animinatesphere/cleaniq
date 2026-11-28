@@ -11,7 +11,7 @@ const PICTURES = [
   ["ours-then-unsplash", "Our photos first, Unsplash if none fit"],
   ["ours", "Only our photos"],
   ["unsplash", "Always Unsplash"],
-  ["none", "No photo (Instagram, TikTok and Pinterest are skipped)"],
+  ["none", "No photo (Instagram and TikTok are skipped)"],
 ];
 const EXAMPLES = [
   "Share one practical cleaning tip for Manchester homes. Friendly and short. End by inviting people to get a free quote.",

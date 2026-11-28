@@ -398,7 +398,7 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-sm font-semibold text-slate-900">Video</p>
-              <p className="text-xs text-slate-500 mt-0.5">Goes out as a Reel on Instagram, a video on TikTok, YouTube, Facebook, LinkedIn, X, Threads and Pinterest.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Goes out as a Reel on Instagram, a video on TikTok, YouTube, Facebook, LinkedIn, X and Threads.</p>
             </div>
             {!video && <Button variant="secondary" size="sm" onClick={() => setVideoPicker(true)}><Film size={15} /> Add a video</Button>}
           </div>
@@ -419,7 +419,7 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
 
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-slate-900">{video ? "Cover photo" : "Photos"} <span className="font-normal text-slate-400">{video ? "(optional — Pinterest uses it as the video cover)" : `(${images.length}/10)`}</span></p>
+            <p className="text-sm font-semibold text-slate-900">{video ? "Cover photo" : "Photos"} <span className="font-normal text-slate-400">{video ? "(optional)" : `(${images.length}/10)`}</span></p>
             <Button variant="secondary" size="sm" onClick={() => setPicker(true)} disabled={images.length >= 10}><ImagePlus size={15} /> Add photos</Button>
           </div>
           {images.length ? (

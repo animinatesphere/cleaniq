@@ -94,19 +94,6 @@ const CONNECT = [
     ],
     callbackAt: 2,
   },
-  {
-    key: "pinterest", networks: ["pinterest"], title: "Pinterest",
-    text: "Pins your photos to your boards, linking to the website.",
-    steps: [
-      "Use a Pinterest business account with at least one board (e.g. Before and after).",
-      "Go to developers.pinterest.com, Apps, Connect app, and request Trial access.",
-      "In the app settings, add this Redirect URI:",
-      "Copy the App ID and App secret key into the server .env as PINTEREST_APP_ID and PINTEREST_APP_SECRET, then restart the server.",
-      "Press Connect. Each board shows as its own account, so you choose which board to pin to.",
-      "Trial access has low limits; apply for Standard access when you are posting regularly.",
-    ],
-    callbackAt: 2,
-  },
 ];
 
 function CopyBox({ value }) {

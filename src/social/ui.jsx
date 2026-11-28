@@ -14,7 +14,8 @@ export const NETWORKS = {
   pinterest: { label: "Pinterest", color: "#E60023", soft: "bg-[#E60023]/10 text-[#E60023]" },
   youtube: { label: "YouTube", color: "#FF0000", soft: "bg-[#FF0000]/10 text-[#CC0000]" },
 };
-export const NETWORK_ORDER = ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "pinterest", "youtube"];
+// Pinterest was removed from the dashboard (2026-11-28); its server code is kept, add "pinterest" back here to show it again.
+export const NETWORK_ORDER = ["facebook", "instagram", "linkedin", "x", "google", "threads", "tiktok", "youtube"];
 /** Networks that only take videos. */
 export const VIDEO_ONLY = ["youtube"];
 /** Networks that can't post without a photo. */
