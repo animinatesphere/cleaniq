@@ -231,8 +231,10 @@ async function scanAllMailboxes() {
       } catch (err) {
         const protection = require("./coldProtection");
         if (protection.isSignInError(`${err.message} ${err.response?.data?.error || ""} ${err.code || ""}`)) await protection.markSignInBroken(mailbox._id, err.message);
-        total.errors.push(`${mailbox.email}: ${err.message}`);
-        console.error(`[cold email] can't read ${mailbox.email}:`, err.message);
+        // Node's "fetch failed" hides the real network reason (timeout, DNS, refused) in err.cause.
+        const cause = err.cause ? ` (${err.cause.code || err.cause.message || err.cause}${err.cause.hostname ? ` ${err.cause.hostname}` : ""})` : "";
+        total.errors.push(`${mailbox.email}: ${err.message}${cause}`);
+        console.error(`[cold email] can't read ${mailbox.email}:`, `${err.message}${cause}`);
       }
     }
   } finally {
