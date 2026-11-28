@@ -9,6 +9,7 @@ const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
 const ColdEvent = require("../models/ColdEvent");
 const { effectiveDailyLimit, inSendingWindow, nextSendAfter } = require("./deliverability");
+const protection = require("./coldProtection");
 const { newToken, addTracking } = require("./coldTracking");
 
 // ── Token encryption ──────────────────────────────────────────────────────────
@@ -607,6 +608,8 @@ async function processSingleSend(send) {
     }
   }
 
+  // Paused: the email waits (Resume carries on). Only finished/draft campaigns drop their emails.
+  if (campaign.status === "paused") return "wait";
   if (campaign.status !== "active") {
     return ColdSend.findByIdAndUpdate(send._id, {
       status: "skipped",
@@ -635,11 +638,17 @@ async function processSingleSend(send) {
   }
   // The address can't receive email (no mail server): skip, so it doesn't bounce and hurt the mailbox.
   if (campaign.skipInvalid !== false && contact.verification?.status === "invalid") {
+    await protection.log("invalid", send);
     return ColdSend.findByIdAndUpdate(send._id, {
       status: "skipped",
       error: `Email can't receive mail: ${contact.verification.reason || "invalid"}`,
     });
   }
+
+  // Sending protection: risky addresses, someone already in another campaign, same company too soon.
+  const rule = await protection.checkBeforeSend(contact, send);
+  if (rule?.skip) return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: rule.skip });
+  if (rule?.later) return ColdSend.findByIdAndUpdate(send._id, { scheduledAt: rule.later, error: rule.reason });
 
   // Pick mailbox (warm-up limit + gap between emails)
   const picked = await pickMailbox(campaign.mailboxIds);
@@ -717,10 +726,18 @@ async function processSingleSend(send) {
     fromName: campaign.fromName || "",
     unsubUrl,
   };
-  const result =
-    mailbox.provider === "outlook"
-      ? await sendViaOutlook(mailbox, sendOpts)
+  let result;
+  try {
+    result =
+      mailbox.provider === "outlook" ? await sendViaOutlook(mailbox, sendOpts)
+      : mailbox.provider === "smtp" ? await require("./coldSmtp").sendViaSmtp(mailbox, sendOpts)
       : await sendViaGmail(mailbox, sendOpts);
+  } catch (err) {
+    err.mailboxId = mailbox._id;
+    // The mailbox's sign-in is broken: it's not this person's fault, so their email waits.
+    if (protection.isSignInError(`${err.message} ${err.response?.data?.error || ""} ${err.code || ""}`)) err.signIn = true;
+    throw err;
+  }
 
   await ColdSend.findByIdAndUpdate(send._id, {
     status: "sent",
@@ -755,6 +772,40 @@ function isTemporaryError(message = "") {
   return /fetch failed|ECONNRESET|ETIMEDOUT|ECONNREFUSED|EAI_AGAIN|ENOTFOUND|socket hang up|UND_ERR|network|timeout|\b(429|500|502|503|504)\b|throttl|try again|ServiceUnavailable|TooManyRequests|backendError|rateLimitExceeded/i.test(message);
 }
 
+// What to do when sending one email throws.
+async function handleSendError(send, err) {
+  // Node's "fetch failed" hides the real reason (e.g. ECONNRESET) in err.cause — keep it.
+  const cause = err.cause ? `: ${err.cause.code || err.cause.message || err.cause}` : "";
+  const reason = `${err.message}${cause}`;
+  console.error(`Cold send error (${send.contactEmail}):`, reason);
+  const attempts = (send.attempts || 0) + 1;
+  if (err.signIn || protection.isSignInError(reason)) {
+    // Mark the mailbox "Reconnect needed" (it's skipped until fixed); this email waits.
+    await protection.markSignInBroken(err.mailboxId || send.mailboxId, reason);
+    await ColdSend.findByIdAndUpdate(send._id, {
+      status: "pending",
+      error: "Waiting: the mailbox needs reconnecting (see Mailboxes)",
+      scheduledAt: new Date(Date.now() + 30 * 60 * 1000),
+    });
+    return;
+  }
+  if (isTemporaryError(reason) && attempts <= MAX_RETRIES) {
+    // Brief network/Microsoft/Google outage: try again in 10 minutes instead of failing.
+    await ColdSend.findByIdAndUpdate(send._id, {
+      status: "pending",
+      attempts,
+      error: `Retrying (${attempts}/${MAX_RETRIES}) after: ${reason}`,
+      scheduledAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+    return;
+  }
+  await ColdSend.findByIdAndUpdate(send._id, {
+    status: "failed",
+    attempts,
+    error: reason,
+  });
+}
+
 let sendRunning = false;
 
 async function processColdEmailSends() {
@@ -767,9 +818,12 @@ async function processColdEmailSends() {
     if (!inSendingWindow()) return;
 
     const now = new Date();
+    // Paused campaigns' emails stay pending and aren't looked at (so they don't block the queue).
+    const paused = await ColdCampaign.find({ status: "paused" }).distinct("_id");
     const pending = await ColdSend.find({
       status: "pending",
       scheduledAt: { $lte: now },
+      ...(paused.length ? { campaignId: { $nin: paused } } : {}),
     })
       .sort({ scheduledAt: 1 })
       .limit(150)
@@ -785,38 +839,7 @@ async function processColdEmailSends() {
         const result = await processSingleSend(send);
         if (result === "wait") waiting.add(String(send.campaignId));
       } catch (err) {
-        // Node's "fetch failed" hides the real reason (e.g. ECONNRESET) in err.cause — keep it.
-        const cause = err.cause ? `: ${err.cause.code || err.cause.message || err.cause}` : "";
-        const reason = `${err.message}${cause}`;
-        console.error(`Cold send error (${send.contactEmail}):`, reason);
-        const attempts = (send.attempts || 0) + 1;
-        if (isTemporaryError(reason) && attempts <= MAX_RETRIES) {
-          // Brief network/Microsoft/Google outage: try again in 10 minutes instead of failing.
-          await ColdSend.findByIdAndUpdate(send._id, {
-            status: "pending",
-            attempts,
-            error: `Retrying (${attempts}/${MAX_RETRIES}) after: ${reason}`,
-            scheduledAt: new Date(Date.now() + 10 * 60 * 1000),
-          });
-          continue;
-        }
-        await ColdSend.findByIdAndUpdate(send._id, {
-          status: "failed",
-          attempts,
-          error: reason,
-        });
-        const tokenError =
-          err.message &&
-          (err.message.includes("invalid_grant") ||
-            err.message.includes("Invalid Credentials") ||
-            err.message.includes("InvalidAuthenticationToken") ||
-            err.message.includes("reconnect this mailbox"));
-        if (tokenError && send.mailboxId) {
-          await ColdMailbox.findByIdAndUpdate(send.mailboxId, {
-            status: "error",
-            errorMessage: err.message,
-          });
-        }
+        await handleSendError(send, err);
       }
     }
   } finally {
@@ -914,6 +937,7 @@ module.exports = {
   sendOutlookReply,
   personalizeTemplate,
   pickVariant,
+  handleSendError,
   REDIRECT_URI,
   MS_REDIRECT_URI,
 };

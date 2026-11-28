@@ -91,6 +91,9 @@ const adapters = {
   },
 };
 
+// "Other email" mailboxes: IMAP.
+adapters.smtp = (mailbox, seen) => require("./coldSmtp").readImap(mailbox, seen, { days: DAYS, max: MAX_PER_RUN });
+
 async function markSeen(mailbox, id) {
   await ColdSeenMessage.updateOne({ mailboxId: mailbox._id, messageId: id }, { $setOnInsert: { at: new Date() } }, { upsert: true }).catch(() => {});
 }
@@ -143,6 +146,8 @@ async function handleBounce(mailbox, msg, b) {
   await ColdContact.updateOne({ _id: send.contactId }, { status: "suppressed", stage: "bounced", lastActivityAt: new Date() });
   await ColdCampaign.updateOne({ _id: send.campaignId }, { $inc: { "stats.bounced": 1 } });
   await ColdEvent.create({ type: "bounced", sendId: send._id, campaignId: send.campaignId, contactId: send.contactId, mailboxId: mailbox._id, stepIndex: send.stepIndex, variant: send.variant, detail: b.reason, at: msg.receivedAt });
+  // Too many bounces: pause the mailbox / campaign before it hurts the domain's reputation.
+  await require("./coldProtection").afterBounce(mailbox._id, send.campaignId);
   return true;
 }
 
@@ -181,7 +186,7 @@ async function handleReply(mailbox, msg, send) {
 async function scanMailbox(mailbox) {
   const seenRows = await ColdSeenMessage.find({ mailboxId: mailbox._id }).select("messageId").lean();
   const seen = new Set(seenRows.map((r) => r.messageId));
-  const adapter = adapters[mailbox.provider === "outlook" ? "outlook" : "gmail"];
+  const adapter = adapters[mailbox.provider === "outlook" ? "outlook" : mailbox.provider === "smtp" ? "smtp" : "gmail"];
   const messages = await adapter(mailbox, seen);
   const counts = { checked: messages.length, replies: 0, bounces: 0 };
   const mine = mailbox.email.toLowerCase();
@@ -196,7 +201,8 @@ async function scanMailbox(mailbox) {
         continue;
       }
       // Which of our emails is this answering: same thread, else the latest email we sent this person.
-      const send = (msg.threadId && await ColdSend.findOne({ mailboxId: mailbox._id, gmailThreadId: msg.threadId }).sort({ sentAt: -1 }))
+      const threads = msg.threadIds?.length ? msg.threadIds : msg.threadId ? [msg.threadId] : [];
+      const send = (threads.length && await ColdSend.findOne({ mailboxId: mailbox._id, gmailThreadId: { $in: threads } }).sort({ sentAt: -1 }))
         || (fromEmail && await ColdSend.findOne({ mailboxId: mailbox._id, contactEmail: fromEmail, sentAt: { $gte: new Date(Date.now() - 90 * 864e5) } }).sort({ sentAt: -1 }));
       if (send) {
         await handleReply(mailbox, msg, send);
@@ -223,6 +229,8 @@ async function scanAllMailboxes() {
         total.replies += c.replies;
         total.bounces += c.bounces;
       } catch (err) {
+        const protection = require("./coldProtection");
+        if (protection.isSignInError(`${err.message} ${err.response?.data?.error || ""} ${err.code || ""}`)) await protection.markSignInBroken(mailbox._id, err.message);
         total.errors.push(`${mailbox.email}: ${err.message}`);
         console.error(`[cold email] can't read ${mailbox.email}:`, err.message);
       }

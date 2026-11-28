@@ -19,6 +19,8 @@ const M = (n) => require(`../../models/${n}`);
 test.before(async () => {
   mongod = await MongoMemoryServer.create();
   await mongoose.connect(mongod.getUri() + "cleaniq");
+  // These tests email 12 people at example.org; the "same company" spacing rule is tested separately.
+  await M("ColdSettings").create({ key: "main", companySpacingHours: 0 });
   const admin = await M("Admin").collection.insertOne({ username: "boss", password: "x", role: "superadmin" });
   auth = { Authorization: `Bearer ${jwt.sign({ id: admin.insertedId.toString() }, process.env.JWT_SECRET, { algorithm: "HS256" })}` };
   const app = express();

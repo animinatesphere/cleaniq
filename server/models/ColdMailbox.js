@@ -2,7 +2,14 @@ const mongoose = require("mongoose");
 
 const coldMailboxSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  provider: { type: String, enum: ["gmail", "outlook"], default: "gmail" },
+  provider: { type: String, enum: ["gmail", "outlook", "smtp"], default: "gmail" },
+  // "Other email" mailboxes (GoDaddy, Zoho, Hostinger…): send by SMTP, read replies/bounces by IMAP.
+  // Passwords are AES-256-GCM encrypted.
+  smtp: {
+    host: String, port: Number, secure: Boolean, user: String, pass: String,
+    imapHost: String, imapPort: Number, imapSecure: Boolean,
+  },
+  fromName: { type: String, default: "" },
   accessToken: { type: String },       // AES-256-GCM encrypted
   refreshToken: { type: String },      // AES-256-GCM encrypted
   tokenExpiry: { type: Date },
@@ -19,6 +26,9 @@ const coldMailboxSchema = new mongoose.Schema({
   // Last DNS check of the mailbox's domain (SPF/DKIM/DMARC/MX).
   health: { type: Object },
   errorMessage: { type: String },
+  // Paused automatically by Protection (e.g. too many bounces): why and when.
+  pausedReason: { type: String, default: "" },
+  autoPausedAt: { type: Date },
   createdAt: { type: Date, default: () => new Date() },
 });
 

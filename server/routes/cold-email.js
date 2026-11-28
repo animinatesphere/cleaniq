@@ -23,6 +23,8 @@ const publicMailbox = (m) => ({
   ...m,
   accessToken: undefined,
   refreshToken: undefined,
+  smtp: m.smtp ? { ...m.smtp, pass: undefined, hasPassword: !!m.smtp.pass } : undefined,
+  needsReconnect: m.status === "error",
   warmupDay: warmupDay(m),
   todayLimit: effectiveDailyLimit(m),
 });
@@ -139,6 +141,7 @@ router.get("/auth/callback", async (req, res) => {
           : undefined,
         status: "active",
         errorMessage: "",
+        pausedReason: "",
       },
       { upsert: true, new: true },
     );
@@ -205,6 +208,7 @@ router.get("/auth/microsoft/callback", async (req, res) => {
         tokenExpiry: new Date(Date.now() + (tokens.expires_in || 3600) * 1000),
         status: "active",
         errorMessage: "",
+        pausedReason: "",
       },
       { upsert: true, new: true },
     );
@@ -240,6 +244,7 @@ router.patch("/mailboxes/:id", async (req, res) => {
     if (dailyLimit !== undefined)
       update.dailyLimit = Math.max(1, Math.min(10000, Number(dailyLimit)));
     if (status !== undefined) update.status = status;
+    if (status === "active") { update.pausedReason = ""; update.autoPausedAt = null; }
     if (warmupEnabled !== undefined) update.warmupEnabled = !!warmupEnabled;
     if (restartWarmup) {
       update.warmupEnabled = true;
@@ -264,6 +269,200 @@ router.get("/mailboxes/:id/health", async (req, res) => {
     const health = await checkDomain(box.email.split("@")[1], box.provider);
     await ColdMailbox.updateOne({ _id: box._id }, { $set: { health } });
     res.json({ ...health, sendingWindowOpen: inSendingWindow() });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/cold-email/mailboxes/smtp — connect (or update the password of) an "other email"
+// mailbox: GoDaddy, Zoho, Hostinger… Logs in to check the details work before saving.
+router.post("/mailboxes/smtp", async (req, res) => {
+  try {
+    const b = req.body || {};
+    const email = String(b.email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ message: "Enter the email address." });
+    const existing = await ColdMailbox.findOne({ email });
+    if (existing && existing.provider !== "smtp") return res.status(400).json({ message: `${email} is already connected through ${existing.provider === "outlook" ? "Outlook" : "Gmail"}. Use Reconnect on it instead.` });
+    const cfg = {
+      host: String(b.host || "").trim(),
+      port: Number(b.port) || 465,
+      secure: b.secure !== undefined ? !!b.secure : Number(b.port || 465) === 465,
+      user: String(b.user || email).trim(),
+      imapHost: String(b.imapHost || "").trim(),
+      imapPort: Number(b.imapPort) || 993,
+      imapSecure: b.imapSecure !== undefined ? !!b.imapSecure : true,
+    };
+    if (!cfg.host) return res.status(400).json({ message: "Enter the sending (SMTP) server, or pick your email provider." });
+    let pass = String(b.password || "");
+    if (!pass && existing?.smtp?.pass) pass = decrypt(existing.smtp.pass);
+    if (!pass) return res.status(400).json({ message: "Enter the email password (or app password)." });
+    try {
+      await require("../utils/coldSmtp").testConnection(cfg, pass);
+    } catch (err) {
+      return res.status(400).json({ message: err.message });
+    }
+    const box = await ColdMailbox.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          email, provider: "smtp", smtp: { ...cfg, pass: encrypt(pass) }, fromName: String(b.fromName || existing?.fromName || "").slice(0, 80),
+          status: "active", errorMessage: "", pausedReason: "",
+          ...(b.dailyLimit ? { dailyLimit: Math.max(1, Math.min(500, Number(b.dailyLimit))) } : {}),
+        },
+        $setOnInsert: { createdAt: new Date(), warmupEnabled: true, warmupStartedAt: new Date() },
+      },
+      { upsert: true, new: true },
+    ).lean();
+    res.json(publicMailbox(box));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  DOMAINS (mailboxes grouped by domain, with DNS health, warm-up and bounce rate)
+// ═══════════════════════════════════════════════════════════════════════════════
+const domainOfEmail = (e) => String(e || "").split("@")[1] || "";
+
+async function mailboxStats30() {
+  const rows = await ColdSend.aggregate([
+    { $match: { sentAt: { $gte: new Date(Date.now() - 30 * 864e5) }, status: { $in: ["sent", "replied", "bounced"] }, mailboxId: { $ne: null } } },
+    { $group: {
+      _id: "$mailboxId",
+      sent: { $sum: 1 },
+      bounced: { $sum: { $cond: [{ $eq: ["$status", "bounced"] }, 1, 0] } },
+      replied: { $sum: { $cond: [{ $eq: ["$status", "replied"] }, 1, 0] } },
+      opened: { $sum: { $cond: [{ $gt: ["$opens", 0] }, 1, 0] } },
+    } },
+  ]);
+  const r1 = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
+  return Object.fromEntries(rows.map((r) => [String(r._id), { ...r, _id: undefined, bounceRate: r1(r.bounced, r.sent), replyRate: r1(r.replied, r.sent - r.bounced), openRate: r1(r.opened, r.sent - r.bounced) }]));
+}
+
+function mailboxIssues(m, st, maxBounce) {
+  const issues = [];
+  if (m.status === "error") issues.push({ level: "bad", text: m.errorMessage || "The sign-in stopped working. Reconnect this mailbox." });
+  if (m.status === "paused" && m.pausedReason) issues.push({ level: "bad", text: m.pausedReason });
+  else if (m.status === "paused") issues.push({ level: "warn", text: "Paused by you." });
+  if (st?.sent >= 10 && st.bounceRate > maxBounce) issues.push({ level: "bad", text: `Bounce rate ${st.bounceRate}% (keep it under ${maxBounce}%).` });
+  return issues;
+}
+
+router.get("/domains", async (req, res) => {
+  try {
+    const settings = await require("../utils/coldProtection").getSettings();
+    const [boxes, stats] = await Promise.all([ColdMailbox.find().sort({ createdAt: 1 }).lean(), mailboxStats30()]);
+    const groups = {};
+    for (const m of boxes) {
+      const d = domainOfEmail(m.email);
+      groups[d] = groups[d] || { domain: d, mailboxes: [], health: null };
+      const st = stats[String(m._id)] || { sent: 0, bounced: 0, replied: 0, opened: 0, bounceRate: 0, replyRate: 0, openRate: 0 };
+      groups[d].mailboxes.push({ ...publicMailbox(m), stats: st, issues: mailboxIssues(m, st, settings.maxBounceRate) });
+      if (m.health && (!groups[d].health || new Date(m.health.checkedAt) > new Date(groups[d].health.checkedAt))) groups[d].health = m.health;
+    }
+    const domains = Object.values(groups).map((g) => {
+      const sent = g.mailboxes.reduce((n, m) => n + m.stats.sent, 0);
+      const bounced = g.mailboxes.reduce((n, m) => n + m.stats.bounced, 0);
+      const problems = g.mailboxes.filter((m) => m.issues.some((i) => i.level === "bad")).length;
+      const score = g.health?.score;
+      const status = problems ? "attention" : score === undefined ? "unchecked" : score >= 90 ? "excellent" : score >= 70 ? "good" : "attention";
+      return { ...g, sent, bounced, bounceRate: sent ? Math.round((bounced / sent) * 1000) / 10 : 0, problems, status };
+    });
+    res.json({ domains, maxBounceRate: settings.maxBounceRate });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /domains/:domain/check — re-reads the domain's DNS (SPF, DKIM, DMARC, MX) and saves it.
+router.post("/domains/:domain/check", async (req, res) => {
+  try {
+    const domain = String(req.params.domain || "").toLowerCase();
+    const boxes = await ColdMailbox.find({ email: { $regex: `@${domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" } }).lean();
+    if (!boxes.length) return res.status(404).json({ message: "No mailbox on that domain." });
+    const health = await checkDomain(domain, boxes[0].provider === "smtp" ? "" : boxes[0].provider);
+    await ColdMailbox.updateMany({ _id: { $in: boxes.map((b) => b._id) } }, { $set: { health } });
+    res.json(health);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  PROTECTION (sending rules), BOUNCE LOG, ALERTS
+// ═══════════════════════════════════════════════════════════════════════════════
+router.get("/protection", async (req, res) => {
+  try {
+    const p = require("../utils/coldProtection");
+    const [settings, summary] = await Promise.all([p.getSettings(), p.summary(30)]);
+    const boxes = await ColdMailbox.find().select("email health").lean();
+    const domains = {};
+    for (const b of boxes) {
+      const d = domainOfEmail(b.email);
+      if (!domains[d] || (b.health && (!domains[d].health || new Date(b.health.checkedAt) > new Date(domains[d].health.checkedAt)))) domains[d] = { domain: d, health: b.health || null };
+    }
+    const list = Object.values(domains).map((d) => ({
+      domain: d.domain,
+      checked: !!d.health,
+      checks: (d.health?.checks || []).map((c) => ({ key: c.key, label: c.label, level: c.level })),
+    }));
+    res.json({ settings, summary, domains: list });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.put("/protection", async (req, res) => {
+  try {
+    res.json(await require("../utils/coldProtection").saveSettings(req.body || {}));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /bounces?page=&type=hard|soft — every bounce with its reason.
+router.get("/bounces", async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page || "1"));
+    const limit = 50;
+    const types = req.query.type === "soft" ? ["soft_bounce"] : req.query.type === "hard" ? ["bounced"] : ["bounced", "soft_bounce"];
+    const filter = { type: { $in: types } };
+    const [rows, total] = await Promise.all([
+      ColdEvent.find(filter).sort({ at: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      ColdEvent.countDocuments(filter),
+    ]);
+    const [contacts, boxes, camps] = await Promise.all([
+      ColdContact.find({ _id: { $in: rows.map((r) => r.contactId) } }).select("email firstName lastName company").lean(),
+      ColdMailbox.find({ _id: { $in: rows.map((r) => r.mailboxId) } }).select("email").lean(),
+      ColdCampaign.find({ _id: { $in: rows.map((r) => r.campaignId) } }).select("name").lean(),
+    ]);
+    const map = (l) => Object.fromEntries(l.map((x) => [String(x._id), x]));
+    const C = map(contacts); const B = map(boxes); const K = map(camps);
+    res.json({
+      total, page,
+      bounces: rows.map((r) => ({
+        _id: r._id, at: r.at, type: r.type === "bounced" ? "hard" : "soft", reason: r.detail || "",
+        contact: C[String(r.contactId)] || null, mailbox: B[String(r.mailboxId)]?.email || "", campaign: K[String(r.campaignId)]?.name || "", campaignId: r.campaignId,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /alerts — things that need the owner: broken sign-ins, auto-paused mailboxes and campaigns.
+router.get("/alerts", async (req, res) => {
+  try {
+    const [boxes, camps] = await Promise.all([
+      ColdMailbox.find({ $or: [{ status: "error" }, { status: "paused", pausedReason: { $nin: ["", null] } }] }).select("email provider status errorMessage pausedReason").lean(),
+      ColdCampaign.find({ status: "paused", pausedReason: { $nin: ["", null] } }).select("name pausedReason").lean(),
+    ]);
+    res.json({
+      alerts: [
+        ...boxes.map((b) => ({ kind: b.status === "error" ? "reconnect" : "mailbox_paused", id: b._id, provider: b.provider, title: b.status === "error" ? `${b.email} needs reconnecting` : `${b.email} was paused`, text: b.status === "error" ? b.errorMessage : b.pausedReason })),
+        ...camps.map((c) => ({ kind: "campaign_paused", id: c._id, title: `Campaign "${c.name}" was paused`, text: c.pausedReason })),
+      ],
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -940,7 +1139,7 @@ router.post("/campaigns/:id/resume", async (req, res) => {
   try {
     const campaign = await ColdCampaign.findByIdAndUpdate(
       req.params.id,
-      { status: "active" },
+      { status: "active", pausedReason: "", autoPausedAt: null },
       { new: true },
     );
     if (!campaign) return res.status(404).json({ message: "Not found" });
@@ -1366,6 +1565,8 @@ router.post("/inbox/contact/:contactId/respond", async (req, res) => {
     const to = (String(last.from).match(/[^\s<>]+@[^\s<>]+/) || [""])[0];
     const sent = mailbox.provider === "outlook"
       ? await engine.sendOutlookReply(mailbox, { messageId: last.providerMessageId, text })
+      : mailbox.provider === "smtp"
+      ? await require("../utils/coldSmtp").sendSmtpReply(mailbox, { to, subject: last.subject || "", text, inReplyTo: last.internetMessageId, fromName: campaign?.fromName || "" })
       : await engine.sendGmailReply(mailbox, { to, subject: last.subject || "", text, threadId: last.threadId, inReplyTo: last.internetMessageId, fromName: campaign?.fromName || "" });
     const out = await ColdReply.create({
       direction: "out", sendId: last.sendId, campaignId: last.campaignId, contactId: last.contactId, mailboxId: mailbox._id,

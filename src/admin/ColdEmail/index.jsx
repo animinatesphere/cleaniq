@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Mail, Users, Inbox, ShieldOff, BarChart2, MessageSquare } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Mail, Users, Inbox, ShieldOff, BarChart2, MessageSquare, Globe, ShieldCheck, AlertTriangle } from "lucide-react";
 import Mailboxes from "./Mailboxes";
 import Contacts from "./Contacts";
 import Campaigns from "./Campaigns";
 import Suppression from "./Suppression";
 import ReplyInbox from "./Inbox";
 import Analytics from "./Analytics";
+import Domains from "./Domains";
+import Protection from "./Protection";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -15,7 +17,9 @@ const TABS = [
   { id: "inbox",       label: "Inbox",       icon: MessageSquare },
   { id: "analytics",   label: "Analytics",   icon: BarChart2 },
   { id: "contacts",    label: "Contacts",     icon: Users },
+  { id: "domains",     label: "Domains",      icon: Globe },
   { id: "mailboxes",   label: "Mailboxes",    icon: Inbox },
+  { id: "protection",  label: "Protection",   icon: ShieldCheck },
   { id: "suppression", label: "Suppression",  icon: ShieldOff },
 ];
 
@@ -26,6 +30,8 @@ export default function ColdEmail() {
   const [stats, setStats] = useState(null);
   const [connected, setConnected] = useState(searchParams.get("connected") === "1");
   const [oauthError, setOauthError] = useState(searchParams.get("error") || "");
+  const [alerts, setAlerts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Clean URL params after reading
@@ -40,6 +46,12 @@ export default function ColdEmail() {
     })
       .then((r) => r.json())
       .then(setStats)
+      .catch(() => {});
+    fetch(`${API}/cold-email/alerts`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("adminToken") || ""}` },
+    })
+      .then((r) => r.json())
+      .then((d) => setAlerts(d.alerts || []))
       .catch(() => {});
   }, [activeTab]);
 
@@ -77,6 +89,27 @@ export default function ColdEmail() {
         <div className="flex items-center gap-3 bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-3">
           <span className="text-rose-400 text-sm font-semibold">OAuth error: {oauthError}. Please try again.</span>
           <button onClick={() => setOauthError("")} className="ml-auto text-rose-400/60 hover:text-rose-400 text-lg leading-none cursor-pointer">×</button>
+        </div>
+      )}
+
+      {/* ── Things that need fixing (broken sign-ins, auto-paused) ──── */}
+      {alerts.length > 0 && (
+        <div className="space-y-2">
+          {alerts.map((a) => (
+            <div key={`${a.kind}-${a.id}`} className={`flex items-start gap-3 rounded-xl px-4 py-3 border ${a.kind === "reconnect" ? "bg-rose-500/10 border-rose-500/25" : "bg-amber-500/10 border-amber-500/25"}`}>
+              <AlertTriangle size={16} className={`shrink-0 mt-0.5 ${a.kind === "reconnect" ? "text-rose-400" : "text-amber-400"}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-bold ${a.kind === "reconnect" ? "text-rose-300" : "text-amber-300"}`}>{a.title}</p>
+                {a.text && <p className="text-white/55 text-xs mt-0.5">{a.text}</p>}
+              </div>
+              <button
+                onClick={() => (a.kind === "campaign_paused" ? navigate(`/admin/cold-email/${a.id}`) : switchTab("mailboxes"))}
+                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer text-white ${a.kind === "reconnect" ? "bg-rose-500 hover:bg-rose-400" : "bg-amber-500 hover:bg-amber-400"}`}
+              >
+                {a.kind === "reconnect" ? "Fix now" : "Review"}
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
@@ -133,7 +166,9 @@ export default function ColdEmail() {
         {activeTab === "inbox"       && <ReplyInbox  />}
         {activeTab === "analytics"   && <Analytics   />}
         {activeTab === "contacts"    && <Contacts    />}
+        {activeTab === "domains"     && <Domains     />}
         {activeTab === "mailboxes"   && <Mailboxes   />}
+        {activeTab === "protection"  && <Protection  onGoDomains={() => switchTab("domains")} />}
         {activeTab === "suppression" && <Suppression />}
       </div>
     </div>

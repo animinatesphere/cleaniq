@@ -21,6 +21,9 @@ const coldCampaignSchema = new mongoose.Schema({
     enum: ["draft", "active", "scheduled", "paused", "completed"],
     default: "draft",
   },
+  // Paused automatically by Protection (e.g. too many bounces): why and when.
+  pausedReason: { type: String, default: "" },
+  autoPausedAt: { type: Date },
   steps: [stepSchema],
   mailboxIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "ColdMailbox" }],
   contactIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "ColdContact" }],

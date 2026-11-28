@@ -182,6 +182,13 @@ export default function CampaignDetail() {
         </div>
       </div>
 
+      {campaign.status === "paused" && campaign.pausedReason && (
+        <div className="flex items-start gap-3 bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3">
+          <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-amber-200/90 text-sm">{campaign.pausedReason} Its emails are waiting, not cancelled.</p>
+        </div>
+      )}
+
       {/* Results: sent → delivered → opened → clicked → replied */}
       {stats ? (
         <div className="space-y-4">

@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 
 const coldEventSchema = new mongoose.Schema({
-  type: { type: String, enum: ["sent", "opened", "clicked", "replied", "auto_reply", "bounced", "soft_bounce", "unsubscribed"], required: true },
+  type: { type: String, enum: ["sent", "opened", "clicked", "replied", "auto_reply", "bounced", "soft_bounce", "unsubscribed", "protected"], required: true },
   sendId: { type: mongoose.Schema.Types.ObjectId, ref: "ColdSend" },
   campaignId: { type: mongoose.Schema.Types.ObjectId, ref: "ColdCampaign" },
   contactId: { type: mongoose.Schema.Types.ObjectId, ref: "ColdContact" },

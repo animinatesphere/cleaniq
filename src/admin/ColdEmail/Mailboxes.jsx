@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Inbox, Trash2, Pause, Play, AlertCircle, ShieldCheck, CheckCircle2, XCircle, Loader2, Flame } from "lucide-react";
+import { Inbox, Trash2, Pause, Play, AlertCircle, ShieldCheck, CheckCircle2, XCircle, Loader2, Flame, Mail, RefreshCw } from "lucide-react";
+import SmtpModal from "./SmtpModal";
 
 const API = import.meta.env.VITE_API_URL;
 const token = () => localStorage.getItem("adminToken") || "";
@@ -36,6 +37,7 @@ export default function Mailboxes() {
   const [saving, setSaving]       = useState(false);
   const [checking, setChecking]   = useState(null); // mailbox id whose domain is being checked
   const [openHealth, setOpenHealth] = useState(null);
+  const [smtpFor, setSmtpFor] = useState(null); // null = closed, {} = new, mailbox = update password
 
   async function load() {
     setLoading(true);
@@ -123,6 +125,12 @@ export default function Mailboxes() {
             </svg>
             Connect Microsoft 365
           </a>
+          <button
+            onClick={() => setSmtpFor({})}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.07] border border-white/[0.12] text-white font-bold text-sm rounded-xl hover:bg-white/[0.12] transition-all cursor-pointer"
+          >
+            <Mail size={16} /> Other email (SMTP)
+          </button>
         </div>
       </div>
 
@@ -166,12 +174,14 @@ export default function Mailboxes() {
             const healthBad = health?.checks?.some((c) => c.level === "bad");
             const isEdit = editId === box._id;
             const isOutlook = box.provider === "outlook";
+            const isSmtp = box.provider === "smtp";
+            const reconnect = () => (isSmtp ? setSmtpFor(box) : (window.location.href = isOutlook ? outlookAuthUrl : gmailAuthUrl));
             return (
               <div key={box._id} className="bg-[#0B2D22] border border-white/[0.06] rounded-2xl p-5">
                 <div className="flex items-start gap-4">
                   {/* Provider avatar */}
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow ${isOutlook ? "bg-[#0078D4]" : "bg-white"}`}>
-                    {isOutlook
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow ${isOutlook ? "bg-[#0078D4]" : isSmtp ? "bg-emerald-500/20" : "bg-white"}`}>
+                    {isSmtp ? <Mail size={19} className="text-emerald-300" /> : isOutlook
                       ? <svg width="20" height="20" viewBox="0 0 21 21" fill="none">
                           <path d="M0 5.25L10.5 10.5L21 5.25" stroke="white" strokeWidth="2"/>
                           <path d="M10.5 10.5V21" stroke="white" strokeWidth="2"/>
@@ -188,20 +198,29 @@ export default function Mailboxes() {
                       <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
                         isOutlook ? "bg-blue-500/15 text-blue-400" : "bg-white/10 text-white/50"
                       }`}>
-                        {isOutlook ? "Microsoft 365" : "Gmail"}
+                        {isOutlook ? "Microsoft 365" : isSmtp ? "Other (SMTP)" : "Gmail"}
                       </span>
                       {/* Status badge */}
                       <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
                         box.status === "active" ? "bg-emerald-500/15 text-emerald-400" :
                         box.status === "paused" ? "bg-amber-500/15 text-amber-400"   :
                                                    "bg-rose-500/15 text-rose-400"
-                      }`}>{box.status}</span>
+                      }`}>{box.status === "error" ? "Reconnect needed" : box.pausedReason ? "Auto-paused" : box.status}</span>
                     </div>
 
-                    {box.status === "error" && box.errorMessage && (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <AlertCircle size={12} className="text-rose-400 shrink-0" />
-                        <p className="text-rose-400 text-xs">{box.errorMessage}</p>
+                    {box.status === "error" && (
+                      <div className="flex items-start gap-2 mt-2 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
+                        <AlertCircle size={14} className="text-rose-400 shrink-0 mt-0.5" />
+                        <p className="text-rose-300 text-xs flex-1">{box.errorMessage || "The sign-in for this mailbox stopped working."} Nothing is sent from it until it's fixed; its emails wait.</p>
+                        <button onClick={reconnect} className="flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-md bg-rose-500 text-white text-xs font-bold hover:bg-rose-400 cursor-pointer">
+                          <RefreshCw size={11} /> {isSmtp ? "Update password" : "Reconnect"}
+                        </button>
+                      </div>
+                    )}
+                    {box.status === "paused" && box.pausedReason && (
+                      <div className="flex items-start gap-2 mt-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+                        <AlertCircle size={14} className="text-amber-400 shrink-0 mt-0.5" />
+                        <p className="text-amber-200/90 text-xs flex-1">{box.pausedReason}</p>
                       </div>
                     )}
 
@@ -326,6 +345,8 @@ export default function Mailboxes() {
           })}
         </div>
       )}
+
+      {smtpFor && <SmtpModal mailbox={smtpFor._id ? smtpFor : null} onClose={() => setSmtpFor(null)} onSaved={load} />}
 
       {/* Setup instructions — both providers */}
       <div className="grid sm:grid-cols-2 gap-3">

@@ -170,4 +170,4 @@ const MIN_GAP_MS = 4 * 60 * 1000;
 const MAX_EXTRA_MS = 5 * 60 * 1000;
 const nextSendAfter = (from = new Date()) => new Date(from.getTime() + MIN_GAP_MS + Math.floor(Math.random() * MAX_EXTRA_MS));
 
-module.exports = { checkDomain, effectiveDailyLimit, warmupDay, inSendingWindow, nextSendAfter, WARMUP_START, WARMUP_STEP };
+module.exports = { checkDomain, effectiveDailyLimit, warmupDay, inSendingWindow, nextSendAfter, WARMUP_START, WARMUP_STEP, FREE_DOMAINS };
