@@ -1021,6 +1021,9 @@ function Wizard({ onClose, onCreated, editCampaign }) {
             : [{ order: 0, subject: "", body: "", waitDays: 0 }],
           contactIds: editCampaign.contactIds || [],
           status: editCampaign.status || "draft",
+          trackOpens: editCampaign.trackOpens !== false,
+          trackClicks: editCampaign.trackClicks !== false,
+          skipInvalid: editCampaign.skipInvalid !== false,
         }
       : {
           name: "",
@@ -1030,6 +1033,9 @@ function Wizard({ onClose, onCreated, editCampaign }) {
           steps: [{ order: 0, subject: "", body: "", waitDays: 0 }],
           contactIds: [],
           status: "draft",
+          trackOpens: true,
+          trackClicks: true,
+          skipInvalid: true,
         },
   );
 
@@ -1292,7 +1298,15 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                     <code className="text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
                       {"{{domain}}"}
                     </code>{" "}
-                    to personalise. Unsubscribe link added automatically.
+                    to personalise. Add a fallback for empty fields with{" "}
+                    <code className="text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
+                      {"{{first_name|there}}"}
+                    </code>
+                    . Any column from your contact upload works too, e.g.{" "}
+                    <code className="text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
+                      {"{{city}}"}
+                    </code>
+                    . Unsubscribe link added automatically.
                   </div>
                   <button
                     onClick={() => setShowTplPicker((v) => !v)}
@@ -1508,6 +1522,45 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                         </button>
                       ))}
                     </div>
+
+                    {/* A/B test: a second version of this step; half the contacts get each */}
+                    <div className="border-t border-white/[0.05]">
+                      {s.abOpen || s.subjectB?.trim() || s.bodyB?.trim() ? (
+                        <div className="px-4 py-3 space-y-2 bg-indigo-500/[0.03]">
+                          <div className="flex items-center justify-between">
+                            <p className="text-indigo-300 text-xs font-bold">Version B (A/B test) — half your contacts get this version</p>
+                            <button
+                              onClick={() => setData((d) => ({ ...d, steps: d.steps.map((x, i) => (i === idx ? { ...x, subjectB: "", bodyB: "", abOpen: false } : x)) }))}
+                              className="text-white/30 hover:text-rose-400 text-[11px] cursor-pointer"
+                            >
+                              Remove version B
+                            </button>
+                          </div>
+                          <input
+                            type="text"
+                            value={s.subjectB || ""}
+                            onChange={(e) => setStepField(idx, "subjectB", e.target.value)}
+                            placeholder="Different subject (leave empty to use the same one)"
+                            className="w-full bg-white/[0.03] border border-white/[0.07] rounded-lg px-3 py-2 text-white/90 placeholder:text-white/20 text-sm focus:outline-none focus:border-indigo-400/40"
+                          />
+                          <textarea
+                            value={s.bodyB || ""}
+                            onChange={(e) => setStepField(idx, "bodyB", e.target.value)}
+                            rows={6}
+                            placeholder="Different email text (leave empty to use the same one)"
+                            className="w-full bg-white/[0.03] border border-white/[0.07] rounded-lg px-3 py-2 text-white/85 placeholder:text-white/20 text-sm focus:outline-none focus:border-indigo-400/40 resize-y leading-relaxed"
+                          />
+                          <p className="text-white/25 text-[11px]">See which version gets more opens and replies on the campaign page.</p>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setStepField(idx, "abOpen", true)}
+                          className="w-full text-left px-4 py-2.5 text-indigo-300/70 hover:text-indigo-300 text-xs font-bold cursor-pointer"
+                        >
+                          + Add version B (A/B test)
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
 
@@ -1669,6 +1722,37 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                             </p>
                           </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-white/40 text-xs font-bold uppercase tracking-wider block mb-2">
+                    Tracking & safety
+                  </label>
+                  <div className="space-y-2">
+                    {[
+                      { key: "trackOpens", label: "Track opens", desc: "See who opened your email (an estimate — some email apps open emails automatically)." },
+                      { key: "trackClicks", label: "Track link clicks", desc: "See who clicked a link in your email." },
+                      { key: "skipInvalid", label: "Skip emails that can't receive mail", desc: "Addresses with no mail server are skipped, so they don't bounce and hurt your mailbox." },
+                    ].map((opt) => {
+                      const on = data[opt.key] !== false;
+                      return (
+                        <button
+                          type="button"
+                          key={opt.key}
+                          onClick={() => setData((d) => ({ ...d, [opt.key]: !on }))}
+                          className={`w-full flex items-start gap-3 px-4 py-3 rounded-xl border text-left cursor-pointer transition-all ${on ? "bg-emerald-500/[0.06] border-emerald-500/25" : "bg-white/[0.025] border-white/[0.07]"}`}
+                        >
+                          <span className={`mt-0.5 w-9 h-5 rounded-full relative shrink-0 transition-all ${on ? "bg-emerald-500" : "bg-white/15"}`}>
+                            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${on ? "left-[18px]" : "left-0.5"}`} />
+                          </span>
+                          <span>
+                            <span className={`block text-sm font-bold ${on ? "text-white" : "text-white/60"}`}>{opt.label}</span>
+                            <span className="block text-white/30 text-xs mt-0.5 leading-relaxed">{opt.desc}</span>
+                          </span>
+                        </button>
                       );
                     })}
                   </div>

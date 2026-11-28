@@ -91,8 +91,10 @@ export default function Mailboxes() {
     load();
   }
 
-  const gmailAuthUrl   = `${API}/cold-email/auth/google`;
-  const outlookAuthUrl = `${API}/cold-email/auth/microsoft`;
+  // The connect pages need the admin login, passed in the link (a normal link can't send headers).
+  const adminT = encodeURIComponent(localStorage.getItem("adminToken") || "");
+  const gmailAuthUrl   = `${API}/cold-email/auth/google?t=${adminT}`;
+  const outlookAuthUrl = `${API}/cold-email/auth/microsoft?t=${adminT}`;
 
   return (
     <div className="space-y-5">

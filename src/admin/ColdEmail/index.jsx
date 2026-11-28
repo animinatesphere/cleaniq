@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Mail, Users, Inbox, ShieldOff, BarChart2 } from "lucide-react";
+import { Mail, Users, Inbox, ShieldOff, BarChart2, MessageSquare } from "lucide-react";
 import Mailboxes from "./Mailboxes";
 import Contacts from "./Contacts";
 import Campaigns from "./Campaigns";
 import Suppression from "./Suppression";
+import ReplyInbox from "./Inbox";
+import Analytics from "./Analytics";
 
 const API = import.meta.env.VITE_API_URL;
 
 const TABS = [
   { id: "campaigns",   label: "Campaigns",   icon: Mail },
+  { id: "inbox",       label: "Inbox",       icon: MessageSquare },
+  { id: "analytics",   label: "Analytics",   icon: BarChart2 },
   { id: "contacts",    label: "Contacts",     icon: Users },
   { id: "mailboxes",   label: "Mailboxes",    icon: Inbox },
   { id: "suppression", label: "Suppression",  icon: ShieldOff },
@@ -80,8 +84,8 @@ export default function ColdEmail() {
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Total Sent",       value: stats.totalSent,      icon: "✉",  color: "emerald", tab: "campaigns"   },
-            { label: "Replies",          value: stats.totalReplied,   icon: "💬", color: "blue",    tab: "campaigns"   },
+            { label: "Total Sent",       value: stats.totalSent,      icon: "✉",  color: "emerald", tab: "analytics"   },
+            { label: "Replies",          value: stats.totalReplied,   icon: "💬", color: "blue",    tab: "inbox"       },
             { label: "Contacts",         value: stats.activeContacts, icon: "👥", color: "purple",  tab: "contacts"    },
             { label: "Active Mailboxes", value: stats.totalMailboxes, icon: "📬", color: "amber",   tab: "mailboxes"   },
           ].map(({ label, value, icon, color, tab }) => (
@@ -126,6 +130,8 @@ export default function ColdEmail() {
       {/* ── Tab Content ───────────────────────────────────────────── */}
       <div>
         {activeTab === "campaigns"   && <Campaigns   onStatsChange={() => {}} />}
+        {activeTab === "inbox"       && <ReplyInbox  />}
+        {activeTab === "analytics"   && <Analytics   />}
         {activeTab === "contacts"    && <Contacts    />}
         {activeTab === "mailboxes"   && <Mailboxes   />}
         {activeTab === "suppression" && <Suppression />}

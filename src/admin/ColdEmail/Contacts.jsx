@@ -9,7 +9,11 @@ import {
   X,
   UserPlus,
   Pencil,
+  ShieldCheck,
 } from "lucide-react";
+import { STAGES, VERIFY, api } from "./coldApi";
+import { Pill } from "./parts";
+import ContactActivity from "./ContactActivity";
 
 const API = import.meta.env.VITE_API_URL;
 const auth = () => ({
@@ -51,6 +55,9 @@ export default function Contacts() {
   });
   const [addErr, setAddErr] = useState("");
   const [addSaving, setAddSaving] = useState(false);
+  const [activityId, setActivityId] = useState(null);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyNote, setVerifyNote] = useState("");
   const fileRef = useRef();
   const LIMIT = 50;
 
@@ -74,6 +81,19 @@ export default function Contacts() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Checks every unchecked address (or the selected ones): does it have a mail server, is it disposable, etc.
+  async function checkEmails() {
+    setVerifying(true); setVerifyNote("");
+    try {
+      const ids = selected.size ? [...selected] : undefined;
+      const r = await api("/contacts/verify", { method: "POST", body: JSON.stringify(ids ? { ids } : {}) });
+      const c = r.counts || {};
+      setVerifyNote(`Checked. ${c.valid || 0} valid · ${c.risky || 0} risky · ${c.invalid || 0} can't receive email${c.unknown ? ` · ${c.unknown} not checked yet` : ""}. Invalid ones are skipped when sending.`);
+      await load();
+    } catch (e) { setVerifyNote(e.message); }
+    finally { setVerifying(false); }
+  }
 
   // Reset page on search/view change
   useEffect(() => { setPage(1); }, [search, view]);
@@ -253,6 +273,14 @@ export default function Contacts() {
 
   return (
     <div className="space-y-5">
+      {activityId && <ContactActivity contactId={activityId} onClose={() => { setActivityId(null); load(); }} />}
+      {verifyNote && (
+        <div className="flex items-start gap-3 bg-white/[0.04] border border-white/[0.07] rounded-xl px-4 py-3">
+          <ShieldCheck size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+          <p className="text-white/60 text-sm flex-1">{verifyNote}</p>
+          <button onClick={() => setVerifyNote("")} className="text-white/30 hover:text-white/70 cursor-pointer">×</button>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
@@ -274,6 +302,14 @@ export default function Contacts() {
               {deleting ? "Deleting…" : `Delete ${selected.size}`}
             </button>
           )}
+          <button
+            onClick={checkEmails}
+            disabled={verifying}
+            title="Check which addresses can actually receive email, so they don't bounce"
+            className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/10 text-white/70 text-sm font-bold rounded-xl hover:bg-white/10 transition-all cursor-pointer disabled:opacity-50"
+          >
+            <ShieldCheck size={14} /> {verifying ? "Checking…" : selected.size ? `Check ${selected.size} emails` : "Check emails"}
+          </button>
           <button
             onClick={openAddModal}
             className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/10 text-white/70 text-sm font-bold rounded-xl hover:bg-white/10 transition-all cursor-pointer"
@@ -489,13 +525,18 @@ export default function Contacts() {
                         <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${c.contacted ? "bg-blue-500/15 text-blue-400" : "bg-white/[0.07] text-white/50"}`}>
                           {(name[0] || "?").toUpperCase()}
                         </div>
-                        <span className="text-white/80 text-sm font-medium truncate">{name}</span>
+                        <button onClick={() => setActivityId(c._id)} title="See everything that happened with this contact" className="text-white/80 text-sm font-medium truncate hover:underline cursor-pointer text-left">{name}</button>
                       </div>
-                      <span className="text-white/50 text-sm truncate">{c.email}</span>
+                      <span className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-white/50 text-sm truncate">{c.email}</span>
+                        {c.verification?.status && c.verification.status !== "unknown" && <Pill map={VERIFY} value={c.verification.status} />}
+                      </span>
                       <span className="text-white/40 text-sm truncate">{c.company || "—"}</span>
                       <span className="text-white/40 text-sm truncate">{c.domain || getDomainFromEmail(c.email) || "—"}</span>
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        {c.contacted && (
+                        {c.stage && c.stage !== "new" ? (
+                          <Pill map={STAGES} value={c.stage} fallback="new" />
+                        ) : c.contacted && (
                           <span className="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-500/20 whitespace-nowrap">
                             ✓ Emailed
                           </span>

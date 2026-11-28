@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, MessageSquare, Ban, AlertCircle, RefreshCw, Users, CheckCircle2, Clock, XCircle, ChevronRight } from "lucide-react";
+import { ArrowLeft, MessageSquare, Ban, AlertCircle, RefreshCw, CheckCircle2, Clock, XCircle, ChevronRight, Eye, MousePointerClick } from "lucide-react";
+import { STAGES, VERIFY, api } from "./coldApi";
+import { Funnel, FunnelNote, DailyChart, RateTable, Pill } from "./parts";
+import { Conversation } from "./Inbox";
 
 const API = import.meta.env.VITE_API_URL;
 const auth = () => ({ Authorization: `Bearer ${localStorage.getItem("adminToken") || ""}` });
@@ -34,6 +37,8 @@ export default function CampaignDetail() {
   const [loading, setLoading]   = useState(true);
   const [sendsLoading, setSendsLoading] = useState(true);
   const [actionBusy, setActionBusy]     = useState("");
+  const [stats, setStats]               = useState(null);
+  const [openContact, setOpenContact]   = useState(null);
 
   const loadCampaign = useCallback(async () => {
     const r = await fetch(`${API}/cold-email/campaigns/${campaignId}`, { headers: auth() });
@@ -53,7 +58,11 @@ export default function CampaignDetail() {
     setSendsLoading(false);
   }, [campaignId, page, statusFilter]);
 
-  useEffect(() => { loadCampaign(); }, [loadCampaign]);
+  const loadStats = useCallback(async () => {
+    try { setStats(await api(`/campaigns/${campaignId}/analytics`)); } catch { /* shown as empty */ }
+  }, [campaignId]);
+
+  useEffect(() => { loadCampaign(); loadStats(); }, [loadCampaign, loadStats]);
   useEffect(() => { loadSends(); }, [loadSends]);
 
   async function doAction(verb) {
@@ -113,6 +122,10 @@ export default function CampaignDetail() {
     completed: "bg-blue-500/15 text-blue-400",
   };
 
+  if (openContact) {
+    return <Conversation contactId={openContact} onBack={() => { setOpenContact(null); loadSends(); loadStats(); }} />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
@@ -140,7 +153,7 @@ export default function CampaignDetail() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => loadCampaign() & loadSends()}
+            onClick={() => { loadCampaign(); loadSends(); loadStats(); }}
             className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/[0.07] flex items-center justify-center text-white/40 hover:text-white/80 hover:bg-white/10 cursor-pointer transition-all"
             title="Refresh"
           >
@@ -169,21 +182,37 @@ export default function CampaignDetail() {
         </div>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: "Emails Sent",    value: s.sent || 0,         sub: "",              color: "text-white/80",   bg: "bg-white/[0.04]"     },
-          { label: "Replied",        value: s.replied || 0,      sub: `${replyRate}%`, color: "text-emerald-400", bg: "bg-emerald-500/[0.06]" },
-          { label: "Unsubscribed",   value: s.unsubscribed || 0, sub: "",              color: "text-amber-400",  bg: "bg-amber-500/[0.05]"  },
-          { label: "Bounced/Failed", value: (s.bounced || 0) + (s.failed || 0), sub: "", color: "text-rose-400", bg: "bg-rose-500/[0.05]" },
-        ].map(({ label, value, sub, color, bg }) => (
-          <div key={label} className={`${bg} border border-white/[0.06] rounded-xl px-4 py-4`}>
-            <p className={`font-black text-2xl leading-none ${color}`}>{value.toLocaleString()}</p>
-            {sub && <p className={`text-xs font-bold mt-0.5 ${color} opacity-70`}>{sub} rate</p>}
-            <p className="text-white/30 text-xs mt-1">{label}</p>
-          </div>
-        ))}
-      </div>
+      {/* Results: sent → delivered → opened → clicked → replied */}
+      {stats ? (
+        <div className="space-y-4">
+          <Funnel f={stats.total} />
+          <FunnelNote f={stats.total} />
+          <DailyChart days={stats.daily} />
+          <RateTable title="By step" rows={(stats.steps || []).map((r) => ({ ...r, name: `Step ${r.key + 1}${r.subject ? ` — ${r.subject}` : ""}` }))} />
+          {(stats.variants || []).some((v) => v.variant === "B") && (
+            <RateTable
+              title="A/B test — which version wins"
+              rows={stats.variants.map((v) => ({ ...v, name: `Step ${v.step + 1} · version ${v.variant}`, bounceRate: v.sent ? Math.round((v.bounced / v.sent) * 1000) / 10 : 0 }))}
+            />
+          )}
+          <RateTable title="By mailbox" rows={stats.mailboxes} nameKey="email" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: "Emails Sent", value: s.sent || 0 },
+            { label: "Replied", value: s.replied || 0, sub: `${replyRate}%` },
+            { label: "Unsubscribed", value: s.unsubscribed || 0 },
+            { label: "Bounced/Failed", value: (s.bounced || 0) + (s.failed || 0) },
+          ].map(({ label, value, sub }) => (
+            <div key={label} className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-4 py-4">
+              <p className="font-black text-2xl leading-none text-white/80">{value.toLocaleString()}</p>
+              {sub && <p className="text-xs font-bold mt-0.5 text-white/50">{sub} rate</p>}
+              <p className="text-white/30 text-xs mt-1">{label}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Sequence steps */}
       <div>
@@ -227,7 +256,7 @@ export default function CampaignDetail() {
             >
               <RefreshCw size={11} className={actionBusy === "retry" ? "animate-spin" : ""} /> Retry failed
             </button>
-            {["", "pending", "sent", "replied", "failed", "skipped"].map((st) => (
+            {["", "pending", "delivered", "opened", "clicked", "replied", "bounced", "failed", "skipped"].map((st) => (
               <button
                 key={st}
                 onClick={() => { setStatusFilter(st); setPage(1); }}
@@ -245,12 +274,13 @@ export default function CampaignDetail() {
 
         <div className="bg-[#0B2D22] border border-white/[0.06] rounded-2xl overflow-hidden">
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_1fr_80px_100px_120px] gap-x-4 px-5 py-2.5 border-b border-white/[0.06] text-[10px] font-bold text-white/30 uppercase tracking-wider">
+          <div className="grid grid-cols-[1fr_1fr_70px_110px_110px_110px] gap-x-4 px-5 py-2.5 border-b border-white/[0.06] text-[10px] font-bold text-white/30 uppercase tracking-wider">
             <span>Contact</span>
             <span>Email</span>
             <span>Step</span>
             <span>Status</span>
-            <span>Scheduled</span>
+            <span>Opens / clicks</span>
+            <span>When</span>
           </div>
 
           {sendsLoading ? (
@@ -270,15 +300,22 @@ export default function CampaignDetail() {
                   : send.contactEmail;
                 const when = send.sentAt || send.scheduledAt;
                 return (
-                  <div key={send._id} className="grid grid-cols-[1fr_1fr_80px_100px_120px] gap-x-4 px-5 py-3 border-b border-white/[0.03] items-center last:border-0 hover:bg-white/[0.02] transition-colors">
-                    <div className="flex items-center gap-2 min-w-0">
+                  <div key={send._id} className="grid grid-cols-[1fr_1fr_70px_110px_110px_110px] gap-x-4 px-5 py-3 border-b border-white/[0.03] items-center last:border-0 hover:bg-white/[0.02] transition-colors">
+                    <div className="flex items-center gap-2 min-w-0 cursor-pointer" title="Open the whole conversation" onClick={() => c._id && setOpenContact(c._id)}>
                       <div className="w-6 h-6 rounded-md bg-white/[0.07] flex items-center justify-center text-[10px] font-black text-white/40 shrink-0">
                         {(name[0] || "?").toUpperCase()}
                       </div>
-                      <span className="text-white/80 text-sm truncate">{name}</span>
+                      <span className="text-white/80 text-sm truncate hover:underline">{name}</span>
+                      {c.stage && c.stage !== "new" && c.stage !== "contacted" && <Pill map={STAGES} value={c.stage} />}
                     </div>
                     <div className="min-w-0">
-                      <span className="block text-white/40 text-xs truncate">{send.contactEmail}</span>
+                      <span className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-white/40 text-xs truncate">{send.contactEmail}</span>
+                        {c.verification?.status && c.verification.status !== "valid" && c.verification.status !== "unknown" && <Pill map={VERIFY} value={c.verification.status} />}
+                      </span>
+                      {send.status === "bounced" && send.bounceReason && (
+                        <p title={send.bounceReason} className="mt-1 text-orange-300/80 text-[10px] leading-snug line-clamp-2">{send.bounceReason}</p>
+                      )}
                       {send.status === "pending" && send.error && (
                         <p title={send.error} className="mt-1 text-amber-300/80 text-[10px] leading-snug line-clamp-2">
                           {send.error}
@@ -297,6 +334,11 @@ export default function CampaignDetail() {
                         {send.status}
                       </span>
                     </div>
+                    <span className="flex items-center gap-2.5 text-xs">
+                      <span title="Opened" className={`flex items-center gap-1 ${send.opens ? "text-cyan-300" : "text-white/20"}`}><Eye size={11} />{send.opens || 0}</span>
+                      <span title="Clicked" className={`flex items-center gap-1 ${send.clicks ? "text-indigo-300" : "text-white/20"}`}><MousePointerClick size={11} />{send.clicks || 0}</span>
+                      {send.variant === "B" && <span className="text-[10px] text-white/40 font-bold">B</span>}
+                    </span>
                     <span className="text-white/30 text-xs">
                       {when ? new Date(when).toLocaleDateString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
                     </span>
