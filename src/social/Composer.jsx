@@ -1,7 +1,7 @@
 // Create or edit a post: choose accounts, write once (or per network), add photos, preview it as
 // each network shows it, then post now, schedule or save as a draft.
 import { useEffect, useMemo, useState } from "react";
-import { Film, ImagePlus, Send, CalendarClock, Save, AlertTriangle, ArrowLeft, ArrowRight, Trash2, Heart, MessageCircle, Repeat2, Share2, Bookmark, ThumbsUp, Globe2, MoreHorizontal, Upload, Check } from "lucide-react";
+import { Sparkles, Film, ImagePlus, Send, CalendarClock, Save, AlertTriangle, ArrowLeft, ArrowRight, Trash2, Heart, MessageCircle, Repeat2, Share2, Bookmark, ThumbsUp, Globe2, MoreHorizontal, Upload, Check } from "lucide-react";
 import { api, photoUrl, uploadFiles } from "./api";
 import { NETWORKS, NETWORK_ORDER, PHOTO_ONLY, VIDEO_ONLY, NetworkMark, AccountAvatar, Button, Card, Modal, inputCls, labelCls, toLocalInput } from "./ui";
 
@@ -300,6 +300,65 @@ function HandShare({ text, images }) {
   );
 }
 
+// "Write with AI": Claude writes the post (and wording for each network) from a short idea, and picks
+// a photo if none is chosen yet. It only fills in the form — the team checks it and posts as usual.
+const AI_PICTURES = [
+  ["ours-then-unsplash", "Our photos first, then a free Unsplash photo"],
+  ["ours", "Only our own photos"],
+  ["unsplash", "A free Unsplash photo"],
+  ["none", "No photo"],
+];
+function AiWriter({ hasText, media, onWritten }) {
+  const [open, setOpen] = useState(!hasText);
+  const [idea, setIdea] = useState("");
+  const [pictures, setPictures] = useState("ours-then-unsplash");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const write = async () => {
+    if (hasText && !window.confirm("Replace what you've written with Claude's version?")) return;
+    setBusy(true);
+    setError("");
+    try {
+      onWritten(await api("/generate", { method: "POST", body: { idea, pictures, media } }));
+      setOpen(false);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-dashed border-primary/40 text-primary text-sm font-semibold hover:bg-primary/5 transition">
+        <Sparkles size={16} /> {hasText ? "Rewrite with AI" : "Write with AI"}
+      </button>
+    );
+  }
+  return (
+    <Card className="p-5 border-primary/20 bg-gradient-to-br from-primary/[0.04] to-transparent">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-sm font-semibold text-slate-900 flex items-center gap-2"><Sparkles size={16} className="text-primary" /> Write with AI</p>
+        {hasText && <button type="button" onClick={() => setOpen(false)} className="text-xs text-slate-400 hover:text-slate-700">Close</button>}
+      </div>
+      <p className="text-xs text-slate-500 mb-3">Say what the post is about. Claude writes it for every network (you can edit anything before posting).</p>
+      <textarea value={idea} onChange={(e) => setIdea(e.target.value)} rows={3} placeholder="e.g. End of tenancy clean we did in Didsbury today — get the deposit back, free quotes" className={`${inputCls} resize-y`} />
+      <div className="flex flex-wrap items-center gap-3 mt-3">
+        {media.length ? (
+          <span className="text-xs text-slate-500 flex-1 min-w-[200px]">Claude will write about the {media.length === 1 ? (/\.(mp4|mov|m4v)$/i.test(media[0]) ? "video" : "photo") : "photos/video"} you've added.</span>
+        ) : (
+          <select value={pictures} onChange={(e) => setPictures(e.target.value)} className={`${inputCls} flex-1 min-w-[200px] !w-auto`}>
+            {AI_PICTURES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+        )}
+        <Button onClick={write} disabled={busy || !idea.trim()}>
+          <Sparkles size={15} /> {busy ? "Writing… (about 20 seconds)" : "Write it"}
+        </Button>
+      </div>
+      {error && <p className="mt-3 text-sm text-rose-600 bg-rose-50 rounded-lg px-3 py-2">{error}</p>}
+    </Card>
+  );
+}
+
 export default function Composer({ accounts, post, onDone, notify, defaultWhen }) {
   const editing = !!post?._id;
   // Until you change it: the post's accounts, or every switched-on account for a new post.
@@ -317,13 +376,17 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
   const [picker, setPicker] = useState(false);
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  // Unsplash credit line, tied to the photo it belongs to (dropped if that photo is removed).
+  const [credit, setCredit] = useState({ text: post?.credit || "", ref: post?.images?.[0] || "" });
+  const [aiDone, setAiDone] = useState(false);
+  const creditText = credit.text && (!credit.ref || images.includes(credit.ref)) ? credit.text : "";
 
   const selected = accounts.filter((a) => chosen.includes(a._id));
   const nets = NETWORK_ORDER.filter((n) => selected.some((a) => a.network === n));
   const [pickedNet, setPreviewNet] = useState(null);
   const previewNet = nets.includes(pickedNet) ? pickedNet : nets[0] || "facebook";
 
-  const textFor = (n) => (variants[n]?.trim() ? variants[n] : text) + (post?.credit ? `\n\n${post.credit}` : "");
+  const textFor = (n) => (variants[n]?.trim() ? variants[n] : text) + (creditText ? `\n\n${creditText}` : "");
   const problems = useMemo(() => {
     const out = [];
     if (!selected.length) out.push("Choose at least one account.");
@@ -342,7 +405,7 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
     setBusy(action);
     setError("");
     try {
-      const body = { text, variants, images, video, accounts: chosen, action, ...(action === "schedule" ? { scheduledAt: new Date(when).toISOString() } : {}) };
+      const body = { text, variants, images, video, credit: creditText, accounts: chosen, action, ...(action === "schedule" ? { scheduledAt: new Date(when).toISOString() } : {}) };
       const saved = editing ? await api(`/posts/${post._id}`, { method: "PATCH", body }) : await api("/posts", { method: "POST", body });
       if (action === "now") {
         const ok = saved.results?.filter((r) => r.status === "posted").length || 0;
@@ -387,6 +450,21 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
           )}
         </Card>
 
+        <AiWriter
+          hasText={!!text.trim() || Object.values(variants).some((v) => v?.trim())}
+          media={video ? [video, ...images] : images}
+          onWritten={(g) => {
+            setText(g.text);
+            setVariants((v) => ({ ...v, ...g.variants }));
+            if (g.images?.length && !images.length && !video) {
+              setImages(g.images);
+              setCredit({ text: g.credit || "", ref: g.images[0] });
+            }
+            setTab("all");
+            setAiDone(true);
+          }}
+        />
+
         <Card className="overflow-hidden">
           <div className="flex items-center gap-1 px-3 pt-3 border-b border-slate-100 overflow-x-auto">
             {["all", ...nets].map((n) => (
@@ -403,7 +481,7 @@ export default function Composer({ accounts, post, onDone, notify, defaultWhen }
               placeholder={tab === "all" ? "What would you like to share? e.g. a cleaning tip, a before & after, a special day…" : `Leave empty to use the main text: "${text.slice(0, 60)}${text.length > 60 ? "…" : ""}"`}
               className="w-full resize-y rounded-xl border-0 bg-slate-50 px-4 py-3 text-[15px] leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-primary/10" />
             <div className="flex items-center justify-between mt-2 text-xs">
-              <span className="text-slate-400">{tab === "all" ? "Used for every network unless you change a network's wording." : ""}</span>
+              <span className={aiDone && tab === "all" ? "text-primary font-medium" : "text-slate-400"}>{tab === "all" ? (aiDone ? "Claude wrote a different version for each network — click the network tabs above to see or edit them." : "Used for every network unless you change a network's wording.") : ""}</span>
               {limit && <span className={`font-semibold tabular-nums ${count > limit ? "text-rose-600" : count > limit * 0.9 ? "text-amber-600" : "text-slate-400"}`}>{countNet && tab === "all" && nets.length > 1 ? `${NETWORKS[countNet].label}: ` : ""}{count.toLocaleString()} / {limit.toLocaleString()}</span>}
             </div>
           </div>

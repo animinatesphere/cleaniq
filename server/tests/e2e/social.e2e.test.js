@@ -432,3 +432,23 @@ test("autopilot with the team's own photos and videos: uses each before repeatin
   const third = await run();
   assert.equal(third.video, vid.ref, "after all are used, it starts again");
 });
+
+test("Create post 'Write with AI': fills text + wording per network and a photo; writes to match media the team chose; posts nothing", async () => {
+  calls.length = 0;
+  assert.equal((await api("/generate", { method: "POST", body: JSON.stringify({ idea: "" }) }, socialToken)).status, 400);
+  const g = await jsonOf(await api("/generate", { method: "POST", body: JSON.stringify({ idea: "Spring cleaning tip" }) }, socialToken));
+  assert.equal(g.text, "Spring is here — time for a deep clean!");
+  assert.equal(g.variants.x, "X: Spring deep clean in Manchester");
+  assert.match(g.images[0], /^\/uploads\/social\/unsplash-/);
+  assert.equal(g.credit, "Photo: Jane Doe on Unsplash");
+  made.push(g.images[0]);
+  const none = await jsonOf(await api("/generate", { method: "POST", body: JSON.stringify({ idea: "Tip", pictures: "none" }) }, socialToken));
+  assert.deepEqual(none.images, []);
+  // Media already chosen: Claude is told what's in it, and no other photo is added.
+  const ref = require("../../utils/socialNetworks").ourPhotos()[0].ref;
+  calls.length = 0;
+  const mine = await jsonOf(await api("/generate", { method: "POST", body: JSON.stringify({ idea: "Show this job", media: [ref] }) }, socialToken));
+  assert.deepEqual(mine.images, []);
+  assert.ok(JSON.parse(calls.find((c) => c.path === "/v1/messages").body).messages[0].content.includes("Photos and videos to choose from"));
+  assert.ok(!calls.some((c) => c.path === "/2/tweets"), "nothing posted");
+});

@@ -15,7 +15,7 @@ const UNSPLASH = () => process.env.UNSPLASH_API_URL || "https://api.unsplash.com
 const SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["text", "facebook", "instagram", "linkedin", "x", "threads", "google", "pinterest", "tiktok", "photo", "unsplashSearch"],
+  required: ["text", "facebook", "instagram", "linkedin", "x", "threads", "google", "pinterest", "tiktok", "youtube", "photo", "unsplashSearch"],
   properties: {
     text: { type: "string", description: "The main post text" },
     facebook: { type: "string", description: "Wording for Facebook" },
@@ -26,6 +26,7 @@ const SCHEMA = {
     google: { type: "string", description: "Wording for our Google Business Profile: plain, local and useful (mention Manchester), no hashtags, at most 1,200 characters" },
     pinterest: { type: "string", description: "Wording for Pinterest: first line is a short, searchable title (under 100 characters); then a helpful description under 600 characters with a few keywords" },
     tiktok: { type: "string", description: "Wording for a TikTok photo post: short and lively, first line a hook, 3-6 hashtags at the end" },
+    youtube: { type: "string", description: "Wording for a YouTube video: first line is the video title (under 90 characters, no hashtags); then a helpful description of 2-4 short paragraphs mentioning Manchester and our website, with 3-5 hashtags at the end" },
     photo: { type: "string", description: 'The id of the best photo from the list, or "none" if none fits the post' },
     unsplashSearch: { type: "string", description: "2-4 word Unsplash search for a photo that fits, used only if none of ours fits" },
   },
@@ -68,7 +69,7 @@ What you know about the business (use only this; never invent prices, offers, di
 ${await businessFacts()}
 
 Write in friendly, natural British English. Short paragraphs. At most 2 emojis per post. No made-up customer quotes.
-Give wording for each network: Facebook (conversational), Instagram (caption, hashtags at the end), LinkedIn (a little more professional), X (short — at most ${X_LIMIT - 40} characters), Threads (casual, short), Google Business Profile (plain and local, no hashtags), Pinterest (searchable title line, then a description) and TikTok (a hook, hashtags at the end).
+Give wording for each network: Facebook (conversational), Instagram (caption, hashtags at the end), LinkedIn (a little more professional), X (short — at most ${X_LIMIT - 40} characters), Threads (casual, short), Google Business Profile (plain and local, no hashtags), Pinterest (searchable title line, then a description), TikTok (a hook, hashtags at the end) and YouTube (a title line, then a description).\nEach network's wording must be genuinely different, written for how people use that network — not the same text copied with small changes.
 ${mine
     ? "Media: the team chose the photos and videos in the list for these posts. Choose the id of the one that best fits the post (you must choose one), and write the post so it matches what it shows. For a video, write as if introducing the video."
     : `Photos: choose the id of the photo from the list that best fits the post, or "none" if none of them fits.${photos.length ? "" : " (There is no photo list this time: answer \"none\".)"}`}`;
@@ -99,7 +100,7 @@ ${mine
   const clean = (s) => String(s || "").trim().slice(0, 3000);
   return {
     text: clean(d.text),
-    variants: { facebook: clean(d.facebook), instagram: clean(d.instagram), linkedin: clean(d.linkedin), x: clean(d.x), threads: clean(d.threads), google: clean(d.google), pinterest: clean(d.pinterest), tiktok: clean(d.tiktok) },
+    variants: { facebook: clean(d.facebook), instagram: clean(d.instagram), linkedin: clean(d.linkedin), x: clean(d.x), threads: clean(d.threads), google: clean(d.google), pinterest: clean(d.pinterest), tiktok: clean(d.tiktok), youtube: clean(d.youtube) },
     photoRef: pick ? pick.ref : null,
     pickedKind: pick?.kind || "photo",
     unsplashSearch: String(d.unsplashSearch || "").trim().slice(0, 60),

@@ -237,6 +237,40 @@ async function postFields(body, existing) {
   if (!text.trim() && !NETWORKS.some((n) => variants[n].trim())) throw bad("Write something to post.");
   return { text, variants, images, video, accounts, credit: String(body.credit ?? existing?.credit ?? "").slice(0, 200) };
 }
+// POST /generate { idea, pictures, media } — Claude writes a post (main text + wording for each
+// network) for the Create post page. If the team already chose photos/videos ("media"), the post is
+// written to match them; otherwise a photo is picked (our photos first, then Unsplash) unless
+// pictures is "none". Nothing is posted: the page fills in the form for the team to check.
+router.post("/generate", socialAuth, json, async (req, res) => {
+  try {
+    const idea = String(req.body?.idea || "").trim().slice(0, 2000);
+    if (!idea) throw bad("Tell Claude what the post should be about.");
+    const pictures = ["ours-then-unsplash", "ours", "unsplash", "none"].includes(req.body?.pictures) ? req.body.pictures : "ours-then-unsplash";
+    const chosen = (Array.isArray(req.body?.media) ? req.body.media : []).map(String).filter((r) => PHOTO_REF.test(r)).slice(0, 10);
+    let pool = null;
+    if (chosen.length) {
+      const saved = Object.fromEntries((await SocialPhoto.find({ path: { $in: chosen } }).select("path description").lean()).map((p) => [p.path, p.description]));
+      const ours = Object.fromEntries(networks.ourPhotos().map((p) => [p.ref, p.description]));
+      pool = chosen.map((ref) => ({ ref, kind: VIDEO_REF.test(ref) ? "video" : "photo", description: saved[ref] || ours[ref] || (VIDEO_REF.test(ref) ? "A video from our team" : "A photo from our team") }));
+    }
+    const recent = (await SocialPost.find().sort({ createdAt: -1 }).limit(10).select("text").lean()).map((p) => p.text);
+    const { writePost, unsplashPhoto } = require("../utils/socialWriter");
+    const draft = await writePost({ instructions: idea, pictures: pool ? "none" : pictures, recent, pool });
+    let images = [];
+    let credit = "";
+    if (!pool && pictures !== "none") {
+      if (draft.photoRef && pictures !== "unsplash") images = [draft.photoRef];
+      if (!images.length && (pictures === "ours-then-unsplash" || pictures === "unsplash")) {
+        const u = await unsplashPhoto(draft.unsplashSearch || "clean home").catch((e) => { console.warn("[social] Unsplash:", e.message); return null; });
+        if (u) { images = [u.ref]; credit = u.credit; }
+      }
+    }
+    res.json({ text: draft.text, variants: draft.variants, images, credit });
+  } catch (err) {
+    fail(res, err, "Couldn't write the post");
+  }
+});
+
 function checkPostable(f) {
   if (!f.accounts.length) throw bad("Choose at least one account to post to.");
   for (const [n, label] of [["instagram", "Instagram"], ["tiktok", "TikTok"], ["pinterest", "Pinterest"]]) {
