@@ -22,10 +22,26 @@ const coldSendSchema = new mongoose.Schema({
   replySubject:    { type: String },
   replyBody:       { type: String },
   repliedAt:       { type: Date   },
+  // A/B test version of the step used for this email ("A" or "B").
+  variant:         { type: String, default: "A" },
+  // Tracking (utils/coldTracking.js): a random token in the open pixel and the tracked links.
+  trackToken:      { type: String },
+  opens:           { type: Number, default: 0 },
+  firstOpenedAt:   { type: Date },
+  lastOpenedAt:    { type: Date },
+  clicks:          { type: Number, default: 0 },
+  firstClickedAt:  { type: Date },
+  // Bounces found in the mailbox (utils/coldInbox.js).
+  bouncedAt:       { type: Date },
+  bounceType:      { type: String }, // hard | soft
+  bounceReason:    { type: String },
+  replyCategory:   { type: String },
 });
 
 coldSendSchema.index({ campaignId: 1, contactId: 1, stepIndex: 1 }, { unique: true });
 coldSendSchema.index({ status: 1, scheduledAt: 1 });
 coldSendSchema.index({ gmailThreadId: 1 });
+coldSendSchema.index({ trackToken: 1 }, { sparse: true });
+coldSendSchema.index({ mailboxId: 1, contactEmail: 1, sentAt: -1 });
 
 module.exports = mongoose.model("ColdSend", coldSendSchema);

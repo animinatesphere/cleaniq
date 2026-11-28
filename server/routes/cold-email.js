@@ -9,6 +9,12 @@ const ColdCampaign = require("../models/ColdCampaign");
 const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
 const ColdTemplate = require("../models/ColdTemplate");
+const ColdEvent = require("../models/ColdEvent");
+const ColdReply = require("../models/ColdReply");
+const mongoose = require("mongoose");
+const adminAuth = require("../middleware/adminAuth");
+const { recordOpen, recordClick, PIXEL } = require("../utils/coldTracking");
+const { verifyEmail } = require("../utils/coldVerify");
 const { resolveContactDomain } = require("../utils/contactDomain");
 const { checkDomain, effectiveDailyLimit, warmupDay, inSendingWindow } = require("../utils/deliverability");
 
@@ -37,6 +43,36 @@ const upload = multer({
 
 const JWT_SECRET = process.env.JWT_SECRET || "cleaniq_jwt_secret";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+
+// Everything here needs the admin login, except: tracking links and the unsubscribe page (opened by
+// the people we email), and Google/Microsoft sending people back after connecting a mailbox. The
+// "connect a mailbox" links are opened in the browser, so they carry the admin token as ?t=.
+const PUBLIC_PATHS = [/^\/t\//, /^\/unsubscribe\//, /^\/auth\/callback$/, /^\/auth\/microsoft\/callback$/];
+router.use((req, res, next) => {
+  if (PUBLIC_PATHS.some((r) => r.test(req.path))) return next();
+  if ((req.path === "/auth/google" || req.path === "/auth/microsoft") && req.query.t && !req.headers.authorization) {
+    req.headers.authorization = `Bearer ${req.query.t}`;
+  }
+  return adminAuth(req, res, next);
+});
+
+// ── Tracking (public) ─────────────────────────────────────────────────────────
+router.get("/t/o/:token.gif", async (req, res) => {
+  res.set({ "Content-Type": "image/gif", "Cache-Control": "no-store, no-cache, must-revalidate, private", Pragma: "no-cache" });
+  res.end(PIXEL);
+  recordOpen(req.params.token, req).catch((e) => console.error("[cold email] open:", e.message));
+});
+router.get("/t/c/:token", async (req, res) => {
+  try {
+    const to = await recordClick(req.params.token, String(req.query.u || ""), String(req.query.s || ""), req);
+    if (!to) return res.status(400).send("This link isn't valid.");
+    res.redirect(302, to);
+  } catch (err) {
+    console.error("[cold email] click:", err.message);
+    const u = String(req.query.u || "");
+    return /^https?:\/\//.test(u) && require("../utils/coldTracking").sign(req.params.token, u) === req.query.s ? res.redirect(302, u) : res.status(400).send("This link isn't valid.");
+  }
+});
 
 function isValidEmail(e) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
@@ -368,6 +404,7 @@ router.post("/contacts/import-bulk", async (req, res) => {
     imported++;
   }
 
+  setImmediate(() => verifyUnchecked().catch((e) => console.error("[cold email] email check:", e.message)));
   res.json({ imported, duplicates, invalid, total: raw.length });
 });
 
@@ -514,6 +551,7 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
       imported++;
     }
 
+    setImmediate(() => verifyUnchecked().catch((e) => console.error("[cold email] email check:", e.message)));
     res.json({ imported, duplicates, invalid, total: records.length });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -596,6 +634,7 @@ router.post("/contacts", async (req, res) => {
       lastName,
       company,
       domain: resolveContactDomain(domain, email),
+      verification: await verifyEmail(email),
     });
     res.status(201).json(contact);
   } catch (err) {
@@ -697,6 +736,9 @@ router.post("/campaigns", async (req, res) => {
       contactIds,
       emailStyle,
       status,
+      trackOpens,
+      trackClicks,
+      skipInvalid,
     } = req.body;
     if (!name) return res.status(400).json({ message: "name is required" });
     const campaign = await ColdCampaign.create({
@@ -707,6 +749,9 @@ router.post("/campaigns", async (req, res) => {
       contactIds: contactIds || [],
       emailStyle: emailStyle || "branded",
       status: status || "draft",
+      ...(typeof trackOpens === "boolean" ? { trackOpens } : {}),
+      ...(typeof trackClicks === "boolean" ? { trackClicks } : {}),
+      ...(typeof skipInvalid === "boolean" ? { skipInvalid } : {}),
     });
     res.json(campaign);
   } catch (err) {
@@ -748,6 +793,7 @@ router.put("/campaigns/:id", async (req, res) => {
     } = req.body;
     const update = { name, fromName, steps, mailboxIds, contactIds };
     if (emailStyle) update.emailStyle = emailStyle;
+    for (const k of ["trackOpens", "trackClicks", "skipInvalid"]) if (typeof req.body[k] === "boolean") update[k] = req.body[k];
     if (status !== undefined) update.status = status;
     const campaign = await ColdCampaign.findByIdAndUpdate(
       req.params.id,
@@ -924,11 +970,14 @@ router.get("/campaigns/:id/sends", async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page || "1"));
     const limit = Math.min(100, parseInt(req.query.limit || "50"));
     const filter = { campaignId: req.params.id };
-    if (req.query.status) filter.status = req.query.status;
+    if (req.query.status === "opened") filter.opens = { $gt: 0 };
+    else if (req.query.status === "clicked") filter.clicks = { $gt: 0 };
+    else if (req.query.status === "delivered") filter.status = { $in: ["sent", "replied"] };
+    else if (req.query.status) filter.status = req.query.status;
 
     const [sends, total] = await Promise.all([
       ColdSend.find(filter)
-        .populate("contactId", "firstName lastName email company")
+        .populate("contactId", "firstName lastName email company stage verification")
         .sort({ scheduledAt: 1 })
         .skip((page - 1) * limit)
         .limit(limit)
@@ -1053,6 +1102,8 @@ h1{color:#0f172a;font-size:22px;font-weight:800;margin-bottom:12px}p{color:#6474
           await ColdCampaign.findByIdAndUpdate(decoded.campaignId, {
             $inc: { "stats.unsubscribed": 1 },
           });
+          await ColdEvent.create({ type: "unsubscribed", campaignId: decoded.campaignId, contactId: contact._id });
+          await ColdContact.updateOne({ _id: contact._id }, { stage: "unsubscribed", lastActivityAt: new Date() });
         }
       }
     }
@@ -1091,12 +1142,9 @@ router.post("/campaigns/:id/check-replies", async (req, res) => {
     if (!campaign)
       return res.status(404).json({ message: "Campaign not found" });
 
-    const { detectReplies } = require("../utils/coldEmailEngine");
-    await detectReplies();
-
-    // Return fresh campaign stats
+    const found = await require("../utils/coldInbox").scanAllMailboxes();
     const updated = await ColdCampaign.findById(req.params.id).lean();
-    res.json({ message: "Reply check complete", stats: updated.stats });
+    res.json({ message: `Checked ${found.checked || 0} new messages: ${found.replies || 0} replies, ${found.bounces || 0} bounces`, stats: updated.stats, found });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -1144,6 +1192,313 @@ router.get("/stats", async (req, res) => {
       totalMailboxes,
       totalSent: agg.sent,
       totalReplied: agg.replied,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  EMAIL CHECKS (does the address's domain accept email?)
+// ═══════════════════════════════════════════════════════════════════════════════
+let verifying = false;
+async function verifyUnchecked(limit = 500) {
+  if (verifying) return 0;
+  verifying = true;
+  try {
+    const rows = await ColdContact.find({ $or: [{ "verification.checkedAt": null }, { "verification.checkedAt": { $exists: false } }] }).select("email").limit(limit).lean();
+    for (const c of rows) await ColdContact.updateOne({ _id: c._id }, { verification: await verifyEmail(c.email) });
+    return rows.length;
+  } finally {
+    verifying = false;
+  }
+}
+router.verifyUnchecked = verifyUnchecked;
+
+// POST /contacts/verify { ids?: [...] } — check (again) the given contacts, or everyone not checked yet.
+router.post("/contacts/verify", async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.filter((x) => mongoose.isValidObjectId(x)).slice(0, 2000) : null;
+    if (ids?.length) {
+      const rows = await ColdContact.find({ _id: { $in: ids } }).select("email").lean();
+      for (const c of rows) await ColdContact.updateOne({ _id: c._id }, { verification: await verifyEmail(c.email) });
+    } else {
+      await verifyUnchecked(2000);
+    }
+    const counts = await ColdContact.aggregate([{ $group: { _id: "$verification.status", n: { $sum: 1 } } }]);
+    res.json({ counts: Object.fromEntries(counts.map((c) => [c._id || "unknown", c.n])) });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  CONTACT ACTIVITY + STAGE
+// ═══════════════════════════════════════════════════════════════════════════════
+const STAGES = ["new", "contacted", "opened", "clicked", "replied", "interested", "meeting", "not_interested", "bounced", "unsubscribed"];
+
+router.get("/contacts/:id/activity", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Not found" });
+    const contact = await ColdContact.findById(req.params.id).lean();
+    if (!contact) return res.status(404).json({ message: "Not found" });
+    const [events, replies, campaigns] = await Promise.all([
+      ColdEvent.find({ contactId: contact._id, bot: { $ne: true } }).sort({ at: -1 }).limit(300).lean(),
+      ColdReply.find({ contactId: contact._id }).sort({ receivedAt: -1 }).limit(100).lean(),
+      ColdCampaign.find({ _id: { $in: await ColdSend.distinct("campaignId", { contactId: contact._id }) } }).select("name").lean(),
+    ]);
+    res.json({ contact, events, replies, campaigns });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.patch("/contacts/:id/stage", async (req, res) => {
+  const { stage, notes } = req.body || {};
+  if (stage !== undefined && !STAGES.includes(stage)) return res.status(400).json({ message: "Unknown stage" });
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Not found" });
+  const upd = {};
+  if (stage) upd.stage = stage;
+  if (typeof notes === "string") upd.notes = notes.slice(0, 5000);
+  const c = await ColdContact.findByIdAndUpdate(req.params.id, upd, { new: true }).lean();
+  if (!c) return res.status(404).json({ message: "Not found" });
+  res.json(c);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  INBOX (replies from contacts, and our answers)
+// ═══════════════════════════════════════════════════════════════════════════════
+// GET /inbox?category=&unread=1&campaignId=&page=
+router.get("/inbox", async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page || "1"));
+    const limit = 50;
+    const match = { direction: "in" };
+    if (req.query.category === "auto") match.autoReply = true;
+    else if (req.query.category) { match.category = req.query.category; match.autoReply = false; }
+    else if (req.query.all !== "1") match.autoReply = false;
+    if (req.query.unread === "1") match.read = false;
+    if (req.query.campaignId && mongoose.isValidObjectId(req.query.campaignId)) match.campaignId = new mongoose.Types.ObjectId(req.query.campaignId);
+    // One row per contact: their latest message.
+    const rows = await ColdReply.aggregate([
+      { $match: match },
+      { $sort: { receivedAt: -1 } },
+      { $group: { _id: "$contactId", latest: { $first: "$$ROOT" }, unread: { $sum: { $cond: ["$read", 0, 1] } }, count: { $sum: 1 } } },
+      { $sort: { "latest.receivedAt": -1 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+    ]);
+    const contacts = await ColdContact.find({ _id: { $in: rows.map((r) => r._id) } }).select("email firstName lastName company stage").lean();
+    const campaigns = await ColdCampaign.find({ _id: { $in: rows.map((r) => r.latest.campaignId) } }).select("name").lean();
+    const byId = (list) => Object.fromEntries(list.map((x) => [String(x._id), x]));
+    const cMap = byId(contacts);
+    const kMap = byId(campaigns);
+    const counts = await ColdReply.aggregate([
+      { $match: { direction: "in" } },
+      { $group: { _id: { $cond: ["$autoReply", "auto", "$category"] }, n: { $sum: 1 }, unread: { $sum: { $cond: ["$read", 0, 1] } } } },
+    ]);
+    res.json({
+      threads: rows.map((r) => ({ ...r.latest, unread: r.unread, count: r.count, contact: cMap[String(r._id)] || null, campaign: kMap[String(r.latest.campaignId)] || null })),
+      counts: Object.fromEntries(counts.map((c) => [c._id || "other", { total: c.n, unread: c.unread }])),
+      page,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /inbox/contact/:contactId — the whole conversation: our emails, their replies, our answers.
+router.get("/inbox/contact/:contactId", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.contactId)) return res.status(404).json({ message: "Not found" });
+    const contactId = req.params.contactId;
+    const [contact, replies, sends] = await Promise.all([
+      ColdContact.findById(contactId).lean(),
+      ColdReply.find({ contactId }).sort({ receivedAt: 1 }).lean(),
+      ColdSend.find({ contactId, sentAt: { $ne: null }, status: { $in: ["sent", "replied", "bounced"] } }).sort({ sentAt: 1 }).lean(),
+    ]);
+    if (!contact) return res.status(404).json({ message: "Not found" });
+    const campaigns = await ColdCampaign.find({ _id: { $in: sends.map((s) => s.campaignId) } }).lean();
+    const cMap = Object.fromEntries(campaigns.map((c) => [String(c._id), c]));
+    const { personalizeTemplate } = require("../utils/coldEmailEngine");
+    // Our emails as they were sent (step + A/B version), so the thread reads naturally.
+    const ours = sends.map((s) => {
+      const step = cMap[String(s.campaignId)]?.steps?.[s.stepIndex];
+      const b = s.variant === "B";
+      return {
+        _id: `send-${s._id}`, kind: "sent", at: s.sentAt, campaign: cMap[String(s.campaignId)]?.name || "", stepIndex: s.stepIndex, variant: s.variant,
+        subject: step ? personalizeTemplate(b && step.subjectB?.trim() ? step.subjectB : step.subject, contact) : "",
+        body: step ? personalizeTemplate(b && step.bodyB?.trim() ? step.bodyB : step.body, contact) : "",
+        status: s.status, opens: s.opens || 0, clicks: s.clicks || 0, bounceReason: s.bounceReason || "",
+      };
+    });
+    const theirs = replies.map((r) => ({ _id: r._id, kind: r.direction === "in" ? "reply" : "answer", at: r.receivedAt, subject: r.subject, body: r.body, from: r.from, category: r.category, autoReply: r.autoReply, read: r.read, sentBy: r.sentBy }));
+    await ColdReply.updateMany({ contactId, direction: "in", read: false }, { read: true });
+    res.json({ contact, messages: [...ours, ...theirs].sort((a, b) => new Date(a.at) - new Date(b.at)) });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.patch("/inbox/:id", async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Not found" });
+  const upd = {};
+  if (typeof req.body?.read === "boolean") upd.read = req.body.read;
+  if (typeof req.body?.category === "string") upd.category = req.body.category.slice(0, 40);
+  const r = await ColdReply.findByIdAndUpdate(req.params.id, upd, { new: true }).lean();
+  if (!r) return res.status(404).json({ message: "Not found" });
+  res.json(r);
+});
+
+// POST /inbox/contact/:contactId/respond { text } — answer their latest reply, in the same thread,
+// from the mailbox they replied to.
+router.post("/inbox/contact/:contactId/respond", async (req, res) => {
+  try {
+    const text = String(req.body?.text || "").trim();
+    if (!text) return res.status(400).json({ message: "Write your answer first." });
+    if (!mongoose.isValidObjectId(req.params.contactId)) return res.status(404).json({ message: "Not found" });
+    const last = await ColdReply.findOne({ contactId: req.params.contactId, direction: "in" }).sort({ receivedAt: -1 });
+    if (!last) return res.status(400).json({ message: "There's no reply to answer yet." });
+    const mailbox = await ColdMailbox.findById(last.mailboxId);
+    if (!mailbox) return res.status(400).json({ message: "The mailbox that received this reply isn't connected any more." });
+    const campaign = await ColdCampaign.findById(last.campaignId).select("fromName").lean();
+    const engine = require("../utils/coldEmailEngine");
+    const to = (String(last.from).match(/[^\s<>]+@[^\s<>]+/) || [""])[0];
+    const sent = mailbox.provider === "outlook"
+      ? await engine.sendOutlookReply(mailbox, { messageId: last.providerMessageId, text })
+      : await engine.sendGmailReply(mailbox, { to, subject: last.subject || "", text, threadId: last.threadId, inReplyTo: last.internetMessageId, fromName: campaign?.fromName || "" });
+    const out = await ColdReply.create({
+      direction: "out", sendId: last.sendId, campaignId: last.campaignId, contactId: last.contactId, mailboxId: mailbox._id,
+      providerMessageId: sent.id || undefined, threadId: sent.threadId || last.threadId, from: mailbox.email, to, subject: last.subject, body: text, read: true,
+      sentBy: req.admin?.username || req.admin?.email || "admin", receivedAt: new Date(),
+    });
+    res.json(out);
+  } catch (err) {
+    console.error("[cold email] answer:", err.message);
+    res.status(500).json({ message: `Couldn't send: ${err.message}` });
+  }
+});
+
+// POST /inbox/check — read the mailboxes now (instead of waiting ~10 minutes).
+router.post("/inbox/check", async (req, res) => {
+  try {
+    res.json(await require("../utils/coldInbox").scanAllMailboxes());
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  ANALYTICS
+// ═══════════════════════════════════════════════════════════════════════════════
+// Emails that actually went out.
+const SENT_STATUSES = ["sent", "replied", "bounced"];
+const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
+
+async function funnel(match) {
+  const [row] = await ColdSend.aggregate([
+    { $match: { ...match, sentAt: { $ne: null }, status: { $in: SENT_STATUSES } } },
+    { $group: {
+      _id: null,
+      sent: { $sum: 1 },
+      bounced: { $sum: { $cond: [{ $eq: ["$status", "bounced"] }, 1, 0] } },
+      opened: { $sum: { $cond: [{ $gt: ["$opens", 0] }, 1, 0] } },
+      clicked: { $sum: { $cond: [{ $gt: ["$clicks", 0] }, 1, 0] } },
+      replied: { $sum: { $cond: [{ $eq: ["$status", "replied"] }, 1, 0] } },
+      interested: { $sum: { $cond: [{ $eq: ["$replyCategory", "interested"] }, 1, 0] } },
+    } },
+  ]);
+  const f = row || { sent: 0, bounced: 0, opened: 0, clicked: 0, replied: 0, interested: 0 };
+  const delivered = f.sent - f.bounced;
+  return {
+    sent: f.sent, delivered, bounced: f.bounced, opened: f.opened, clicked: f.clicked, replied: f.replied, interested: f.interested,
+    deliveredRate: pct(delivered, f.sent), bounceRate: pct(f.bounced, f.sent), openRate: pct(f.opened, delivered), clickRate: pct(f.clicked, delivered), replyRate: pct(f.replied, delivered),
+  };
+}
+
+async function breakdown(match, field) {
+  const rows = await ColdSend.aggregate([
+    { $match: { ...match, sentAt: { $ne: null }, status: { $in: SENT_STATUSES } } },
+    { $group: {
+      _id: `$${field}`,
+      sent: { $sum: 1 },
+      bounced: { $sum: { $cond: [{ $eq: ["$status", "bounced"] }, 1, 0] } },
+      opened: { $sum: { $cond: [{ $gt: ["$opens", 0] }, 1, 0] } },
+      clicked: { $sum: { $cond: [{ $gt: ["$clicks", 0] }, 1, 0] } },
+      replied: { $sum: { $cond: [{ $eq: ["$status", "replied"] }, 1, 0] } },
+    } },
+    { $sort: { _id: 1 } },
+  ]);
+  return rows.map((r) => {
+    const delivered = r.sent - r.bounced;
+    return { key: r._id, ...r, delivered, openRate: pct(r.opened, delivered), clickRate: pct(r.clicked, delivered), replyRate: pct(r.replied, delivered), bounceRate: pct(r.bounced, r.sent) };
+  });
+}
+
+async function daily(match, days = 30) {
+  const since = new Date(Date.now() - days * 864e5);
+  const rows = await ColdEvent.aggregate([
+    { $match: { ...match, at: { $gte: since }, bot: { $ne: true }, type: { $in: ["sent", "opened", "clicked", "replied", "bounced"] } } },
+    { $group: { _id: { d: { $dateToString: { format: "%Y-%m-%d", date: "$at", timezone: "Europe/London" } }, t: "$type" }, n: { $sum: 1 } } },
+  ]);
+  const out = {};
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 864e5).toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+    out[d] = { date: d, sent: 0, opened: 0, clicked: 0, replied: 0, bounced: 0 };
+  }
+  for (const r of rows) if (out[r._id.d]) out[r._id.d][r._id.t] = r.n;
+  return Object.values(out);
+}
+
+// GET /analytics — everything; /campaigns/:id/analytics — one campaign
+router.get("/analytics", async (req, res) => {
+  try {
+    const [total, campaigns, mailboxes, days, replies] = await Promise.all([
+      funnel({}),
+      breakdown({}, "campaignId"),
+      breakdown({}, "mailboxId"),
+      daily({}),
+      ColdReply.aggregate([{ $match: { direction: "in" } }, { $group: { _id: { $cond: ["$autoReply", "out_of_office", "$category"] }, n: { $sum: 1 } } }]),
+    ]);
+    const names = Object.fromEntries((await ColdCampaign.find({ _id: { $in: campaigns.map((c) => c.key) } }).select("name status").lean()).map((c) => [String(c._id), c]));
+    const boxes = Object.fromEntries((await ColdMailbox.find({ _id: { $in: mailboxes.map((m) => m.key) } }).select("email").lean()).map((m) => [String(m._id), m.email]));
+    res.json({
+      total, daily: days,
+      campaigns: campaigns.map((c) => ({ ...c, name: names[String(c.key)]?.name || "(deleted)", status: names[String(c.key)]?.status })),
+      mailboxes: mailboxes.map((m) => ({ ...m, email: boxes[String(m.key)] || "(removed)" })),
+      replyCategories: Object.fromEntries(replies.map((r) => [r._id || "other", r.n])),
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.get("/campaigns/:id/analytics", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Not found" });
+    const campaignId = new mongoose.Types.ObjectId(req.params.id);
+    const campaign = await ColdCampaign.findById(campaignId).lean();
+    if (!campaign) return res.status(404).json({ message: "Not found" });
+    const [total, steps, variants, mailboxes, days, pending, unsubscribed] = await Promise.all([
+      funnel({ campaignId }),
+      breakdown({ campaignId }, "stepIndex"),
+      ColdSend.aggregate([
+        { $match: { campaignId, sentAt: { $ne: null }, status: { $in: SENT_STATUSES } } },
+        { $group: { _id: { s: "$stepIndex", v: "$variant" }, sent: { $sum: 1 }, bounced: { $sum: { $cond: [{ $eq: ["$status", "bounced"] }, 1, 0] } }, opened: { $sum: { $cond: [{ $gt: ["$opens", 0] }, 1, 0] } }, clicked: { $sum: { $cond: [{ $gt: ["$clicks", 0] }, 1, 0] } }, replied: { $sum: { $cond: [{ $eq: ["$status", "replied"] }, 1, 0] } } } },
+        { $sort: { "_id.s": 1, "_id.v": 1 } },
+      ]),
+      breakdown({ campaignId }, "mailboxId"),
+      daily({ campaignId }),
+      ColdSend.countDocuments({ campaignId, status: "pending" }),
+      ColdEvent.countDocuments({ campaignId, type: "unsubscribed" }),
+    ]);
+    const boxes = Object.fromEntries((await ColdMailbox.find({ _id: { $in: mailboxes.map((m) => m.key) } }).select("email").lean()).map((m) => [String(m._id), m.email]));
+    res.json({
+      total: { ...total, pending, unsubscribed: Math.max(unsubscribed, campaign.stats?.unsubscribed || 0) },
+      steps: steps.map((s) => ({ ...s, subject: campaign.steps?.[s.key]?.subject || "" })),
+      variants: variants.map((v) => { const d = v.sent - v.bounced; return { step: v._id.s, variant: v._id.v || "A", ...v, _id: undefined, delivered: d, openRate: pct(v.opened, d), clickRate: pct(v.clicked, d), replyRate: pct(v.replied, d) }; }),
+      mailboxes: mailboxes.map((m) => ({ ...m, email: boxes[String(m.key)] || "(removed)" })),
+      daily: days,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

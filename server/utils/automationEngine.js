@@ -340,6 +340,8 @@ function startAutomationEngine() {
       try {
         const { detectReplies } = require("./coldEmailEngine");
         await detectReplies();
+        // Check new contacts' email addresses (does the domain accept mail?).
+        await require("../routes/cold-email").verifyUnchecked(300);
       } catch (e) {
         console.error("Reply detection error:", e.message);
       }

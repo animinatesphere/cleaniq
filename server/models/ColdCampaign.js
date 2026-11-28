@@ -6,6 +6,9 @@ const stepSchema = new mongoose.Schema(
     subject: { type: String, required: true },
     body: { type: String, required: true },
     waitDays: { type: Number, default: 0 }, // days after previous step
+    // A/B test: a second subject and/or text. Contacts are split evenly between A and B.
+    subjectB: { type: String, default: "" },
+    bodyB: { type: String, default: "" },
   },
   { _id: false }
 );
@@ -31,6 +34,11 @@ const coldCampaignSchema = new mongoose.Schema({
   // "plain" reads like a normal personal email and lands in the inbox far more often than the
   // designed "branded" template, so it's the default for new campaigns.
   emailStyle:       { type: String, enum: ["branded", "plain"], default: "plain" },
+  // Open tracking (a tiny invisible image) and click tracking (links go via our server first).
+  trackOpens:       { type: Boolean, default: true },
+  trackClicks:      { type: Boolean, default: true },
+  // Skip contacts whose email check says the address can't receive email.
+  skipInvalid:      { type: Boolean, default: true },
   createdAt:        { type: Date, default: () => new Date() },
   launchedAt:       { type: Date },
   scheduledStartAt: { type: Date },

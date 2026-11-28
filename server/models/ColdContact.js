@@ -18,6 +18,20 @@ const coldContactSchema = new mongoose.Schema({
     enum: ["active", "suppressed"],
     default: "active",
   },
+  // Where the conversation is (set automatically from sends, opens and replies; can be changed by hand).
+  stage: {
+    type: String,
+    enum: ["new", "contacted", "opened", "clicked", "replied", "interested", "meeting", "not_interested", "bounced", "unsubscribed"],
+    default: "new",
+  },
+  lastActivityAt: { type: Date },
+  // Email check (utils/coldVerify.js): valid | risky | invalid | unknown.
+  verification: {
+    status: { type: String, default: "unknown" },
+    reason: { type: String, default: "" },
+    checkedAt: { type: Date },
+  },
+  notes: { type: String, default: "" },
   importBatch: { type: String }, // label / filename of the import
   importedAt: { type: Date, default: () => new Date() },
 });

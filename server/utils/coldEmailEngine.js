@@ -7,7 +7,9 @@ const ColdContact = require("../models/ColdContact");
 const ColdCampaign = require("../models/ColdCampaign");
 const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
+const ColdEvent = require("../models/ColdEvent");
 const { effectiveDailyLimit, inSendingWindow, nextSendAfter } = require("./deliverability");
+const { newToken, addTracking } = require("./coldTracking");
 
 // ── Token encryption ──────────────────────────────────────────────────────────
 
@@ -256,6 +258,49 @@ async function sendViaOutlook(mailbox, { to, subject, html, fromName }) {
   return { id: msg.id, conversationId: msg.conversationId };
 }
 
+// ── Answering a reply (admin inbox), in the same email thread ─────────────────
+async function sendGmailReply(mailbox, { to, subject, text, threadId, inReplyTo, fromName }) {
+  const gmail = await getGmailClient(mailbox);
+  const from = fromName ? `=?UTF-8?B?${Buffer.from(fromName).toString("base64")}?= <${mailbox.email}>` : mailbox.email;
+  const subj = /^re:/i.test(subject) ? subject : `Re: ${subject}`;
+  const mime = [
+    `MIME-Version: 1.0`,
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: =?UTF-8?B?${Buffer.from(subj).toString("base64")}?=`,
+    ...(inReplyTo ? [`In-Reply-To: ${inReplyTo}`, `References: ${inReplyTo}`] : []),
+    `Content-Type: text/plain; charset=UTF-8`,
+    `Content-Transfer-Encoding: base64`,
+    ``,
+    Buffer.from(text, "utf8").toString("base64").replace(/(.{76})/g, "$1\r\n"),
+  ].join("\r\n");
+  const raw = Buffer.from(mime).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const result = await gmail.users.messages.send({ userId: "me", requestBody: { raw, ...(threadId ? { threadId } : {}) } });
+  return { id: result.data.id, threadId: result.data.threadId };
+}
+
+async function sendOutlookReply(mailbox, { messageId, text }) {
+  const accessToken = await getMsAccessToken(mailbox);
+  const GRAPH = process.env.MS_GRAPH_URL || "https://graph.microsoft.com";
+  const res = await fetch(`${GRAPH}/v1.0/me/messages/${messageId}/reply`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ comment: text }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Microsoft reply: ${graphError(res, err)}`);
+  }
+  return { id: "" };
+}
+
+// A/B tests: each contact always gets the same version of a step, half A and half B.
+function pickVariant(step, contactId, stepIndex) {
+  if (!step?.subjectB?.trim() && !step?.bodyB?.trim()) return "A";
+  const h = crypto.createHash("md5").update(`${contactId}:${stepIndex}`).digest();
+  return h[0] % 2 ? "B" : "A";
+}
+
 // ── Template helpers ──────────────────────────────────────────────────────────
 // Plain-text version of an email for the text/plain part.
 function htmlToText(html) {
@@ -272,16 +317,26 @@ function htmlToText(html) {
 }
 
 
+// Placeholders, like Apollo: {{first_name}} or {{firstName}}, {{last_name}}, {{full_name}}, {{company}},
+// {{email}}, {{domain}}, any imported column (e.g. {{city}}), and a fallback after "|" for when it's
+// empty: "Hi {{first_name|there}}". Unknown placeholders become the fallback (or nothing), never "{{…}}".
 function personalizeTemplate(template, contact) {
-  const fullName =
-    `${contact.firstName || ""} ${contact.lastName || ""}`.trim();
-  return template
-    .replace(/\{\{first_name\}\}/gi, contact.firstName || "")
-    .replace(/\{\{last_name\}\}/gi, contact.lastName || "")
-    .replace(/\{\{full_name\}\}/gi, fullName)
-    .replace(/\{\{company\}\}/gi, contact.company || "")
-    .replace(/\{\{email\}\}/gi, contact.email || "")
-    .replace(/\{\{domain\}\}/gi, contact.domain || "");
+  const norm = (k) => String(k).toLowerCase().replace(/[\s_-]+/g, "");
+  const values = {
+    firstname: contact.firstName || "",
+    lastname: contact.lastName || "",
+    fullname: `${contact.firstName || ""} ${contact.lastName || ""}`.trim(),
+    name: `${contact.firstName || ""} ${contact.lastName || ""}`.trim(),
+    company: contact.company || "",
+    email: contact.email || "",
+    domain: contact.domain || "",
+  };
+  const extra = contact.extraFields instanceof Map ? Object.fromEntries(contact.extraFields) : contact.extraFields || {};
+  for (const [k, v] of Object.entries(extra)) if (!(norm(k) in values)) values[norm(k)] = String(v ?? "");
+  return String(template || "").replace(/\{\{\s*([^}|]+?)\s*(?:\|([^}]*))?\}\}/g, (m, key, fallback) => {
+    const v = values[norm(key)];
+    return v && v.trim() ? v : (fallback ?? "").trim();
+  });
 }
 
 function buildEmailHtml(rawBody, unsubUrl, replySubject) {
@@ -578,6 +633,13 @@ async function processSingleSend(send) {
       error: "Contact inactive",
     });
   }
+  // The address can't receive email (no mail server): skip, so it doesn't bounce and hurt the mailbox.
+  if (campaign.skipInvalid !== false && contact.verification?.status === "invalid") {
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: `Email can't receive mail: ${contact.verification.reason || "invalid"}`,
+    });
+  }
 
   // Pick mailbox (warm-up limit + gap between emails)
   const picked = await pickMailbox(campaign.mailboxIds);
@@ -604,8 +666,10 @@ async function processSingleSend(send) {
     });
   }
 
-  const subject = personalizeTemplate(step.subject, contact);
-  const body = personalizeTemplate(step.body, contact);
+  const variant = pickVariant(step, send.contactId, send.stepIndex);
+  const subject = personalizeTemplate(variant === "B" && step.subjectB?.trim() ? step.subjectB : step.subject, contact);
+  const body = personalizeTemplate(variant === "B" && step.bodyB?.trim() ? step.bodyB : step.body, contact);
+  const trackToken = newToken();
 
   const unsubToken = jwt.sign(
     { email: contact.email, campaignId: send.campaignId.toString() },
@@ -613,10 +677,13 @@ async function processSingleSend(send) {
     { expiresIn: "90d" },
   );
   const unsubUrl = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/unsubscribe/${unsubToken}`;
-  const fullHtml =
+  const fullHtml = addTracking(
     campaign.emailStyle === "plain"
       ? buildPlainEmailHtml(body, unsubUrl)
-      : buildEmailHtml(body, unsubUrl, subject);
+      : buildEmailHtml(body, unsubUrl, subject),
+    trackToken,
+    { opens: campaign.trackOpens !== false, clicks: campaign.trackClicks !== false },
+  );
 
   // ── Dry-run mode ──────────────────────────────────────────────────────────
   if (process.env.COLD_EMAIL_DRY_RUN === "true") {
@@ -627,6 +694,8 @@ async function processSingleSend(send) {
       status: "sent",
       sentAt: new Date(),
       mailboxId: mailbox._id,
+      variant,
+      trackToken,
     });
     await ColdMailbox.findByIdAndUpdate(mailbox._id, {
       $inc: { sentToday: 1 },
@@ -634,6 +703,7 @@ async function processSingleSend(send) {
     await ColdCampaign.findByIdAndUpdate(send.campaignId, {
       $inc: { "stats.sent": 1 },
     });
+    await afterSent(send, mailbox, variant);
     await scheduleNextStep(send, campaign);
     return;
   }
@@ -656,6 +726,8 @@ async function processSingleSend(send) {
     status: "sent",
     sentAt: new Date(),
     mailboxId: mailbox._id,
+    variant,
+    trackToken,
     gmailMessageId: result.id,
     gmailThreadId:
       mailbox.provider === "outlook" ? result.conversationId : result.threadId,
@@ -664,7 +736,15 @@ async function processSingleSend(send) {
   await ColdCampaign.findByIdAndUpdate(send.campaignId, {
     $inc: { "stats.sent": 1 },
   });
+  await afterSent(send, mailbox, variant);
   await scheduleNextStep(send, campaign);
+}
+
+// Activity log + contact stage after an email goes out.
+async function afterSent(send, mailbox, variant) {
+  await ColdEvent.create({ type: "sent", sendId: send._id, campaignId: send.campaignId, contactId: send.contactId, mailboxId: mailbox._id, stepIndex: send.stepIndex, variant });
+  await ColdContact.updateOne({ _id: send.contactId, stage: { $in: ["new", null] } }, { stage: "contacted" });
+  await ColdContact.updateOne({ _id: send.contactId }, { lastActivityAt: new Date() });
 }
 
 // ── Main send processor ───────────────────────────────────────────────────────
@@ -746,27 +826,9 @@ async function processColdEmailSends() {
 
 // ── Reply detection ───────────────────────────────────────────────────────────
 
-let replyRunning = false;
-
+// Replies, bounces and out-of-office messages: see utils/coldInbox.js.
 async function detectReplies() {
-  if (replyRunning) return;
-  replyRunning = true;
-  try {
-    const mailboxes = await ColdMailbox.find({ status: "active" });
-    for (const mailbox of mailboxes) {
-      try {
-        if (mailbox.provider === "outlook") {
-          await detectRepliesForOutlookMailbox(mailbox);
-        } else {
-          await detectRepliesForMailbox(mailbox);
-        }
-      } catch (err) {
-        console.error(`Reply detect error (${mailbox.email}):`, err.message);
-      }
-    }
-  } finally {
-    replyRunning = false;
-  }
+  return require("./coldInbox").scanAllMailboxes();
 }
 
 // Decode Gmail base64url safely
@@ -831,144 +893,6 @@ function extractGmailBody(payload, depth = 0) {
   return "";
 }
 
-async function detectRepliesForOutlookMailbox(mailbox) {
-  const accessToken = await getMsAccessToken(mailbox);
-
-  const sentSends = await ColdSend.find({
-    mailboxId: mailbox._id,
-    status: "sent",
-    gmailThreadId: { $exists: true, $ne: null },
-  })
-    .limit(200)
-    .lean();
-
-  for (const send of sentSends) {
-    try {
-      const url = `https://graph.microsoft.com/v1.0/me/messages?$filter=conversationId eq '${send.gmailThreadId}' and isDraft eq false&$orderby=receivedDateTime asc&$select=id,from,subject,bodyPreview,receivedDateTime`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!res.ok) continue;
-      const data = await res.json();
-      const messages = data.value || [];
-
-      const reply = messages.find(
-        (m) =>
-          m.id !== send.gmailMessageId &&
-          m.from?.emailAddress?.address?.toLowerCase() !==
-            mailbox.email.toLowerCase(),
-      );
-      if (!reply) continue;
-
-      const replyFrom = reply.from?.emailAddress?.address || "";
-      const replySubject = reply.subject || "";
-      const replyBody = (reply.bodyPreview || "").slice(0, 2000);
-
-      await ColdSend.updateMany(
-        {
-          campaignId: send.campaignId,
-          contactId: send.contactId,
-          status: "pending",
-        },
-        { status: "skipped", error: "Contact replied" },
-      );
-      await ColdSend.findByIdAndUpdate(send._id, {
-        status: "replied",
-        repliedAt: new Date(reply.receivedDateTime),
-        replyFrom,
-        replySubject,
-        replyBody,
-      });
-      const alreadyCounted = await ColdSend.findOne({
-        campaignId: send.campaignId,
-        contactId: send.contactId,
-        status: "replied",
-        _id: { $ne: send._id },
-      });
-      if (!alreadyCounted) {
-        await ColdCampaign.findByIdAndUpdate(send.campaignId, {
-          $inc: { "stats.replied": 1 },
-        });
-      }
-    } catch {
-      continue;
-    }
-  }
-}
-
-async function detectRepliesForMailbox(mailbox) {
-  const gmail = await getGmailClient(mailbox);
-
-  const list = await gmail.users.messages.list({
-    userId: "me",
-    q: "in:inbox newer_than:14d",
-    maxResults: 100,
-  });
-
-  if (!list.data.messages) return;
-
-  for (const ref of list.data.messages) {
-    const msg = await gmail.users.messages.get({
-      userId: "me",
-      id: ref.id,
-      format: "full",
-      metadataHeaders: ["From", "Subject"],
-    });
-
-    const threadId = msg.data.threadId;
-    if (!threadId) continue;
-
-    const originalSend = await ColdSend.findOne({
-      gmailThreadId: threadId,
-      status: "sent",
-    });
-    if (!originalSend) continue;
-
-    // Extract reply content
-    const headers = msg.data.payload?.headers || [];
-    const fromHdr = headers.find((h) => h.name?.toLowerCase() === "from");
-    const subHdr = headers.find((h) => h.name?.toLowerCase() === "subject");
-    const replyFrom = fromHdr?.value || "";
-    const replySubject = subHdr?.value || "";
-    // Try full body extraction first, fall back to Gmail snippet
-    let replyBody = extractGmailBody(msg.data.payload);
-    if (!replyBody && msg.data.snippet) replyBody = msg.data.snippet;
-    replyBody = replyBody.slice(0, 5000); // cap at 5k chars
-
-    // Stop sequence — mark all pending sends for this contact in this campaign
-    await ColdSend.updateMany(
-      {
-        campaignId: originalSend.campaignId,
-        contactId: originalSend.contactId,
-        status: "pending",
-      },
-      { status: "skipped", error: "Contact replied" },
-    );
-    // Mark the original send as replied with reply content
-    await ColdSend.findByIdAndUpdate(originalSend._id, {
-      status: "replied",
-      replyFrom,
-      replySubject,
-      replyBody,
-      repliedAt: new Date(
-        msg.data.internalDate ? parseInt(msg.data.internalDate) : Date.now(),
-      ),
-    });
-    // Increment campaign replied counter (only once per contact)
-    const alreadyCounted = await ColdSend.findOne({
-      campaignId: originalSend.campaignId,
-      contactId: originalSend.contactId,
-      status: "replied",
-      _id: { $ne: originalSend._id },
-    });
-    if (!alreadyCounted) {
-      await ColdCampaign.findByIdAndUpdate(originalSend.campaignId, {
-        $inc: { "stats.replied": 1 },
-      });
-    }
-  }
-}
-
 // ── Exports ───────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -981,7 +905,15 @@ module.exports = {
   buildMsAuthUrl,
   exchangeMsCode,
   processColdEmailSends,
+  processSingleSend,
   detectReplies,
+  getGmailClient,
+  getMsAccessToken,
+  extractGmailBody,
+  sendGmailReply,
+  sendOutlookReply,
+  personalizeTemplate,
+  pickVariant,
   REDIRECT_URI,
   MS_REDIRECT_URI,
 };
