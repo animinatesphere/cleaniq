@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MessageSquare, Ban, AlertCircle, RefreshCw, CheckCircle2, Clock, XCircle, ChevronRight, Eye, MousePointerClick } from "lucide-react";
-import { STAGES, VERIFY, api } from "./coldApi";
+import { STAGES, VERIFY, api, sendingPausedUntil } from "./coldApi";
 import { Funnel, FunnelNote, DailyChart, RateTable, Pill } from "./parts";
 import { Conversation } from "./Inbox";
 
@@ -181,6 +181,16 @@ export default function CampaignDetail() {
           )}
         </div>
       </div>
+
+      {campaign.status === "active" && sendingPausedUntil() && (
+        <div className="flex items-start gap-3 bg-sky-500/10 border border-sky-500/25 rounded-xl px-4 py-3">
+          <Clock size={16} className="text-sky-300 shrink-0 mt-0.5" />
+          <p className="text-sky-100/90 text-sm">
+            <b>Outside sending hours.</b> Emails only go out Monday–Friday, 8am–6pm UK time, so they don't look like spam.
+            Your pending emails will start going out <b>{sendingPausedUntil()}</b>, one every few minutes per mailbox.
+          </p>
+        </div>
+      )}
 
       {campaign.status === "paused" && campaign.pausedReason && (
         <div className="flex items-start gap-3 bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3">

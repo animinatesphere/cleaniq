@@ -51,3 +51,16 @@ export function when(d) {
   if (mins < 60 * 24) return `${Math.round(mins / 60)} h ago`;
   return t.toLocaleDateString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
+
+// Cold emails only go out Monday–Friday, 8am–6pm UK time (server: utils/deliverability.js).
+// Returns null while sending is allowed, else when it starts again, e.g. "Monday at 8am".
+export function sendingPausedUntil(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(now);
+  const day = parts.find((p) => p.type === "weekday").value;
+  const hour = Number(parts.find((p) => p.type === "hour").value) % 24;
+  const weekday = ["Mon", "Tue", "Wed", "Thu", "Fri"].includes(day);
+  if (weekday && hour >= 8 && hour < 18) return null;
+  if (weekday && hour < 8) return "today at 8am";
+  if (["Mon", "Tue", "Wed", "Thu"].includes(day)) return "tomorrow at 8am";
+  return "Monday at 8am";
+}
