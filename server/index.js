@@ -2,7 +2,12 @@
 // email) hung until ETIMEDOUT when Node picked an IPv6 address the network can't route.
 require("dns").setDefaultResultOrder("ipv4first");
 try {
-  require("net").setDefaultAutoSelectFamily(true); // fall back to the other family if one hangs
+  const net = require("net");
+  net.setDefaultAutoSelectFamily(true); // fall back to the other family if one hangs
+  // Node's default is to give each address only 250ms before trying the next one. Microsoft
+  // sometimes takes longer than that to answer from the VPS, and the VPS has no IPv6, so every
+  // attempt was abandoned and fetch failed with ETIMEDOUT. Give each address 3 seconds.
+  net.setDefaultAutoSelectFamilyAttemptTimeout(3000);
 } catch {
   /* older Node */
 }

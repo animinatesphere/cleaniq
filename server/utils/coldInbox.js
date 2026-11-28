@@ -224,7 +224,12 @@ async function scanAllMailboxes() {
   try {
     for (const mailbox of await ColdMailbox.find({ status: { $in: ["active", "paused"] } })) {
       try {
-        const c = await scanMailbox(mailbox);
+        // One quick retry when the network blips (timeout / connection reset), before giving up.
+        const c = await scanMailbox(mailbox).catch(async (err) => {
+          if (!/ETIMEDOUT|ECONNRESET|EAI_AGAIN|UND_ERR|socket hang up/i.test(`${err.cause?.code || ""} ${err.cause?.message || ""} ${err.message}`)) throw err;
+          await new Promise((r) => setTimeout(r, 3000));
+          return scanMailbox(mailbox);
+        });
         total.checked += c.checked;
         total.replies += c.replies;
         total.bounces += c.bounces;
