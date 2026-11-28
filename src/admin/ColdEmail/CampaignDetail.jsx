@@ -341,6 +341,11 @@ export default function CampaignDetail() {
                           {send.error}
                         </p>
                       )}
+                      {send.status === "skipped" && send.error && (
+                        <p title={send.error} className="mt-1 text-white/45 text-[10px] leading-snug line-clamp-2">
+                          Not sent: {send.error.replace(/^Protection: /, "")}
+                        </p>
+                      )}
                       {send.status === "failed" && send.error && (
                         <p title={send.error} className="mt-1 text-rose-400/80 text-[10px] leading-snug line-clamp-2">
                           {send.error}
