@@ -82,11 +82,11 @@ export default function Protection({ onGoDomains }) {
         <Rule on={s.companySpacingHours > 0} onChange={(v) => save({ companySpacingHours: v ? 24 : 0 })} title="Space out emails to the same company" desc={<>Only one first email per company (same email domain) every <NumIn value={s.companySpacingHours || 24} onSave={(v) => save({ companySpacingHours: v })} /> hours. Others at that company wait. Gmail/Outlook/Yahoo addresses aren't counted as one company.</>} />
       </Section>
 
-      <Section title="Sending safeguards" count={`${s.autoPause ? 4 : 3}/4 on`} desc="Pauses sending automatically when something could hurt your reputation.">
+      <Section title="Sending safeguards" count={`${2 + (s.autoPause ? 1 : 0) + (s.businessHoursOnly !== false ? 1 : 0)}/4 on`} desc="Pauses sending automatically when something could hurt your reputation.">
         <Rule on={s.autoPause} onChange={(v) => save({ autoPause: v })} title="Auto-pause on high bounces" desc={<>Pause a mailbox or campaign when more than <NumIn value={s.maxBounceRate} step="0.5" onSave={(v) => save({ maxBounceRate: v })} />% of its emails bounce (after at least <NumIn value={s.minSendsBeforePause} onSave={(v) => save({ minSendsBeforePause: v })} /> sent, last 30 days).</>} />
         <Rule locked on title="Stop using a mailbox whose sign-in broke" desc="It's marked 'Reconnect needed' and its emails wait instead of failing." />
         <Rule locked on title="Warm-up and pacing" desc="New mailboxes start at 5 a day (+3 a day), one email every 4–9 minutes per mailbox." />
-        <Rule locked on title="Business hours only" desc="Monday–Friday, 8am–6pm UK time." />
+        <Rule on={s.businessHoursOnly !== false} onChange={(v) => save({ businessHoursOnly: v })} title="Business hours only" desc={s.businessHoursOnly !== false ? "Emails go out Monday–Friday, 8am–6pm UK time, like a real person at work. Recommended: weekend and night emails land in junk more often." : "Off: emails go out any day, any time as soon as they're due (still one every 4–9 minutes per mailbox)."} />
       </Section>
 
       <BounceLog />

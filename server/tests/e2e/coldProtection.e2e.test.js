@@ -245,3 +245,19 @@ test("domains page: mailboxes grouped by domain with stats and problems", async 
   assert.equal(a.smtp, undefined);
   assert.ok(d.domains.some((x) => x.domain === "cleaniqservice.com"));
 });
+
+test("business hours can be turned off: due emails go out at any time (still one per mailbox per gap)", async () => {
+  await api("/protection", { method: "PUT", body: JSON.stringify({ businessHoursOnly: false, companySpacingHours: 0, oneCampaignAtATime: false }) });
+  assert.equal((await (await api("/protection")).json()).settings.businessHoursOnly, false);
+  const box = await M("ColdMailbox").create({ email: "anytime@cleaniqservices.com", dailyLimit: 500, warmupEnabled: false });
+  const ppl = await M("ColdContact").insertMany([{ email: "w1@weekend.org" }, { email: "w2@weekend2.org" }]);
+  const c = await makeCampaign("Anytime", box._id, ppl);
+  await new Promise((r) => setTimeout(r, 300)); // launch starts a send run itself
+  await M("ColdSend").updateMany({ campaignId: c._id }, { scheduledAt: new Date(Date.now() - 1000) });
+  await engine().processColdEmailSends();
+  assert.equal(await M("ColdSend").countDocuments({ campaignId: c._id, status: "sent" }), 1, "one now, the next after the 4–9 minute gap");
+  await free(box._id);
+  await engine().processColdEmailSends();
+  assert.equal(await M("ColdSend").countDocuments({ campaignId: c._id, status: "sent" }), 2);
+  await api("/protection", { method: "PUT", body: JSON.stringify({ businessHoursOnly: true }) });
+});

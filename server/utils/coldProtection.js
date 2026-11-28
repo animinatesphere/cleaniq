@@ -11,7 +11,7 @@ const ColdMailbox = require("../models/ColdMailbox");
 const ColdCampaign = require("../models/ColdCampaign");
 const { FREE_DOMAINS } = require("./deliverability");
 
-const DEFAULTS = { autoPause: true, maxBounceRate: 3, minSendsBeforePause: 20, skipRisky: false, oneCampaignAtATime: true, oneCampaignDays: 30, companySpacingHours: 24 };
+const DEFAULTS = { autoPause: true, businessHoursOnly: true, maxBounceRate: 3, minSendsBeforePause: 20, skipRisky: false, oneCampaignAtATime: true, oneCampaignDays: 30, companySpacingHours: 24 };
 const SENT = ["sent", "replied", "bounced"];
 
 let cache = null;
@@ -27,7 +27,7 @@ async function getSettings() {
 async function saveSettings(body = {}) {
   const num = (v, min, max) => Math.max(min, Math.min(max, Number(v)));
   const upd = { updatedAt: new Date() };
-  for (const k of ["autoPause", "skipRisky", "oneCampaignAtATime"]) if (typeof body[k] === "boolean") upd[k] = body[k];
+  for (const k of ["autoPause", "skipRisky", "oneCampaignAtATime", "businessHoursOnly"]) if (typeof body[k] === "boolean") upd[k] = body[k];
   if (body.maxBounceRate !== undefined && !Number.isNaN(Number(body.maxBounceRate))) upd.maxBounceRate = num(body.maxBounceRate, 0.5, 50);
   if (body.minSendsBeforePause !== undefined && !Number.isNaN(Number(body.minSendsBeforePause))) upd.minSendsBeforePause = Math.round(num(body.minSendsBeforePause, 5, 1000));
   if (body.oneCampaignDays !== undefined && !Number.isNaN(Number(body.oneCampaignDays))) upd.oneCampaignDays = Math.round(num(body.oneCampaignDays, 1, 365));

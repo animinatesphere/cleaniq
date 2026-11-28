@@ -5,6 +5,8 @@ const coldSettingsSchema = new mongoose.Schema({
   key: { type: String, default: "main", unique: true },
   // Sending safeguards: pause a mailbox / campaign whose bounce rate (last 30 days) goes over the limit.
   autoPause: { type: Boolean, default: true },
+  // Only send Monday–Friday, 8am–6pm UK time. Off = send any day, any time (still paced).
+  businessHoursOnly: { type: Boolean, default: true },
   maxBounceRate: { type: Number, default: 3 },   // %
   minSendsBeforePause: { type: Number, default: 20 },
   // Who gets emailed

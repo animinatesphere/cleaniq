@@ -814,8 +814,9 @@ async function processColdEmailSends() {
   try {
     await resetDailyCounters();
 
-    // Only send Monday–Friday, 8am–6pm UK time, like a person at work. Due emails wait until then.
-    if (!inSendingWindow()) return;
+    // Only send Monday–Friday, 8am–6pm UK time, like a person at work (unless turned off in
+    // Protection). Due emails wait until then.
+    if ((await protection.getSettings()).businessHoursOnly !== false && !inSendingWindow()) return;
 
     const now = new Date();
     // Paused campaigns' emails stay pending and aren't looked at (so they don't block the queue).

@@ -39,6 +39,8 @@ export default function CampaignDetail() {
   const [actionBusy, setActionBusy]     = useState("");
   const [stats, setStats]               = useState(null);
   const [openContact, setOpenContact]   = useState(null);
+  const [hoursOnly, setHoursOnly]       = useState(true);
+  useEffect(() => { api("/protection").then((d) => setHoursOnly(d.settings?.businessHoursOnly !== false)).catch(() => {}); }, []);
 
   const loadCampaign = useCallback(async () => {
     const r = await fetch(`${API}/cold-email/campaigns/${campaignId}`, { headers: auth() });
@@ -182,12 +184,13 @@ export default function CampaignDetail() {
         </div>
       </div>
 
-      {campaign.status === "active" && sendingPausedUntil() && (
+      {campaign.status === "active" && hoursOnly && sendingPausedUntil() && (
         <div className="flex items-start gap-3 bg-sky-500/10 border border-sky-500/25 rounded-xl px-4 py-3">
           <Clock size={16} className="text-sky-300 shrink-0 mt-0.5" />
           <p className="text-sky-100/90 text-sm">
             <b>Outside sending hours.</b> Emails only go out Monday–Friday, 8am–6pm UK time, so they don't look like spam.
             Your pending emails will start going out <b>{sendingPausedUntil()}</b>, one every few minutes per mailbox.
+            To send now, turn off <b>Business hours only</b> in the Protection tab.
           </p>
         </div>
       )}
