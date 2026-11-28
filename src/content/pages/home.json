@@ -12,7 +12,7 @@
       "type": "Hero",
       "props": {
         "badge": "TOP-RATED CLEANERS IN MANCHESTER",
-        "heading": "House Cleaning Services in",
+        "heading": "House Cleaning Services i",
         "highlight": "Manchester",
         "text": "Looking for reliable cleaners near me? Our vetted local cleaners handle regular house cleaning, end of tenancy, deep, oven and carpet cleaning across Greater Manchester.",
         "buttons": [
@@ -354,5 +354,6 @@
         "id": "ColumnsText-14"
       }
     }
-  ]
+  ],
+  "zones": {}
 }
