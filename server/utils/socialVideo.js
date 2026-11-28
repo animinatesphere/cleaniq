@@ -2,8 +2,8 @@
 // X, Threads, TikTok, Pinterest (video pin, needs a cover photo) and YouTube. Google Business
 // Profile posts can't include video, so they go out as text with the website button.
 //
-// Networks that fetch the video themselves (Facebook, Instagram, Threads, TikTok) get its public
-// address; the others are sent the file in parts.
+// Networks that fetch the video themselves (Facebook, Instagram, Threads) get its public
+// address; the others (LinkedIn, X, TikTok, Pinterest, YouTube) are sent the file.
 const fs = require("fs");
 
 const env = (k, d = "") => process.env[k] || d;
@@ -107,9 +107,29 @@ async function tiktok(acc, text, video, cover, call) {
   const info = (await call(`${TIKTOK_API()}/v2/post/publish/creator_info/query/`, { method: "POST", headers: h, body: "{}" }, "TikTok account check")).data.data || {};
   const options = info.privacy_level_options || [];
   const privacy = options.includes("PUBLIC_TO_EVERYONE") ? "PUBLIC_TO_EVERYONE" : options[0] || "SELF_ONLY";
-  const body = { post_info: { title: text.slice(0, 2200), privacy_level: privacy, disable_comment: false, disable_duet: false, disable_stitch: false }, source_info: { source: "PULL_FROM_URL", video_url: video.publicUrl } };
+  // We send the file ourselves (FILE_UPLOAD) so TikTok doesn't need our web address verified.
+  // TikTok's rules: one piece if it's under 64MB, otherwise 10MB pieces with the last one taking the rest.
+  const bytes = fs.readFileSync(video.file);
+  const size = bytes.length;
+  const MB = 1024 * 1024;
+  const chunk = size <= 64 * MB ? size : 10 * MB;
+  const count = size <= 64 * MB ? 1 : Math.floor(size / chunk);
+  const body = { post_info: { title: text.slice(0, 2200), privacy_level: privacy, disable_comment: false, disable_duet: false, disable_stitch: false }, source_info: { source: "FILE_UPLOAD", video_size: size, chunk_size: chunk, total_chunk_count: count } };
   const { data } = await call(`${TIKTOK_API()}/v2/post/publish/video/init/`, { method: "POST", headers: h, body: JSON.stringify(body) }, "TikTok video");
   if (data.error?.code && data.error.code !== "ok") throw new Error(`TikTok video: ${data.error.message || data.error.code}`);
+  const uploadUrl = data.data?.upload_url;
+  if (!uploadUrl) throw new Error("TikTok video: TikTok didn't give an upload address. Try again.");
+  for (let i = 0; i < count; i++) {
+    const first = i * chunk;
+    const last = i === count - 1 ? size - 1 : first + chunk - 1;
+    const res = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": video.type || "video/mp4", "Content-Length": String(last - first + 1), "Content-Range": `bytes ${first}-${last}/${size}` },
+      body: bytes.subarray(first, last + 1),
+      signal: AbortSignal.timeout(300000),
+    });
+    if (!res.ok) throw new Error(`TikTok video upload: HTTP ${res.status}`);
+  }
   return { externalId: data.data?.publish_id || "", url: "", note: privacy === "SELF_ONLY" ? "Posted as private (TikTok hasn't approved the app for public posts yet)" : "" };
 }
 

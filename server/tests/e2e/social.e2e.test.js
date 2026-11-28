@@ -85,7 +85,8 @@ function startFake() {
       if (p === "/2/media/upload/XV1/append") { res.writeHead(204); return res.end(); }
       if (p === "/2/media/upload/XV1/finalize") return send({ data: { id: "XV1", processing_info: { state: "pending" } } });
       if (p === "/2/media/upload" && u.searchParams.get("command") === "STATUS") return send({ data: { id: "XV1", processing_info: { state: "succeeded" } } });
-      if (p === "/v2/post/publish/video/init/") return send({ data: { publish_id: "VPUB1" }, error: { code: "ok" } });
+      if (p === "/v2/post/publish/video/init/") return send({ data: { publish_id: "VPUB1", upload_url: `${fakeBase}/tt-vupload` }, error: { code: "ok" } });
+      if (p === "/tt-vupload") { res.writeHead(201); return res.end(); }
       if (p === "/v5/media" && req.method === "POST") return send({ media_id: "M1", upload_url: `${fakeBase}/pin-upload`, upload_parameters: { key: "k1" } });
       if (p === "/pin-upload") { res.writeHead(204); return res.end(); }
       if (p === "/v5/media/M1") return send({ status: "succeeded" });
@@ -382,7 +383,11 @@ test("video: upload an MP4 and post it to every network (YouTube too)", async ()
   assert.equal(JSON.parse(calls.find((c) => c.path === "/2/tweets").body).media.media_ids[0], "XV1", "X video");
   assert.ok(has("/2/media/upload"), "X waits for processing");
   assert.ok(has("/v1.0/TH1/threads", /media_type=VIDEO/), "Threads video");
-  assert.match(JSON.parse(calls.find((c) => c.path === "/v2/post/publish/video/init/").body).source_info.video_url, /\.mp4$/, "TikTok video");
+  const tt = JSON.parse(calls.find((c) => c.path === "/v2/post/publish/video/init/").body).source_info;
+  assert.deepEqual(tt, { source: "FILE_UPLOAD", video_size: 2048, chunk_size: 2048, total_chunk_count: 1 }, "TikTok video is sent as a file");
+  const ttUp = calls.find((c) => c.path === "/tt-vupload");
+  assert.equal(ttUp.method, "PUT");
+  assert.equal(ttUp.headers["content-range"], "bytes 0-2047/2048", "TikTok upload");
   const pin = JSON.parse(calls.find((c) => c.path === "/v5/pins").body);
   assert.equal(pin.media_source.source_type, "video_id");
   assert.match(pin.media_source.cover_image_url, /^https:\/\/api\.example\.test\/uploads\/social\//);
