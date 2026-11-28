@@ -44,7 +44,7 @@ const CONNECT = [
   },
   {
     key: "google", networks: ["google"], title: "Google Business Profile",
-    text: "Posts updates to your Google listing, shown on Google Search and Maps.",
+    text: "Posts updates to your Google listing, shown on Google Search and Maps. Waiting for Google to approve API access — until then, use \"Open Google Business\" under Create post to post by hand.",
     steps: [
       "Go to console.cloud.google.com, create a project (e.g. Cleaniq Social).",
       "Request access to the Business Profile APIs (search Google Business Profile API access request form). Google approves this, usually within a few days.",

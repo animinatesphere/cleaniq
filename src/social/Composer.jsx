@@ -264,16 +264,21 @@ function HandShare({ text, images }) {
   );
   return (
     <Card className="p-5">
-      <p className="text-sm font-semibold text-slate-900">Reddit & Nextdoor <span className="font-normal text-slate-400">(post by hand)</span></p>
-      <p className="text-xs text-slate-500 mt-0.5 mb-3">These two don't allow automatic posting yet. Click to open the site with your post filled in (it's also copied, in case the site doesn't fill it). Add your photos there and press Post.</p>
-      <div className="grid sm:grid-cols-2 gap-3">
+      <p className="text-sm font-semibold text-slate-900">Google Business, Reddit & Nextdoor <span className="font-normal text-slate-400">(post by hand)</span></p>
+      <p className="text-xs text-slate-500 mt-0.5 mb-3">These don't allow automatic posting yet. Click to open the site with your post filled in (it's also copied, in case the site doesn't fill it). Add your photos there and press Post.</p>
+      <div className="grid sm:grid-cols-3 gap-3">
         <div className="space-y-2">
           <input value={sub} onChange={(e) => setSub(e.target.value)} placeholder="Subreddit (optional), e.g. manchester" className={inputCls} />
           {btn(redditUrl, "reddit", "#FF4500", "Open in Reddit")}
           <p className="text-[11px] text-slate-400">The first line becomes the title. Most subreddits ban adverts — check their rules, or post to your own profile.</p>
         </div>
         <div className="space-y-2">
-          <div className="h-[38px] flex items-center text-xs text-slate-500">Shares to your Nextdoor neighbourhood.</div>
+          <div className="h-[38px] flex items-center text-xs text-slate-500">Your Google listing (Search & Maps).</div>
+          {btn("https://business.google.com/", "google", "#1A73E8", "Open Google Business")}
+          <p className="text-[11px] text-slate-400">Your post is copied. Click Add update (or Posts), paste, add a photo, then Post.</p>
+        </div>
+        <div className="space-y-2">
+          <div className="h-[38px] flex items-center text-xs text-slate-500">Your Nextdoor neighbourhood.</div>
           {btn(nextdoorUrl, "nextdoor", "#1B8751", "Open in Nextdoor")}
           <p className="text-[11px] text-slate-400">To post as the business, switch to your Cleaniq business page in Nextdoor first.</p>
         </div>
